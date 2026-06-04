@@ -138,6 +138,22 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
 .mfp-schedule-row:last-child{border-bottom:none}
 .mfp-sched-label{color:var(--charcoal);font-weight:500}
 .mfp-sched-val{font-weight:700;color:var(--teal)}
+
+/* MFP Overview grid */
+.mfp-overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.mfp-overview-grid{grid-template-columns:1fr}}
+.mfp-ov-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px 18px;cursor:pointer;transition:border-color .15s,box-shadow .15s;display:flex;flex-direction:column;gap:8px}
+.mfp-ov-card:hover{border-color:var(--teal);box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.mfp-ov-header{display:flex;align-items:center;gap:8px}
+.mfp-ov-icon{font-size:16px;flex-shrink:0}
+.mfp-ov-title{font-size:13px;font-weight:700;color:var(--charcoal);flex:1}
+.mfp-ov-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--teal);color:#fff;white-space:nowrap;flex-shrink:0}
+.mfp-ov-badge.warn{background:#e57a00}
+.mfp-ov-badge.red{background:#c0392b}
+.mfp-ov-summary{font-size:12px;color:var(--muted);line-height:1.5}
+.mfp-ov-bullets{display:flex;flex-direction:column;gap:3px}
+.mfp-ov-bullet{font-size:11px;color:var(--charcoal);line-height:1.4}
+.mfp-ov-cta{font-size:11px;font-weight:600;color:var(--teal);margin-top:2px}
 .phase-pills{display:flex;flex-wrap:wrap;gap:6px;padding:4px 16px 8px}
 .pill{padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--muted);transition:all .15s;white-space:nowrap}
 .pill.active{background:var(--teal);color:#fff;border-color:var(--teal)}
@@ -1662,20 +1678,46 @@ async function setProject(projectId) {
     const fin = ctx.financials;
     const issues = ctx.live_issues || [];
 
+    const sd = fin.stadium_direct_costs || {};
+    const li = fin.lemartec_indirects || {};
+    const tp = fin.total_project || {};
+    const audit = fin.target_cost_savings_audit || {};
+    const sc = fin.soft_costs || {};
+    const cos = fin.change_order_summary || {};
+    const su = fin.sources_and_uses || {};
+    const trades = (fin.key_trade_contractors || []).slice(0,8).map(tc =>
+      `\n    ${tc.firm}: $${((tc.balance_outstanding||tc.outstanding||0)/1e6).toFixed(1)}M outstanding (${tc.pct_paid||'N/A'} paid) — ${tc.scope}`
+    ).join('');
+
     PROJECT_SYSTEM_PROMPTS.mfp = ctx.playbook_ai_system_prompt +
-      `\n\n=== CURRENT PROJECT SNAPSHOT ===` +
+      `\n\n=== CURRENT PROJECT SNAPSHOT (${fin.snapshot_date}) ===` +
       `\nProject: ${p.name} | Phase: ${p.phase} | Role: ${p.level_up_role}` +
       `\nCM: ${ctx.stakeholders.cm.firm} | AOR: ${ctx.stakeholders.architect_of_record.firm}` +
-      `\n\nFINANCIALS (as of ${fin.snapshot_date}):` +
-      `\n- Total balance to closeout: $${(fin.total_project.total_balance_to_closeout/1e6).toFixed(1)}M` +
-      `\n- Currently outstanding: $${(fin.total_project.total_currently_outstanding/1e6).toFixed(1)}M` +
-      `\n- Stadium direct cost % complete: ${fin.stadium_direct_costs.pct_complete}` +
-      `\n- Retainage held (stadium direct): $${(fin.stadium_direct_costs.retainage_held/1e6).toFixed(1)}M` +
-      `\n- Kroll audit target: $${(fin.target_cost_savings_audit.total_target/1e6).toFixed(1)}M` +
-      `\n\nLIVE ISSUES (${issues.length} active):` +
+      `\nHome Opener: April 4, 2026 — building open and active` +
+
+      `\n\n── FINANCIALS ──` +
+      `\nTotal balance to closeout: $${((tp.total_balance_to_closeout||0)/1e6).toFixed(1)}M` +
+      `\nCurrently outstanding: $${((tp.total_currently_outstanding||0)/1e6).toFixed(1)}M` +
+      `\nDirect construction committed: $${((sd.committed_to_date||0)/1e6).toFixed(1)}M | Invoiced: $${((sd.invoiced_to_date||0)/1e6).toFixed(1)}M | Paid: $${((sd.payments_issued||0)/1e6).toFixed(1)}M (${sd.pct_paid||''})` +
+      `\nRetainage held (direct): $${((sd.retainage_held||0)/1e6).toFixed(1)}M | Remaining construction: $${((sd.remaining_construction_balance||0)/1e6).toFixed(1)}M` +
+      `\nLemartec indirects: $${((li.total_indirect_budget||0)/1e6).toFixed(1)}M total — $0 PAID — $${((li.crb_pending_adds||0)/1e6).toFixed(1)}M CRB pending — projected $${((li.total_projected||0)/1e6).toFixed(1)}M` +
+      `\nNet CRB pending: $${((cos.net_crb_pending||0)/1e6).toFixed(1)}M` +
+      `\nConstruction loan: $${((su.construction_loan||{}).commitment||0)/1e6}M total | $${((su.construction_loan||{}).drawn_to_date||0)/1e6}M drawn | $${((su.construction_loan||{}).remaining||0)/1e6}M remaining` +
+      `\nSoft costs total: $${((sc.grand_total_contract_value||0)/1e6).toFixed(1)}M | Paid: $${((sc.total_paid||0)/1e6).toFixed(1)}M | Outstanding: $${((sc.total_outstanding_payments||0)/1e6).toFixed(1)}M` +
+      `\nARQ (Arquitectonica): ~$1.5M on HOLD (Feb–Apr invoices). Contract: $19.6M total` +
+      `\nLevel Up: $340K outstanding, $95K contract balance remaining` +
+      `\nKroll audit target: $${((audit.total_target||0)/1e6).toFixed(0)}M+ | Delivery: June 30, 2026` +
+      `\nPending targeted reductions (Kroll/VE/store transfer): -$${((Math.abs((audit.specific_pending_adjustments_per_spreadsheet||{}).total_pending_adjustments||0))/1e6).toFixed(1)}M` +
+
+      `\n\n── KEY TRADE BALANCES ──` + trades +
+
+      `\n\n── LIVE ISSUES (${issues.length} active) ──` +
       issues.map(i => `\n- [${i.priority}] ${i.title}: ${i.status}. ${i.level_up_position || ''}`).join('') +
-      `\n\nKEY CONTACTS: Graham Oxley (Owner day-to-day), Devon McCorkle (Approver), Victor Oliver (Approver), Antonio Torres Roman (IMCF Ops), Jordan Ward (Level Up field lead), Justin Williams (Level Up PM).` +
-      `\n\nAnswer all questions in the specific context of MFP. Reference real stakeholders, known disputes, and Level Up's established positions. Be direct and actionable.`;
+
+      `\n\n── KEY CONTACTS ──` +
+      `\nGraham Oxley (Owner day-to-day), Devon McCorkle (Approver), Victor Oliver (Approver), Antonio Torres Roman (IMCF Ops), Jordan Ward (Level Up field lead), Justin Williams (Level Up PM), Whitney Williams (Level Up Principal/OPM Lead)` +
+
+      `\n\nAnswer all questions in the specific context of MFP. Reference real dollar figures, stakeholders, known disputes, and Level Up's established positions. Be direct and actionable. When discussing financials always cite specific amounts from the data above.`;
 
     // Reset chat with project-aware greeting
     chatHistory = [];
@@ -1703,13 +1745,163 @@ function switchSidebarMode(mode) {
     mfpSidebar.classList.add('visible');
     playbookContent.classList.add('hidden');
     mfpPanel.classList.add('visible');
-    showMFPSection('issues');
+    renderMFPOverview();
   } else {
     playbookSidebar.classList.remove('hidden');
     mfpSidebar.classList.remove('visible');
     playbookContent.classList.remove('hidden');
     mfpPanel.classList.remove('visible');
   }
+}
+
+function renderMFPOverview() {
+  // Deselect all sidebar buttons
+  document.querySelectorAll('.mfp-section-btn').forEach(b => b.classList.remove('active'));
+  activeMFPSection = null;
+
+  const ctx = projectContext;
+  const panel = document.getElementById('mfp-panel');
+  if (!panel || !ctx) return;
+
+  const p = ctx.project;
+  const fin = ctx.financials || {};
+  const tp = fin.total_project || {};
+  const issues = ctx.live_issues || [];
+  const highIssues = issues.filter(i => i.priority === 'HIGH').length;
+  const audit = fin.target_cost_savings_audit || {};
+
+  const sections = [
+    {
+      id: 'issues',
+      icon: '🔴',
+      title: 'Live Issues',
+      badge: `${issues.length} active`,
+      badgeClass: 'red',
+      summary: `${highIssues} HIGH priority. ARQ payment hold, Kroll audit, punch list disputes, HVAC service agreement, Lemartec indirect cost gap.`,
+      bullets: issues.slice(0, 3).map(i => `[${i.priority}] ${i.title}`)
+    },
+    {
+      id: 'financials',
+      icon: '💰',
+      title: 'Financials',
+      badge: `$${(tp.total_balance_to_closeout/1e6||0).toFixed(0)}M to close`,
+      badgeClass: '',
+      summary: `Total balance to closeout: $${(tp.total_balance_to_closeout/1e6||0).toFixed(1)}M. Currently outstanding: $${(tp.total_currently_outstanding/1e6||0).toFixed(1)}M. Retainage held: $${((fin.stadium_direct_costs||{}).retainage_held/1e6||0).toFixed(1)}M.`,
+      bullets: [
+        `Stadium direct: ${(fin.stadium_direct_costs||{}).pct_complete || 'N/A'} complete`,
+        `Lemartec indirects outstanding: $${((fin.lemartec_indirects||{}).outstanding/1e6||0).toFixed(1)}M`,
+        `Kroll audit target: $${(audit.total_target/1e6||0).toFixed(1)}M`
+      ]
+    },
+    {
+      id: 'schedule',
+      icon: '📅',
+      title: 'Schedule & Milestones',
+      badge: 'Post-Opening',
+      badgeClass: '',
+      summary: 'Home opener April 4, 2026 — building open and active. Primary milestones now: Kroll audit delivery June 30, punch list closeout, final CO path.',
+      bullets: [
+        'Home opener: April 4, 2026 ✓',
+        'Kroll audit final delivery: June 30, 2026',
+        'Punch list closeout: In progress'
+      ]
+    },
+    {
+      id: 'punchlist',
+      icon: '📋',
+      title: 'Punch List',
+      badge: 'Active',
+      badgeClass: 'warn',
+      summary: 'Active disputes with Lemartec on tile installation deficiency and surface-mounted electrical conduit (spec required concealed). Level Up position: correction, not credit.',
+      bullets: [
+        'Tile installation deficiency — correction required',
+        'Surface-mounted conduit — spec required concealed',
+        'Lemartec cannot close list without full walkthroughs'
+      ]
+    },
+    {
+      id: 'contracts',
+      icon: '📄',
+      title: 'Contracts',
+      badge: '6 active',
+      badgeClass: '',
+      summary: 'Lemartec ($553M), ARQ (payments on hold ~$1.5M), MANICA, Level Up, Parker Company (invoices 104 days past due), Miller Electric ($28M outstanding).',
+      bullets: [
+        'Lemartec: $553M revised — 94.2% complete',
+        'ARQ: ~$1.5M on HOLD (Feb–Apr invoices)',
+        'Miller Electric: $28M outstanding — largest balance'
+      ]
+    },
+    {
+      id: 'day2',
+      icon: '🏗',
+      title: 'Day 2 / Owner Requests',
+      badge: '60+ items',
+      badgeClass: 'warn',
+      summary: 'Post-opening owner-directed scope additions and modifications. Each requires scope definition, cost estimate, and owner authorization before proceeding.',
+      bullets: [
+        '60+ active items in the log',
+        'Multiple trades and vendors involved',
+        'Must not be confused with punch list deficiencies'
+      ]
+    },
+    {
+      id: 'costrecovery',
+      icon: '🔍',
+      title: 'Cost Recovery / Kroll',
+      badge: 'Jun 30 deadline',
+      badgeClass: 'warn',
+      summary: `Kroll engaged as independent analyst. Target: $${(audit.total_target/1e6||0).toFixed(0)}M+ in recoverable savings. Scope: CO clawbacks, VE credits, OCIP, quantity verification, duplicate COs, defective work credits.`,
+      bullets: [
+        `Target: $${(audit.total_target/1e6||0).toFixed(0)}M+ recoverable`,
+        'Final delivery: June 30, 2026',
+        'Internal draft: late June 2026'
+      ]
+    },
+    {
+      id: 'stakeholders',
+      icon: '👥',
+      title: 'Stakeholders',
+      badge: '',
+      badgeClass: '',
+      summary: 'Owner: Graham Oxley (day-to-day), Devon McCorkle & Victor Oliver (approvers). Level Up: Whitney Williams, Jordan Ward, Justin Williams, Greg Wieting.',
+      bullets: [
+        'CM/GC: Lemartec Corporation',
+        'AOR: Arquitectonica (ARQ)',
+        'Cost Recovery: Kroll (independent)'
+      ]
+    }
+  ];
+
+  let html = `
+    <div style="margin-bottom:20px">
+      <div style="font-size:18px;font-weight:700;color:var(--charcoal);margin-bottom:4px">Miami Freedom Park Stadium</div>
+      <div style="font-size:12px;color:var(--muted)">${p.phase || 'Post-Opening / Active Punch List Closeout'} &nbsp;·&nbsp; ${p.level_up_role || 'Owner\'s Representative'} &nbsp;·&nbsp; Home opener April 4, 2026</div>
+    </div>
+    <div class="mfp-overview-grid">
+  `;
+
+  sections.forEach(s => {
+    const badgePart = s.badge
+      ? `<span class="mfp-ov-badge ${s.badgeClass}">${s.badge}</span>`
+      : '';
+    const bulletsHtml = s.bullets.map(b => `<div class="mfp-ov-bullet">· ${b}</div>`).join('');
+    html += `
+      <div class="mfp-ov-card" onclick="showMFPSection('${s.id}')">
+        <div class="mfp-ov-header">
+          <span class="mfp-ov-icon">${s.icon}</span>
+          <span class="mfp-ov-title">${s.title}</span>
+          ${badgePart}
+        </div>
+        <div class="mfp-ov-summary">${s.summary}</div>
+        <div class="mfp-ov-bullets">${bulletsHtml}</div>
+        <div class="mfp-ov-cta">View details →</div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  panel.innerHTML = html;
 }
 
 let activeMFPSection = 'issues';
@@ -1784,32 +1976,66 @@ function renderMFPPanel(section) {
     const li = fin.lemartec_indirects || {};
     const audit = fin.target_cost_savings_audit || {};
     const sc = fin.soft_costs || {};
+    const su = fin.sources_and_uses || {};
+    const cos = fin.change_order_summary || {};
+
     html += `<div class="mfp-card">
       <div class="mfp-card-title"><span class="mfp-ct-icon">💰</span> Project Financials — Snapshot ${fin.snapshot_date || ''}</div>
       <div class="mfp-fin-grid">
         <div class="mfp-fin-item"><div class="mfp-fin-label">Total Balance to Closeout</div><div class="mfp-fin-value">${fmt(tp.total_balance_to_closeout)}</div></div>
         <div class="mfp-fin-item"><div class="mfp-fin-label">Currently Outstanding</div><div class="mfp-fin-value warn">${fmt(tp.total_currently_outstanding)}</div></div>
-        <div class="mfp-fin-item"><div class="mfp-fin-label">Stadium Direct % Complete</div><div class="mfp-fin-value accent">${sd.pct_complete || 'N/A'}</div></div>
-        <div class="mfp-fin-item"><div class="mfp-fin-label">Retainage Held</div><div class="mfp-fin-value">${fmt(sd.retainage_held)}</div></div>
-        <div class="mfp-fin-item"><div class="mfp-fin-label">Lemartec Indirects Outstanding</div><div class="mfp-fin-value warn">${fmt(li.outstanding)}</div></div>
-        <div class="mfp-fin-item"><div class="mfp-fin-label">Kroll Audit Target</div><div class="mfp-fin-value accent">${fmt(audit.total_target)}</div></div>
+        <div class="mfp-fin-item"><div class="mfp-fin-label">Committed to Date (Direct)</div><div class="mfp-fin-value">${fmt(sd.committed_to_date)}</div></div>
+        <div class="mfp-fin-item"><div class="mfp-fin-label">Invoiced to Date (Direct)</div><div class="mfp-fin-value">${fmt(sd.invoiced_to_date)}</div></div>
+        <div class="mfp-fin-item"><div class="mfp-fin-label">Payments Issued</div><div class="mfp-fin-value">${fmt(sd.payments_issued)}</div></div>
+        <div class="mfp-fin-item"><div class="mfp-fin-label">% Paid (Direct)</div><div class="mfp-fin-value accent">${sd.pct_paid || 'N/A'}</div></div>
+        <div class="mfp-fin-item"><div class="mfp-fin-label">Retainage Held (Direct)</div><div class="mfp-fin-value warn">${fmt(sd.retainage_held)}</div></div>
+        <div class="mfp-fin-item"><div class="mfp-fin-label">Remaining Construction</div><div class="mfp-fin-value">${fmt(sd.remaining_construction_balance)}</div></div>
+        <div class="mfp-fin-item"><div class="mfp-fin-label">Lemartec Indirects Total</div><div class="mfp-fin-value warn">${fmt(li.total_indirect_budget)}</div></div>
+        <div class="mfp-fin-item"><div class="mfp-fin-label">Lemartec Indirects Paid</div><div class="mfp-fin-value red">$0 paid</div></div>
+        <div class="mfp-fin-item"><div class="mfp-fin-label">Net CRB Pending</div><div class="mfp-fin-value">${fmt(cos.net_crb_pending)}</div></div>
+        <div class="mfp-fin-item"><div class="mfp-fin-label">Kroll Audit Target</div><div class="mfp-fin-value accent">${fmt(audit.total_target)}+</div></div>
       </div>
     </div>`;
+
+    html += `<div class="mfp-card">
+      <div class="mfp-card-title">Construction Loan Draw</div>
+      <div class="mfp-fin-grid">
+        <div class="mfp-fin-item"><div class="mfp-fin-label">Loan Commitment</div><div class="mfp-fin-value">${fmt((su.construction_loan||{}).commitment)}</div></div>
+        <div class="mfp-fin-item"><div class="mfp-fin-label">Drawn to Date</div><div class="mfp-fin-value warn">${fmt((su.construction_loan||{}).drawn_to_date)}</div></div>
+        <div class="mfp-fin-item full"><div class="mfp-fin-label">Remaining Availability</div><div class="mfp-fin-value accent">${fmt((su.construction_loan||{}).remaining)}</div></div>
+      </div>
+    </div>`;
+
+    html += `<div class="mfp-card"><div class="mfp-card-title">Soft Costs — ${sc.snapshot_date || ''}</div>
+      <div class="mfp-fin-grid">
+        <div class="mfp-fin-item"><div class="mfp-fin-label">Total Contract Value</div><div class="mfp-fin-value">${fmt(sc.grand_total_contract_value)}</div></div>
+        <div class="mfp-fin-item"><div class="mfp-fin-label">Total Paid</div><div class="mfp-fin-value">${fmt(sc.total_paid)}</div></div>
+        <div class="mfp-fin-item"><div class="mfp-fin-label">Outstanding Payments</div><div class="mfp-fin-value warn">${fmt(sc.total_outstanding_payments)}</div></div>
+        <div class="mfp-fin-item"><div class="mfp-fin-label">Balance Remaining (contract)</div><div class="mfp-fin-value">${fmt(sc.total_balance_remaining)}</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px">ARQ: ~$1.5M on HOLD (Feb–Apr invoices) · Level Up: $340K outstanding, $95K contract balance · MFP Mgmt Fee: $2M outstanding</div>
+    </div>`;
+
     if (fin.key_trade_contractors && fin.key_trade_contractors.length) {
-      html += `<div class="mfp-card"><div class="mfp-card-title">Key Trade Balances</div>`;
+      html += `<div class="mfp-card"><div class="mfp-card-title">Key Trade Balances (as of ${fin.snapshot_date})</div>`;
       fin.key_trade_contractors.forEach(tc => {
+        const bal = tc.balance_outstanding || tc.outstanding || 0;
+        const pct = tc.pct_paid ? ` · ${tc.pct_paid} paid` : '';
         html += `<div class="mfp-schedule-row">
-          <span class="mfp-sched-label">${tc.firm}</span>
-          <span class="mfp-sched-val">${fmt(tc.balance_outstanding)} remaining</span>
+          <div><span class="mfp-sched-label">${tc.firm}</span><br><span style="font-size:10px;color:var(--muted)">${tc.scope}${pct}</span></div>
+          <span class="mfp-sched-val">${fmt(bal)} outstanding</span>
         </div>`;
       });
       html += `</div>`;
     }
+
     html += `<div class="mfp-card"><div class="mfp-card-title">Quick Questions</div><div class="mfp-quick-asks">
       <button class="mfp-quick-btn" onclick="mfpQuickAsk('What is the current financial exposure on MFP and what are the biggest outstanding items?')">Financial Exposure</button>
       <button class="mfp-quick-btn" onclick="mfpQuickAsk('What is the status of retainage and when can it be released?')">Retainage Status</button>
-      <button class="mfp-quick-btn" onclick="mfpQuickAsk('Summarize the Lemartec indirect cost dispute')">Lemartec Indirects</button>
-      <button class="mfp-quick-btn" onclick="mfpQuickAsk('What are the Parker Company invoice issues?')">Parker Company</button>
+      <button class="mfp-quick-btn" onclick="mfpQuickAsk('Why does Lemartec show $0 paid on indirect costs and what does that mean?')">Lemartec Indirects</button>
+      <button class="mfp-quick-btn" onclick="mfpQuickAsk('What is the Boldyn Networks payment situation — why is only 5% paid on a $22M contract?')">Boldyn Status</button>
+      <button class="mfp-quick-btn" onclick="mfpQuickAsk('What are the specific Kroll audit target reductions by vendor?')">Kroll Targets by Vendor</button>
+      <button class="mfp-quick-btn" onclick="mfpQuickAsk('What are the pending change review board items and how much do they add to the project cost?')">CRB Pending Items</button>
     </div></div>`;
 
   } else if (section === 'schedule') {
