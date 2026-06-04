@@ -573,7 +573,7 @@ const ALL_TOPICS = [...new Set(KB.flatMap(s=>s.topics))].sort();
 let activePhase = null;
 let activeTopic = null;
 let activeSearch = '';
-let collapsedGroups = new Set();
+let collapsedGroups = new Set(['1','6','13','18','37']);
 let bookmarks = new Set();
 let chatHistory = [];
 let chatOpen = false;
@@ -1665,6 +1665,13 @@ function renderSidebar() {
   const sn = document.getElementById('section-nav');
   const NAV_GROUPS = {'1':'Foundation','6':'Project Setup','13':'Controls','18':'Phase Execution','37':'Reference'};
   const NAV_GROUP_NUMS = Object.keys(NAV_GROUPS).map(Number).sort((a,b)=>a-b);
+  // Count sections per group
+  const groupCounts = {};
+  for (const s of KB) {
+    let mg = NAV_GROUP_NUMS[0];
+    for (const gn of NAV_GROUP_NUMS) { if (Number(s.num) >= gn) mg = gn; }
+    groupCounts[mg] = (groupCounts[mg] || 0) + 1;
+  }
   let navHtml = '';
   let currentGroup = null;
   for (const s of KB) {
@@ -1674,12 +1681,15 @@ function renderSidebar() {
       currentGroup = myGroup;
       const grpLabel = NAV_GROUPS[String(myGroup)];
       const isCollapsed = collapsedGroups.has(String(myGroup));
+      const cnt = groupCounts[myGroup] || 0;
       navHtml += `<div class="nav-group-label" onclick="toggleGroup('${myGroup}')">
-        <span class="nav-grp-chevron ${isCollapsed ? 'collapsed' : ''}">▾</span> ${grpLabel}
+        <span class="nav-grp-chevron ${isCollapsed ? 'collapsed' : ''}">▾</span>
+        <span style="flex:1">${grpLabel}</span>
+        <span style="font-size:9px;opacity:.5;font-weight:400">${cnt}</span>
       </div>`;
     }
-    const myGroupNum = currentGroup;
-    if (collapsedGroups.has(String(myGroupNum))) continue;
+    // Only show section items when group is expanded
+    if (collapsedGroups.has(String(myGroup))) continue;
     const shortTitle = s.title.replace(/^SECTION \d+:\s*/,'');
     navHtml += `<div class="section-nav-item" onclick="jumpTo('${s.num}')">
       <span class="section-num">${s.num}</span>
