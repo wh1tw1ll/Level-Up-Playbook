@@ -38,6 +38,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
 #site-logo path{fill:#e6e7e8}
 [data-theme="dark"] #site-logo path{fill:#e6e7e8}
 .topbar-search{flex:1;max-width:480px;position:relative}
+.topbar-scope{display:none;align-items:center;gap:4px;flex-shrink:0}
+.topbar-scope.visible{display:flex}
+.topbar-scope-label{font-size:11px;color:rgba(255,255,255,.5);margin-right:2px;white-space:nowrap}
+.topbar-scope .scope-btn{padding:3px 10px;font-size:11px;border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:rgba(255,255,255,.6)}
+.topbar-scope .scope-btn.active{background:var(--sage);color:var(--teal);border-color:transparent}
+.topbar-scope .scope-btn:hover:not(.active){border-color:rgba(255,255,255,.4);color:#fff;background:rgba(255,255,255,.15)}
 .topbar-search input{width:100%;padding:8px 12px 8px 36px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.1);color:#fff;font-family:inherit;font-size:14px;outline:none;transition:all .15s}
 .topbar-search input::placeholder{color:rgba(255,255,255,.5)}
 .topbar-search input:focus{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.3)}
@@ -55,7 +61,27 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
 /* ── SIDEBAR ── */
 .sidebar{background:var(--card);border-right:1px solid var(--border);overflow-y:auto;padding:16px 0;transition:background .2s,border-color .2s}
 .sidebar-section{margin-bottom:8px}
-.sidebar-heading{font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--muted);padding:8px 20px 4px;text-transform:uppercase}
+.sidebar-heading{font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--muted);padding:8px 20px 4px;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;transition:color .15s}
+.sidebar-heading:hover{color:var(--teal)}
+.sidebar-heading .chevron{font-size:10px;opacity:.5;transition:transform .2s;margin-right:16px}
+.sidebar-section.collapsed .chevron{transform:rotate(-90deg)}
+.sidebar-section.collapsed .phase-pills,
+.sidebar-section.collapsed .topic-list,
+.sidebar-section.collapsed .section-nav{display:none}
+
+/* Project switcher */
+.project-switcher{padding:8px 12px 4px}
+.project-switcher-label{font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;padding:0 8px 6px;display:block}
+.project-btn{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border-radius:7px;font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;font-family:inherit;text-align:left;transition:all .15s;margin-bottom:4px}
+.project-btn:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-light)}
+.project-btn.active{border-color:var(--teal);background:var(--teal);color:#fff}
+.project-btn .proj-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.project-btn.active .proj-dot{background:var(--sage)}
+.project-btn:not(.active) .proj-dot{background:var(--border)}
+.project-badge{font-size:9px;font-weight:600;padding:1px 5px;border-radius:4px;background:var(--sage);color:var(--teal);margin-left:auto;letter-spacing:.04em}
+.active-project-bar{margin:0 12px 8px;padding:7px 10px;border-radius:7px;background:var(--teal-light);border:1px solid var(--teal);font-size:11px;color:var(--teal);font-weight:500;display:none;align-items:center;gap:6px}
+.active-project-bar.visible{display:flex}
+.active-project-bar .apb-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);flex-shrink:0}
 .phase-pills{display:flex;flex-wrap:wrap;gap:6px;padding:4px 16px 8px}
 .pill{padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--muted);transition:all .15s;white-space:nowrap}
 .pill.active{background:var(--teal);color:#fff;border-color:var(--teal)}
@@ -243,6 +269,12 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
       <g><path id="lp8" d="m103.45,259.42l11.24,19.81c.2.35-.05.79-.46.79h-27.76c-3.09,0-5.95-1.66-7.47-4.35l-11.12-19.58c-1.48-2.61-1.5-5.8-.03-8.43l27.24-48.92c1.52-2.72,4.39-4.41,7.51-4.41h27.58c.4,0,.66.44.46.79l-29.19,52.42c-1.46,2.62-1.45,5.81.03,8.42l1.97,3.47Z"/><path id="lp9" d="m218,195.11l-10.54,18.88-20.8,37.29-13.59,24.34c-1.52,2.72-4.39,4.41-7.51,4.41h-35.6c-3.09,0-5.95-1.66-7.48-4.35l-11.12-19.58c-1.48-2.61-1.5-5.81-.04-8.43l27.25-48.92c1.52-2.72,4.39-4.41,7.51-4.41h27.58c.41,0,.66.44.47.79l-30.84,55.37c-.2.36.06.79.47.79h4.31c3.11,0,5.98-1.69,7.51-4.41l26.86-48.13c1.52-2.72,4.39-4.41,7.51-4.41h27.59c.4,0,.66.44.46.79Z"/></g>
     </svg>
   </a>
+  <div class="topbar-scope" id="topbar-scope">
+    <span class="topbar-scope-label">Search in:</span>
+    <button class="scope-btn active" id="scope-title" onclick="setScope('title')">Titles</button>
+    <button class="scope-btn" id="scope-subs" onclick="setScope('subs')">+ Subsections</button>
+    <button class="scope-btn active" id="scope-all" onclick="setScope('all')">+ Full Content</button>
+  </div>
   <div class="topbar-search">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <input type="text" id="search-input" placeholder="Search the playbook… (press / to focus)" autocomplete="off">
@@ -257,6 +289,30 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
+  <!-- Project Switcher -->
+  <div class="project-switcher">
+    <span class="project-switcher-label">Active Project</span>
+    <button class="project-btn active" id="proj-generic" onclick="setProject('generic')">
+      <span class="proj-dot"></span>
+      General Playbook
+    </button>
+    <button class="project-btn" id="proj-mfp" onclick="setProject('mfp')">
+      <span class="proj-dot"></span>
+      MFP Stadium
+      <span class="project-badge">Active</span>
+    </button>
+
+  </div>
+
+  <!-- Active project indicator -->
+  <div class="active-project-bar" id="active-project-bar">
+    <span class="apb-dot"></span>
+    <span id="active-project-label">MFP context loaded</span>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Action buttons -->
   <div class="sidebar-section" style="padding:12px 0 4px">
     <button class="sidebar-action-btn" onclick="openPhaseGuide()">
       <span class="btn-icon">🗺</span> Phase Reading Guide
@@ -266,18 +322,30 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
     </button>
   </div>
   <div class="divider"></div>
-  <div class="sidebar-section">
-    <div class="sidebar-heading">Project Phase</div>
+
+  <!-- Project Phase — collapsible -->
+  <div class="sidebar-section collapsed" id="sec-phases">
+    <div class="sidebar-heading" onclick="toggleSidebarSection('sec-phases')">
+      Project Phase <span class="chevron">▾</span>
+    </div>
     <div class="phase-pills" id="phase-pills"></div>
   </div>
   <div class="divider"></div>
-  <div class="sidebar-section">
-    <div class="sidebar-heading">Topics</div>
+
+  <!-- Topics — collapsible -->
+  <div class="sidebar-section collapsed" id="sec-topics">
+    <div class="sidebar-heading" onclick="toggleSidebarSection('sec-topics')">
+      Topics <span class="chevron">▾</span>
+    </div>
     <div class="topic-list" id="topic-list"></div>
   </div>
   <div class="divider"></div>
-  <div class="sidebar-section">
-    <div class="sidebar-heading">All Sections</div>
+
+  <!-- All Sections — collapsible -->
+  <div class="sidebar-section collapsed" id="sec-nav">
+    <div class="sidebar-heading" onclick="toggleSidebarSection('sec-nav')">
+      All Sections <span class="chevron">▾</span>
+    </div>
     <div class="section-nav" id="section-nav"></div>
   </div>
 </aside>
@@ -287,12 +355,6 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
   <div class="content-area" id="content-area">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
   <div class="results-meta" id="results-meta"></div>
-  <div id="search-scope-row" style="display:none;gap:6px;display:flex">
-    <span style="font-size:12px;color:var(--muted);margin-right:4px;line-height:28px">Search in:</span>
-    <button class="scope-btn active" id="scope-title" onclick="setScope('title')">Titles</button>
-    <button class="scope-btn" id="scope-subs" onclick="setScope('subs')">+ Subsections</button>
-    <button class="scope-btn active" id="scope-all" onclick="setScope('all')">+ Full Content</button>
-  </div>
 </div>
     <div id="sections-container"></div>
   </div>
@@ -314,6 +376,20 @@ let activeSearch = '';
 let bookmarks = new Set();
 let chatHistory = [];
 let chatOpen = false;
+
+// ── PROJECT CONTEXT ──
+let activeProject = 'generic';
+let projectContext = null;
+
+const PROJECT_CONTEXT_URLS = {
+  mfp: 'https://raw.githubusercontent.com/wh1tw1ll/Level-Up-Playbook/main/mfp_context.json',
+  hcc: null // coming soon
+};
+
+const PROJECT_SYSTEM_PROMPTS = {
+  generic: `You are an AI assistant for Level Up Project Development's PM Playbook. Answer questions about project management best practices for sports facility and capital program delivery. Be specific and actionable.`,
+  mfp: null // loaded dynamically from mfp_context.json
+};
 
 // ── STORAGE ──
 async function loadBookmarks() {
@@ -1302,8 +1378,8 @@ const searchInput = document.getElementById('search-input');
 searchInput.addEventListener('input', e => {
   activeSearch = e.target.value.trim();
   renderSections();
-  const scopeRow = document.getElementById('search-scope-row');
-  if (scopeRow) scopeRow.style.display = activeSearch ? 'flex' : 'none';
+  const scopeRow = document.getElementById('topbar-scope');
+  if (scopeRow) scopeRow.classList.toggle('visible', !!activeSearch);
   if (activeSearch) {
     saveRecentSearch(activeSearch);
     setTimeout(() => {
@@ -1379,12 +1455,8 @@ Content: ${content}
 Key Points: ${bullets}`;
   }).join('\n\n');
 
-  const systemPrompt = `You are the Level Up Project Development Playbook AI. Level Up is a sports venue owner's representative firm. You have complete knowledge of the Level Up Program Management Playbook covering all aspects of managing major sports facility projects.
-
-Answer questions using the playbook content. Be specific, practical, and direct. Reference section numbers when relevant. Use **bold** for key terms. Give actionable guidance.
-
-FULL PLAYBOOK KNOWLEDGE BASE:
-${kbSummary}`;
+  const projectPrompt = getActiveSystemPrompt();
+  const systemPrompt = projectPrompt + `\n\nFULL PLAYBOOK KNOWLEDGE BASE (methodology & process reference):\n${kbSummary}`;
 
   try {
     const response = await fetch('/api/chat', {
@@ -1447,6 +1519,81 @@ function askQuestion(q) {
 }
 
 // ── THEME ──
+// ── SIDEBAR COLLAPSIBLE ──
+function toggleSidebarSection(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+// ── PROJECT SWITCHER ──
+async function setProject(projectId) {
+  activeProject = projectId;
+
+  // Update button states
+  document.querySelectorAll('.project-btn').forEach(b => b.classList.remove('active'));
+  const activeBtn = document.getElementById('proj-' + projectId);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  const bar = document.getElementById('active-project-bar');
+  const label = document.getElementById('active-project-label');
+
+  if (projectId === 'generic') {
+    projectContext = null;
+    bar.classList.remove('visible');
+    chatHistory = [];
+    return;
+  }
+
+  // Show loading state
+  bar.classList.add('visible');
+  label.textContent = 'Loading ' + projectId.toUpperCase() + ' context…';
+
+  try {
+    const url = PROJECT_CONTEXT_URLS[projectId];
+    if (!url) { label.textContent = 'Context not yet available'; return; }
+
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('fetch failed');
+    projectContext = await res.json();
+
+    // Build system prompt from context
+    const ctx = projectContext;
+    const p = ctx.project;
+    const fin = ctx.financials;
+    const issues = ctx.live_issues || [];
+
+    PROJECT_SYSTEM_PROMPTS.mfp = ctx.playbook_ai_system_prompt +
+      `\n\n=== CURRENT PROJECT SNAPSHOT ===` +
+      `\nProject: ${p.name} | Phase: ${p.phase} | Role: ${p.level_up_role}` +
+      `\nCM: ${ctx.stakeholders.cm.firm} | AOR: ${ctx.stakeholders.architect_of_record.firm}` +
+      `\n\nFINANCIALS (as of ${fin.snapshot_date}):` +
+      `\n- Total balance to closeout: $${(fin.total_project.total_balance_to_closeout/1e6).toFixed(1)}M` +
+      `\n- Currently outstanding: $${(fin.total_project.total_currently_outstanding/1e6).toFixed(1)}M` +
+      `\n- Stadium direct cost % complete: ${fin.stadium_direct_costs.pct_complete}` +
+      `\n- Retainage held (stadium direct): $${(fin.stadium_direct_costs.retainage_held/1e6).toFixed(1)}M` +
+      `\n- Kroll audit target: $${(fin.target_cost_savings_audit.total_target/1e6).toFixed(1)}M` +
+      `\n\nLIVE ISSUES (${issues.length} active):` +
+      issues.map(i => `\n- [${i.priority}] ${i.title}: ${i.status}. ${i.level_up_position || ''}`).join('') +
+      `\n\nKEY CONTACTS: Graham Oxley (Owner day-to-day), Devon McCorkle (Approver), Victor Oliver (Approver), Antonio Torres Roman (IMCF Ops), Jordan Ward (Level Up field lead), Justin Williams (Level Up PM).` +
+      `\n\nAnswer all questions in the specific context of MFP. Reference real stakeholders, known disputes, and Level Up's established positions. Be direct and actionable.`;
+
+    // Reset chat with project-aware greeting
+    chatHistory = [];
+    label.textContent = 'MFP Stadium — context active';
+    appendMsg('ai', `**MFP context loaded.** I now have full project awareness for Miami Freedom Park Stadium — financials, live issues, stakeholders, and Level Up's current positions. Ask me anything about the project.`);
+
+  } catch (err) {
+    label.textContent = 'Failed to load context — check connection';
+    console.error('Project context load error:', err);
+  }
+}
+
+function getActiveSystemPrompt() {
+  if (activeProject !== 'generic' && PROJECT_SYSTEM_PROMPTS[activeProject]) {
+    return PROJECT_SYSTEM_PROMPTS[activeProject];
+  }
+  return PROJECT_SYSTEM_PROMPTS.generic;
+}
+
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   const btn = document.getElementById('theme-btn');
