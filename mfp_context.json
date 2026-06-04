@@ -1,0 +1,415 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "last_updated": "2026-06-04",
+    "updated_by": "Whitney Williams",
+    "source_docs": [
+      "Construction_Cost_Go-Forward_Summary.xlsx",
+      "Stadium_Budget_Analysis_May_23_2026.xlsx",
+      "MFP_Project_Wide_Cost_Summary_05_19_26.xlsx",
+      "Design_Change_and_Day_2_Additions_Log.xlsx",
+      "StadCo_Soft_Cost_Payment_Recommendation_5_22_26.pdf",
+      "ARQ_Agreement_for_AOR_Services__Execution_Copy__FE__.pdf",
+      "MANICA_Agreement_for_Design_Architect__FE_.pdf",
+      "MFP-LE_1.PDF"
+    ],
+    "instructions": "To add content: open this file, find the relevant section, add your data following the existing pattern. To update financials, change values under 'financials.snapshot' and update 'last_updated'. To add a live issue, copy an existing object in 'live_issues' and fill in the fields. To add a stakeholder, copy an existing object in 'stakeholders' and fill in. Save and re-upload to any Claude chat to reload context."
+  },
+
+  "project": {
+    "name": "Miami Freedom Park Stadium",
+    "short_name": "MFP",
+    "client": "Miami Freedom Park, LLC",
+    "client_address": "800 Douglas Road, 8th Floor, Miami, FL 33134",
+    "site_address": "1900 NW 37th Avenue, Miami, Florida 33125",
+    "program": "25,000-seat MLS stadium, mixed-use entertainment district, public park, parking structures",
+    "mls_club": "Inter Miami CF (IMCF)",
+    "phase": "Closeout / Post-Substantial Completion",
+    "level_up_role": "Owner's Representative",
+    "delivery_method": "Construction Manager as Agent for Owner",
+    "contract_value_total": "$824M+ (all packages)",
+    "construction_start": "2022",
+    "substantial_completion": "2026-Q1",
+    "target_final_co": "TBD",
+    "notes": "Project includes StadCo scope (stadium) and DevCo scope (site, public realm, parking, chiller plant). Public Park Phase 1 separately tracked."
+  },
+
+  "stakeholders": {
+    "owner": {
+      "entity": "Miami Freedom Park, LLC",
+      "principals": ["Jorge Mas", "Jose Mas"],
+      "key_contacts": {
+        "Graham Oxley": { "role": "Owner Representative / Day-to-Day Lead", "email": "", "phone": "" },
+        "Devon McCorkle": { "role": "Owner / Approver", "email": "", "phone": "" },
+        "Victor Oliver": { "role": "Owner / Approver", "email": "", "phone": "" },
+        "Javi Alvarez": { "role": "Owner / Operations", "email": "", "phone": "" },
+        "Antonio Torres Roman": { "role": "Operations Lead (IMCF)", "email": "", "phone": "" },
+        "Kaitlyn Stolzenberg": { "role": "IMCF Operations", "email": "", "phone": "" },
+        "Laurence McMillon": { "role": "IMCF Operations / F&B", "email": "", "phone": "" },
+        "Nelson Fuentes": { "role": "IMCF Facilities / Guest Services", "email": "", "phone": "" },
+        "Ricky Ledo": { "role": "IMCF Operations", "email": "", "phone": "" },
+        "Yago Marino": { "role": "IMCF", "email": "", "phone": "" },
+        "Ali Curtis": { "role": "IMCF", "email": "", "phone": "" },
+        "Mari Padilla": { "role": "IMCF Command Center", "email": "", "phone": "" },
+        "Chris McBride": { "role": "MFP Site / Field Representative", "email": "", "phone": "" },
+        "Tyler Wetzel": { "role": "MFP", "email": "", "phone": "" }
+      }
+    },
+    "level_up": {
+      "firm": "Level Up Project Development",
+      "role": "Owner's Representative",
+      "key_contacts": {
+        "Whitney Williams": { "role": "Principal / Owner's Rep Lead", "email": "", "phone": "" },
+        "Greg Wieting": { "role": "Principal / Project Executive", "email": "", "phone": "" },
+        "Jordan Ward": { "role": "Principal in Charge / Field Lead", "email": "", "phone": "" },
+        "Justin Williams": { "role": "Project Manager", "email": "", "phone": "" },
+        "George Salinas": { "role": "Field / Design Coordination", "email": "", "phone": "" },
+        "Greg Giordano": { "role": "Field Coordination", "email": "", "phone": "" }
+      },
+      "fee": {
+        "monthly_fee": 170000,
+        "reimbursables_april": 5870.63,
+        "notes": "April 2026 invoice #1046 approved PAY. Reimbursables cover project meals and expenses."
+      }
+    },
+    "cm": {
+      "firm": "Lemartec Corporation",
+      "role": "Construction Manager as Agent for Owner",
+      "address": "3390 Mary Street, Suite 166, Coconut Grove, Florida 33133",
+      "contract_structure": "Trade Contract Agreement template — all trade contracts between Owner (MFP LLC) and Trade Contractors; Lemartec acts as agent",
+      "key_contacts": {
+        "Rodrigo Guerro": { "role": "Lemartec Field / Site", "email": "", "phone": "" }
+      },
+      "notes": "Copy/change restricted PDF. 140-page Trade Contract Agreement. Key clauses: payment terms (Sec 13), right to set off (Sec 14), defective work (Sec 22), termination (Sec 19), dispute resolution (Sec 25)."
+    },
+    "architect_of_record": {
+      "firm": "Arquitectonica International Corp.",
+      "short_name": "ARQ",
+      "role": "Architect of Record (AOR)",
+      "agreement_date": "July 27, 2023",
+      "key_contacts": {
+        "Ateeq": { "role": "ARQ Design Lead / Project Architect", "email": "", "phone": "" },
+        "Krishna": { "role": "ARQ", "email": "", "phone": "" }
+      },
+      "payment_status": "ALL INVOICES ON HOLD as of May 2026. Feb, Mar, Apr base + add services + reimbursables all held. Total on hold: ~$1.507M. Approved to pay: ~$1.058M (sbp, Thornton Tomasetti, Level Up, Trivandi, others).",
+      "notes": "ARQ hold is a live financial and relationship issue. Multiple add services invoices from Feb-Apr 2026 all held. Resolution required before CO."
+    },
+    "design_architect": {
+      "firm": "MANICA Architecture, PA",
+      "role": "Design Architect",
+      "agreement_date": "July 27, 2023",
+      "key_contacts": {},
+      "notes": "Separate agreement from AOR. Design Architect role distinct from AOR construction administration role."
+    },
+    "key_trade_contractors": {
+      "Enclos Tensile Structures": { "scope": "Canopy / PTFE tensile structure", "original_contract": 115257119, "net_cos": -32035629, "total_contract": 83221490, "work_complete": 80046017, "paid_to_date": 79645062, "retainage": 4161074, "balance_to_finish": 3576428, "target_savings": 1500000, "notes": "Largest scope reduction via COs. Canopy LED video boards arriving 7/7." },
+      "Miller Electric": { "scope": "Electrical", "original_contract": 76286182, "net_cos": 8614133, "total_contract": 84900315, "work_complete": 80956038, "paid_to_date": 56803583, "retainage": 4008739, "balance_to_finish": 28096732, "target_savings": 3000000, "notes": "Largest outstanding balance of any trade." },
+      "Baker Concrete": { "scope": "Concrete", "total_contract": 61487834, "work_complete": 61487834, "paid_to_date": 56010328, "retainage": 2679816, "balance_to_finish": 5477506, "target_savings": 750000 },
+      "Lemartec_GC_Fees": { "scope": "CM General Conditions / Indirect Costs", "total_contract": 65275459, "work_complete": 57276766, "paid_to_date": 25810997, "retainage": 0, "balance_to_finish": 39464462, "notes": "Confirm future costs only. Large gap between work complete and paid — key reconciliation item." },
+      "Hill York": { "scope": "HVAC / MEP", "total_contract": 28430831, "work_complete": 28204297, "paid_to_date": 24265382, "retainage": 1349735, "balance_to_finish": 4165449, "target_savings": 250000, "notes": "HY service agreement urgency — personnel with institutional knowledge departing. Game day standby coverage needed. CEP Plant also pending." },
+      "Right Way Plumbing": { "scope": "Plumbing / Mechanical", "total_contract": 20189300, "work_complete": 20189300, "paid_to_date": 13363211, "retainage": 957758, "balance_to_finish": 6826089, "target_savings": 750000 },
+      "Qualico_Steel_S&R": { "scope": "Structural Steel", "notes": "Qualico ($16.5M) and S&R ($10.4M) both near complete." },
+      "The Parker Company": { "scope": "Dreamseats / Seating Systems", "total_contract": 8998250, "work_complete": 6910595, "paid_to_date": 6310595, "balance_to_finish": 2687655, "target_savings": 2015741, "notes": "Largest single target savings. Labeled 'Dreamseats' in notes column." },
+      "FRACHT": { "scope": "Freight / Logistics (international procurement)", "total_contract": 16112254, "paid_to_date": 14917048, "balance_to_finish": 1195206, "target_savings": 1000000, "notes": "Missing original contract — backcharge others flag." },
+      "US_Customs": { "scope": "U.S. Customs duties", "total_contract": 13989138, "paid_to_date": 13989138, "balance_to_finish": 0, "target_savings": 2500000, "notes": "Missing original contract flag. $2.5M target savings — key audit item." },
+      "Glenn Rieder": { "scope": "Millwork / Casework", "total_contract": 14046261, "paid_to_date": 9828514, "retainage": 1346558, "balance_to_finish": 4217747, "target_savings": 1000000 },
+      "TSI Commercial Floor": { "scope": "Flooring / Tile", "total_contract": 5626580, "paid_to_date": 3156101, "retainage": 553842, "balance_to_finish": 2470479, "target_savings": 750000, "notes": "Tile deficiency issues active on punch list." },
+      "LTG Sports Turf": { "scope": "Pitch / Field Turf", "total_contract": 2794645, "paid_to_date": 1029137, "balance_to_finish": 1765508 },
+      "Promethean Builders": { "scope": "Team Store + Venue Supplementation + Office Expansion", "total_contract": 5784978, "work_complete": 4338734, "paid_to_date": 2274379, "balance_to_finish": 3510599, "notes": "Office expansion underway as of 5/28. Demo commenced 5/28." },
+      "AmpThink": { "scope": "Wi-Fi / DAS / Tech Infrastructure + Canopy LED boards", "notes": "Catwalk video boards: aluminum sent to shop for reweld. LED boards arrive 7/7. Separate from Mastec (data drops)." },
+      "Convergint": { "scope": "Security / Access Control", "total_contract": 1685204, "paid_to_date": 723804, "retainage": 121616, "balance_to_finish": 961400, "target_savings": 125000 },
+      "Design Communications": { "scope": "Signage / Graphics", "total_contract": 20603902, "paid_to_date": 15525853, "retainage": 1045300, "balance_to_finish": 5078049, "target_savings": 75000, "notes": "Signage costs charged to Partnerships per notes." },
+      "A1 All Florida Painting": { "scope": "Painting", "total_contract": 8847551, "paid_to_date": 3889185, "retainage": 628734, "balance_to_finish": 4958366, "target_savings": 500000 }
+    },
+    "soft_cost_vendors": {
+      "sbp_engineering": { "scope": "Structural Engineering (MEP/Structural consulting)", "approved_pay": 207129, "status": "PAY" },
+      "Thornton_Tomasetti": { "scope": "Structural Engineering", "approved_pay": 45000, "status": "PAY" },
+      "Gensler": { "scope": "Interior Design / Consulting", "total_invoiced": 182607, "approved_pay": 182607, "notes": "Two invoices PAY ($102,660 + $79,947), one HOLD ($31,453)" },
+      "ViewPointe_Consulting": { "scope": "Tim Sangbush — consulting", "approved_pay": 105200, "status": "PAY" },
+      "Smith_Emery": { "scope": "Special Inspections / Testing / Welding Inspection", "approved_pay": 163965, "status": "PAY" },
+      "Trivandi": { "scope": "Operations / Venue Consulting", "approved_pay": 55000, "status": "PAY" },
+      "Pacifica": { "scope": "Waterproofing + Geotechnical Consulting", "approved_pay": 28303, "status": "PAY" },
+      "Capitol_Airspace": { "scope": "FAA / Airspace Consulting", "approved_pay": 5136, "status": "PAY" },
+      "Food_Service_Matters": { "scope": "Food Service Consulting", "approved_pay": 10000, "hold": 22531, "notes": "One March invoice PAY; April invoices on HOLD" },
+      "LiveView_Technology": { "scope": "Technology / Monitoring", "approved_pay": 41602, "notes": "Feb-Apr invoices PAY; May invoices HOLD" },
+      "From_Where_I_Fly": { "scope": "Nicole Abbett — Photography / Documentation", "approved_pay": 21461, "hold": 43662, "notes": "Feb-Mar invoices PAY; large batch of May invoices HOLD" },
+      "Grimes_Consulting": { "scope": "Consulting — May Services", "approved_pay": 10750, "status": "PAY" },
+      "The_Parker_Company_soft": { "scope": "Consulting (Fee)", "hold": 66989, "notes": "ALL Parker Company fee invoices Jan-May on HOLD (104 days past due at oldest)" },
+      "Kroll": { "scope": "Independent Cost Recovery Auditor", "notes": "Engaged for cost recovery audit. Kickoff late May 2026. Internal draft late June. Final delivery June 30." }
+    }
+  },
+
+  "financials": {
+    "snapshot_date": "2026-05-19 to 2026-05-23",
+    "stadium_direct_costs": {
+      "original_contract": 477735717,
+      "net_change_orders": 76018925,
+      "revised_contract": 553754643,
+      "work_complete_billed": 521486135,
+      "pct_complete": "94.2%",
+      "paid_to_date": 417117309,
+      "retainage_held": 25454318,
+      "balance_to_finish_work": 32268508,
+      "outstanding_current": 65933554,
+      "balance_to_closeout": 136637334
+    },
+    "stadium_indirect_costs": {
+      "original_contract": 36918395,
+      "net_change_orders": 28365323,
+      "revised_contract": 65283718,
+      "work_complete_billed": 57276766,
+      "pct_complete": "87.7%",
+      "paid_to_date": 25810997,
+      "retainage_held": 1363833,
+      "outstanding_current": 10849137,
+      "balance_to_closeout": 39472721,
+      "notes": "Lemartec indirects. Large gap between billed and paid is key financial risk."
+    },
+    "sitework_infrastructure": {
+      "contract": 86576112,
+      "work_complete": 80351719,
+      "pct_complete": "92.8%",
+      "retainage": 2673416,
+      "outstanding_current": 32217974,
+      "balance_to_closeout": 36502799
+    },
+    "public_realm": {
+      "contract": 33334350,
+      "work_complete": 11480085,
+      "pct_complete": "34.4%",
+      "outstanding_current": 6865452,
+      "balance_to_closeout": 29867726,
+      "notes": "Only 34% complete — significant work remaining"
+    },
+    "parking_garage": {
+      "contract": 79369091,
+      "work_complete": 78793380,
+      "pct_complete": "99.3%",
+      "retainage": 3799328,
+      "outstanding_current": 9523507,
+      "balance_to_closeout": 10099218
+    },
+    "chiller_plant": {
+      "contract": 13623833,
+      "work_complete": 13482990,
+      "pct_complete": "98.9%",
+      "outstanding_current": 4191441,
+      "balance_to_closeout": 4332284,
+      "notes": "Near completion. CEP Plant service coverage also a live issue."
+    },
+    "public_park_phase1": {
+      "contract": 9500000,
+      "work_complete": 1000000,
+      "pct_complete": "10.5%",
+      "balance_to_closeout": 9500000
+    },
+    "total_project": {
+      "stadco_balance_to_closeout": 176110054,
+      "devco_balance_to_closeout": 90302027,
+      "total_balance_to_closeout": 266412081,
+      "total_currently_outstanding": 129581064
+    },
+    "sources": {
+      "construction_loan": 450000000,
+      "equity_invested_soft": 40669886,
+      "equity_invested_hard": 39407212,
+      "devco_reimbursement": 79535189,
+      "vendor_contributions": 10271604,
+      "advanced_collections": 12800000,
+      "notes": "Debt/equity split ~63/37"
+    },
+    "target_cost_savings_audit": {
+      "total_target": 20016315,
+      "by_trade": {
+        "Miller Electric": 3000000,
+        "Enclos Tensile": 1500000,
+        "The Parker Company (Dreamseats)": 2015741,
+        "US Customs": 2500000,
+        "FRACHT Freight": 1000000,
+        "Baker Concrete": 750000,
+        "Right Way Plumbing": 750000,
+        "TSI Flooring": 750000,
+        "Glenn Rieder Millwork": 1000000,
+        "A1 Painting": 500000,
+        "Decklight Roofing": 350000,
+        "G-Force Waterproofing": 350000,
+        "VENUR Construction": 1785574,
+        "S&R Steel": 1000000,
+        "Other trades": 2764000
+      },
+      "notes": "Kroll audit scope. Targets pending confirmation from LMTC. Categories: CO clawbacks, VE credits never received, quantity verification, defective work credits, OCIP credits, sales tax recovery, duplicate COs, scope billed across trades."
+    },
+    "soft_costs_summary": {
+      "total_approved_pay": 1058523,
+      "total_on_hold": 1507092,
+      "arq_on_hold_total": "~$1.2M+ across base + add services + reimbursables (Feb/Mar/Apr 2026)",
+      "parker_company_on_hold": 66989,
+      "notes": "ARQ hold is largest single soft cost dispute. Parker Company has invoices 104 days past due."
+    }
+  },
+
+  "live_issues": [
+    {
+      "id": "mfp-001",
+      "title": "ARQ Payment Hold",
+      "category": "Financial / Vendor Dispute",
+      "status": "Open",
+      "priority": "High",
+      "parties": ["ARQ (Arquitectonica)", "MFP Ownership", "Level Up"],
+      "level_up_position": "All ARQ base + add services + reimbursables on hold Feb through Apr 2026. Approved soft cost pay list does not include ARQ. Reason for hold TBD — fill in here.",
+      "financial_exposure": "~$1.507M on hold",
+      "next_step": "Clarify hold reason. Determine whether tied to punch list resolution, dispute, or cashflow. Document position.",
+      "related_docs": ["StadCo_Soft_Cost_Payment_Recommendation_5_22_26.pdf", "ARQ_Agreement_for_AOR_Services__Execution_Copy__FE__.pdf"],
+      "last_updated": "2026-06-04"
+    },
+    {
+      "id": "mfp-002",
+      "title": "Kroll Cost Recovery Audit",
+      "category": "Cost Recovery",
+      "status": "In Progress",
+      "priority": "High",
+      "parties": ["Kroll (analyst)", "Level Up", "Lemartec", "MFP Ownership"],
+      "level_up_position": "Directing audit. Targeting recoverable savings across multiple categories.",
+      "financial_exposure": "$20M+ target recovery",
+      "audit_scope": [
+        "Change order clawbacks",
+        "VE credits never received",
+        "Quantity and unit cost verification",
+        "Defective work credits",
+        "OCIP credits",
+        "Sales tax recovery (target: $5M)",
+        "Duplicate/overlapping COs from addenda",
+        "Scope billed across multiple trades",
+        "US Customs duties review ($2.5M target)",
+        "FRACHT freight audit ($1M target)"
+      ],
+      "timeline": {
+        "kickoff": "Late May 2026",
+        "internal_draft": "Late June 2026",
+        "final_delivery": "2026-06-30"
+      },
+      "next_step": "Internal draft review late June. Final delivery June 30.",
+      "last_updated": "2026-06-04"
+    },
+    {
+      "id": "mfp-003",
+      "title": "Punch List: Tile Installation Deficiency",
+      "category": "Punch List / Deficiency",
+      "status": "Open / Disputed",
+      "priority": "High",
+      "parties": ["Lemartec", "ARQ", "TSI (flooring sub)", "MFP Ownership", "Level Up"],
+      "level_up_position": "Deficiency is contractor responsibility. Pushing for correction, not credits-only resolution. Pushed back against Lemartec closing punch list before full walkthroughs complete.",
+      "financial_exposure": "TBD — credits vs. correction cost",
+      "related_vendors": ["TSI Commercial Floor Covering"],
+      "next_step": "Coordinate walkthrough with ARQ. Document all deficiencies formally. Maintain position that punch list cannot close until full inspection complete.",
+      "last_updated": "2026-06-04"
+    },
+    {
+      "id": "mfp-004",
+      "title": "Punch List: Surface-Mounted Electrical Conduit",
+      "category": "Punch List / Deficiency",
+      "status": "Open / Disputed",
+      "priority": "High",
+      "parties": ["Lemartec", "Miller Electric", "ARQ", "MFP Ownership", "Level Up"],
+      "level_up_position": "Spec required concealed conduit. Surface-mounted installation is a deficiency. Lemartec responsible for correction or credit.",
+      "financial_exposure": "TBD",
+      "next_step": "Document spec reference. Get ARQ confirmation in writing that surface mount does not comply. Issue formal punch item.",
+      "last_updated": "2026-06-04"
+    },
+    {
+      "id": "mfp-005",
+      "title": "HVAC Service Agreement — Hill York (HY)",
+      "category": "Operations / Transition",
+      "status": "Urgent / Pending Signature",
+      "priority": "High",
+      "parties": ["Hill York (HY)", "MFP Ownership / Antonio Torres Roman", "Level Up", "Greg Cuneo"],
+      "level_up_position": "Urgent to execute before HY personnel with institutional system knowledge depart project. Game day standby coverage must be included in contract scope. Construction standby is more expensive than service personnel — need to transition.",
+      "financial_exposure": "Ongoing operational risk if not executed. CEP Plant also needs coverage.",
+      "next_step": "Antonio (Ops) to execute. Confirm scope includes: base service agreement, game day standby, CEP Plant coverage.",
+      "last_updated": "2026-06-04"
+    },
+    {
+      "id": "mfp-006",
+      "title": "Lemartec Indirect Costs — Payment Gap",
+      "category": "Financial",
+      "status": "Open",
+      "priority": "High",
+      "parties": ["Lemartec", "MFP Ownership", "Level Up"],
+      "level_up_position": "Lemartec indirect contract $65.3M total. Work billed $57.3M. Only $25.8M paid. $39.5M outstanding. Confirm future costs only — do not pay historical unless verified.",
+      "financial_exposure": "$39.5M outstanding",
+      "next_step": "LMTC to confirm work in place on all COs and CRBs. Reconcile billed vs. paid gap before further indirect payments.",
+      "last_updated": "2026-06-04"
+    },
+    {
+      "id": "mfp-007",
+      "title": "Day 2 / Owner Requests Log — Active Items",
+      "category": "Owner Directed Changes",
+      "status": "Multiple items in various stages",
+      "priority": "Medium",
+      "parties": ["IMCF Ownership", "Level Up", "Lemartec", "ARQ", "Various subs"],
+      "summary": "60+ active items. Key open items as of 5/28: Office Expansion (underway), West Stack Scupper Gutter (pricing), Press Level Redesign (released to ARQ), Canopy Video Boards (LED boards arrive 7/7), Locker Room modifications (IMCF internal), Bowl cable railing corrections (pending LMT pricing), Big Ass Fans (SBP studying), ADA Loge Boxes (in fabrication), West VIP Entrance pavers (in design).",
+      "cost_responsibility_note": "Items split between MFP cost responsibility and IMCF cost responsibility. Confirm before authorizing.",
+      "next_step": "Continue weekly Day 2 meeting cadence. JW to draft release approval emails for multiple items.",
+      "last_updated": "2026-06-04"
+    },
+    {
+      "id": "mfp-008",
+      "title": "Parker Company — Invoices 104 Days Past Due",
+      "category": "Financial / Vendor",
+      "status": "Open",
+      "priority": "Medium",
+      "parties": ["The Parker Company", "MFP Ownership", "Level Up"],
+      "level_up_position": "Multiple invoices on HOLD since January 2026. Oldest at 104 days past due as of May 2026. Linked to Dreamseats scope.",
+      "financial_exposure": "$67K on hold. $2M target savings against their contract.",
+      "next_step": "Determine hold reason. Evaluate against $2M savings target before releasing.",
+      "last_updated": "2026-06-04"
+    },
+    {
+      "id": "mfp-009",
+      "title": "TCO / Certificate of Occupancy / Insurance",
+      "category": "Closeout",
+      "status": "In Progress",
+      "priority": "High",
+      "parties": ["MFP Ownership", "City of Miami", "Level Up", "ARQ", "Lemartec"],
+      "level_up_position": "TCO obtained for operations. Final CO and insurance closeout ongoing.",
+      "next_step": "Confirm outstanding items required for final CO. Track retainage release triggers.",
+      "retainage_held": "$28.1M stadium direct + $1.4M indirect + additional by package",
+      "last_updated": "2026-06-04"
+    }
+  ],
+
+  "contracts": {
+    "lemartec_trade_contract": {
+      "parties": "Miami Freedom Park LLC (Owner) / Lemartec Corporation (CM as Agent)",
+      "key_clauses": {
+        "payment_terms": "Section 13",
+        "right_to_set_off": "Section 14 — Owner may set off amounts owed against payments due",
+        "defective_work": "Section 22 — Trade Contractor responsible for defective/incomplete work",
+        "termination": "Section 19 — Termination, suspension, or delay provisions",
+        "dispute_resolution": "Section 25 — Choice of law/venue and dispute resolution",
+        "indemnification": "Section 18",
+        "lien_waiver": "Section 16 — Waiver of right to file liens",
+        "time_is_essence": "Section 31",
+        "audit_rights": "Section 9 — Audit rights included"
+      },
+      "notes": "Copy-restricted PDF. 140 pages. Template applies to all trade contractors on project."
+    },
+    "arq_agreement": {
+      "parties": "Miami Freedom Park LLC (Developer) / Arquitectonica International Corp. (AOR)",
+      "execution_date": "July 27, 2023",
+      "key_sections": {
+        "key_persons": "Section 3.9 — Key persons and staffing requirements",
+        "standard_of_care": "Section 3.3",
+        "time_schedule": "Section 3.8 — Time is of the essence",
+        "consultants": "Section 3.11 — AOR's subconsultants"
+      }
+    },
+    "manica_agreement": {
+      "parties": "Miami Freedom Park LLC (Developer) / MANICA Architecture, PA (Design Architect)",
+      "execution_date": "July 27, 2023",
+      "notes": "Separate agreement from AOR. 81 pages."
+    }
+  },
+
+  "playbook_ai_system_prompt": "You are an AI assistant supporting Level Up Project Development on the Miami Freedom Park Stadium project in Miami, Florida. The project is a 25,000-seat MLS stadium for Inter Miami CF, currently in closeout and post-substantial completion phase. Level Up serves as Owner's Representative. The CM is Lemartec Corporation. The Architect of Record is Arquitectonica (ARQ). Key active issues include: punch list disputes (tile deficiency, surface-mounted conduit), a cost recovery audit led by Kroll targeting $20M+ in recoverable savings, ARQ payment hold (~$1.5M), an urgent HVAC service agreement with Hill York, and Lemartec indirect cost reconciliation ($39.5M outstanding). When answering questions, reference actual project stakeholders, known disputes, and Level Up's established positions. Be specific, actionable, and grounded in the MFP context."
+}
