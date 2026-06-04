@@ -105,34 +105,38 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
 .ask-btn button{padding:6px 14px;border-radius:7px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--teal);color:var(--teal);background:transparent;transition:all .15s}
 .ask-btn button:hover{background:var(--teal);color:#fff}
 
-/* ── AI CHAT ── */
-.chat-panel{background:var(--card);border-top:1px solid var(--border);padding:0;position:sticky;bottom:0;z-index:50;box-shadow:0 -4px 20px rgba(0,0,0,.08)}
-.chat-toggle{display:flex;align-items:center;gap:8px;padding:10px 24px;cursor:pointer;font-size:13px;font-weight:500;color:var(--teal);border-bottom:1px solid transparent;transition:all .15s;user-select:none}
-.chat-toggle:hover{background:var(--teal-light)}
-.chat-toggle.open{border-bottom-color:var(--border)}
-.chat-toggle .icon{font-size:16px}
-.chat-body{display:none;flex-direction:column;height:340px}
-.chat-body.open{display:flex}
-.chat-messages{flex:1;overflow-y:auto;padding:16px 24px;display:flex;flex-direction:column;gap:12px}
-.msg{max-width:85%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6}
+/* ── FLOATING CHAT ── */
+#fab{position:fixed;bottom:28px;right:28px;z-index:200;background:var(--teal);color:#fff;border-radius:50px;padding:12px 20px;display:flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.25);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;transition:all .2s;user-select:none;border:none}
+#fab:hover{background:#1d5568;transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.3)}
+#fab-icon{font-size:18px;line-height:1}
+#fab.open #fab-label{display:none}
+#fab.open{padding:12px;border-radius:50%}
+#chat-drawer{position:fixed;bottom:84px;right:28px;z-index:199;width:420px;height:520px;min-width:320px;min-height:300px;max-width:90vw;max-height:85vh;background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.2);display:none;flex-direction:column;overflow:hidden;resize:both}
+#chat-drawer.open{display:flex}
+#chat-drawer.expanded{width:700px;height:75vh;bottom:84px;right:28px}
+.chat-expand-btn{background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:14px;padding:4px 8px;line-height:1;transition:color .15s}
+.chat-expand-btn:hover{color:#fff}
+.chat-drawer-header{background:var(--teal);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.quick-asks{display:flex;flex-wrap:wrap;gap:5px;padding:10px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.quick-ask{padding:4px 10px;border-radius:20px;font-size:11px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
+.quick-ask:hover{border-color:var(--teal);color:var(--teal)}
+.chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:180px;max-height:300px}
+.msg{max-width:88%;padding:10px 13px;border-radius:12px;font-size:13px;line-height:1.55}
 .msg-user{background:var(--teal);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
 .msg-ai{background:var(--teal-light);color:var(--charcoal);align-self:flex-start;border-bottom-left-radius:4px}
 .msg-ai strong{color:var(--teal)}
-.msg-loading{display:flex;gap:4px;align-items:center;padding:12px 16px}
+.msg-loading{display:flex;gap:4px;align-items:center;padding:10px 14px;background:var(--teal-light);border-radius:12px;align-self:flex-start}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);animation:bounce .8s ease-in-out infinite}
 .dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
 @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
-.chat-input-row{display:flex;gap:8px;padding:12px 24px;border-top:1px solid var(--border)}
-.chat-input-row input{flex:1;padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--charcoal);font-family:inherit;font-size:13px;outline:none;transition:border-color .15s}
+.chat-input-row{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--border);flex-shrink:0}
+.chat-input-row input{flex:1;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--charcoal);font-family:inherit;font-size:13px;outline:none;transition:border-color .15s}
 .chat-input-row input:focus{border-color:var(--teal)}
-.chat-input-row button{padding:9px 16px;border-radius:8px;background:var(--teal);color:#fff;border:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;transition:background .15s;white-space:nowrap}
-.chat-input-row button:hover{background:var(--teal-mid)}
+.chat-input-row button{padding:8px 14px;border-radius:8px;background:var(--teal);color:#fff;border:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500}
 .chat-input-row button:disabled{opacity:.5;cursor:default}
-.quick-asks{display:flex;flex-wrap:wrap;gap:6px;padding:8px 24px 0}
-.quick-ask{padding:5px 12px;border-radius:20px;font-size:12px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s}
-.quick-ask:hover{border-color:var(--teal);color:var(--teal)}
+@media(max-width:520px){#chat-drawer{width:calc(100vw - 24px);right:12px}#fab{bottom:16px;right:16px}}
 
-/* ── BOOKMARKS ── */
+/* ── BOOKMARKS ── *//* ── BOOKMARKS ── */
 .bookmark-btn{background:none;border:none;cursor:pointer;padding:4px;color:var(--muted);font-size:16px;transition:color .15s;line-height:1}
 .bookmark-btn:hover,.bookmark-btn.active{color:#E8A838}
 .bookmark-btn.active{color:#E8A838}
@@ -144,8 +148,88 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
 /* ── RESPONSIVE ── */
 @media(max-width:900px){.shell{grid-template-columns:1fr}.sidebar{display:none}.content-area{padding:20px}}
 
+.scope-btn{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:500;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s}
+.scope-btn.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+.scope-btn:hover:not(.active){border-color:var(--teal);color:var(--teal)}
 /* ── HIGHLIGHT ── */
-mark{background:rgba(190,209,198,.4);color:inherit;border-radius:2px;padding:0 2px}
+mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight:600}[data-theme="dark"] mark{background:#B8922A;color:#fff;border-radius:3px;padding:1px 3px;font-weight:600}
+
+/* ── GLOSSARY TOOLTIP ── */
+.gloss{border-bottom:1px dashed var(--teal);cursor:help;color:inherit;position:relative}
+.gloss-tip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--charcoal);color:#fff;font-size:12px;line-height:1.5;padding:8px 12px;border-radius:8px;width:240px;z-index:999;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.3);white-space:normal;font-weight:400}
+.gloss:hover .gloss-tip{display:block}
+[data-theme="dark"] .gloss-tip{background:#E4E8E4;color:#111}
+
+/* ── CHECKLIST ── */
+.checklist-item{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
+.checklist-item:last-child{border-bottom:none}
+.checklist-item input[type=checkbox]{width:16px;height:16px;flex-shrink:0;margin-top:2px;accent-color:var(--teal);cursor:pointer}
+.checklist-item.done span{text-decoration:line-through;color:var(--muted);opacity:.6}
+.checklist-item span{font-size:13px;line-height:1.5}
+.checklist-reset{margin-top:10px;padding:5px 14px;border-radius:7px;font-size:12px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:inherit}
+.checklist-reset:hover{border-color:var(--teal);color:var(--teal)}
+.checklist-progress{height:4px;background:var(--border);border-radius:4px;margin:8px 0;overflow:hidden}
+.checklist-progress-bar{height:100%;background:var(--teal);border-radius:4px;transition:width .3s}
+
+/* ── PHASE GUIDE ── */
+.phase-guide-btn{display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;border-radius:8px;font-size:13px;border:1px solid var(--border);background:transparent;color:var(--charcoal);cursor:pointer;font-family:inherit;margin-bottom:6px;text-align:left;transition:all .15s}
+.phase-guide-btn:hover{background:var(--teal-light);border-color:var(--teal);color:var(--teal)}
+.phase-guide-btn .pg-num{background:var(--teal);color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;font-family:monospace}
+#phase-guide-modal{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5);align-items:center;justify-content:center}
+#phase-guide-modal.open{display:flex}
+.pg-modal-box{background:var(--card);border-radius:16px;width:600px;max-width:95vw;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.pg-modal-header{background:var(--teal);padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.pg-modal-header h3{color:#fff;font-size:16px;font-weight:600;margin:0}
+.pg-modal-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:24px;cursor:pointer;line-height:1;padding:0 4px}
+.pg-modal-body{overflow-y:auto;padding:20px}
+.pg-section-item{padding:10px 12px;border-radius:8px;margin-bottom:6px;border:1px solid var(--border);cursor:pointer;transition:all .15s}
+.pg-section-item:hover{background:var(--teal-light);border-color:var(--teal)}
+.pg-section-item .pg-sec-num{font-size:11px;font-weight:700;background:var(--teal);color:#fff;padding:2px 6px;border-radius:4px;font-family:monospace;margin-right:8px}
+.pg-section-item .pg-sec-title{font-size:13px;font-weight:500}
+.pg-section-item .pg-sec-why{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* ── DECISION TREE ── */
+#decision-modal{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5);align-items:center;justify-content:center}
+#decision-modal.open{display:flex}
+.dt-box{background:var(--card);border-radius:16px;width:560px;max-width:95vw;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.dt-header{background:var(--teal);padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.dt-header h3{color:#fff;font-size:16px;font-weight:600;margin:0}
+.dt-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:24px;cursor:pointer;line-height:1}
+.dt-body{padding:20px;overflow-y:auto;flex:1}
+.dt-question{font-size:15px;font-weight:600;color:var(--charcoal);margin-bottom:16px;line-height:1.4}
+.dt-options{display:flex;flex-direction:column;gap:8px}
+.dt-option{padding:12px 16px;border-radius:10px;border:1px solid var(--border);cursor:pointer;font-size:13px;transition:all .15s;text-align:left;background:transparent;color:var(--charcoal);font-family:inherit;line-height:1.4}
+.dt-option:hover{background:var(--teal-light);border-color:var(--teal);color:var(--teal)}
+.dt-answer{background:var(--teal-light);border:1px solid var(--sage);border-radius:10px;padding:16px;font-size:13px;line-height:1.6;color:var(--charcoal)}
+.dt-answer strong{color:var(--teal)}
+.dt-answer a{color:var(--teal);cursor:pointer;text-decoration:underline}
+.dt-back{margin-top:12px;padding:7px 14px;border-radius:7px;font-size:12px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:inherit}
+.dt-back:hover{border-color:var(--teal);color:var(--teal)}
+.dt-breadcrumb{font-size:11px;color:var(--muted);margin-bottom:12px}
+
+/* ── RECENT SEARCHES ── */
+.search-dropdown{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);z-index:101;overflow:hidden}
+.search-dropdown.open{display:block}
+.search-drop-item{padding:9px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--charcoal);transition:background .1s}
+.search-drop-item:hover{background:var(--teal-light)}
+.search-drop-icon{color:var(--muted);font-size:12px}
+.search-drop-clear{padding:7px 14px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);cursor:pointer;text-align:right}
+.search-drop-clear:hover{color:var(--teal)}
+
+/* ── KEYBOARD SHORTCUT HINT ── */
+.kbd-hint{display:inline-block;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:11px;color:var(--muted);font-family:monospace}
+
+/* ── RELATED SECTIONS ── */
+.related-sections{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.related-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.related-chips{display:flex;flex-wrap:wrap;gap:6px}
+.related-chip{padding:4px 12px;border-radius:20px;font-size:12px;background:var(--teal-light);color:var(--teal);cursor:pointer;border:1px solid transparent;transition:all .15s;font-weight:500}
+.related-chip:hover{background:var(--teal);color:#fff}
+
+/* ── PHASE GUIDE SIDEBAR BUTTON ── */
+.sidebar-action-btn{display:flex;align-items:center;gap:8px;width:calc(100% - 24px);margin:0 12px 6px;padding:9px 12px;border-radius:8px;font-size:13px;border:1px solid var(--border);background:var(--bg);color:var(--charcoal);cursor:pointer;font-family:inherit;text-align:left;transition:all .15s;font-weight:500}
+.sidebar-action-btn:hover{background:var(--teal-light);border-color:var(--teal);color:var(--teal)}
+.sidebar-action-btn .btn-icon{font-size:16px}
 </style>
 </head>
 <body>
@@ -161,7 +245,8 @@ mark{background:rgba(190,209,198,.4);color:inherit;border-radius:2px;padding:0 2
   </a>
   <div class="topbar-search">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input type="text" id="search-input" placeholder="Search the playbook…" autocomplete="off">
+    <input type="text" id="search-input" placeholder="Search the playbook… (press / to focus)" autocomplete="off">
+    <div class="search-dropdown" id="search-dropdown"></div>
   </div>
   <div class="topbar-actions">
     <button class="btn btn-ghost" onclick="showBookmarks()">⭐ Saved</button>
@@ -172,6 +257,15 @@ mark{background:rgba(190,209,198,.4);color:inherit;border-radius:2px;padding:0 2
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
+  <div class="sidebar-section" style="padding:12px 0 4px">
+    <button class="sidebar-action-btn" onclick="openPhaseGuide()">
+      <span class="btn-icon">🗺</span> Phase Reading Guide
+    </button>
+    <button class="sidebar-action-btn" onclick="openDecisionTree()">
+      <span class="btn-icon">🔀</span> What Do I Do?
+    </button>
+  </div>
+  <div class="divider"></div>
   <div class="sidebar-section">
     <div class="sidebar-heading">Project Phase</div>
     <div class="phase-pills" id="phase-pills"></div>
@@ -191,34 +285,19 @@ mark{background:rgba(190,209,198,.4);color:inherit;border-radius:2px;padding:0 2
 <!-- MAIN -->
 <main class="main">
   <div class="content-area" id="content-area">
-    <div class="results-meta" id="results-meta"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+  <div class="results-meta" id="results-meta"></div>
+  <div id="search-scope-row" style="display:none;gap:6px;display:flex">
+    <span style="font-size:12px;color:var(--muted);margin-right:4px;line-height:28px">Search in:</span>
+    <button class="scope-btn active" id="scope-title" onclick="setScope('title')">Titles</button>
+    <button class="scope-btn" id="scope-subs" onclick="setScope('subs')">+ Subsections</button>
+    <button class="scope-btn active" id="scope-all" onclick="setScope('all')">+ Full Content</button>
+  </div>
+</div>
     <div id="sections-container"></div>
   </div>
 
-  <!-- AI CHAT PANEL -->
-  <div class="chat-panel">
-    <div class="chat-toggle" id="chat-toggle" onclick="toggleChat()">
-      <span class="icon">✦</span>
-      <span>Ask the Playbook AI</span>
-      <span style="margin-left:auto;font-size:11px;color:var(--muted);font-weight:400">Powered by Claude</span>
-      <span id="chat-caret" style="margin-left:4px">▲</span>
-    </div>
-    <div class="chat-body" id="chat-body">
-      <div class="quick-asks" id="quick-asks">
-        <button class="quick-ask" onclick="askQuestion('What should I do on Day 1 of a new project?')">Day 1 checklist</button>
-        <button class="quick-ask" onclick="askQuestion('How do I handle a DAS scope in design development?')">DAS in design dev</button>
-        <button class="quick-ask" onclick="askQuestion('When should we start VE and what are the best opportunities?')">VE timing & priorities</button>
-        <button class="quick-ask" onclick="askQuestion('How do we coordinate with the sponsorship team on procurement?')">Sponsorship coordination</button>
-        <button class="quick-ask" onclick="askQuestion('What goes in a monthly draw package?')">Draw package</button>
-        <button class="quick-ask" onclick="askQuestion('What are the biggest schedule risks on sports projects?')">Schedule risks</button>
-      </div>
-      <div class="chat-messages" id="chat-messages"></div>
-      <div class="chat-input-row">
-        <input type="text" id="chat-input" placeholder="Ask anything about the Level Up playbook…" onkeydown="if(event.key==='Enter')sendChat()">
-        <button id="chat-send-btn" onclick="sendChat()">Ask ✦</button>
-      </div>
-    </div>
-  </div>
+
 </main>
 
 </div>
@@ -234,7 +313,7 @@ let activeTopic = null;
 let activeSearch = '';
 let bookmarks = new Set();
 let chatHistory = [];
-let chatOpen = true;
+let chatOpen = false;
 
 // ── STORAGE ──
 async function loadBookmarks() {
@@ -256,7 +335,754 @@ async function saveChat() {
   try { await window.storage.set('lu_chat', JSON.stringify(chatHistory.slice(-20))); } catch(e) {}
 }
 
+// ══════════════════════════════════════════════════════════════
+// GLOSSARY
+// ══════════════════════════════════════════════════════════════
+const GLOSSARY = {
+  'GMP': 'Guaranteed Maximum Price — the CM/GC contractually guarantees the project will not exceed this cost.',
+  'GC': 'General Contractor — the primary construction contractor responsible for coordinating all trades.',
+  'CM': 'Construction Manager — manages the construction process, often in a CM at Risk (CMAR) arrangement.',
+  'CMAR': 'Construction Manager at Risk — CM provides preconstruction services then guarantees a maximum price.',
+  'OAC': 'Owner-Architect-Contractor meeting — the primary weekly project coordination meeting.',
+  'TCO': 'Temporary Certificate of Occupancy — allows the building to be occupied before all punch list items are complete.',
+  'CO': 'Certificate of Occupancy — official approval from the AHJ that the building is safe for occupancy.',
+  'AHJ': 'Authority Having Jurisdiction — the building department, fire marshal, or other regulatory body that approves permits and inspections.',
+  'RFI': 'Request for Information — formal question from contractor to design team asking for clarification.',
+  'PCO': 'Potential Change Order — a change event that may result in a contract change order.',
+  'DAS': 'Distributed Antenna System — in-building wireless network that distributes cellular signal from all carriers.',
+  'FF&E': 'Furniture, Fixtures and Equipment — movable items not permanently attached to the building structure.',
+  'OS&E': 'Operating Supplies and Equipment — consumable items needed for day-one operations.',
+  'OFCI': 'Owner-Furnished Contractor-Installed — owner buys the item, contractor installs it.',
+  'OFOI': 'Owner-Furnished Owner-Installed — owner is responsible for both procurement and installation.',
+  'RACI': 'Responsible, Accountable, Consulted, Informed — a matrix defining decision-making roles.',
+  'CxA': 'Commissioning Agent — independent party who verifies all building systems function per design intent.',
+  'VE': 'Value Engineering — systematic process to reduce cost while maintaining function and quality.',
+  'CSI': 'Construction Specifications Institute — organization that defines the standard format for construction specifications.',
+  'MEP': 'Mechanical, Electrical, and Plumbing — the building systems consultants and their scopes.',
+  'POS': 'Point of Sale — the hardware and software system used for concession and retail transactions.',
+  'CNS': 'Converged Network System — the IP network backbone over which all technology systems communicate.',
+  'SOV': 'Schedule of Values — breakdown of contract price by line item used to track and certify pay applications.',
+  'NTP': 'Notice to Proceed — formal authorization for the contractor to begin work.',
+  'LOI': 'Letter of Intent — preliminary agreement to move forward with a contract before final execution.',
+  'AV': 'Audio-Visual — the systems covering speakers, displays, control systems, and related technology.',
+  'BMS': 'Building Management System — centralized system controlling HVAC, lighting, and other building operations.',
+  'LEED': 'Leadership in Energy and Environmental Design — green building rating system.',
+  'SD': 'Schematic Design — first formal design phase where building massing and program are established.',
+  'DD': 'Design Development — second design phase where systems and specifications are developed in detail.',
+  'CDs': 'Construction Documents — final design phase producing the full permit and construction drawing set.',
+};
+
+function applyGlossary(text) {
+  if (!text) return text;
+  let result = text;
+  for (const [term, def] of Object.entries(GLOSSARY)) {
+    const re = new RegExp(`\\b(${term})\\b`, 'g');
+    result = result.replace(re, `<span class="gloss">$1<span class="gloss-tip">${def}</span></span>`);
+  }
+  return result;
+}
+
+// ══════════════════════════════════════════════════════════════
+// CHECKLISTS
+// ══════════════════════════════════════════════════════════════
+const CHECKLISTS = {
+  '4': {
+    label: 'Day 1 Mobilization Checklist',
+    items: [
+      'Issue formal document request to owner and all consultants',
+      'Obtain all executed contracts (design, CM/GC, specialty consultants)',
+      'Obtain current project budget in most detailed available form',
+      'Obtain current project schedule and contractor baseline',
+      'Obtain all RFIs issued to date and responses',
+      'Obtain all executed change orders and change directives',
+      'Obtain meeting minutes from last 6 months',
+      'Set up SharePoint folder structure per standard 14-folder template',
+      'Configure Procore: companies, contacts, drawings, RFI/submittal modules',
+      'Set up Smartsheet: action item log, risk register, procurement log',
+      'Schedule kickoff meeting with owner executive team',
+      'Schedule first OAC meeting and distribute agenda template',
+      'Identify all AHJs and confirm permit status',
+      'Review budget vs. current estimate — flag gaps',
+      'Brief Level Up principal on project status within 5 business days'
+    ]
+  },
+  '22': {
+    label: 'Punch List Closeout Checklist',
+    items: [
+      'Conduct Level Up independent punch list walk before contractor submits',
+      'All punch list items logged in Procore with photos',
+      'Each item has assigned responsible contractor and due date',
+      'Tile installation deficiencies documented with spec reference',
+      'Surface-mounted conduit vs. concealed spec reviewed and documented',
+      'Architect (ARQ) sign-off on all architectural punch items',
+      'CM/GC confirmation that all items are assigned to correct subcontractor',
+      'Weekly punch list progress report issued',
+      'Credit vs. correction decisions documented and owner-approved',
+      'TCO conditions log updated — all items tracked to resolution',
+      'Final CO application submitted only after all TCO conditions resolved',
+      'Retainage release request prepared after final CO received',
+      'Final lien waivers from all subcontractors obtained',
+      'O&M manuals accepted and filed in SharePoint'
+    ]
+  },
+  '20': {
+    label: 'First Event Readiness Checklist',
+    items: [
+      'Full event simulation completed with all operational systems active',
+      'Access control credential load test at full venue capacity',
+      'POS system end-to-end test with actual payment processing',
+      'DAS carrier acceptance testing complete for all carriers',
+      'Scoreboard and replay system tested with broadcast feed',
+      'Wi-Fi throughput tested at simulated full occupancy',
+      'HVAC systems commissioned and event-day setpoints confirmed',
+      'Sports lighting photometric test completed and league-approved',
+      'Life safety systems (fire alarm, sprinkler) fully commissioned',
+      'Security camera coverage confirmed across all areas',
+      'F&B operator walkthrough — all equipment operational',
+      'Emergency evacuation drill completed',
+      'ADA accessible routes confirmed clear and operational',
+      'Parking and transportation plan tested',
+      'Media/broadcast positions confirmed with league technical staff',
+      'Staff training complete for all operational departments'
+    ]
+  },
+  '28': {
+    label: 'Monthly Draw Package Checklist',
+    items: [
+      'Contractor pay application received and date-stamped',
+      'SOV line items reconciled against previous period',
+      'Stored materials documentation included and verified',
+      'Conditional lien waivers from contractor received',
+      'Unconditional lien waivers from prior period received',
+      'Level Up field verification of percent complete complete',
+      'Level Up pay application review form signed',
+      'Stored materials on-site vs. off-site documented',
+      'All soft cost invoices collected and categorized',
+      'Budget update prepared and reconciled',
+      'Contingency log updated',
+      'Draw package cover letter prepared',
+      'Draw submitted to owner/lender by Day 15'
+    ]
+  }
+};
+
+let checklistState = {};
+
+async function loadChecklistState() {
+  try {
+    const r = await window.storage.get('lu_checklists');
+    if (r && r.value) checklistState = JSON.parse(r.value);
+  } catch(e) {}
+}
+
+async function saveChecklistState() {
+  try { await window.storage.set('lu_checklists', JSON.stringify(checklistState)); } catch(e) {}
+}
+
+function renderChecklist(secNum) {
+  const cl = CHECKLISTS[secNum];
+  if (!cl) return '';
+  const state = checklistState[secNum] || {};
+  const done = cl.items.filter((_, i) => state[i]).length;
+  const pct = Math.round((done / cl.items.length) * 100);
+  
+  return `<div style="margin:16px 0;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <strong style="font-size:13px;color:var(--teal)">${cl.label}</strong>
+      <span style="font-size:12px;color:var(--muted)">${done}/${cl.items.length} complete</span>
+    </div>
+    <div class="checklist-progress"><div class="checklist-progress-bar" style="width:${pct}%"></div></div>
+    <div style="margin-top:10px">
+      ${cl.items.map((item, i) => `
+        <div class="checklist-item ${state[i] ? 'done' : ''}" onclick="toggleCheck('${secNum}',${i})">
+          <input type="checkbox" ${state[i] ? 'checked' : ''} onclick="event.stopPropagation();toggleCheck('${secNum}',${i})">
+          <span>${item}</span>
+        </div>`).join('')}
+    </div>
+    <button class="checklist-reset" onclick="resetChecklist('${secNum}')">Reset checklist</button>
+  </div>`;
+}
+
+async function toggleCheck(secNum, idx) {
+  if (!checklistState[secNum]) checklistState[secNum] = {};
+  checklistState[secNum][idx] = !checklistState[secNum][idx];
+  await saveChecklistState();
+  // Re-render just the checklist portion
+  const container = document.getElementById('cl-' + secNum);
+  if (container) container.innerHTML = renderChecklist(secNum);
+}
+
+async function resetChecklist(secNum) {
+  checklistState[secNum] = {};
+  await saveChecklistState();
+  const container = document.getElementById('cl-' + secNum);
+  if (container) container.innerHTML = renderChecklist(secNum);
+}
+
+// ══════════════════════════════════════════════════════════════
+// RELATED SECTIONS MAP
+// ══════════════════════════════════════════════════════════════
+const RELATED = {
+  '10': ['9','11','16','28'],
+  '11': ['10','9','3','29'],
+  '12': ['13','10','32','35'],
+  '13': ['12','14','15','17'],
+  '14': ['13','15','22','20'],
+  '15': ['16','22','9','26'],
+  '16': ['9','10','15','27'],
+  '17': ['34','19','18','12'],
+  '19': ['34','17','21','25'],
+  '20': ['21','22','18','17'],
+  '21': ['20','22','23','14'],
+  '22': ['21','23','14','28'],
+  '23': ['22','21','10','24'],
+  '34': ['17','19','12','32'],
+  '35': ['10','16','36','12'],
+  '36': ['35','12','32','17'],
+  '8':  ['7','24','26','5'],
+  '27': ['9','10','29','16'],
+};
+
+function renderRelated(secNum) {
+  const related = RELATED[secNum];
+  if (!related) return '';
+  const chips = related.map(num => {
+    const sec = KB.find(s => s.num === num);
+    if (!sec) return '';
+    return `<span class="related-chip" onclick="jumpTo('${num}')" title="${sec.title}">§${num}: ${sec.title.replace('SECTION '+num+': ','').substring(0,30)}${sec.title.length > 40 ? '…' : ''}</span>`;
+  }).filter(Boolean).join('');
+  if (!chips) return '';
+  return `<div class="related-sections"><div class="related-title">Related Sections</div><div class="related-chips">${chips}</div></div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// PHASE READING GUIDE
+// ══════════════════════════════════════════════════════════════
+const PHASE_GUIDE = {
+  'Pre-Development': {
+    icon: '🏗',
+    desc: 'You are just getting started. Focus on mobilization, governance, and getting the team aligned.',
+    sections: [
+      { num: 'DC', why: 'Set up your document control system on Day 1' },
+      { num: '4', why: 'Follow the Day 1 mobilization plan immediately' },
+      { num: '5', why: 'Establish governance and decision-making authority' },
+      { num: '6', why: 'Map all stakeholders and set communication expectations' },
+      { num: '9', why: 'Stand up project controls — budget, schedule, risk' },
+      { num: '32', why: 'Review the procurement timeline — some items start NOW' },
+      { num: '27', why: 'Build the initial risk register' },
+      { num: '33', why: 'Identify all utility and district coordination requirements' },
+    ]
+  },
+  'Schematic Design': {
+    icon: '✏️',
+    desc: 'Design is taking shape. Push for program compliance, engage long-lead vendors, and do your first VE pass.',
+    sections: [
+      { num: '13', why: 'Manage the design team — SD deliverables and review' },
+      { num: '35', why: 'Phase Gate 1 VE — highest flexibility, act now' },
+      { num: '32', why: 'Scoreboard and seating LOIs should be in flight' },
+      { num: '17', why: 'Sports specialty workstreams need early decisions' },
+      { num: '10', why: 'Validate budget against SD estimate' },
+      { num: '36', why: 'Start sponsorship spec review — identify partnership opportunities' },
+      { num: '12', why: 'Evaluate delivery method and begin CM/GC procurement' },
+    ]
+  },
+  'Design Development': {
+    icon: '📐',
+    desc: 'Systems are being defined. Last chance for major scope changes. Operators must be at the table.',
+    sections: [
+      { num: '13', why: 'DD design review — program, budget, league standards' },
+      { num: '35', why: 'Phase Gate 2 VE — run a formal workshop if gap >5%' },
+      { num: '34', why: 'DAS, CNS, F&B, scoreboard — deep dive coordination' },
+      { num: '19', why: 'Technology consultant must finalize network architecture' },
+      { num: '20', why: 'Engage operations team NOW — not after CDs' },
+      { num: '18', why: 'FF&E procurement plan should be started' },
+      { num: '14', why: 'Pre-application meetings with AHJ — do not wait' },
+      { num: '36', why: 'Bidder-partner sequencing — identify partnership-eligible packages' },
+    ]
+  },
+  'CDs & Bid': {
+    icon: '📋',
+    desc: 'Documents are being finalized and bid out. Procurement integrity and schedule are the priorities.',
+    sections: [
+      { num: '12', why: 'Manage the bid process — RFP, interview, selection' },
+      { num: '35', why: 'Phase Gate 3 — GMP reconciliation VE as bids come in' },
+      { num: '14', why: 'Permit submission — confirm all AHJ comments are resolved' },
+      { num: '32', why: 'All long-lead items should be under contract by now' },
+      { num: '36', why: 'Post-bid: open partnership conversations before contract execution' },
+      { num: '10', why: 'GMP reconciliation — line by line against the budget' },
+      { num: '27', why: 'Update risk register — construction risks are now primary' },
+    ]
+  },
+  'Construction': {
+    icon: '🔨',
+    desc: 'Build phase. Field oversight, change management, and schedule recovery are your daily work.',
+    sections: [
+      { num: '15', why: 'Field oversight protocol — minimum 3 days/week on site' },
+      { num: '16', why: 'Every PCO gets reviewed the same way — every time' },
+      { num: '11', why: 'Schedule management — protect the event opening date' },
+      { num: '10', why: 'Monthly draw package review and cost-to-complete forecast' },
+      { num: '21', why: 'Commissioning must start before construction is complete' },
+      { num: '20', why: 'Operations readiness workstreams running in parallel' },
+      { num: '34', why: 'Specialty scope coordination — DAS, scoreboard, seating' },
+      { num: '24', why: 'Weekly and monthly reporting must be consistent' },
+    ]
+  },
+  'Closeout': {
+    icon: '✅',
+    desc: 'Finishing strong. Punch list, CO, retainage, and turnover are all happening simultaneously.',
+    sections: [
+      { num: '22', why: 'Punch list management — systematic, documented, enforced' },
+      { num: '14', why: 'CO and TCO process — confirm all conditions are tracked' },
+      { num: '21', why: 'Systems commissioning and O&M turnover' },
+      { num: '23', why: 'Closeout plan — as-builts, warranties, final budget' },
+      { num: '18', why: 'FF&E installation and inventory' },
+      { num: '28', why: 'Final draw package checklist' },
+      { num: '10', why: 'Final budget reconciliation and retainage release' },
+    ]
+  },
+  'Opening': {
+    icon: '🎉',
+    desc: 'Game day. Operations readiness, event simulation, and first event execution.',
+    sections: [
+      { num: '20', why: 'First event readiness checklist — run it item by item' },
+      { num: '34', why: 'All specialty systems must be commissioned and tested' },
+      { num: '21', why: 'Confirm all systems are in warranty and O&M is transferred' },
+      { num: '29', why: 'Know the common problems — be ready with Level Up responses' },
+    ]
+  }
+};
+
+function openPhaseGuide() {
+  const modal = document.getElementById('phase-guide-modal');
+  const body = document.getElementById('pg-modal-body');
+  
+  body.innerHTML = Object.entries(PHASE_GUIDE).map(([phase, data]) => `
+    <div style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:8px;border-bottom:2px solid var(--sage)">
+        <span style="font-size:20px">${data.icon}</span>
+        <strong style="font-size:15px;color:var(--teal)">${phase}</strong>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px">${data.desc}</p>
+      ${data.sections.map(s => {
+        const sec = KB.find(k => k.num === s.num);
+        return `<div class="pg-section-item" onclick="closePhaseGuide();jumpTo('${s.num}')">
+          <span class="pg-sec-num">${s.num}</span>
+          <span class="pg-sec-title">${sec ? sec.title.replace('SECTION '+s.num+': ','') : s.num}</span>
+          <div class="pg-sec-why">${s.why}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `).join('');
+  
+  modal.classList.add('open');
+}
+
+function closePhaseGuide() {
+  document.getElementById('phase-guide-modal').classList.remove('open');
+}
+
+// ══════════════════════════════════════════════════════════════
+// DECISION TREE
+// ══════════════════════════════════════════════════════════════
+const DT_TREE = {
+  root: {
+    q: "What's the situation?",
+    opts: [
+      { label: '💰 Budget or cost issue', next: 'budget' },
+      { label: '📅 Schedule concern', next: 'schedule' },
+      { label: '🔨 Contractor problem', next: 'contractor' },
+      { label: '📋 Change order received', next: 'co' },
+      { label: '🏗 Design issue', next: 'design' },
+      { label: '🔌 Specialty scope question', next: 'specialty' },
+      { label: '📄 Permit or AHJ issue', next: 'ahj' },
+      { label: '🏁 Getting ready to open', next: 'opening' },
+    ]
+  },
+  budget: {
+    q: "What kind of budget issue?",
+    opts: [
+      { label: 'Budget is over the target', next: 'budget_over' },
+      { label: 'GMP came in higher than expected', next: 'budget_gmp' },
+      { label: 'Contingency is being depleted', next: 'budget_contingency' },
+      { label: 'Need to find savings', next: 'budget_ve' },
+    ]
+  },
+  budget_over: {
+    a: `<strong>Budget over target — what to do now:</strong><br><br>
+1. Prepare a gap analysis (current estimate vs. approved budget, line by line)<br>
+2. Present the owner with a menu of options: VE opportunities, scope reductions, alternate systems, phasing, additional funding<br>
+3. Never present a gap without options — the owner needs to make a decision, not just receive bad news<br><br>
+See <a onclick="closeDecisionTree();jumpTo('10')">§10 Budget Management</a> and <a onclick="closeDecisionTree();jumpTo('35')">§35 Value Engineering</a> for detailed procedures.`,
+    secs: ['10', '35', '29']
+  },
+  budget_gmp: {
+    a: `<strong>GMP over estimate — Phase Gate 3 VE:</strong><br><br>
+When the GMP comes in high, focus VE on trade package alternates — not full redesigns. Work with the CM/GC to identify: alternate products within spec, scope clarifications, and items that can be deferred.<br><br>
+Also check whether any high-cost items are partnership candidates before cutting them. See <a onclick="closeDecisionTree();jumpTo('35')">§35 VE Procedures</a> §35.5 and <a onclick="closeDecisionTree();jumpTo('36')">§36 Sponsorship Coordination</a>.`,
+    secs: ['35', '36', '10']
+  },
+  budget_contingency: {
+    a: `<strong>Contingency depletion:</strong><br><br>
+A 25% depletion of any contingency tier triggers a mandatory owner briefing. Present: what has been drawn, why, what is remaining, and the projected remaining exposure.<br><br>
+See <a onclick="closeDecisionTree();jumpTo('10')">§10.3</a> for contingency strategy and tier definitions. Log every draw in the contingency log.`,
+    secs: ['10', '27', '9']
+  },
+  budget_ve: {
+    a: `<strong>Looking for savings — start with Tier 1:</strong><br><br>
+Best opportunities in order: structural system efficiency, building envelope simplification, MEP rightsizing, back-of-house finishes, site work.<br><br>
+Before cutting anything, check if it's a partnership candidate. See <a onclick="closeDecisionTree();jumpTo('35')">§35.4 VE Opportunities</a> and <a onclick="closeDecisionTree();jumpTo('35')">§35.5 VE-to-Partnership Conversion</a>.`,
+    secs: ['35', '36', '10']
+  },
+  schedule: {
+    q: "What's the schedule concern?",
+    opts: [
+      { label: 'Design is running behind', next: 'sched_design' },
+      { label: 'Construction is behind schedule', next: 'sched_const' },
+      { label: 'Event opening date is at risk', next: 'sched_event' },
+      { label: 'A subcontractor is causing delays', next: 'sched_sub' },
+    ]
+  },
+  sched_design: {
+    a: `<strong>Design behind schedule:</strong><br><br>
+Issue formal written notice to the design team within 5 business days. Request a written recovery plan with specific dates. Track weekly. Escalate to design firm principal if recovery plan is not being executed.<br><br>
+See <a onclick="closeDecisionTree();jumpTo('11')">§11 Schedule Management</a> and <a onclick="closeDecisionTree();jumpTo('29')">§29 Common Problems</a> §29.1.`,
+    secs: ['11', '29', '7']
+  },
+  sched_const: {
+    a: `<strong>Construction behind schedule:</strong><br><br>
+Require a written recovery plan from the CM/GC within 5 business days. The plan must show how lost time is recovered — not just a revised end date. Review the critical path: is this activity truly on the critical path, or does it have float?<br><br>
+See <a onclick="closeDecisionTree();jumpTo('11')">§11.4 Recovery Planning</a>.`,
+    secs: ['11', '15', '9']
+  },
+  sched_event: {
+    a: `<strong>Event opening date at risk:</strong><br><br>
+This is a Level 1 escalation. Immediately brief the Level Up principal and owner executive. Prepare a gap analysis: days needed vs. days available, critical path items that must compress, and cost of acceleration.<br><br>
+See <a onclick="closeDecisionTree();jumpTo('11')">§11.5 Aligning to Event Deadline</a> and <a onclick="closeDecisionTree();jumpTo('29')">§29.7</a>.`,
+    secs: ['11', '29', '20']
+  },
+  sched_sub: {
+    a: `<strong>Subcontractor causing delays:</strong><br><br>
+This is the CM/GC's contractual responsibility — push them to manage it. Document all delay events with dates. The CM/GC must issue cure notices to performing subs. Level Up tracks and reports delay events but does not direct subcontractors directly.<br><br>
+See <a onclick="closeDecisionTree();jumpTo('15')">§15 Field Oversight</a>.`,
+    secs: ['15', '11', '16']
+  },
+  contractor: {
+    q: "What's the contractor issue?",
+    opts: [
+      { label: 'Quality deficiency observed', next: 'cont_quality' },
+      { label: 'Pay application seems inflated', next: 'cont_payapp' },
+      { label: 'Contractor is not cooperating', next: 'cont_coop' },
+      { label: 'Buyout is moving too slowly', next: 'cont_buyout' },
+    ]
+  },
+  cont_quality: {
+    a: `<strong>Quality deficiency:</strong><br><br>
+Document with photos in the field deficiency log immediately. Issue a formal written deficiency notice within 24 hours. Define the required corrective action, the spec reference, and the deadline. Never verbal-only on quality issues.<br><br>
+See <a onclick="closeDecisionTree();jumpTo('15')">§15.2-15.3 Quality Observation and Deficiency Tracking</a>.`,
+    secs: ['15', '22', '7']
+  },
+  cont_payapp: {
+    a: `<strong>Pay application review:</strong><br><br>
+Compare claimed percent complete against your independent field observation. Request documentation for stored materials. Verify lien waivers are current. Never certify more than what you can independently verify.<br><br>
+See <a onclick="closeDecisionTree();jumpTo('10')">§10.6 Pay Application Review</a> and <a onclick="closeDecisionTree();jumpTo('28')">§28 Draw Checklist</a>.`,
+    secs: ['10', '28', '15']
+  },
+  cont_buyout: {
+    a: `<strong>Slow buyout:</strong><br><br>
+Hold a weekly buyout status meeting with CM/GC. Any package more than 2 weeks behind triggers a written explanation from the CM/GC. Unbid packages create GMP exposure — track every one.<br><br>
+See <a onclick="closeDecisionTree();jumpTo('12')">§12.4 Buyout Tracking</a> and <a onclick="closeDecisionTree();jumpTo('29')">§29.3</a>.`,
+    secs: ['12', '29', '10']
+  },
+  co: {
+    q: "What kind of change order situation?",
+    opts: [
+      { label: 'Reviewing a PCO from the contractor', next: 'co_review' },
+      { label: 'Owner wants to add scope', next: 'co_owner' },
+      { label: 'Contractor claims a design error caused extra cost', next: 'co_error' },
+    ]
+  },
+  co_review: {
+    a: `<strong>PCO review — check four things in order:</strong><br><br>
+1. <strong>Entitlement:</strong> Is the contractor contractually entitled to this change?<br>
+2. <strong>Scope:</strong> Is the described scope accurate and complete?<br>
+3. <strong>Pricing:</strong> Are labor hours and materials reasonable and verifiable?<br>
+4. <strong>Schedule:</strong> Is claimed schedule impact on the critical path?<br><br>
+See <a onclick="closeDecisionTree();jumpTo('16')">§16 Change Management Playbook</a> for the full review process.`,
+    secs: ['16', '10', '9']
+  },
+  co_owner: {
+    a: `<strong>Owner-directed scope addition:</strong><br><br>
+Before the owner directs any additional scope: get a rough order of magnitude cost from the CM/GC, confirm budget availability, and get written owner direction. Never instruct the contractor to proceed on verbal direction alone.<br><br>
+See <a onclick="closeDecisionTree();jumpTo('16')">§16.4 Preventing Unauthorized Work</a>.`,
+    secs: ['16', '5', '7']
+  },
+  co_error: {
+    a: `<strong>Design error change order:</strong><br><br>
+Design errors are the architect's liability, not the owner's. Document the discrepancy between drawings and field conditions. The architect must review and issue a clarification or correction. Cost responsibility depends on the contract — typically design errors are A/E liability.<br><br>
+See <a onclick="closeDecisionTree();jumpTo('16')">§16.5 Claims Avoidance</a>.`,
+    secs: ['16', '13', '7']
+  },
+  design: {
+    q: "What's the design issue?",
+    opts: [
+      { label: 'Design does not match the program', next: 'des_program' },
+      { label: 'Spec question on a specialty scope', next: 'specialty' },
+      { label: 'League standards conflict', next: 'des_league' },
+    ]
+  },
+  des_program: {
+    a: `<strong>Program compliance issue:</strong><br><br>
+Issue a formal design review comment requiring the architect to revise. Reference the program document or owner brief. Every comment needs a specific resolution, not just acknowledgment.<br><br>
+See <a onclick="closeDecisionTree();jumpTo('13')">§13.3 Design Deliverable Reviews</a>.`,
+    secs: ['13', '5', '7']
+  },
+  des_league: {
+    a: `<strong>League standards conflict:</strong><br><br>
+League standards are non-negotiable. Identify the specific standard, the current design non-compliance, and the required modification. Escalate to the owner — they manage the franchise relationship with the league.<br><br>
+See <a onclick="closeDecisionTree();jumpTo('13')">§13.5 League Standards Coordination</a>.`,
+    secs: ['13', '17', '6']
+  },
+  specialty: {
+    q: "Which specialty scope?",
+    opts: [
+      { label: 'DAS / Cellular', next: 'spec_das' },
+      { label: 'Scoreboard / LED', next: 'spec_score' },
+      { label: 'F&B / Concessionaire', next: 'spec_fb' },
+      { label: 'Access Control / Ticketing', next: 'spec_ac' },
+      { label: 'Playing Surface', next: 'spec_turf' },
+    ]
+  },
+  spec_das: {
+    a: `<strong>DAS — key decision points:</strong><br><br>
+First decide your procurement model: Carrier-Direct, Neutral Host (Boldyn, ExteNet), or Owner-Funded. Neutral host is most common for major venues. Critical: build 6-12 weeks for carrier acceptance testing into the schedule — this is after installation.<br><br>
+See <a onclick="closeDecisionTree();jumpTo('34')">§34 DAS Deep Dive</a> for full procurement, coordination, and watch items.`,
+    secs: ['34', '32', '19']
+  },
+  spec_score: {
+    a: `<strong>Scoreboard / LED — order NOW:</strong><br><br>
+If you haven't ordered yet, check the schedule immediately. Lead time is 12-24 months. The structural interface drawings must be in the structural engineer's hands before the roof is designed. Confirm pixel pitch meets league broadcast standards.<br><br>
+See <a onclick="closeDecisionTree();jumpTo('34')">§34 Scoreboard Deep Dive</a>.`,
+    secs: ['34', '32', '17']
+  },
+  spec_fb: {
+    a: `<strong>F&B / Concessionaire:</strong><br><br>
+If F&B operator is not engaged by Design Development, you will have kitchen redesigns, POS retrofits, and health department delays. Engage now. Coordinate pouring rights with naming rights category exclusions before either contract is signed.<br><br>
+See <a onclick="closeDecisionTree();jumpTo('34')">§34 F&B Deep Dive</a> and <a onclick="closeDecisionTree();jumpTo('36')">§36.6 Pouring Rights</a>.`,
+    secs: ['34', '36', '32']
+  },
+  spec_ac: {
+    a: `<strong>Access Control / Ticketing:</strong><br><br>
+Confirm your access control system is certified for integration with your ticketing platform BEFORE procurement. Not all systems integrate. Run credential load testing at full venue capacity before opening — not small scale.<br><br>
+See <a onclick="closeDecisionTree();jumpTo('34')">§34 Access Control Deep Dive</a>.`,
+    secs: ['34', '19', '20']
+  },
+  spec_turf: {
+    a: `<strong>Playing Surface:</strong><br><br>
+Natural turf: allow 6-12 months grow-in time before first event — build this into the schedule. Synthetic: G-Max and HIC testing required before any sport is played. Confirm field drainage is civil-engineered before slab is poured.<br><br>
+See <a onclick="closeDecisionTree();jumpTo('34')">§34 Playing Surface Deep Dive</a>.`,
+    secs: ['34', '17', '21']
+  },
+  ahj: {
+    q: "What's the permit or AHJ issue?",
+    opts: [
+      { label: 'Permit is taking too long', next: 'ahj_delay' },
+      { label: 'Failed inspection', next: 'ahj_fail' },
+      { label: 'TCO conditions holding up occupancy', next: 'ahj_tco' },
+    ]
+  },
+  ahj_delay: {
+    a: `<strong>Permit delay:</strong><br><br>
+Request a meeting with the plan reviewer directly. Offer to answer questions in person. If delay continues, escalate to the building department supervisor. Some jurisdictions allow expedited review for a fee — evaluate this option.<br><br>
+See <a onclick="closeDecisionTree();jumpTo('14')">§14 Permitting and AHJ Coordination</a> and <a onclick="closeDecisionTree();jumpTo('29')">§29.4</a>.`,
+    secs: ['14', '29', '11']
+  },
+  ahj_fail: {
+    a: `<strong>Failed inspection:</strong><br><br>
+Document the specific items cited. Issue a written response to the CM/GC with the corrective action required and a 48-hour completion deadline for life safety items. Re-inspection must be scheduled immediately after corrections are complete.<br><br>
+See <a onclick="closeDecisionTree();jumpTo('14')">§14.5 CO Review Process</a>.`,
+    secs: ['14', '15', '22']
+  },
+  ahj_tco: {
+    a: `<strong>TCO conditions blocking final CO:</strong><br><br>
+Every TCO condition must be tracked individually in the TCO conditions log. Each item needs an owner, a deadline, and a verification method. Final CO cannot be requested until ALL conditions are resolved and confirmed by the AHJ.<br><br>
+See <a onclick="closeDecisionTree();jumpTo('14')">§14.5</a> and <a onclick="closeDecisionTree();jumpTo('22')">§22.6 Final CO and Retainage</a>.`,
+    secs: ['14', '22', '23']
+  },
+  opening: {
+    a: `<strong>Getting ready to open — the critical list:</strong><br><br>
+1. <strong>Event simulation</strong> — at least one full dry run before public event<br>
+2. <strong>DAS</strong> — all carrier acceptance tests complete<br>
+3. <strong>Access control</strong> — credential load test at full capacity<br>
+4. <strong>POS</strong> — end-to-end payment test with real transactions<br>
+5. <strong>Life safety</strong> — all systems commissioned and signed off<br>
+6. <strong>CO/TCO</strong> — confirmed occupancy for event day attendance<br><br>
+See <a onclick="closeDecisionTree();jumpTo('20')">§20 Operations Readiness</a> First Event Readiness Checklist.`,
+    secs: ['20', '34', '21']
+  },
+  cont_coop: {
+    a: `<strong>Contractor not cooperating:</strong><br><br>
+Everything goes in writing. Send a formal written notice for every verbal commitment that is not followed through on. If non-cooperation is systemic, escalate to the owner immediately — this is a contractual performance issue. Document a pattern before formal cure notice.<br><br>
+See <a onclick="closeDecisionTree();jumpTo('7')">§7 Communication Protocols</a> and <a onclick="closeDecisionTree();jumpTo('16')">§16.5 Claims Avoidance</a>.`,
+    secs: ['7', '16', '29']
+  }
+};
+
+let dtHistory = [];
+
+function openDecisionTree() {
+  dtHistory = [];
+  document.getElementById('decision-modal').classList.add('open');
+  renderDT('root');
+}
+
+function closeDecisionTree() {
+  document.getElementById('decision-modal').classList.remove('open');
+  dtHistory = [];
+}
+
+function renderDT(nodeId) {
+  const node = DT_TREE[nodeId];
+  if (!node) return;
+  const body = document.getElementById('dt-body');
+  
+  const breadcrumb = dtHistory.length > 0 
+    ? `<div class="dt-breadcrumb">${dtHistory.map(h => h.label).join(' › ')}</div>` 
+    : '';
+
+  if (node.a) {
+    // Answer node
+    const relSecs = (node.secs || []).map(num => {
+      const sec = KB.find(s => s.num === num);
+      return sec ? `<a onclick="closeDecisionTree();jumpTo('${num}')" style="color:var(--teal);cursor:pointer;display:inline-block;margin:3px 6px 3px 0;font-size:12px;background:var(--teal-light);padding:2px 8px;border-radius:10px;text-decoration:none">§${num}</a>` : '';
+    }).join('');
+    
+    body.innerHTML = breadcrumb + `
+      <div class="dt-answer">${node.a}</div>
+      ${relSecs ? `<div style="margin-top:12px"><strong style="font-size:12px;color:var(--muted)">Jump to:</strong><div style="margin-top:6px">${relSecs}</div></div>` : ''}
+      ${dtHistory.length > 0 ? `<button class="dt-back" onclick="dtBack()">← Back</button>` : ''}
+      <button class="dt-back" onclick="renderDT('root')" style="margin-left:8px">Start over</button>
+    `;
+  } else {
+    // Question node
+    body.innerHTML = breadcrumb + `
+      <div class="dt-question">${node.q}</div>
+      <div class="dt-options">
+        ${node.opts.map(opt => `
+          <button class="dt-option" onclick="dtNext('${opt.next}', '${opt.label.replace(/'/g,"\'")}')">
+            ${opt.label}
+          </button>
+        `).join('')}
+      </div>
+      ${dtHistory.length > 0 ? `<button class="dt-back" onclick="dtBack()">← Back</button>` : ''}
+    `;
+  }
+}
+
+function dtNext(nodeId, label) {
+  dtHistory.push({ nodeId: nodeId, label: label });
+  renderDT(nodeId);
+}
+
+function dtBack() {
+  if (dtHistory.length === 0) return;
+  dtHistory.pop();
+  const prev = dtHistory.length > 0 ? dtHistory[dtHistory.length - 1].nodeId : 'root';
+  renderDT(prev);
+}
+
+// ══════════════════════════════════════════════════════════════
+// RECENT SEARCHES
+// ══════════════════════════════════════════════════════════════
+let recentSearches = [];
+
+async function loadRecentSearches() {
+  try {
+    const r = await window.storage.get('lu_searches');
+    if (r && r.value) recentSearches = JSON.parse(r.value);
+  } catch(e) {}
+}
+
+async function saveRecentSearch(q) {
+  if (!q || q.length < 2) return;
+  recentSearches = [q, ...recentSearches.filter(s => s !== q)].slice(0, 8);
+  try { await window.storage.set('lu_searches', JSON.stringify(recentSearches)); } catch(e) {}
+}
+
+function showSearchDropdown() {
+  const dd = document.getElementById('search-dropdown');
+  if (!dd) return;
+  if (recentSearches.length === 0) { dd.classList.remove('open'); return; }
+  dd.innerHTML = `
+    <div style="padding:8px 14px 4px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Recent searches</div>
+    ${recentSearches.map(s => `
+      <div class="search-drop-item" onclick="applySearch('${s.replace(/'/g,"\'")}')">
+        <span class="search-drop-icon">🕐</span> ${s}
+      </div>`).join('')}
+    <div class="search-drop-clear" onclick="clearRecentSearches()">Clear recent searches</div>
+  `;
+  dd.classList.add('open');
+}
+
+function hideSearchDropdown() {
+  setTimeout(() => {
+    const dd = document.getElementById('search-dropdown');
+    if (dd) dd.classList.remove('open');
+  }, 200);
+}
+
+function applySearch(q) {
+  const input = document.getElementById('search-input');
+  input.value = q;
+  activeSearch = q;
+  renderSections();
+  document.getElementById('search-dropdown').classList.remove('open');
+}
+
+async function clearRecentSearches() {
+  recentSearches = [];
+  try { await window.storage.delete('lu_searches'); } catch(e) {}
+  document.getElementById('search-dropdown').classList.remove('open');
+}
+
+// ══════════════════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ══════════════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  // '/' to focus search
+  if (e.key === '/' && !['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) {
+    e.preventDefault();
+    const input = document.getElementById('search-input');
+    input.focus();
+    input.select();
+  }
+  // Escape to close modals or clear search
+  if (e.key === 'Escape') {
+    closePhaseGuide();
+    closeDecisionTree();
+    if (activeSearch) {
+      activeSearch = '';
+      document.getElementById('search-input').value = '';
+      renderSections();
+    }
+  }
+});
+
+
+
 // ── FILTER LOGIC ──
+// Search depth levels: 1=title/topic, 2=subsection, 3=content/bullets
+function getMatchDepth(s, q) {
+  if (!q) return 0;
+  const ql = q.toLowerCase();
+  if (s.title.toLowerCase().includes(ql)) return 1;
+  if (s.topics.some(t => t.toLowerCase().includes(ql))) return 1;
+  if ((s.h2||[]).some(h => h.toLowerCase().includes(ql))) return 2;
+  if ((s.h3||[]).some(h => h.toLowerCase().includes(ql))) return 2;
+  if ((s.content||[]).some(p => p.toLowerCase().includes(ql))) return 3;
+  if ((s.bullets||[]).some(b => b.toLowerCase().includes(ql))) return 3;
+  return 0;
+}
+
 function getFiltered() {
   return KB.filter(s => {
     if (activePhase && activePhase !== 'All Phases') {
@@ -266,16 +1092,11 @@ function getFiltered() {
       if (!s.topics.some(t => t.toLowerCase().includes(activeTopic.toLowerCase()))) return false;
     }
     if (activeSearch) {
-      const q = activeSearch.toLowerCase();
-      const inTitle = s.title.toLowerCase().includes(q);
-      const inTopics = s.topics.some(t => t.toLowerCase().includes(q));
-      const inSubs = (s.h2||[]).some(sub => sub.toLowerCase().includes(q));
-      const inSummary = (s.content||[]).some(p => p.toLowerCase().includes(q));
-      const inBullets = (s.bullets||[]).some(b => b.toLowerCase().includes(q));
-      if (!inTitle && !inTopics && !inSubs && !inSummary && !inBullets) return false;
+      return getMatchDepth(s, activeSearch) > 0;
     }
     return true;
-  });
+  }).map(s => ({...s, _matchDepth: getMatchDepth(s, activeSearch)}))
+    .sort((a, b) => (b._matchDepth || 0) - (a._matchDepth || 0));
 }
 
 function highlight(text, query) {
@@ -342,7 +1163,17 @@ function renderSections() {
   const container = document.getElementById('sections-container');
 
   const filters = [activePhase, activeTopic, activeSearch].filter(Boolean);
-  if (filters.length) {
+  if (activeSearch) {
+    // Count total matches across all filtered content
+    const q = activeSearch.toLowerCase();
+    let totalMatches = 0;
+    filtered.forEach(s => {
+      const allText = [s.title, ...(s.h2||[]), ...(s.content||[]), ...(s.bullets||[])].join(' ').toLowerCase();
+      let idx = 0;
+      while ((idx = allText.indexOf(q, idx)) !== -1) { totalMatches++; idx += q.length; }
+    });
+    meta.innerHTML = `<span style="color:var(--teal);font-weight:600">${filtered.length} sections</span> &nbsp;·&nbsp; <span style="background:#F5D842;color:#111;padding:1px 8px;border-radius:10px;font-weight:600">${totalMatches} matches</span>`;
+  } else if (filters.length) {
     meta.textContent = `${filtered.length} of ${KB.length} sections`;
   } else {
     meta.textContent = `${KB.length} sections`;
@@ -357,7 +1188,7 @@ function renderSections() {
         <span class="sec-badge">${s.num}</span>
         <div style="flex:1">
           <div class="sec-title">${highlight(s.title, q)}</div>
-          <div class="sec-phases">${s.phases.map(p=>`<span class="sec-phase-tag">${p}</span>`).join('')}</div>
+          <div class="sec-phases">${s.phases.map(p=>`<span class="sec-phase-tag">${p}</span>`).join('')}${q && s._matchDepth ? `<span style="background:${s._matchDepth===1?'#184655':s._matchDepth===2?'#2D6B7F':'#F5D842'};color:${s._matchDepth===3?'#111':'#fff'};font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px">${s._matchDepth===1?'Title match':s._matchDepth===2?'Subsection match':'Content match'}</span>` : ''}${q ? (() => { const allText = [s.title,...(s.h2||[]),...(s.content||[]),...(s.bullets||[])].join(' ').toLowerCase(); let c=0,i=0; while((i=allText.indexOf(q.toLowerCase(),i))!==-1){c++;i+=q.length;} return c>0?`<span style="background:#F5D842;color:#111;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;margin-left:4px">${c} match${c>1?'es':''}</span>`:''; })() : ''}</div>
         </div>
         <button class="bookmark-btn ${isBookmarked?'active':''}" onclick="event.stopPropagation();toggleBookmark('${s.num}')" title="${isBookmarked?'Remove bookmark':'Bookmark'}">
           ${isBookmarked?'★':'☆'}
@@ -365,12 +1196,14 @@ function renderSections() {
         <span class="sec-expand-icon">▾</span>
       </div>
       <div class="section-card-body">
-        ${s.h2 && s.h2.length ? `<div style="margin:12px 0;font-weight:500;color:var(--teal)">Topics:</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0">${s.h2.map(h=>`<span style="font-size:12px;background:var(--teal-light);color:var(--teal);padding:4px 10px;border-radius:12px">${highlight(h,q)}</span>`).join('')}</div>` : ''}
-        ${s.content && s.content.length ? `<div style="margin:12px 0;border-left:2px solid var(--sage);padding-left:12px">${s.content.map(p=>`<p style="margin:8px 0;font-size:13px;line-height:1.6;color:var(--muted)">${highlight(p,q)}</p>`).join('')}</div>` : ''}
-        ${s.bullets && s.bullets.length ? `<div style="margin:12px 0"><div style="font-weight:500;color:var(--teal);margin-bottom:8px">Key Points:</div><div>${s.bullets.map(b=>`<div class="bullet-item">${highlight(b,q)}</div>`).join('')}</div></div>` : ''}
+        ${s.h2 && s.h2.length ? `<div style="margin:14px 0 8px"><div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Subsections</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px">${s.h2.map((h,i)=>`<div style="display:flex;align-items:center;gap:6px;font-size:12px;padding:4px 0;color:var(--charcoal)"><span style="color:var(--sage);font-weight:700;font-size:11px;font-family:monospace;flex-shrink:0">${s.num}.${i+1}</span><span>${highlight(h,q)}</span></div>`).join('')}</div></div>` : ''}
+        ${s.content && s.content.length ? `<div style="margin:12px 0;border-left:2px solid var(--sage);padding-left:12px">${s.content.map(p=>`<p style="margin:8px 0;font-size:13px;line-height:1.6;color:var(--muted)">${applyGlossary(highlight(p,q))}</p>`).join('')}</div>` : ''}
+        ${s.bullets && s.bullets.length ? `<div style="margin:14px 0"><div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Key Points</div><div>${s.bullets.map(b=>`<div class="bullet-item">${applyGlossary(highlight(b,q))}</div>`).join('')}</div></div>` : ''}
         <div class="topics-row">
           ${s.topics.map(t=>`<span class="topic-tag" onclick="setTopic('${t}')">${t}</span>`).join('')}
         </div>
+        ${CHECKLISTS[s.num] ? `<div id="cl-${s.num}">${renderChecklist(s.num)}</div>` : ''}
+        ${renderRelated(s.num)}
         <div class="ask-btn">
           <button onclick="askAboutSection('${s.num}','${s.title.replace(/'/g,"\'")}')">␚ Ask about this section</button>
         </div>
@@ -465,19 +1298,39 @@ function askAboutSection(num, title) {
 }
 
 // ── SEARCH ──
-document.getElementById('search-input').addEventListener('input', e => {
+const searchInput = document.getElementById('search-input');
+searchInput.addEventListener('input', e => {
   activeSearch = e.target.value.trim();
   renderSections();
+  const scopeRow = document.getElementById('search-scope-row');
+  if (scopeRow) scopeRow.style.display = activeSearch ? 'flex' : 'none';
+  if (activeSearch) {
+    saveRecentSearch(activeSearch);
+    setTimeout(() => {
+      const firstMark = document.querySelector('mark');
+      if (firstMark) firstMark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 80);
+  }
 });
+
+let searchScope = 'all';
+function setScope(scope) {
+  searchScope = scope;
+  document.querySelectorAll('.scope-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('scope-' + scope).classList.add('active');
+  renderSections();
+}
+searchInput.addEventListener('focus', () => { if (!activeSearch) showSearchDropdown(); });
+searchInput.addEventListener('blur', hideSearchDropdown);
 
 // ── CHAT ──
 function toggleChat() {
   chatOpen = !chatOpen;
-  document.getElementById('chat-body').classList.toggle('open', chatOpen);
-  document.getElementById('chat-toggle').classList.toggle('open', chatOpen);
-  document.getElementById('chat-caret').textContent = chatOpen ? '▼' : '▲';
-  if (chatOpen && chatHistory.length===0) {
-    appendMsg('ai', "I'm the Level Up Playbook AI. Ask me anything about managing a sports venue project — from Day 1 mobilization through closeout. I know all 36 sections.");
+  document.getElementById('chat-drawer').classList.toggle('open', chatOpen);
+  document.getElementById('fab').classList.toggle('open', chatOpen);
+  if (chatOpen) {
+    if (chatHistory.length === 0) appendMsg('ai', "I'm the Level Up Playbook AI. Ask me anything about managing a sports venue project — from Day 1 mobilization through closeout.");
+    setTimeout(() => document.getElementById('chat-input').focus(), 150);
   }
 }
 
@@ -567,6 +1420,26 @@ ${kbSummary}`;
   document.getElementById('chat-input').focus();
 }
 
+function expandChat() {
+  const drawer = document.getElementById('chat-drawer');
+  const btn = document.getElementById('expand-btn');
+  const isExpanded = drawer.classList.toggle('expanded');
+  btn.innerHTML = isExpanded ? '&#x2922;' : '&#x26F6;';
+  btn.title = isExpanded ? 'Collapse' : 'Expand';
+  // Scroll messages to bottom after resize
+  setTimeout(() => {
+    const msgs = document.getElementById('chat-messages');
+    if (msgs) msgs.scrollTop = msgs.scrollHeight;
+  }, 50);
+}
+
+function clearChatHistory() {
+  chatHistory = [];
+  document.getElementById('chat-messages').innerHTML = '';
+  try { window.storage.delete('lu_chat'); } catch(e) {}
+  appendMsg('ai', "Chat cleared. Ask me anything about the playbook.");
+}
+
 function askQuestion(q) {
   if (!chatOpen) toggleChat();
   document.getElementById('chat-input').value = q;
@@ -588,29 +1461,74 @@ function toggleTheme() {
 
 // ── INIT ──
 async function init() {
-  // Apply saved theme before render to prevent flash
   const savedTheme = (() => { try { return localStorage.getItem('lu_theme'); } catch(e) { return null; } })();
   const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
 
   await loadBookmarks();
   await loadChat();
+  await loadChecklistState();
+  await loadRecentSearches();
   renderAll();
-
-  // Set chat open state from the start
-  document.getElementById('chat-body').classList.add('open');
-  document.getElementById('chat-toggle').classList.add('open');
-  document.getElementById('chat-caret').textContent = '▼';
-
-  // Restore chat history or show welcome
-  if (chatHistory.length > 0) {
-    chatHistory.forEach(msg => appendMsg(msg.role==='user'?'user':'ai', msg.content));
-  } else {
-    appendMsg('ai', "I'm the Level Up Playbook AI. Ask me anything about managing a sports venue project — from Day 1 mobilization through closeout. I know all 36 sections.");
-  }
 }
 
 init();
+
 </script>
+
+<!-- FLOATING AI CHAT -->
+<div id="fab" onclick="toggleChat()" title="Ask the Playbook AI">
+  <span id="fab-icon">&#10022;</span>
+  <span id="fab-label">Ask AI</span>
+</div>
+<div id="chat-drawer">
+  <div class="chat-drawer-header">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:16px;color:#fff">&#10022;</span>
+      <span style="font-weight:600;font-size:14px;color:#fff">Playbook AI</span>
+      <span style="font-size:11px;color:var(--sage);margin-left:4px">Powered by Claude</span>
+    </div>
+    <div style="display:flex;gap:4px;align-items:center">
+      <button onclick="clearChatHistory()" title="Clear chat" class="chat-expand-btn" style="font-size:16px">&#8635;</button>
+      <button onclick="expandChat()" title="Expand/collapse" class="chat-expand-btn" id="expand-btn">&#x26F6;</button>
+      <button onclick="toggleChat()" class="chat-expand-btn" style="font-size:22px;padding:2px 8px">&times;</button>
+    </div>
+  </div>
+  <div class="quick-asks" id="quick-asks">
+    <button class="quick-ask" onclick="askQuestion('What should I do on Day 1 of a new project?')">Day 1 checklist</button>
+    <button class="quick-ask" onclick="askQuestion('How do I handle a DAS scope in design development?')">DAS coordination</button>
+    <button class="quick-ask" onclick="askQuestion('When should we start VE and what are the best opportunities?')">VE timing</button>
+    <button class="quick-ask" onclick="askQuestion('How do we coordinate with the sponsorship team on procurement?')">Sponsorship</button>
+    <button class="quick-ask" onclick="askQuestion('What goes in a monthly draw package?')">Draw package</button>
+    <button class="quick-ask" onclick="askQuestion('What are the biggest schedule risks?')">Schedule risks</button>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="chat-input-row">
+    <input type="text" id="chat-input" placeholder="Ask anything about the playbook…" onkeydown="if(event.key==='Enter')sendChat()">
+    <button id="chat-send-btn" onclick="sendChat()">Send</button>
+  </div>
+</div>
+
+<!-- PHASE GUIDE MODAL -->
+<div id="phase-guide-modal" onclick="if(event.target===this)closePhaseGuide()">
+  <div class="pg-modal-box">
+    <div class="pg-modal-header">
+      <h3 id="pg-modal-title">Phase Reading Guide</h3>
+      <button class="pg-modal-close" onclick="closePhaseGuide()">&times;</button>
+    </div>
+    <div class="pg-modal-body" id="pg-modal-body"></div>
+  </div>
+</div>
+
+<!-- DECISION TREE MODAL -->
+<div id="decision-modal" onclick="if(event.target===this)closeDecisionTree()">
+  <div class="dt-box">
+    <div class="dt-header">
+      <h3>What Do I Do?</h3>
+      <button class="dt-close" onclick="closeDecisionTree()">&times;</button>
+    </div>
+    <div class="dt-body" id="dt-body"></div>
+  </div>
+</div>
 </body>
 </html>
