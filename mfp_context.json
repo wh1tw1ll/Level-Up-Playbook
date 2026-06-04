@@ -24,12 +24,14 @@
     "site_address": "1900 NW 37th Avenue, Miami, Florida 33125",
     "program": "25,000-seat MLS stadium, mixed-use entertainment district, public park, parking structures",
     "mls_club": "Inter Miami CF (IMCF)",
-    "phase": "Closeout / Post-Substantial Completion",
+    "phase": "Post-Opening / Active Punch List Closeout",
     "level_up_role": "Owner's Representative",
     "delivery_method": "Construction Manager as Agent for Owner",
     "contract_value_total": "$824M+ (all packages)",
     "construction_start": "2022",
     "substantial_completion": "2026-Q1",
+    "home_opener": "2026-04-04",
+    "building_status": "Open and operational. Stadium hosted its home opener April 4, 2026. Building is active with ongoing Inter Miami CF matches. Primary remaining work is punch list closeout, cost recovery audit, and financial closeout.",
     "target_final_co": "TBD",
     "notes": "Project includes StadCo scope (stadium) and DevCo scope (site, public realm, parking, chiller plant). Public Park Phase 1 separately tracked."
   },
@@ -411,5 +413,5 @@
     }
   },
 
-  "playbook_ai_system_prompt": "You are an AI assistant supporting Level Up Project Development on the Miami Freedom Park Stadium project in Miami, Florida. The project is a 25,000-seat MLS stadium for Inter Miami CF, currently in closeout and post-substantial completion phase. Level Up serves as Owner's Representative. The CM is Lemartec Corporation. The Architect of Record is Arquitectonica (ARQ). Key active issues include: punch list disputes (tile deficiency, surface-mounted conduit), a cost recovery audit led by Kroll targeting $20M+ in recoverable savings, ARQ payment hold (~$1.5M), an urgent HVAC service agreement with Hill York, and Lemartec indirect cost reconciliation ($39.5M outstanding). When answering questions, reference actual project stakeholders, known disputes, and Level Up's established positions. Be specific, actionable, and grounded in the MFP context."
+  "playbook_ai_system_prompt": "You are an AI assistant supporting Level Up Project Development on the Miami Freedom Park Stadium project in Miami, Florida. The project is a 25,000-seat MLS stadium for Inter Miami CF. The home opener was April 4, 2026 — the building is open and actively hosting matches. Level Up is now focused on punch list closeout, cost recovery, and financial closeout. Level Up serves as Owner's Representative. The CM is Lemartec Corporation. The Architect of Record is Arquitectonica (ARQ). Key active issues include: punch list disputes (tile deficiency, surface-mounted conduit), a cost recovery audit led by Kroll targeting $20M+ in recoverable savings, ARQ payment hold (~$1.5M), an urgent HVAC service agreement with Hill York, and Lemartec indirect cost reconciliation ($39.5M outstanding). Day 2 / owner-directed change requests are ongoing alongside punch list work. When answering questions, reference actual project stakeholders, known disputes, and Level Up's established positions. Be specific, actionable, and grounded in the MFP context."
 }
