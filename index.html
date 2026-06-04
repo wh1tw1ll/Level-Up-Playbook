@@ -1866,7 +1866,7 @@ function renderMFPPanel(section) {
       { party: 'Lemartec Corporation', role: 'Construction Manager (CM/GC)', detail: `Stadium direct: $553M revised contract. Indirects: $65.3M. Executed July 27, 2023.` },
       { party: 'Arquitectonica (ARQ)', role: 'Architect of Record', detail: `~$1.5M currently on HOLD (Feb–Apr invoices). Agreement July 27, 2023.` },
       { party: 'MANICA Architecture', role: 'Design Architect', detail: `Agreement July 27, 2023. Soft cost invoices under review.` },
-      { party: 'Level Up Project Development', role: 'Owner's Representative', detail: `April fee: $170K + $5,871 reimbursables — approved for payment.` },
+      { party: 'Level Up Project Development', role: "Owner's Representative", detail: `April fee: $170K + $5,871 reimbursables — approved for payment.` },
       { party: 'The Parker Company / Dreamseats', role: 'Specialty Contractor (Seating)', detail: `$9M contract. Invoices 104 days past due (~$67K held). $2M savings target in audit.` },
       { party: 'Miller Electric', role: 'Electrical Subcontractor', detail: `$84.9M contract. $28M outstanding — largest remaining balance.` },
     ];
@@ -1960,7 +1960,7 @@ function renderMFPPanel(section) {
     html += `</div>`;
     html += `<div class="mfp-card"><div class="mfp-card-title">Quick Questions</div><div class="mfp-quick-asks">
       <button class="mfp-quick-btn" onclick="mfpQuickAsk('Who has authority to approve payments on MFP and what is the approval threshold?')">Approval Authority</button>
-      <button class="mfp-quick-btn" onclick="mfpQuickAsk('What is Kroll\'s role and how do they coordinate with Level Up?')">Kroll Coordination</button>
+      <button class="mfp-quick-btn" onclick="mfpQuickAsk('What is Kroll role and how does Kroll coordinate with Level Up?')">Kroll Coordination</button>
     </div></div>`;
   }
 
@@ -2004,6 +2004,15 @@ async function init() {
 
 init();
 
+
+// Quick-ask event delegation
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('[data-q]');
+  if (btn && btn.classList.contains('mfp-quick-btn')) {
+    const q = btn.getAttribute('data-q').replace(/&apos;/g, "'");
+    mfpQuickAsk(q);
+  }
+});
 </script>
 
 <!-- FLOATING AI CHAT -->
