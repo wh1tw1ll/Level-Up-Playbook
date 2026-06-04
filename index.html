@@ -1430,7 +1430,12 @@ function setTopic(t) {
 function clearFilters() {
   activePhase = null; activeTopic = null; activeSearch = '';
   document.getElementById('search-input').value = '';
-  renderAll();
+  if (activeProject === 'mfp') {
+    renderMFPOverview();
+    document.querySelectorAll('.mfp-section-btn').forEach(b => b.classList.remove('active'));
+  } else {
+    renderAll();
+  }
 }
 function jumpTo(num) {
   clearFilters();
