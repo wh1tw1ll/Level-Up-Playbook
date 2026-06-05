@@ -515,6 +515,100 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
   </div>
 </header>
 
+<!-- HOME PAGE -->
+<div id="home-page" class="home-page active">
+  <div class="home-inner">
+    <div class="home-greeting" id="home-greeting">Good morning 👋</div>
+    <div class="home-sub">Level Up Project Development — PM Playbook</div>
+    <div class="home-cards">
+
+      <div class="home-card accent" onclick="setView('playbook')">
+        <div class="home-card-icon">📖</div>
+        <div class="home-card-title">Playbook</div>
+        <div class="home-card-desc">43 sections across 5 groups — methodology, controls, phase execution, and reference material for sports facility delivery.</div>
+        <div class="home-card-meta">Open Playbook →</div>
+      </div>
+
+      <div class="home-card" onclick="setView('mfp-go')">
+        <span class="home-card-badge active">Active</span>
+        <div class="home-card-icon">🏟</div>
+        <div class="home-card-title">MFP Stadium</div>
+        <div class="home-card-desc">Miami Freedom Park — Post-Opening Closeout. Kroll audit, punch list disputes, Lemartec indirects, ARQ hold.</div>
+        <div class="home-card-meta" id="home-mfp-meta">Open Project Dashboard →</div>
+      </div>
+
+      <div class="home-card" onclick="setView('actions')">
+        <div class="home-card-icon">✅</div>
+        <div class="home-card-title">Action Items</div>
+        <div class="home-card-desc">Track open action items across all projects. Manual entry now — Outlook sync coming soon.</div>
+        <div class="home-card-meta" id="home-ai-meta">View Action Items →</div>
+      </div>
+
+      <div class="home-card" onclick="setView('templates')">
+        <div class="home-card-icon">📥</div>
+        <div class="home-card-title">Templates</div>
+        <div class="home-card-desc">10 branded Excel templates — risk register, budget tracker, change order log, punch list, pay app checklist, and more.</div>
+        <div class="home-card-meta">Browse &amp; Download →</div>
+      </div>
+
+      <div class="home-card" onclick="toggleNotesPanel()">
+        <div class="home-card-icon">📝</div>
+        <div class="home-card-title">Team Notes</div>
+        <div class="home-card-desc">Shared notes, corrections, and lessons learned pinned to playbook sections. Visible to the full team.</div>
+        <div class="home-card-meta" id="home-notes-meta">View Notes →</div>
+      </div>
+
+      <div class="home-card" onclick="openPhaseGuide()">
+        <div class="home-card-icon">📖</div>
+        <div class="home-card-title">Phase Reading Guide</div>
+        <div class="home-card-desc">Find which playbook sections to read based on your current project phase.</div>
+        <div class="home-card-meta">Open Guide →</div>
+      </div>
+
+      <div class="home-card" onclick="openDecisionTree()">
+        <div class="home-card-icon">🔀</div>
+        <div class="home-card-title">What Do I Do?</div>
+        <div class="home-card-desc">Not sure where to start? Answer a few questions and get pointed to the right section.</div>
+        <div class="home-card-meta">Open Decision Guide →</div>
+      </div>
+
+      <div class="home-card" onclick="toggleChat()">
+        <div class="home-card-icon">🤖</div>
+        <div class="home-card-title">Ask the Playbook AI</div>
+        <div class="home-card-desc">Ask anything about project management, MFP finances, punch list strategy, or any playbook topic.</div>
+        <div class="home-card-meta">Open AI Chat →</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ACTION ITEMS PANEL -->
+<div id="ai-panel" class="ai-panel">
+  <div class="ai-panel-header">
+    <div class="ai-panel-title">✅ Action Items</div>
+    <button class="ai-add-btn" onclick="toggleAiForm()">+ Add Action Item</button>
+  </div>
+  <div class="ai-add-form" id="ai-add-form">
+    <div class="ai-form-row">
+      <input class="ai-form-input" id="ai-input-text" placeholder="What needs to be done?" style="flex:2">
+      <select class="ai-form-select" id="ai-input-project">
+        <option value="MFP">MFP Stadium</option>
+        <option value="General">General</option>
+      </select>
+    </div>
+    <div class="ai-form-row">
+      <input class="ai-form-input" id="ai-input-owner" placeholder="Owner (name)" style="flex:1">
+      <input class="ai-form-input" id="ai-input-due" type="date" style="flex:1">
+    </div>
+    <div class="ai-form-actions">
+      <button class="note-cancel-btn" onclick="toggleAiForm()">Cancel</button>
+      <button class="note-submit-btn" onclick="submitActionItem()">Add Item</button>
+    </div>
+  </div>
+  <div id="ai-list"></div>
+</div>
+
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <!-- Project Switcher -->
@@ -541,14 +635,6 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 
   <!-- ── GENERAL PLAYBOOK SIDEBAR ── -->
   <div class="playbook-sidebar" id="playbook-sidebar">
-    <div class="sidebar-section" style="padding:12px 0 4px">
-      <button class="sidebar-action-btn" onclick="openPhaseGuide()">
-        <span class="btn-icon">📖</span> Phase Reading Guide
-      </button>
-      <button class="sidebar-action-btn" onclick="openDecisionTree()">
-        <span class="btn-icon">🔀</span> What Do I Do?
-      </button>
-    </div>
     <div class="divider"></div>
     <div class="sidebar-section" id="sec-phases">
       <div class="sidebar-heading" onclick="toggleSidebarSection('sec-phases')">
