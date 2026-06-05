@@ -485,11 +485,57 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 #auth-signin-btn { display: none; }
 #auth-signin-btn.visible { display: flex !important; }
 #auth-user-info.visible { display: flex !important; }
+
+.sticky-header{position:sticky;top:0;z-index:200;width:100%}
+.topbar{background:var(--topbar-bg);display:flex;align-items:center;gap:16px;padding:10px 24px;transition:background .2s;border-bottom:1px solid rgba(255,255,255,.06);width:100%}
+.app-nav{display:flex;gap:0;padding:0 20px;background:var(--topbar-bg,#1a2332);border-bottom:1px solid rgba(255,255,255,.08);width:100%}
+.nav-tab{display:flex;align-items:center;gap:6px;padding:11px 18px;font-size:12px;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;border:none;background:none;font-family:inherit;border-bottom:3px solid transparent;transition:all .15s;white-space:nowrap}
+.nav-tab:hover{color:#fff}
+.nav-tab.active{color:#fff;border-bottom-color:var(--sage)}
+.home-page{display:none;width:100%;min-height:calc(100vh - 92px);align-items:center;justify-content:center;background:var(--bg)}
+.home-page.active{display:flex}
+.home-inner{width:100%;max-width:960px;padding:48px 40px}
+.home-greeting{font-size:28px;font-weight:800;color:var(--charcoal);margin-bottom:6px}
+.home-sub{font-size:14px;color:var(--muted);margin-bottom:36px;font-weight:500}
+.home-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.home-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px 24px;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden}
+.home-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--teal);transform:scaleX(0);transform-origin:left;transition:transform .2s}
+.home-card:hover::before{transform:scaleX(1)}
+.home-card:hover{border-color:var(--teal);box-shadow:0 4px 20px rgba(0,107,107,.12);transform:translateY(-2px)}
+.home-card.accent{border-color:var(--teal);background:linear-gradient(135deg,var(--teal-light) 0%,var(--card) 100%)}
+.home-card.accent::before{transform:scaleX(1)}
+.home-card-icon{font-size:26px}
+.home-card-title{font-size:15px;font-weight:700;color:var(--charcoal)}
+.home-card-desc{font-size:12px;color:var(--muted);line-height:1.55;flex:1}
+.home-card-meta{font-size:11px;font-weight:600;color:var(--teal);margin-top:4px}
+.home-card-badge{position:absolute;top:14px;right:14px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.home-card-badge.active{background:#e8f8ee;color:#27ae60}
+.ai-panel{display:none;width:100%;min-height:calc(100vh - 92px);background:var(--bg);align-items:flex-start;justify-content:center}
+.ai-panel.active{display:flex}
+.ai-panel-inner{width:100%;max-width:860px;padding:40px}
+.ai-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.ai-panel-title{font-size:20px;font-weight:700;color:var(--charcoal)}
+.ai-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.ai-item:last-child{border-bottom:none}
+.ai-checkbox{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);flex-shrink:0;cursor:pointer;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:11px}
+.ai-checkbox.done{background:var(--teal);border-color:var(--teal);color:#fff}
+.ai-item-body{flex:1}
+.ai-item-text{font-size:13px;color:var(--charcoal);line-height:1.5;margin-bottom:4px}
+.ai-item-text.done{text-decoration:line-through;color:var(--muted)}
+.ai-item-meta{font-size:11px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
+.ai-item-project{font-weight:600;color:var(--teal)}
+.ai-add-btn{display:flex;align-items:center;gap:8px;padding:8px 14px;border:1px dashed var(--teal);border-radius:8px;background:none;color:var(--teal);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.ai-add-btn:hover{background:var(--teal-light)}
+.ai-add-form{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:12px;display:none}
+.ai-add-form.open{display:block}
+.ai-form-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.ai-form-input{flex:1;font-family:inherit;font-size:13px;padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--charcoal);min-width:180px}
+.ai-form-select{font-family:inherit;font-size:12px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--charcoal)}
+.ai-form-actions{display:flex;justify-content:flex-end;gap:8px}
 </style>
 </head>
 <body>
-<div class="shell">
-
+<div class="sticky-header">
 <!-- TOPBAR -->
 <header class="topbar">
   <a class="logo" href="#">
@@ -527,6 +573,110 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
     </div>
   </div>
 </header>
+<nav class="app-nav" id="app-nav">
+  <button class="nav-tab active" id="nav-home" onclick="setView('home')">Home</button>
+  <button class="nav-tab" id="nav-playbook" onclick="setView('playbook')">Playbook</button>
+  <button class="nav-tab" id="nav-templates" onclick="setView('templates')">Templates</button>
+  <button class="nav-tab" id="nav-mfp" onclick="setView('mfp-go')">Projects</button>
+  <button class="nav-tab" id="nav-actions" onclick="setView('actions')">Action Items</button>
+</nav>
+</div>
+
+<!-- HOME PAGE -->
+<div id="home-page" class="home-page active">
+  <div class="home-inner" id="home-inner">
+    <div class="home-greeting" id="home-greeting">Good morning</div>
+    <div class="home-sub">Level Up Project Development &mdash; PM Playbook</div>
+    <div class="home-cards">
+      <div class="home-card accent" onclick="setView('playbook')">
+        <div class="home-card-icon">&#128218;</div>
+        <div class="home-card-title">Playbook</div>
+        <div class="home-card-desc">43 sections across 5 groups &mdash; methodology, controls, phase execution, and reference material.</div>
+        <div class="home-card-meta">Open Playbook &rarr;</div>
+      </div>
+      <div class="home-card" onclick="setView('mfp-go')">
+        <span class="home-card-badge active">1 Active</span>
+        <div class="home-card-icon">&#128193;</div>
+        <div class="home-card-title">Projects</div>
+        <div class="home-card-desc">Active projects and dashboards. MFP Stadium currently active &mdash; Post-Opening Closeout.</div>
+        <div class="home-card-meta" id="home-mfp-meta">Open Projects &rarr;</div>
+      </div>
+      <div class="home-card" onclick="setView('actions')">
+        <div class="home-card-icon">&#9989;</div>
+        <div class="home-card-title">Action Items</div>
+        <div class="home-card-desc">Track open action items across all projects.</div>
+        <div class="home-card-meta" id="home-ai-meta">View Action Items &rarr;</div>
+      </div>
+      <div class="home-card" onclick="setView('templates')">
+        <div class="home-card-icon">&#128442;</div>
+        <div class="home-card-title">Templates</div>
+        <div class="home-card-desc">10 branded Excel templates &mdash; risk register, budget tracker, change order log, and more.</div>
+        <div class="home-card-meta">Browse &amp; Download &rarr;</div>
+      </div>
+      <div class="home-card" onclick="toggleNotesPanel()">
+        <div class="home-card-icon">&#128221;</div>
+        <div class="home-card-title">Team Notes</div>
+        <div class="home-card-desc">Shared notes and lessons learned pinned to playbook sections.</div>
+        <div class="home-card-meta" id="home-notes-meta">View Notes &rarr;</div>
+      </div>
+      <div class="home-card" onclick="openPhaseGuide()">
+        <div class="home-card-icon">&#128214;</div>
+        <div class="home-card-title">Phase Reading Guide</div>
+        <div class="home-card-desc">Find which sections to read based on your current project phase.</div>
+        <div class="home-card-meta">Open Guide &rarr;</div>
+      </div>
+      <div class="home-card" onclick="openDecisionTree()">
+        <div class="home-card-icon">&#128256;</div>
+        <div class="home-card-title">What Do I Do?</div>
+        <div class="home-card-desc">Answer a few questions to find the right playbook section.</div>
+        <div class="home-card-meta">Open Decision Guide &rarr;</div>
+      </div>
+      <div class="home-card" onclick="toggleChat()">
+        <div class="home-card-icon">&#129302;</div>
+        <div class="home-card-title">Ask the Playbook AI</div>
+        <div class="home-card-desc">Ask anything about MFP finances, punch list strategy, or any playbook topic.</div>
+        <div class="home-card-meta">Open AI Chat &rarr;</div>
+      </div>
+      <div class="home-card" onclick="signInWithMicrosoft()">
+        <div class="home-card-icon">&#128193;</div>
+        <div class="home-card-title">SharePoint Files</div>
+        <div class="home-card-desc">Search Level Up and MFP documents. Sign in with Microsoft to enable.</div>
+        <div class="home-card-meta" id="sharepoint-card-meta">Sign in to connect &rarr;</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ACTION ITEMS PANEL -->
+<div id="ai-panel" class="ai-panel">
+  <div class="ai-panel-inner">
+    <div class="ai-panel-header">
+      <div class="ai-panel-title">Action Items</div>
+      <button class="ai-add-btn" onclick="toggleAiForm()">+ Add Action Item</button>
+    </div>
+    <div class="ai-add-form" id="ai-add-form">
+      <div class="ai-form-row">
+        <input class="ai-form-input" id="ai-input-text" placeholder="What needs to be done?" style="flex:2">
+        <select class="ai-form-select" id="ai-input-project">
+          <option value="MFP">MFP Stadium</option>
+          <option value="General">General</option>
+        </select>
+      </div>
+      <div class="ai-form-row">
+        <input class="ai-form-input" id="ai-input-owner" placeholder="Owner" style="flex:1">
+        <input class="ai-form-input" id="ai-input-due" type="date" style="flex:1">
+      </div>
+      <div class="ai-form-actions">
+        <button class="note-cancel-btn" onclick="toggleAiForm()">Cancel</button>
+        <button class="note-submit-btn" onclick="submitActionItem()">Add Item</button>
+      </div>
+    </div>
+    <div id="ai-list"></div>
+  </div>
+</div>
+
+<div class="shell" id="app-shell" style="display:none">
+
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
@@ -3222,6 +3372,133 @@ function renderContextualDownload(sectionNum) {
   </div>`;
 }
 
+
+// ── VIEW SYSTEM ──
+var currentView = 'home';
+function setView(view) {
+  if (view === 'mfp-go') { setProject('mfp'); view = 'mfp'; }
+  currentView = view;
+  var homePage = document.getElementById('home-page');
+  var aiPanel  = document.getElementById('ai-panel');
+  var shell    = document.getElementById('app-shell');
+  if (homePage) homePage.classList.remove('active');
+  if (aiPanel)  aiPanel.classList.remove('active');
+  if (shell)    shell.style.display = 'none';
+  document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active');});
+  var tab = document.getElementById('nav-' + (view==='mfp'?'mfp':view));
+  if (tab) tab.classList.add('active');
+  else { var nh=document.getElementById('nav-home'); if(nh) nh.classList.add('active'); }
+  if (view === 'home') {
+    if (homePage) homePage.classList.add('active');
+    updateHomeStats();
+  } else if (view === 'playbook') {
+    if (shell) shell.style.display = '';
+    if (activeProject === 'mfp') {
+      activeProject='generic'; projectContext=null; chatHistory=[];
+      var pg=document.getElementById('proj-generic'); if(pg) pg.classList.add('active');
+      var pm=document.getElementById('proj-mfp'); if(pm) pm.classList.remove('active');
+      var pb=document.getElementById('active-project-bar'); if(pb) pb.classList.remove('visible');
+    }
+    switchSidebarMode('generic'); renderAll();
+  } else if (view === 'mfp') {
+    if (shell) shell.style.display = '';
+  } else if (view === 'templates') {
+    if (homePage) {
+      homePage.classList.add('active');
+      var inner = document.getElementById('home-inner');
+      if (inner) inner.innerHTML =
+        '<button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;margin-bottom:16px;padding:0">Back to Home</button>' +
+        '<div style="font-size:20px;font-weight:700;color:var(--charcoal);margin-bottom:24px">Templates &amp; Downloads</div>' +
+        renderTemplatesHub();
+    }
+  } else if (view === 'actions') {
+    if (aiPanel) aiPanel.classList.add('active');
+    renderActionItems();
+  }
+}
+function goHome() { location.reload(); }
+function updateHomeStats() {
+  var hour = new Date().getHours();
+  var g = hour<12?'Good morning':hour<17?'Good afternoon':'Good evening';
+  var greetEl = document.getElementById('home-greeting');
+  if (greetEl) greetEl.textContent = g;
+  var daysLeft = Math.ceil((new Date('2026-06-30')-new Date())/(1000*60*60*24));
+  var mfpMeta = document.getElementById('home-mfp-meta');
+  if (mfpMeta) mfpMeta.textContent = daysLeft>=0?'Kroll: '+daysLeft+'d - Open Dashboard':'Open Dashboard';
+  var totalNotes = typeof totalNoteCount==='function'?totalNoteCount():0;
+  var notesMeta = document.getElementById('home-notes-meta');
+  if (notesMeta) notesMeta.textContent = totalNotes>0?totalNotes+' notes':'No notes yet';
+  var openCount = (actionItems||[]).filter(function(i){return !i.done;}).length;
+  var aiMeta = document.getElementById('home-ai-meta');
+  if (aiMeta) aiMeta.textContent = openCount>0?openCount+' open items':'No open items';
+  updateAuthUI();
+}
+var actionItems = [];
+async function loadActionItems() {
+  try { var r=await window.storage.get('lu_action_items',true); if(r&&r.value) actionItems=JSON.parse(r.value); } catch(e){actionItems=[];}
+}
+async function saveActionItems() {
+  try { await window.storage.set('lu_action_items',JSON.stringify(actionItems),true); } catch(e){}
+}
+function toggleAiForm() {
+  var f=document.getElementById('ai-add-form'); if(f) f.classList.toggle('open');
+}
+async function submitActionItem() {
+  var textEl=document.getElementById('ai-input-text');
+  var text=textEl?textEl.value.trim():'';
+  if(!text){alert('Please enter an action item.');return;}
+  var item={id:Date.now().toString(),text:text,
+    project:(document.getElementById('ai-input-project')||{}).value||'General',
+    owner:((document.getElementById('ai-input-owner')||{}).value||'').trim(),
+    due:(document.getElementById('ai-input-due')||{}).value||'',
+    done:false,created:new Date().toISOString()};
+  actionItems.push(item); await saveActionItems();
+  ['ai-input-text','ai-input-owner','ai-input-due'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  toggleAiForm(); renderActionItems(); updateHomeStats();
+}
+async function toggleActionItemDone(id) {
+  var item=actionItems.find(function(i){return i.id===id;}); if(item) item.done=!item.done;
+  await saveActionItems(); renderActionItems(); updateHomeStats();
+}
+async function deleteActionItem(id) {
+  actionItems=actionItems.filter(function(i){return i.id!==id;});
+  await saveActionItems(); renderActionItems(); updateHomeStats();
+}
+function renderActionItems() {
+  var list = document.getElementById('ai-list');
+  if (!list) return;
+  var all = actionItems.filter(function(i){return !i.done;}).concat(actionItems.filter(function(i){return i.done;}));
+  if (!all.length) {
+    list.innerHTML = '<div style="text-align:center;padding:48px 0;color:var(--muted)">No action items yet. Click + Add Action Item to start.</div>';
+    return;
+  }
+  var rows = all.map(function(item) {
+    var dueStr = item.due ? new Date(item.due + 'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+    var isOverdue = item.due && !item.done && new Date(item.due + 'T00:00:00') < new Date();
+    return [
+      '<div class="ai-item" data-id="' + item.id + '">',
+      '<div class="ai-checkbox' + (item.done ? ' done' : '') + '" data-action="done">' + (item.done ? '&#10003;' : '') + '</div>',
+      '<div class="ai-item-body">',
+      '<div class="ai-item-text' + (item.done ? ' done' : '') + '">' + item.text + '</div>',
+      '<div class="ai-item-meta">',
+      item.project ? '<span class="ai-item-project">' + item.project + '</span>' : '',
+      item.owner ? '<span>' + item.owner + '</span>' : '',
+      dueStr ? '<span style="color:' + (isOverdue ? '#c0392b' : 'var(--muted)') + '">' + (isOverdue ? 'Overdue: ' : 'Due ') + dueStr + '</span>' : '',
+      '</div></div>',
+      '<button data-action="del" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:0 6px;opacity:.35" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.35">&#215;</button>',
+      '</div>'
+    ].join('');
+  });
+  list.innerHTML = rows.join('');
+  list.onclick = function(e) {
+    var item = e.target.closest('[data-id]');
+    if (!item) return;
+    var id = item.getAttribute('data-id');
+    var action = e.target.getAttribute('data-action') || (e.target.closest('[data-action]') ? e.target.closest('[data-action]').getAttribute('data-action') : null);
+    if (action === 'done') toggleActionItemDone(id);
+    else if (action === 'del') deleteActionItem(id);
+  };
+}
 function getActiveSystemPrompt() {
   if (activeProject !== 'generic' && PROJECT_SYSTEM_PROMPTS[activeProject]) {
     return PROJECT_SYSTEM_PROMPTS[activeProject];
@@ -3252,7 +3529,9 @@ async function init() {
   try { await loadChat(); } catch(e) { console.warn('loadChat failed', e); }
   try { await loadChecklistState(); } catch(e) { console.warn('loadChecklistState failed', e); }
   try { await loadRecentSearches(); } catch(e) { console.warn('loadRecentSearches failed', e); }
-  renderAll();
+  try{await loadActionItems();}catch(e){}
+  await checkAuth().catch(function(){});
+  setView('home');
 }
 
 init();
