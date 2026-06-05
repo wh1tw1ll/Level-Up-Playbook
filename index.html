@@ -644,7 +644,7 @@ const ALL_TOPICS = [...new Set(KB.flatMap(s=>s.topics))].sort();
 let activePhase = null;
 let activeTopic = null;
 let activeSearch = '';
-let collapsedGroups = new Set(['1','6','13','18','37']);
+let collapsedGroups = new Set();
 let bookmarks = new Set();
 let chatHistory = [];
 let chatOpen = false;
@@ -1837,8 +1837,8 @@ function renderSections() {
     const isCollapsed = showGroups && collapsedGroups.has(String(myGroupNum));
     if (showGroups && isCollapsed && !GROUP_MAP[s.num]) return '';
     const groupHeader = gInfo
-      ? `<div class="kb-group-header" onclick="toggleGroup('${s.num}')">
-          <span class="kb-group-chevron ${collapsedGroups.has(s.num) ? 'collapsed' : ''}">▾</span>
+      ? `<div class="kb-group-header" onclick="toggleGroup('${myGroupNum}')">
+          <span class="kb-group-chevron ${collapsedGroups.has(String(myGroupNum)) ? 'collapsed' : ''}">▾</span>
           <span class="kb-group-title">${gInfo.label}</span>
           <span class="kb-group-desc">${gInfo.desc}</span>
         </div>`
