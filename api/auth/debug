@@ -1,14 +1,12 @@
-// api/auth/debug.js — temporary debug endpoint
+// api/auth/debug.js — temporary, remove after testing
 export default function handler(req, res) {
-  const cookieHeader = req.headers.cookie || 'NO COOKIE HEADER';
-  const allHeaders = Object.fromEntries(
-    Object.entries(req.headers).filter(([k]) => !k.includes('secret'))
-  );
+  const raw = req.headers['cookie'] || '';
+  const hasAuth = raw.includes('lu_auth');
   res.json({
-    cookieHeader,
-    hasCookie: req.headers.cookie ? true : false,
-    cookieLength: (req.headers.cookie || '').length,
-    hasLuAuth: (req.headers.cookie || '').includes('lu_auth'),
-    headers: allHeaders,
+    hasCookie: !!raw,
+    hasLuAuth: hasAuth,
+    cookieLength: raw.length,
+    cookiePreview: raw.substring(0, 100),
+    allHeaders: Object.keys(req.headers),
   });
 }
