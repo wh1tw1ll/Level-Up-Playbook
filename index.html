@@ -480,6 +480,49 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 .chat-tmpl-btns{display:flex;gap:6px;flex-shrink:0}
 .chat-tmpl-btns button{padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid var(--teal);background:#fff;color:var(--teal)}
 .chat-tmpl-btns button:last-child{background:var(--teal);color:#fff;border:none}
+/* ── HOME PAGE NAV ── */
+.app-nav{display:flex;gap:2px;padding:0 20px;background:var(--topbar);border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0}
+.nav-tab{display:flex;align-items:center;gap:6px;padding:10px 16px;font-size:12px;font-weight:600;color:rgba(255,255,255,.6);cursor:pointer;border:none;background:none;font-family:inherit;border-bottom:3px solid transparent;transition:all .15s;white-space:nowrap}
+.nav-tab:hover{color:#fff}
+.nav-tab.active{color:#fff;border-bottom-color:var(--sage)}
+/* ── HOME PAGE ── */
+.home-page{display:none;width:100%;min-height:calc(100vh - 110px);align-items:center;justify-content:center}
+.home-page.active{display:flex}
+.home-inner{width:100%;max-width:1000px;padding:40px}
+.home-greeting{font-size:26px;font-weight:700;color:var(--charcoal);margin-bottom:4px}
+.home-sub{font-size:14px;color:var(--muted);margin-bottom:32px}
+.home-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.home-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px 24px;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden}
+.home-card:hover{border-color:var(--teal);box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-1px)}
+.home-card.accent{border-color:var(--teal);background:linear-gradient(135deg,var(--teal-light) 0%,var(--card) 100%)}
+.home-card-icon{font-size:28px}
+.home-card-title{font-size:15px;font-weight:700;color:var(--charcoal)}
+.home-card-desc{font-size:12px;color:var(--muted);line-height:1.5;flex:1}
+.home-card-meta{font-size:11px;font-weight:600;color:var(--teal);margin-top:4px}
+.home-card-badge{position:absolute;top:14px;right:14px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.home-card-badge.active{background:#e8f8ee;color:#27ae60}
+/* ── ACTION ITEMS PANEL ── */
+.ai-panel{display:none;padding:32px 40px;max-width:900px;width:100%}
+.ai-panel.active{display:block}
+.ai-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.ai-panel-title{font-size:20px;font-weight:700;color:var(--charcoal)}
+.ai-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.ai-item:last-child{border-bottom:none}
+.ai-checkbox{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);flex-shrink:0;cursor:pointer;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:11px}
+.ai-checkbox.done{background:var(--teal);border-color:var(--teal);color:#fff}
+.ai-item-body{flex:1}
+.ai-item-text{font-size:13px;color:var(--charcoal);line-height:1.5;margin-bottom:4px}
+.ai-item-text.done{text-decoration:line-through;color:var(--muted)}
+.ai-item-meta{font-size:11px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
+.ai-item-project{font-weight:600;color:var(--teal)}
+.ai-add-btn{display:flex;align-items:center;gap:8px;padding:8px 14px;border:1px dashed var(--teal);border-radius:8px;background:none;color:var(--teal);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.ai-add-btn:hover{background:var(--teal-light)}
+.ai-add-form{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:12px;display:none}
+.ai-add-form.open{display:block}
+.ai-form-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.ai-form-input{flex:1;font-family:inherit;font-size:13px;padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--charcoal);min-width:180px}
+.ai-form-select{font-family:inherit;font-size:12px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--charcoal)}
+.ai-form-actions{display:flex;justify-content:flex-end;gap:8px}
 </style>
 </head>
 <body>
