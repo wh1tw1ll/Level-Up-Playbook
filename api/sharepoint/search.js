@@ -1,6 +1,14 @@
 // api/sharepoint/search.js — proxies MS Graph search with stored token
 export default async function handler(req, res) {
-  const cookie = req.cookies?.lu_auth;
+  // Parse cookies manually (Vercel doesn't auto-parse)
+  const cookieHeader = req.headers.cookie || '';
+  const cookies = Object.fromEntries(
+    cookieHeader.split(';').map(c => c.trim().split('='))
+      .filter(([k]) => k)
+      .map(([k, ...v]) => [k.trim(), v.join('=').trim()])
+  );
+  const cookie = cookies['lu_auth'];
+
   if (!cookie) return res.status(401).json({ error: 'Not authenticated' });
 
   let tokenData;
@@ -14,22 +22,18 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Token expired', reauth: true });
   }
 
-  const { query, limit = 10, fileType } = req.method === 'POST'
-    ? req.body
-    : req.query;
+  const query = req.method === 'POST' ? req.body?.query : req.query?.query;
+  const limit = parseInt(req.method === 'POST' ? req.body?.limit : req.query?.limit) || 10;
 
   if (!query) return res.status(400).json({ error: 'query required' });
 
   try {
-    // Use MS Graph Search API
     const searchBody = {
       requests: [{
-        entityTypes: ['driveItem', 'listItem'],
+        entityTypes: ['driveItem'],
         query: { queryString: query },
         from: 0,
-        size: Math.min(Number(limit), 25),
-        fields: ['name', 'webUrl', 'lastModifiedDateTime', 'size', 'parentReference'],
-        ...(fileType && { contentSources: [] }),
+        size: Math.min(limit, 25),
       }],
     };
 
