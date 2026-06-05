@@ -1791,71 +1791,63 @@ function renderSections() {
 
   const filters = [activePhase, activeTopic, activeSearch].filter(Boolean);
   if (activeSearch) {
-    // Count total matches across all filtered content
     const q = activeSearch.toLowerCase();
     let totalMatches = 0;
     filtered.forEach(s => {
-      const allText = [s.title, ...(s.h2||[]), ...(s.content||[]), ...(s.bullets||[])].join(' ').toLowerCase();
-      let idx = 0;
-      while ((idx = allText.indexOf(q, idx)) !== -1) { totalMatches++; idx += q.length; }
+      const allText = [s.title,...(s.h2||[]),...(s.content||[]),...(s.bullets||[])].join(' ').toLowerCase();
+      let idx=0; while((idx=allText.indexOf(q,idx))!==-1){totalMatches++;idx+=q.length;}
     });
     meta.innerHTML = `<span style="color:var(--teal);font-weight:600">${filtered.length} sections</span> &nbsp;·&nbsp; <span style="background:#F5D842;color:#111;padding:1px 8px;border-radius:10px;font-weight:600">${totalMatches} matches</span>`;
   } else if (filters.length) {
-    meta.textContent = `${filtered.length} of ${KB.length} sections`;
+    meta.textContent = filtered.length + ' of ' + KB.length + ' sections';
   } else {
-    meta.textContent = `${KB.length} sections`;
+    meta.textContent = KB.length + ' sections';
   }
 
-  // Group boundaries (section nums that START a new group when no filters active)
-  const GROUP_MAP = {
+  const GROUPS = {
     '1':  {label:'GROUP 1 — FOUNDATION', desc:'Purpose, philosophy, roles, and governance'},
     '6':  {label:'GROUP 2 — PROJECT SETUP', desc:'Mobilization, tools, communications, and reporting'},
     '13': {label:'GROUP 3 — CONTROLS', desc:'Budget, schedule, change, and risk management'},
     '18': {label:'GROUP 4 — PHASE EXECUTION', desc:'Contract through closeout in project sequence'},
     '37': {label:'GROUP 5 — REFERENCE', desc:'Standards, templates, and common problems'},
   };
-
-  const showGroups = !activePhase && !activeTopic && !activeSearch;
-  const GRP_MAP = {
-    '1':  {label:'GROUP 1 — FOUNDATION', desc:'Purpose, philosophy, roles, and governance'},
-    '6':  {label:'GROUP 2 — PROJECT SETUP', desc:'Mobilization, tools, communications, and reporting'},
-    '13': {label:'GROUP 3 — CONTROLS', desc:'Budget, schedule, change, and risk management'},
-    '18': {label:'GROUP 4 — PHASE EXECUTION', desc:'Contract through closeout in project sequence'},
-    '37': {label:'GROUP 5 — REFERENCE', desc:'Standards, templates, and common problems'},
-  };
-  const GRP_STARTS = [1,6,13,18,37];
-  function grpOf(n) {
+  const GKEYS = [1,6,13,18,37];
+  function grpKey(n) {
     let g = 1;
-    for (const x of GRP_STARTS) { if (Number(n) >= x) g = x; }
+    for (const x of GKEYS) { if (Number(n) >= x) g = x; }
     return String(g);
   }
 
-  // Build flat render list: mix group headers and sections
-  const renderItems = [];
-  let lastG = null;
-  for (const s of filtered) {
-    const g = showGroups ? grpOf(s.num) : null;
-    if (showGroups && g !== lastG) {
-      lastG = g;
-      renderItems.push({type:'group', grp:g, info:GRP_MAP[g]});
-    }
-    if (showGroups && collapsedGroups.has(g)) continue;
-    renderItems.push({type:'section', s});
-  }
+  const showGroups = !activePhase && !activeTopic && !activeSearch;
 
-  container.innerHTML = renderItems.map(item => {
-    if (item.type === 'group') {
-      const ic = collapsedGroups.has(item.grp);
-      return '<div class="kb-group-header" data-grp="' + item.grp + '" onclick="toggleGroup(' + JSON.stringify(item.grp) + ')">'
-        + '<span class="kb-group-chevron' + (ic ? ' collapsed' : '') + '">\u25be</span>'
-        + '<span class="kb-group-title">' + item.info.label + '</span>'
-        + '<span class="kb-group-desc">' + item.info.desc + '</span>'
-        + '</div>';
+  // Build HTML parts array
+  const parts = [];
+  const seenGroups = new Set();
+
+  filtered.forEach(s => {
+    const gk = showGroups ? grpKey(s.num) : null;
+
+    // Inject group header when first section of a group is encountered
+    if (showGroups && !seenGroups.has(gk)) {
+      seenGroups.add(gk);
+      const gInfo = GROUPS[gk];
+      const collapsed = collapsedGroups.has(gk);
+      if (gInfo) {
+        parts.push('<div class="kb-group-header" data-grp="' + gk + '" onclick="toggleGroup(\'' + gk + '\')">'
+          + '<span class="kb-group-chevron' + (collapsed ? ' collapsed' : '') + '">▾</span>'
+          + '<span class="kb-group-title">' + gInfo.label + '</span>'
+          + '<span class="kb-group-desc">' + gInfo.desc + '</span>'
+          + '</div>');
+      }
     }
-    const s = item.s;
+
+    // Skip sections whose group is collapsed
+    if (showGroups && collapsedGroups.has(gk)) return;
+
+    // Render section card
     const isBookmarked = bookmarks.has(s.num);
     const q = activeSearch;
-    return `
+    parts.push(`
     <div class="section-card ${openSections.has(s.num) ? 'open' : ''}" id="sec-${s.num}">
       <div class="section-card-header" onclick="toggleSection('${s.num}')">
         <span class="sec-badge">${s.num}</span>
@@ -1939,10 +1931,10 @@ function renderSections() {
           <button onclick="askAboutSection('${s.num}','${s.title.replace(/'/g,"\'")}')">␚ Ask about this section</button>
         </div>
       </div>
-    </div>`;
-  }).join('');
+    </div>`);
+  });
 
-
+  container.innerHTML = parts.join('');
 
   // Auto-open if searching
   if (activeSearch) {
@@ -1953,6 +1945,7 @@ function renderSections() {
   }
 }
 
+
 function renderAll() {
   renderSidebar();
   renderSections();
@@ -1960,46 +1953,12 @@ function renderAll() {
 
 // ── ACTIONS ──
 function toggleGroup(groupNum) {
-  const grpStr = String(groupNum);
-  if (collapsedGroups.has(grpStr)) {
-    collapsedGroups.delete(grpStr);
-  } else {
-    collapsedGroups.add(grpStr);
-  }
-  // Update group header chevron
-  const headers = document.querySelectorAll('.kb-group-header');
-  headers.forEach(hdr => {
-    if (hdr.getAttribute('data-grp') === grpStr) {
-      const chevron = hdr.querySelector('.kb-group-chevron');
-      if (chevron) chevron.classList.toggle('collapsed', collapsedGroups.has(grpStr));
-    }
-  });
-  // Show/hide section cards belonging to this group
-  const GRP_NUMS = [1,6,13,18,37];
-  let g = GRP_NUMS[0];
-  for (const x of GRP_NUMS) { if (Number(groupNum) >= x) g = x; }
-  // Find next group start
-  const grpIdx = GRP_NUMS.indexOf(g);
-  const nextGrp = GRP_NUMS[grpIdx + 1] || 999;
-  document.querySelectorAll('.section-card').forEach(card => {
-    const num = parseInt(card.id.replace('sec-',''));
-    if (num >= g && num < nextGrp) {
-      card.style.display = collapsedGroups.has(grpStr) ? 'none' : '';
-    }
-  });
-  // If expanding and no cards exist yet (first expand), do a full render
-  const grpIdx2 = GRP_NUMS.indexOf(Number(groupNum));
-  const nextG = GRP_NUMS[grpIdx2 + 1] || 999;
-  const existingCards = document.querySelectorAll('.section-card');
-  let hasCards = false;
-  existingCards.forEach(c => {
-    const n = parseInt(c.id.replace('sec-',''));
-    if (n >= Number(groupNum) && n < nextG) hasCards = true;
-  });
-  if (!collapsedGroups.has(grpStr) && !hasCards) {
-    renderAll();
-  }
+  const k = String(groupNum);
+  if (collapsedGroups.has(k)) { collapsedGroups.delete(k); }
+  else { collapsedGroups.add(k); }
+  renderAll();
 }
+
 
 function toggleSection(num) {
   if (openSections.has(num)) {
