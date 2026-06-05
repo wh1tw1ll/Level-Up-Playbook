@@ -782,7 +782,27 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
       <span class="msb-icon">📄</span>
       <span class="msb-label">Contracts</span>
     </button>
-    <button class="mfp-section-btn" id="mfp-btn-day2" onclick="showMFPSection('day2')
+    <button class="mfp-section-btn" id="mfp-btn-day2" onclick="showMFPSection('day2')">
+    </button>
+  </div><!-- end mfp-sidebar -->
+</div><!-- end sidebar -->
+
+<!-- MAIN -->
+<main class="main">
+  <div class="content-area">
+    <div class="mfp-panel" id="mfp-panel"></div>
+    <div class="playbook-content" id="playbook-content">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div class="results-meta" id="results-meta"></div>
+        <div id="collapse-all-btn-wrap"></div>
+      </div>
+      <div id="sections-container"></div>
+    </div>
+  </div>
+</main>
+
+</div><!-- end app-shell -->
+
 <script>
 // ── MICROSOFT AUTH + SHAREPOINT ──
 let luUser = null;  // { name, email, authenticated }
@@ -2390,30 +2410,29 @@ function askAboutSection(num, title) {
 }
 
 // ── SEARCH ──
-const searchInput = document.getElementById('search-input');
-searchInput.addEventListener('input', e => {
-  activeSearch = e.target.value.trim();
-  renderSections();
-  const scopeRow = document.getElementById('topbar-scope');
-  if (scopeRow) scopeRow.classList.toggle('visible', !!activeSearch);
-  if (activeSearch) {
-    saveRecentSearch(activeSearch);
-    setTimeout(() => {
-      const firstMark = document.querySelector('mark');
-      if (firstMark) firstMark.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 80);
-  }
+document.addEventListener('DOMContentLoaded', function() {
+  const si = document.getElementById('search-input');
+  if (!si) return;
+  si.addEventListener('input', function(e) {
+    activeSearch = e.target.value.trim();
+    if (currentView !== 'playbook') setView('playbook');
+    renderSections();
+    const scopeRow = document.getElementById('topbar-scope');
+    if (scopeRow) scopeRow.classList.toggle('visible', activeSearch.length > 0);
+    updateRecentSearches(activeSearch);
+  });
+  si.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      si.value = '';
+      activeSearch = '';
+      renderAll();
+    }
+  });
+  si.addEventListener('focus', function() {
+    if (!activeSearch) showRecentSearches();
+  });
+  si.addEventListener('blur', hideSearchDropdown);
 });
-
-let searchScope = 'all';
-function setScope(scope) {
-  searchScope = scope;
-  document.querySelectorAll('.scope-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('scope-' + scope).classList.add('active');
-  renderSections();
-}
-searchInput.addEventListener('focus', () => { if (!activeSearch) showSearchDropdown(); });
-searchInput.addEventListener('blur', hideSearchDropdown);
 
 // ── CHAT ──
 // ── DRAGGABLE CHAT ──
@@ -2508,8 +2527,7 @@ function appendLoading() {
   return div;
 }
 
-async 
-function findTemplatesForQuery(q) {
+async function findTemplatesForQuery(q) {
   const lower = q.toLowerCase();
   const keywords = {
     'risk': ['01_Risk_Register.xlsx'],
@@ -3501,6 +3519,14 @@ function handleSharePointClick() {
     signInWithMicrosoft();
   }
 }
+
+function setScope(scope) {
+  searchScope = scope;
+  document.querySelectorAll('.scope-btn').forEach(function(b) { b.classList.remove('active'); });
+  const btn = document.getElementById('scope-' + scope);
+  if (btn) btn.classList.add('active');
+  renderSections();
+}
 function getActiveSystemPrompt() {
   if (activeProject !== 'generic' && PROJECT_SYSTEM_PROMPTS[activeProject]) {
     return PROJECT_SYSTEM_PROMPTS[activeProject];
@@ -3548,30 +3574,10 @@ document.addEventListener('click', function(e) {
   }
 });
 
-function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme') || 'light';
-  const next = current === 'dark' ? 'light' : 'dark';
-  applyTheme(next);
-  try { localStorage.setItem('lu_theme', next); } catch(e) {}
-}
+
 
 // ── INIT ──
-async function init() {
-  const savedTheme = (() => { try { return localStorage.getItem('lu_theme'); } catch(e) { return null; } })();
-  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
 
-  try { await loadBookmarks(); } catch(e) { console.warn('loadBookmarks failed', e); }
-  try { await loadNotes(); } catch(e) { console.warn('loadNotes failed', e); }
-  try { await loadChat(); } catch(e) { console.warn('loadChat failed', e); }
-  try { await loadChecklistState(); } catch(e) { console.warn('loadChecklistState failed', e); }
-  try { await loadRecentSearches(); } catch(e) { console.warn('loadRecentSearches failed', e); }
-  try{await loadActionItems();}catch(e){}
-  await checkAuth().catch(function(){});
-  setView('home');
-}
-
-init();
 
 
 // Quick-ask event delegation
