@@ -577,7 +577,7 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
   <button class="nav-tab active" id="nav-home" onclick="setView('home')">Home</button>
   <button class="nav-tab" id="nav-playbook" onclick="setView('playbook')">Playbook</button>
   <button class="nav-tab" id="nav-templates" onclick="setView('templates')">Templates</button>
-  <button class="nav-tab" id="nav-mfp" onclick="setView('mfp-go')">Projects</button>
+  <button class="nav-tab" id="nav-mfp" onclick="setView('projects')">Projects</button>
   <button class="nav-tab" id="nav-actions" onclick="setView('actions')">Action Items</button>
 </nav>
 </div>
@@ -594,7 +594,7 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
         <div class="home-card-desc">43 sections across 5 groups &mdash; methodology, controls, phase execution, and reference material.</div>
         <div class="home-card-meta">Open Playbook &rarr;</div>
       </div>
-      <div class="home-card" onclick="setView('mfp-go')">
+      <div class="home-card" onclick="setView('projects')">
         <span class="home-card-badge active">1 Active</span>
         <div class="home-card-icon">&#128193;</div>
         <div class="home-card-title">Projects</div>
@@ -637,11 +637,34 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
         <div class="home-card-desc">Ask anything about MFP finances, punch list strategy, or any playbook topic.</div>
         <div class="home-card-meta">Open AI Chat &rarr;</div>
       </div>
-      <div class="home-card" onclick="signInWithMicrosoft()">
+      <div class="home-card" id="sharepoint-home-card" onclick="handleSharePointClick()">
         <div class="home-card-icon">&#128193;</div>
         <div class="home-card-title">SharePoint Files</div>
         <div class="home-card-desc">Search Level Up and MFP documents. Sign in with Microsoft to enable.</div>
         <div class="home-card-meta" id="sharepoint-card-meta">Sign in to connect &rarr;</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROJECTS PANEL -->
+<div id="projects-panel" class="home-page">
+  <div class="home-inner">
+    <div style="font-size:24px;font-weight:800;color:var(--charcoal);margin-bottom:6px">Projects</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:32px;font-weight:500">Active and recent engagements</div>
+    <div class="home-cards">
+      <div class="home-card accent" onclick="setView('mfp-go')">
+        <span class="home-card-badge active">Active</span>
+        <div class="home-card-icon">&#127967;</div>
+        <div class="home-card-title">MFP Stadium</div>
+        <div class="home-card-desc">Miami Freedom Park &mdash; Post-Opening Closeout. Kroll audit, punch list disputes, Lemartec indirects, ARQ hold.</div>
+        <div class="home-card-meta">Open Dashboard &rarr;</div>
+      </div>
+      <div class="home-card" style="opacity:.5;cursor:default">
+        <div class="home-card-icon">&#43;</div>
+        <div class="home-card-title">Add Project</div>
+        <div class="home-card-desc">Kansas City Chiefs, HCC, Sixers, and future pursuits will appear here.</div>
+        <div class="home-card-meta" style="color:var(--muted)">Coming soon</div>
       </div>
     </div>
   </div>
@@ -759,46 +782,7 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
       <span class="msb-icon">📄</span>
       <span class="msb-label">Contracts</span>
     </button>
-    <button class="mfp-section-btn" id="mfp-btn-day2" onclick="showMFPSection('day2')">
-      <span class="msb-icon">🏗</span>
-      <span class="msb-label">Day 2 / Owner Requests</span>
-      <span class="msb-badge">60+</span>
-    </button>
-    <button class="mfp-section-btn" id="mfp-btn-costrecovery" onclick="showMFPSection('costrecovery')">
-      <span class="msb-icon">🔍</span>
-      <span class="msb-label">Cost Recovery / Kroll</span>
-      <span class="msb-badge warn">Jun 30</span>
-    </button>
-    <button class="mfp-section-btn" id="mfp-btn-stakeholders" onclick="showMFPSection('stakeholders')">
-      <span class="msb-icon">👥</span>
-      <span class="msb-label">Stakeholders</span>
-    </button>
-  </div>
-</aside>
-
-<!-- MAIN -->
-<main class="main">
-  <div class="content-area" id="content-area">
-
-    <!-- MFP Project Dashboard Panel -->
-    <div class="mfp-panel" id="mfp-panel"></div>
-
-    <!-- Standard Playbook Content -->
-    <div class="playbook-content" id="playbook-content">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
-        <div class="results-meta" id="results-meta"></div>
-        <div id="collapse-all-btn-wrap"></div>
-      </div>
-      <div id="sections-container"></div>
-    </div>
-
-  </div>
-
-
-</main>
-
-</div>
-
+    <button class="mfp-section-btn" id="mfp-btn-day2" onclick="showMFPSection('day2')
 <script>
 // ── MICROSOFT AUTH + SHAREPOINT ──
 let luUser = null;  // { name, email, authenticated }
@@ -3384,6 +3368,8 @@ function setView(view) {
   if (homePage) homePage.classList.remove('active');
   if (aiPanel)  aiPanel.classList.remove('active');
   if (shell)    shell.style.display = 'none';
+  var projPanel = document.getElementById('projects-panel');
+  if (projPanel) projPanel.classList.remove('active');
   document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active');});
   var tab = document.getElementById('nav-' + (view==='mfp'?'mfp':view));
   if (tab) tab.classList.add('active');
@@ -3400,6 +3386,9 @@ function setView(view) {
       var pb=document.getElementById('active-project-bar'); if(pb) pb.classList.remove('visible');
     }
     switchSidebarMode('generic'); renderAll();
+  } else if (view === 'projects') {
+    var projPanel = document.getElementById('projects-panel');
+    if (projPanel) projPanel.classList.add('active');
   } else if (view === 'mfp') {
     if (shell) shell.style.display = '';
   } else if (view === 'templates') {
@@ -3499,6 +3488,19 @@ function renderActionItems() {
     else if (action === 'del') deleteActionItem(id);
   };
 }
+
+function handleSharePointClick() {
+  if (luUser && luUser.authenticated) {
+    // Already signed in - show a search prompt via chat
+    toggleChat();
+    setTimeout(function() {
+      var input = document.getElementById('chat-input');
+      if (input) { input.value = 'Search SharePoint for: '; input.focus(); }
+    }, 300);
+  } else {
+    signInWithMicrosoft();
+  }
+}
 function getActiveSystemPrompt() {
   if (activeProject !== 'generic' && PROJECT_SYSTEM_PROMPTS[activeProject]) {
     return PROJECT_SYSTEM_PROMPTS[activeProject];
@@ -3511,6 +3513,41 @@ function applyTheme(theme) {
   const btn = document.getElementById('theme-btn');
   if (btn) btn.textContent = theme === 'dark' ? '☾' : '☀';
 }
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  try { localStorage.setItem('lu_theme', next); } catch(e) {}
+}
+
+// ── INIT ──
+async function init() {
+  const savedTheme = (() => { try { return localStorage.getItem('lu_theme'); } catch(e) { return null; } })();
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
+
+  try { await loadBookmarks(); } catch(e) { console.warn('loadBookmarks failed', e); }
+  try { await loadNotes(); } catch(e) { console.warn('loadNotes failed', e); }
+  try { await loadChat(); } catch(e) { console.warn('loadChat failed', e); }
+  try { await loadChecklistState(); } catch(e) { console.warn('loadChecklistState failed', e); }
+  try { await loadRecentSearches(); } catch(e) { console.warn('loadRecentSearches failed', e); }
+  try{await loadActionItems();}catch(e){}
+  await checkAuth().catch(function(){});
+  setView('home');
+}
+
+init();
+
+
+// Quick-ask event delegation
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('[data-q]');
+  if (btn && btn.classList.contains('mfp-quick-btn')) {
+    const q = btn.getAttribute('data-q').replace(/&apos;/g, "'");
+    mfpQuickAsk(q);
+  }
+});
+
 function toggleTheme() {
   const current = document.documentElement.getAttribute('data-theme') || 'light';
   const next = current === 'dark' ? 'light' : 'dark';
