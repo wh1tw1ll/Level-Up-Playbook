@@ -645,6 +645,7 @@ let activePhase = null;
 let activeTopic = null;
 let activeSearch = '';
 let collapsedGroups = new Set();
+let openSections = new Set();
 let bookmarks = new Set();
 let chatHistory = [];
 let chatOpen = false;
@@ -1845,7 +1846,7 @@ function renderSections() {
       : '';
     if (isCollapsed) return groupHeader;
     return `${groupHeader}
-    <div class="section-card" id="sec-${s.num}">
+    <div class="section-card ${openSections.has(s.num) ? 'open' : ''}" id="sec-${s.num}">
       <div class="section-card-header" onclick="toggleSection('${s.num}')">
         <span class="sec-badge">${s.num}</span>
         <div style="flex:1">
@@ -1933,7 +1934,10 @@ function renderSections() {
 
   // Auto-open if searching
   if (activeSearch) {
-    document.querySelectorAll('.section-card').forEach(el => el.classList.add('open'));
+    document.querySelectorAll('.section-card').forEach(el => {
+      el.classList.add('open');
+      openSections.add(el.id.replace('sec-',''));
+    });
   }
 }
 
@@ -1953,8 +1957,14 @@ function toggleGroup(groupNum) {
 }
 
 function toggleSection(num) {
+  if (openSections.has(num)) {
+    openSections.delete(num);
+  } else {
+    openSections.add(num);
+  }
+  // Toggle DOM directly without full re-render
   const el = document.getElementById('sec-'+num);
-  if (el) el.classList.toggle('open');
+  if (el) el.classList.toggle('open', openSections.has(num));
 }
 function toggleSubsec(id) {
   const el = document.getElementById(id);
@@ -1972,6 +1982,7 @@ function clearFilters() {
   activePhase = null; activeTopic = null; activeSearch = '';
   document.getElementById('search-input').value = '';
   collapsedGroups = new Set(['1','6','13','18','37']);
+  openSections = new Set();
   if (activeProject === 'mfp') {
     renderMFPOverview();
     document.querySelectorAll('.mfp-section-btn').forEach(b => b.classList.remove('active'));
