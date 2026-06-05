@@ -1816,37 +1816,46 @@ function renderSections() {
   };
 
   const showGroups = !activePhase && !activeTopic && !activeSearch;
-  const GRP_NUMS = Object.keys(GROUP_MAP).map(Number).sort((a,b)=>a-b);
-  function getGrp(n) {
-    let g = GRP_NUMS[0];
-    for (const x of GRP_NUMS) { if (Number(n) >= x) g = x; }
+  const GRP_MAP = {
+    '1':  {label:'GROUP 1 — FOUNDATION', desc:'Purpose, philosophy, roles, and governance'},
+    '6':  {label:'GROUP 2 — PROJECT SETUP', desc:'Mobilization, tools, communications, and reporting'},
+    '13': {label:'GROUP 3 — CONTROLS', desc:'Budget, schedule, change, and risk management'},
+    '18': {label:'GROUP 4 — PHASE EXECUTION', desc:'Contract through closeout in project sequence'},
+    '37': {label:'GROUP 5 — REFERENCE', desc:'Standards, templates, and common problems'},
+  };
+  const GRP_STARTS = [1,6,13,18,37];
+  function grpOf(n) {
+    let g = 1;
+    for (const x of GRP_STARTS) { if (Number(n) >= x) g = x; }
     return String(g);
   }
 
-  let html = '';
-  let lastGrp = null;
+  // Build flat render list: mix group headers and sections
+  const renderItems = [];
+  let lastG = null;
   for (const s of filtered) {
+    const g = showGroups ? grpOf(s.num) : null;
+    if (showGroups && g !== lastG) {
+      lastG = g;
+      renderItems.push({type:'group', grp:g, info:GRP_MAP[g]});
+    }
+    if (showGroups && collapsedGroups.has(g)) continue;
+    renderItems.push({type:'section', s});
+  }
+
+  container.innerHTML = renderItems.map(item => {
+    if (item.type === 'group') {
+      const ic = collapsedGroups.has(item.grp);
+      return '<div class="kb-group-header" data-grp="' + item.grp + '" onclick="toggleGroup(' + JSON.stringify(item.grp) + ')">'
+        + '<span class="kb-group-chevron' + (ic ? ' collapsed' : '') + '">\u25be</span>'
+        + '<span class="kb-group-title">' + item.info.label + '</span>'
+        + '<span class="kb-group-desc">' + item.info.desc + '</span>'
+        + '</div>';
+    }
+    const s = item.s;
     const isBookmarked = bookmarks.has(s.num);
     const q = activeSearch;
-
-    if (showGroups) {
-      const grp = getGrp(s.num);
-      if (grp !== lastGrp) {
-        lastGrp = grp;
-        const gd = GROUP_MAP[grp] || GROUP_MAP[Number(grp)];
-        if (gd) {
-          const ic = collapsedGroups.has(grp);
-          html += '<div class="kb-group-header" data-grp="' + grp + '" onclick="toggleGroup(\'' + grp + '\')">'
-            + '<span class="kb-group-chevron ' + (ic ? 'collapsed' : '') + '">▾</span>'
-            + '<span class="kb-group-title">' + gd.label + '</span>'
-            + '<span class="kb-group-desc">' + gd.desc + '</span>'
-            + '</div>';
-        }
-      }
-      if (collapsedGroups.has(grp)) continue;
-    }
-
-    html += `
+    return `
     <div class="section-card ${openSections.has(s.num) ? 'open' : ''}" id="sec-${s.num}">
       <div class="section-card-header" onclick="toggleSection('${s.num}')">
         <span class="sec-badge">${s.num}</span>
@@ -1931,8 +1940,8 @@ function renderSections() {
         </div>
       </div>
     </div>`;
-  }
-  container.innerHTML = html;
+  }).join('');
+
 
 
   // Auto-open if searching
