@@ -31,8 +31,9 @@
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal);min-height:100vh;font-size:15px;line-height:1.6;transition:background .2s,color .2s}
 
 /* ── LAYOUT ── */
-.shell{display:grid;grid-template-columns:300px 1fr;grid-template-rows:1fr;min-height:100vh;max-width:1400px;margin:0 auto}
-.topbar{background:var(--topbar-bg);display:flex;align-items:center;gap:16px;padding:10px 24px;position:sticky;top:0;z-index:100;transition:background .2s;border-bottom:1px solid rgba(255,255,255,.06)}
+.shell{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 54px);max-width:1400px;margin:0 auto}
+.topbar{background:var(--topbar-bg);display:flex;align-items:center;gap:16px;padding:10px 24px;position:relative;z-index:200;transition:background .2s;border-bottom:1px solid rgba(255,255,255,.06);width:100%}
+.sticky-header{position:sticky;top:0;z-index:200;width:100%}
 .logo{display:flex;align-items:center;gap:0;color:#fff;text-decoration:none;flex-shrink:0}
 #site-logo{height:34px;width:auto;display:block}
 #site-logo path{fill:#e6e7e8}
@@ -481,12 +482,12 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 .chat-tmpl-btns button{padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid var(--teal);background:#fff;color:var(--teal)}
 .chat-tmpl-btns button:last-child{background:var(--teal);color:#fff;border:none}
 /* ── HOME PAGE NAV ── */
-.app-nav{display:flex;gap:0;padding:0 20px;background:var(--topbar-bg,var(--charcoal,#1a2332));border-bottom:1px solid rgba(255,255,255,.08)}
+.app-nav{display:flex;gap:0;padding:0 20px;background:var(--topbar-bg,var(--charcoal,#1a2332));border-bottom:1px solid rgba(255,255,255,.08);width:100%}
 .nav-tab{display:flex;align-items:center;gap:6px;padding:11px 18px;font-size:12px;font-weight:600;color:rgba(255,255,255,.55);cursor:pointer;border:none;background:none;font-family:inherit;border-bottom:3px solid transparent;transition:all .15s;white-space:nowrap;letter-spacing:.01em}
 .nav-tab:hover{color:#fff}
 .nav-tab.active{color:#fff;border-bottom-color:var(--sage)}
 /* ── HOME PAGE ── */
-.home-page{display:none;width:100%;min-height:calc(100vh - 110px);align-items:center;justify-content:center;background:var(--bg)}
+.home-page{display:none;width:100%;min-height:calc(100vh - 92px);align-items:center;justify-content:center;background:var(--bg)}
 .home-page.active{display:flex}
 .home-inner{width:100%;max-width:960px;padding:48px 40px}
 .home-greeting{font-size:28px;font-weight:800;color:var(--charcoal);margin-bottom:6px;letter-spacing:-.01em}
@@ -540,6 +541,36 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 </style>
 </head>
 <body>
+<div class="sticky-header">
+<!-- TOPBAR -->
+<header class="topbar">
+  <a class="logo" href="#">
+    <svg id="site-logo" viewBox="60 190 700 100" xmlns="http://www.w3.org/2000/svg">
+      <g><path id="lp1" d="m265.9,207.31v43.5h35.59c0,8.47-6.87,15.34-15.34,15.34h-39.15v-58.85h18.9Z"/><path id="lp2" d="m363.87,207.31v13.52h-37.65v8.54h36.46v14h-36.46v9.1h38.12v13.68h-56.87v-53.05c0-3.2,2.6-5.8,5.8-5.8h50.59Z"/><path id="lp3" d="m391.76,257.42l-23.91-50.11h21.91l18.51,41.92,18.51-41.92h20.09l-22.79,49.88c-2.5,5.46-7.95,8.97-13.96,8.97h-4.51c-5.91,0-11.3-3.4-13.85-8.74Z"/><path id="lp4" d="m507.75,207.31v13.52h-37.65v8.54h36.46v14h-36.46v9.1h38.12v13.68h-56.87v-53.05c0-3.2,2.6-5.8,5.8-5.8h50.59Z"/><path id="lp5" d="m536.55,207.31v43.5h35.59c0,8.47-6.87,15.34-15.34,15.34h-39.15v-58.85h18.9Z"/><path id="lp6" d="m601.32,236.26v-28.95h13.02c3.2,0,5.8,2.6,5.8,5.8v22.91c0,6.64,2.06,15.42,16.21,15.42h.4c14.08,0,15.98-8.78,15.98-15.42v-22.91c0-3.2,2.6-5.8,5.8-5.8h13.02v28.95c0,11.71-3.72,30.77-33.85,30.77h-2.29c-31.32,0-34.09-19.14-34.09-30.77Z"/><path id="lp7" d="m700.41,247.97v18.19h-18.9v-53.05c0-3.2,2.6-5.8,5.8-5.8h35.65c20.33,0,26.02,8.15,26.02,19.69v.95c0,11.47-5.93,20.01-26.02,20.01h-22.54Zm0-14.08h20.96c5.85,0,7.99-2.53,7.99-6.17v-.24c0-3.48-2.14-6.01-7.99-6.01h-20.96v12.42Z"/></g>
+      <g><path id="lp8" d="m103.45,259.42l11.24,19.81c.2.35-.05.79-.46.79h-27.76c-3.09,0-5.95-1.66-7.47-4.35l-11.12-19.58c-1.48-2.61-1.5-5.8-.03-8.43l27.24-48.92c1.52-2.72,4.39-4.41,7.51-4.41h27.58c.4,0,.66.44.46.79l-29.19,52.42c-1.46,2.62-1.45,5.81.03,8.42l1.97,3.47Z"/><path id="lp9" d="m218,195.11l-10.54,18.88-20.8,37.29-13.59,24.34c-1.52,2.72-4.39,4.41-7.51,4.41h-35.6c-3.09,0-5.95-1.66-7.48-4.35l-11.12-19.58c-1.48-2.61-1.5-5.81-.04-8.43l27.25-48.92c1.52-2.72,4.39-4.41,7.51-4.41h27.58c.41,0,.66.44.47.79l-30.84,55.37c-.2.36.06.79.47.79h4.31c3.11,0,5.98-1.69,7.51-4.41l26.86-48.13c1.52-2.72,4.39-4.41,7.51-4.41h27.59c.4,0,.66.44.46.79Z"/></g>
+    </svg>
+  </a>
+  <div class="topbar-scope" id="topbar-scope">
+    <span class="topbar-scope-label">Search in:</span>
+    <button class="scope-btn active" id="scope-title" onclick="setScope('title')">Titles</button>
+    <button class="scope-btn" id="scope-subs" onclick="setScope('subs')">+ Subsections</button>
+    <button class="scope-btn active" id="scope-all" onclick="setScope('all')">+ Full Content</button>
+  </div>
+  <div class="topbar-search">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="search-input" placeholder="Search the playbook… (press / to focus)" autocomplete="off">
+    <div class="search-dropdown" id="search-dropdown"></div>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-ghost" onclick="showBookmarks()">⭐ Saved</button>
+    <button class="btn btn-sage" onclick="clearFilters()">All Sections</button>
+    <button class="topbar-notes-btn" onclick="toggleNotesPanel()" title="Team Notes">
+      📝 Notes
+      <span class="topbar-notes-count" id="notes-topbar-count" style="display:none"></span>
+    </button>
+    <button class="btn btn-theme" id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark mode" aria-label="Toggle color theme">☀</button>
+  </div>
+</header>
 <nav class="app-nav" id="app-nav">
   <button class="nav-tab active" id="nav-home"     onclick="setView('home')">🏠 Home</button>
   <button class="nav-tab"        id="nav-playbook"  onclick="setView('playbook')">📖 Playbook</button>
@@ -547,6 +578,8 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
   <button class="nav-tab"        id="nav-mfp"       onclick="setView('mfp-go')">📁 Projects</button>
   <button class="nav-tab"        id="nav-actions"   onclick="setView('actions')">✅ Action Items</button>
 </nav>
+</div><!-- end sticky-header -->
+
 <!-- HOME PAGE -->
 <div id="home-page" class="home-page active">
   <div class="home-inner" id="home-inner">
@@ -636,35 +669,6 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 
 <div class="shell" id="app-shell" style="display:none">
 
-<!-- TOPBAR -->
-<header class="topbar">
-  <a class="logo" href="#">
-    <svg id="site-logo" viewBox="60 190 700 100" xmlns="http://www.w3.org/2000/svg">
-      <g><path id="lp1" d="m265.9,207.31v43.5h35.59c0,8.47-6.87,15.34-15.34,15.34h-39.15v-58.85h18.9Z"/><path id="lp2" d="m363.87,207.31v13.52h-37.65v8.54h36.46v14h-36.46v9.1h38.12v13.68h-56.87v-53.05c0-3.2,2.6-5.8,5.8-5.8h50.59Z"/><path id="lp3" d="m391.76,257.42l-23.91-50.11h21.91l18.51,41.92,18.51-41.92h20.09l-22.79,49.88c-2.5,5.46-7.95,8.97-13.96,8.97h-4.51c-5.91,0-11.3-3.4-13.85-8.74Z"/><path id="lp4" d="m507.75,207.31v13.52h-37.65v8.54h36.46v14h-36.46v9.1h38.12v13.68h-56.87v-53.05c0-3.2,2.6-5.8,5.8-5.8h50.59Z"/><path id="lp5" d="m536.55,207.31v43.5h35.59c0,8.47-6.87,15.34-15.34,15.34h-39.15v-58.85h18.9Z"/><path id="lp6" d="m601.32,236.26v-28.95h13.02c3.2,0,5.8,2.6,5.8,5.8v22.91c0,6.64,2.06,15.42,16.21,15.42h.4c14.08,0,15.98-8.78,15.98-15.42v-22.91c0-3.2,2.6-5.8,5.8-5.8h13.02v28.95c0,11.71-3.72,30.77-33.85,30.77h-2.29c-31.32,0-34.09-19.14-34.09-30.77Z"/><path id="lp7" d="m700.41,247.97v18.19h-18.9v-53.05c0-3.2,2.6-5.8,5.8-5.8h35.65c20.33,0,26.02,8.15,26.02,19.69v.95c0,11.47-5.93,20.01-26.02,20.01h-22.54Zm0-14.08h20.96c5.85,0,7.99-2.53,7.99-6.17v-.24c0-3.48-2.14-6.01-7.99-6.01h-20.96v12.42Z"/></g>
-      <g><path id="lp8" d="m103.45,259.42l11.24,19.81c.2.35-.05.79-.46.79h-27.76c-3.09,0-5.95-1.66-7.47-4.35l-11.12-19.58c-1.48-2.61-1.5-5.8-.03-8.43l27.24-48.92c1.52-2.72,4.39-4.41,7.51-4.41h27.58c.4,0,.66.44.46.79l-29.19,52.42c-1.46,2.62-1.45,5.81.03,8.42l1.97,3.47Z"/><path id="lp9" d="m218,195.11l-10.54,18.88-20.8,37.29-13.59,24.34c-1.52,2.72-4.39,4.41-7.51,4.41h-35.6c-3.09,0-5.95-1.66-7.48-4.35l-11.12-19.58c-1.48-2.61-1.5-5.81-.04-8.43l27.25-48.92c1.52-2.72,4.39-4.41,7.51-4.41h27.58c.41,0,.66.44.47.79l-30.84,55.37c-.2.36.06.79.47.79h4.31c3.11,0,5.98-1.69,7.51-4.41l26.86-48.13c1.52-2.72,4.39-4.41,7.51-4.41h27.59c.4,0,.66.44.46.79Z"/></g>
-    </svg>
-  </a>
-  <div class="topbar-scope" id="topbar-scope">
-    <span class="topbar-scope-label">Search in:</span>
-    <button class="scope-btn active" id="scope-title" onclick="setScope('title')">Titles</button>
-    <button class="scope-btn" id="scope-subs" onclick="setScope('subs')">+ Subsections</button>
-    <button class="scope-btn active" id="scope-all" onclick="setScope('all')">+ Full Content</button>
-  </div>
-  <div class="topbar-search">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input type="text" id="search-input" placeholder="Search the playbook… (press / to focus)" autocomplete="off">
-    <div class="search-dropdown" id="search-dropdown"></div>
-  </div>
-  <div class="topbar-actions">
-    <button class="btn btn-ghost" onclick="showBookmarks()">⭐ Saved</button>
-    <button class="btn btn-sage" onclick="clearFilters()">All Sections</button>
-    <button class="topbar-notes-btn" onclick="toggleNotesPanel()" title="Team Notes">
-      📝 Notes
-      <span class="topbar-notes-count" id="notes-topbar-count" style="display:none"></span>
-    </button>
-    <button class="btn btn-theme" id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark mode" aria-label="Toggle color theme">☀</button>
-  </div>
-</header>
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
