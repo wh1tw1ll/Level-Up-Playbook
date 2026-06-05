@@ -1816,36 +1816,37 @@ function renderSections() {
   };
 
   const showGroups = !activePhase && !activeTopic && !activeSearch;
+  const GRP_NUMS = Object.keys(GROUP_MAP).map(Number).sort((a,b)=>a-b);
+  function getGrp(n) {
+    let g = GRP_NUMS[0];
+    for (const x of GRP_NUMS) { if (Number(n) >= x) g = x; }
+    return String(g);
+  }
 
-  // Build filtered list with group collapse applied
-  const visibleSections = showGroups
-    ? filtered.filter(s => {
-        // Find which group this section belongs to
-        const groupNums = Object.keys(GROUP_MAP).map(Number).sort((a,b)=>a-b);
-        let myGroup = groupNums[0];
-        for (const gn of groupNums) { if (Number(s.num) >= gn) myGroup = gn; }
-        return !collapsedGroups.has(String(myGroup));
-      })
-    : filtered;
-
-  container.innerHTML = filtered.map(s => {
+  let html = '';
+  let lastGrp = null;
+  for (const s of filtered) {
     const isBookmarked = bookmarks.has(s.num);
     const q = activeSearch;
-    const gInfo = showGroups ? GROUP_MAP[s.num] : null;
-    const groupNums = Object.keys(GROUP_MAP).map(Number).sort((a,b)=>a-b);
-    let myGroupNum = groupNums[0];
-    for (const gn of groupNums) { if (Number(s.num) >= gn) myGroupNum = gn; }
-    const isCollapsed = showGroups && collapsedGroups.has(String(myGroupNum));
-    if (showGroups && isCollapsed && !GROUP_MAP[s.num]) return '';
-    const groupHeader = gInfo
-      ? `<div class="kb-group-header" onclick="toggleGroup('${myGroupNum}')">
-          <span class="kb-group-chevron ${collapsedGroups.has(String(myGroupNum)) ? 'collapsed' : ''}">▾</span>
-          <span class="kb-group-title">${gInfo.label}</span>
-          <span class="kb-group-desc">${gInfo.desc}</span>
-        </div>`
-      : '';
-    if (isCollapsed) return groupHeader;
-    return `${groupHeader}
+
+    if (showGroups) {
+      const grp = getGrp(s.num);
+      if (grp !== lastGrp) {
+        lastGrp = grp;
+        const gd = GROUP_MAP[grp] || GROUP_MAP[Number(grp)];
+        if (gd) {
+          const ic = collapsedGroups.has(grp);
+          html += '<div class="kb-group-header" onclick="toggleGroup(\'' + grp + '\')">'
+            + '<span class="kb-group-chevron ' + (ic ? 'collapsed' : '') + '">▾</span>'
+            + '<span class="kb-group-title">' + gd.label + '</span>'
+            + '<span class="kb-group-desc">' + gd.desc + '</span>'
+            + '</div>';
+        }
+      }
+      if (collapsedGroups.has(grp)) continue;
+    }
+
+    html += `
     <div class="section-card ${openSections.has(s.num) ? 'open' : ''}" id="sec-${s.num}">
       <div class="section-card-header" onclick="toggleSection('${s.num}')">
         <span class="sec-badge">${s.num}</span>
@@ -1930,7 +1931,9 @@ function renderSections() {
         </div>
       </div>
     </div>`;
-  }).join('');
+  }
+  container.innerHTML = html;
+
 
   // Auto-open if searching
   if (activeSearch) {
