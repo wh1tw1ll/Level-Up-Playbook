@@ -644,7 +644,7 @@ const ALL_TOPICS = [...new Set(KB.flatMap(s=>s.topics))].sort();
 let activePhase = null;
 let activeTopic = null;
 let activeSearch = '';
-let collapsedGroups = new Set();
+let collapsedGroups = new Set(['1','6','13','18','37']);
 let openSections = new Set();
 let bookmarks = new Set();
 let chatHistory = [];
@@ -1836,7 +1836,7 @@ function renderSections() {
         const gd = GROUP_MAP[grp] || GROUP_MAP[Number(grp)];
         if (gd) {
           const ic = collapsedGroups.has(grp);
-          html += '<div class="kb-group-header" onclick="toggleGroup(\'' + grp + '\')">'
+          html += '<div class="kb-group-header" data-grp="' + grp + '" onclick="toggleGroup(\'' + grp + '\')">'
             + '<span class="kb-group-chevron ' + (ic ? 'collapsed' : '') + '">▾</span>'
             + '<span class="kb-group-title">' + gd.label + '</span>'
             + '<span class="kb-group-desc">' + gd.desc + '</span>'
@@ -1951,12 +1951,45 @@ function renderAll() {
 
 // ── ACTIONS ──
 function toggleGroup(groupNum) {
-  if (collapsedGroups.has(groupNum)) {
-    collapsedGroups.delete(groupNum);
+  const grpStr = String(groupNum);
+  if (collapsedGroups.has(grpStr)) {
+    collapsedGroups.delete(grpStr);
   } else {
-    collapsedGroups.add(groupNum);
+    collapsedGroups.add(grpStr);
   }
-  renderAll();
+  // Update group header chevron
+  const headers = document.querySelectorAll('.kb-group-header');
+  headers.forEach(hdr => {
+    if (hdr.getAttribute('data-grp') === grpStr) {
+      const chevron = hdr.querySelector('.kb-group-chevron');
+      if (chevron) chevron.classList.toggle('collapsed', collapsedGroups.has(grpStr));
+    }
+  });
+  // Show/hide section cards belonging to this group
+  const GRP_NUMS = [1,6,13,18,37];
+  let g = GRP_NUMS[0];
+  for (const x of GRP_NUMS) { if (Number(groupNum) >= x) g = x; }
+  // Find next group start
+  const grpIdx = GRP_NUMS.indexOf(g);
+  const nextGrp = GRP_NUMS[grpIdx + 1] || 999;
+  document.querySelectorAll('.section-card').forEach(card => {
+    const num = parseInt(card.id.replace('sec-',''));
+    if (num >= g && num < nextGrp) {
+      card.style.display = collapsedGroups.has(grpStr) ? 'none' : '';
+    }
+  });
+  // If expanding and no cards exist yet (first expand), do a full render
+  const grpIdx2 = GRP_NUMS.indexOf(Number(groupNum));
+  const nextG = GRP_NUMS[grpIdx2 + 1] || 999;
+  const existingCards = document.querySelectorAll('.section-card');
+  let hasCards = false;
+  existingCards.forEach(c => {
+    const n = parseInt(c.id.replace('sec-',''));
+    if (n >= Number(groupNum) && n < nextG) hasCards = true;
+  });
+  if (!collapsedGroups.has(grpStr) && !hasCards) {
+    renderAll();
+  }
 }
 
 function toggleSection(num) {
@@ -1984,7 +2017,7 @@ function setTopic(t) {
 function clearFilters() {
   activePhase = null; activeTopic = null; activeSearch = '';
   document.getElementById('search-input').value = '';
-  collapsedGroups = new Set(['1','6','13','18','37']);
+  collapsedGroups = new Set();
   openSections = new Set();
   if (activeProject === 'mfp') {
     renderMFPOverview();
@@ -3129,11 +3162,11 @@ async function init() {
   const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
 
-  await loadBookmarks();
-  await loadNotes();
-  await loadChat();
-  await loadChecklistState();
-  await loadRecentSearches();
+  try { await loadBookmarks(); } catch(e) { console.warn('loadBookmarks failed', e); }
+  try { await loadNotes(); } catch(e) { console.warn('loadNotes failed', e); }
+  try { await loadChat(); } catch(e) { console.warn('loadChat failed', e); }
+  try { await loadChecklistState(); } catch(e) { console.warn('loadChecklistState failed', e); }
+  try { await loadRecentSearches(); } catch(e) { console.warn('loadRecentSearches failed', e); }
   renderAll();
 }
 
