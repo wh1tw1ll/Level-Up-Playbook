@@ -3558,7 +3558,7 @@ function openCalendarPanel() {
   loadCalendarList();
 }
 
-async async function loadEmailList() {
+async function loadEmailList() {
   var list=document.getElementById('email-list');
   if(!list) return;
   list.innerHTML='<div style="color:var(--muted);padding:20px 0">Loading emails...</div>';
@@ -3589,7 +3589,7 @@ function openEmailIdx(i){
   if(list&&list._emails&&list._emails[i]&&list._emails[i].webLink) window.open(list._emails[i].webLink,'_blank');
 }
 
-async async function loadCalendarList() {
+async function loadCalendarList() {
   var list=document.getElementById('calendar-list');
   if(!list) return;
   list.innerHTML='<div style="color:var(--muted);padding:20px 0">Loading calendar...</div>';
