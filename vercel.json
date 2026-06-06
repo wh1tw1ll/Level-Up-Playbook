@@ -15,6 +15,7 @@
           { "src": "/api/sharepoint/read",   "dest": "/api/sharepoint/read.js" },
           { "src": "/api/outlook/email",     "dest": "/api/outlook/email.js" },
           { "src": "/api/outlook/calendar",  "dest": "/api/outlook/calendar.js" },
+        { "src": "/calendar.js",           "dest": "/calendar.js" },
           { "src": "/(.*)",                  "dest": "/index.html" }
     ]
 }
