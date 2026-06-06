@@ -1200,183 +1200,108 @@ function renderSidebar() {
 }
 
 function renderSections() {
-  const filtered = getFiltered();
-  const meta = document.getElementById('results-meta');
-  const container = document.getElementById('sections-container');
+  var container = document.getElementById('sections-container');
+  if (!container) return;
 
-  const filters = [activePhase, activeTopic, activeSearch].filter(Boolean);
-  if (activeSearch) {
-    const q = activeSearch.toLowerCase();
-    let totalMatches = 0;
-    filtered.forEach(s => {
-      const allText = [s.title,...(s.h2||[]),...(s.content||[]),...(s.bullets||[])].join(' ').toLowerCase();
-      let idx=0; while((idx=allText.indexOf(q,idx))!==-1){totalMatches++;idx+=q.length;}
-    });
-    meta.innerHTML = `<span style="color:var(--teal);font-weight:600">${filtered.length} sections</span> &nbsp;·&nbsp; <span style="background:#F5D842;color:#111;padding:1px 8px;border-radius:10px;font-weight:600">${totalMatches} matches</span>`;
-  } else if (filters.length) {
-    meta.textContent = filtered.length + ' of ' + KB.length + ' sections';
-  } else {
-    meta.textContent = KB.length + ' sections';
-  }
+  var filtered = getFiltered();
+  var meta = document.getElementById('results-meta');
+  var showGroups = !activePhase && !activeTopic && !activeSearch;
 
-  const GROUPS = {
+  if (meta) meta.textContent = filtered.length + ' sections';
+
+  var GROUPS = {
     '1':  {label:'GROUP 1 — FOUNDATION', desc:'Purpose, philosophy, roles, and governance'},
     '6':  {label:'GROUP 2 — PROJECT SETUP', desc:'Mobilization, tools, communications, and reporting'},
     '13': {label:'GROUP 3 — CONTROLS', desc:'Budget, schedule, change, and risk management'},
     '18': {label:'GROUP 4 — PHASE EXECUTION', desc:'Contract through closeout in project sequence'},
-    '37': {label:'GROUP 5 — REFERENCE', desc:'Standards, templates, and common problems'},
+    '37': {label:'GROUP 5 — REFERENCE', desc:'Standards, templates, and common problems'}
   };
-  const GKEYS = [1,6,13,18,37];
-  
 
-  const showGroups = !activePhase && !activeTopic && !activeSearch;
+  var html = '';
+  var seenGroups = {};
 
-  // Show/hide collapse-all button
-  const btnWrap = document.getElementById('collapse-all-btn-wrap');
-  if (btnWrap) {
-    const anyExpanded = showGroups && collapsedGroups.size < 5;
-    btnWrap.innerHTML = anyExpanded
-      ? '<button onclick="collapseAll()" style="font-size:11px;font-weight:600;padding:4px 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--muted);cursor:pointer;font-family:inherit">↑ Collapse All</button>'
-      : '';
-  }
+  filtered.forEach(function(s) {
+    var gk = showGroups ? String(grpKey(s.num)) : null;
 
-  // Build HTML parts array
-  const parts = [];
-  const seenGroups = new Set();
-
-  filtered.forEach(s => {
-    const gk = showGroups ? grpKey(s.num) : null;
-
-    // Inject group header when first section of a group is encountered
-    if (showGroups && !seenGroups.has(gk)) {
-      seenGroups.add(gk);
-      const gInfo = GROUPS[gk];
-      const collapsed = collapsedGroups.has(gk);
+    // Group header
+    if (showGroups && !seenGroups[gk]) {
+      seenGroups[gk] = true;
+      var gInfo = GROUPS[gk];
+      var collapsed = collapsedGroups.has(gk);
       if (gInfo) {
-        parts.push('<div class="kb-group-header" data-grp="' + gk + '" onclick="toggleGroup(\'' + gk + '\')">'
-          + '<span class="kb-group-chevron' + (collapsed ? ' collapsed' : '') + '">▾</span>'
+        html += '<div class="kb-group-header" data-grp="' + gk + '" onclick="toggleGroup('' + gk + '')">'
+          + '<span class="kb-group-chevron' + (collapsed ? ' collapsed' : '') + '">&#9662;</span>'
           + '<span class="kb-group-title">' + gInfo.label + '</span>'
           + '<span class="kb-group-desc">' + gInfo.desc + '</span>'
-          + '</div>');
+          + '</div>';
       }
     }
 
-    // Skip sections whose group is collapsed
+    // Skip if group collapsed
     if (showGroups && collapsedGroups.has(gk)) return;
 
-    // Render section card
-    const isBookmarked = bookmarks.has(s.num);
-    const q = activeSearch;
-    try {
-    parts.push(`
-    <div class="section-card ${openSections.has(s.num) ? 'open' : ''}" id="sec-${s.num}">
-      <div class="section-card-header" onclick="toggleSection('${s.num}')">
-        <span class="sec-badge">${s.num}</span>
-        <div style="flex:1">
-          <div class="sec-title">${highlight(s.title, q)}</div>
-          <div class="sec-phases">${s.phases.map(p=>`<span class="sec-phase-tag">${p}</span>`).join('')}${q && s._matchDepth ? `<span style="background:${s._matchDepth===1?'#184655':s._matchDepth===2?'#2D6B7F':'#F5D842'};color:${s._matchDepth===3?'#111':'#fff'};font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px">${s._matchDepth===1?'Title match':s._matchDepth===2?'Subsection match':'Content match'}</span>` : ''}${q ? (() => { const allText = [s.title,...(s.h2||[]),...(s.content||[]),...(s.bullets||[])].join(' ').toLowerCase(); let c=0,i=0; while((i=allText.indexOf(q.toLowerCase(),i))!==-1){c++;i+=q.length;} return c>0?`<span style="background:#F5D842;color:#111;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;margin-left:4px">${c} match${c>1?'es':''}</span>`:''; })() : ''}</div>
-        </div>
-        <button class="bookmark-btn ${isBookmarked?'active':''}" onclick="event.stopPropagation();toggleBookmark('${s.num}')" title="${isBookmarked?'Remove bookmark':'Bookmark'}">
-          ${isBookmarked?'★':'☆'}
-        </button>
-        <span class="sec-expand-icon">▾</span>
-      </div>
-      <div class="section-card-body">
-        ${s.is_templates_hub ? renderTemplatesHub() : (() => {
-          // Distribute content paragraphs under h2 headings
-          const h2s = s.h2 || [];
-          const paras = s.content || [];
-          const bullets = s.bullets || [];
-          const q2 = q;
+    var isOpen = openSections.has(s.num);
+    var isBookmarked = bookmarks.has(s.num);
+    var phases = (s.phases || []).map(function(p) {
+      return '<span class="sec-phase-tag">' + p + '</span>';
+    }).join('');
 
-          // If no h2s, render flat
-          if (!h2s.length) {
-            return `
-              ${paras.length ? `<div style="margin:12px 0;border-left:2px solid var(--sage);padding-left:12px">${paras.map(p=>`<p style="margin:8px 0;font-size:13px;line-height:1.6;color:var(--muted)">${applyGlossary(highlight(p,q2))}</p>`).join('')}</div>` : ''}
-              ${bullets.length ? `<div style="margin:14px 0"><div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Key Points</div><div>${bullets.map(b=>`<div class="bullet-item">${applyGlossary(highlight(b,q2))}</div>`).join('')}</div></div>` : ''}
-            `;
-          }
+    html += '<div class="section-card' + (isOpen ? ' open' : '') + '" id="sec-' + s.num + '">'
+      + '<div class="section-card-header" onclick="toggleSection('' + s.num + '')">'
+      + '<span class="sec-badge">' + s.num + '</span>'
+      + '<div style="flex:1">'
+      + '<div class="sec-title">' + (s.title || '') + '</div>'
+      + '<div class="sec-phases">' + phases + '</div>'
+      + '</div>'
+      + '<span style="font-size:16px;color:var(--muted)">' + (isBookmarked ? '&#11088;' : '') + '</span>'
+      + '<span class="sec-chevron">' + (isOpen ? '&#9650;' : '&#9660;') + '</span>'
+      + '</div>';
 
-          // Use explicit subsections if available, otherwise distribute proportionally
-          const buildSubsecHtml = (heading, thisParagraphs, thisBullets, secNum, idx) => {
-            const subId = `subsec-${secNum}-${idx}`;
-            const hasContent = thisParagraphs.length || thisBullets.length;
-            return `<div class="subsec-block collapsed" id="${subId}">
-              <div class="subsec-heading ${hasContent ? 'subsec-toggleable' : ''}" onclick="${hasContent ? `toggleSubsec('${subId}')` : ''}">
-                <span class="subsec-num">${secNum}.${idx+1}</span>
-                <span class="subsec-title">${highlight(heading.replace(/^\d+\.\d+\s*/,''), q2)}</span>
-                ${hasContent ? `<span class="subsec-chevron">▾</span>` : ''}
-              </div>
-              <div class="subsec-content">
-                ${thisParagraphs.length ? `<div class="subsec-paras">${thisParagraphs.map(p=>`<p class="subsec-para">${applyGlossary(highlight(p,q2))}</p>`).join('')}</div>` : ''}
-                ${thisBullets.length ? `<div class="subsec-bullets">${thisBullets.map(b=>`<div class="bullet-item">${applyGlossary(highlight(b,q2))}</div>`).join('')}</div>` : ''}
-              </div>
-            </div>`;
-          };
-
-          let sections;
-          if (s.subsections && s.subsections.length) {
-            // Use explicit mapping
-            sections = s.subsections.map((sub, i) =>
-              buildSubsecHtml(sub.heading, sub.content || [], sub.bullets || [], s.num, i)
-            );
-          } else {
-            // Distribute proportionally
-            const parasPerH2 = Math.max(1, Math.floor(paras.length / h2s.length));
-            const bulletsPerH2 = bullets.length ? Math.max(1, Math.floor(bullets.length / h2s.length)) : 0;
-            let paraIdx = 0;
-            let bulletIdx = 0;
-
-            sections = h2s.map((heading, i) => {
-              const isLast = i === h2s.length - 1;
-              const thisParagraphs = isLast ? paras.slice(paraIdx) : paras.slice(paraIdx, paraIdx + parasPerH2);
-              if (!isLast) paraIdx += parasPerH2;
-              const thisBullets = bullets.length
-                ? (isLast ? bullets.slice(bulletIdx) : bullets.slice(bulletIdx, bulletIdx + bulletsPerH2))
-                : [];
-              if (bullets.length && !isLast) bulletIdx += bulletsPerH2;
-              return buildSubsecHtml(heading, thisParagraphs, thisBullets, s.num, i);
-            });
-          }
-
-          return `<div class="subsec-list">${sections.join('')}</div>`;
-        })()}
-        <div class="topics-row">
-          ${s.topics.map(t=>`<span class="topic-tag" onclick="setTopic('${t}')">${t}</span>`).join('')}
-        </div>
-        ${CHECKLISTS[s.num] ? `<div id="cl-${s.num}">${renderChecklist(s.num)}</div>` : ''}
-        ${renderRelated(s.num)}
-        ${renderContextualDownload(s.num)}
-        ${renderSectionNotes(s.num)}
-        <div class="ask-btn">
-          <button onclick="askAboutSection('${s.num}','${s.title.replace(/'/g,"\'")}')">␚ Ask about this section</button>
-        </div>
-      </div>
-    </div>`);
-    } catch(err) {
-      parts.push(`<div class="section-card" id="sec-${s.num}" style="border-color:#e74c3c">
-        <div class="section-card-header" onclick="toggleSection('${s.num}')">
-          <span class="sec-badge">${s.num}</span>
-          <div style="flex:1"><div class="sec-title">${s.title}</div></div>
-        </div>
-        <div class="section-card-body" style="display:block;padding:12px;color:#e74c3c;font-size:12px">
-          Error rendering this section: ${err.message}
-        </div>
-      </div>`);
+    if (isOpen) {
+      html += '<div class="section-card-body">';
+      // H2 subsections
+      var h2s = s.h2 || [];
+      if (h2s.length) {
+        h2s.forEach(function(heading, idx) {
+          var subId = 'subsec-' + s.num + '-' + idx;
+          html += '<div class="subsec-header" onclick="toggleSubsec('' + subId + '')">'
+            + '<span class="subsec-chevron">&#9662;</span><span>' + heading + '</span></div>'
+            + '<div class="subsec-body" id="' + subId + '">';
+          // Content paragraphs for this subsection
+          var paras = s.content || [];
+          var chunkSize = Math.ceil(paras.length / Math.max(h2s.length, 1));
+          var start = idx * chunkSize;
+          var chunk = paras.slice(start, start + chunkSize);
+          chunk.forEach(function(p) {
+            html += '<p style="font-size:13px;line-height:1.6;color:var(--charcoal);margin-bottom:10px">' + p + '</p>';
+          });
+          html += '</div>';
+        });
+      } else {
+        // No subsections - just show content
+        (s.content || []).forEach(function(p) {
+          html += '<p style="font-size:13px;line-height:1.6;color:var(--charcoal);margin-bottom:10px">' + p + '</p>';
+        });
+      }
+      // Bullets
+      if ((s.bullets || []).length) {
+        html += '<ul style="font-size:13px;line-height:1.7;color:var(--charcoal);padding-left:20px">';
+        (s.bullets || []).forEach(function(b) {
+          html += '<li style="margin-bottom:4px">' + b + '</li>';
+        });
+        html += '</ul>';
+      }
+      html += '</div>';
     }
+    html += '</div>';
   });
 
-  container.innerHTML = parts.join('');
+  container.innerHTML = html || '<div style="padding:40px;text-align:center;color:var(--muted)">No sections match your filters. <button onclick="clearFilters()" style="background:none;border:none;color:var(--teal);cursor:pointer;font-family:inherit">Clear filters</button></div>';
 
-  // Auto-open if searching
-  if (activeSearch) {
-    document.querySelectorAll('.section-card').forEach(el => {
-      el.classList.add('open');
-      openSections.add(el.id.replace('sec-',''));
-    });
-  }
+  // Scroll to top
+  var ca = document.getElementById('content-area');
+  if (ca) ca.scrollTop = 0;
 }
-
 function renderAll() {
   // Reset scroll position to top of content area
   var ca = document.getElementById('content-area');
