@@ -3516,7 +3516,7 @@ function renderActionItems() {
   };
 }
 
-async async function handleSharePointClick() {
+async function handleSharePointClick() {
   // Re-check auth in case cookie loaded after init
   if (!luUser || !luUser.authenticated) {
     await checkAuth();
