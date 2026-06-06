@@ -953,6 +953,7 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
   <div class="chat-messages" id="chat-messages"></div>
   <div class="chat-input-row">
     <input type="text" id="chat-input" placeholder="Ask anything about the play
+<script>
 var homeInnerHTML = '';
 document.addEventListener('DOMContentLoaded', function() {
   var inner = document.getElementById('home-inner');
@@ -1482,28 +1483,34 @@ async function checkAuth() {
 }
 
 function updateAuthUI() {
-  const signInBtn = document.getElementById('auth-signin-btn');
-  const userInfo  = document.getElementById('auth-user-info');
-  const userName  = document.getElementById('auth-user-name');
-  const spMeta = document.getElementById('sharepoint-card-meta');
+  var signInBtn = document.getElementById('auth-signin-btn');
+  var userInfo = document.getElementById('auth-user-info');
+  var userName = document.getElementById('auth-user-name');
   var emailMeta = document.getElementById('email-card-meta');
   var calMeta = document.getElementById('calendar-card-meta');
+  var spMeta = document.getElementById('sharepoint-card-meta');
+
   if (luUser && luUser.authenticated) {
     if (signInBtn) signInBtn.style.display = 'none';
-    if (userInfo)  userInfo.style.display  = 'flex';
-    if (userName)  userName.textContent = luUser.name || luUser.email;
-    if (spMeta)    spMeta.textContent = 'Search files →';
-    if (emailMeta) emailMeta.textContent = 'View inbox →';
-    if (calMeta)   calMeta.textContent = 'View calendar →';
+    if (userInfo) userInfo.style.display = 'flex';
+    if (userName) userName.textContent = luUser.name || luUser.email || 'Signed in';
+    if (emailMeta) emailMeta.textContent = luUser.email || '';
+    if (calMeta) calMeta.textContent = 'Signed in as ' + (luUser.name || luUser.email || '');
+    if (spMeta) spMeta.textContent = 'Connected';
+    // Update home cards
+    var spCard = document.querySelector('[onclick*="handleSharePointClick"]');
+    if (spCard) {
+      var link = spCard.querySelector('a, .card-link, [class*="link"]');
+      if (link) link.textContent = 'Search Files →';
+    }
   } else {
-    if (signInBtn) signInBtn.style.display = 'flex';
-    if (userInfo)  userInfo.style.display  = 'none';
-    if (spMeta)    spMeta.textContent = 'Sign in to connect →';
-    if (emailMeta) emailMeta.textContent = 'Sign in to connect →';
-    if (calMeta)   calMeta.textContent = 'Sign in to connect →';
+    if (signInBtn) signInBtn.style.display = '';
+    if (userInfo) userInfo.style.display = 'none';
+    if (emailMeta) emailMeta.textContent = 'Sign in to enable';
+    if (calMeta) calMeta.textContent = 'Sign in to enable';
+    if (spMeta) spMeta.textContent = 'Sign in to connect';
   }
 }
-
 function signInWithMicrosoft() { window.location.href = '/auth/login'; }
 
 function signOut() {
