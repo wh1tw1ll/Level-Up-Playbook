@@ -3670,6 +3670,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('[data-q]');
+  if (btn && btn.classList.contains('mfp-quick-btn')) {
+    mfpQuickAsk(btn.getAttribute('data-q').replace(/&apos;/g, "'"));
+  }
+});
+
+init();
 </script>
 </body>
 </html>
