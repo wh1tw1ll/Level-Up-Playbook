@@ -3612,6 +3612,10 @@ async function handleSharePointClick() {
     setTimeout(function() {
       var inp = document.getElementById('chat-input');
       if (inp) { inp.value = 'Search SharePoint: '; inp.focus(); }
+    }, 300);
+  } else {
+    window.location.href = '/auth/login';
+  }
 }
 
 function openEmailPanel() {
