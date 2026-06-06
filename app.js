@@ -505,16 +505,36 @@ function setScope(scope) {
 }
 
 async function checkAuth() {
+  // First try reading lu_session cookie directly (set by callback, readable by JS)
   try {
-    const res = await fetch('/auth/me', { credentials: 'include' });
-    if (res.ok) {
-      luUser = await res.json();
-      if (luUser.authenticated) {
+    var cookies = document.cookie.split(';').reduce(function(acc, c) {
+      var parts = c.trim().split('=');
+      if (parts[0]) acc[parts[0]] = parts.slice(1).join('=');
+      return acc;
+    }, {});
+    if (cookies.lu_session) {
+      var data = JSON.parse(decodeURIComponent(cookies.lu_session));
+      if (data.expires_at && Date.now() < data.expires_at) {
+        luUser = { authenticated: true, name: data.name, email: data.email };
         updateAuthUI();
         return true;
       }
     }
-  } catch(e) { /* not on Vercel, skip */ }
+  } catch(e) { /* cookie parse failed */ }
+
+  // Fallback: try /auth/me API
+  try {
+    var res = await fetch('/auth/me', { credentials: 'include' });
+    if (res.ok) {
+      var data = await res.json();
+      if (data.authenticated) {
+        luUser = data;
+        updateAuthUI();
+        return true;
+      }
+    }
+  } catch(e) { /* network error */ }
+
   luUser = null;
   updateAuthUI();
   return false;
@@ -2570,12 +2590,18 @@ async function init() {
   try { await loadActionItems(); } catch(e) {}
   await checkAuth().catch(function(){});
   var urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('auth') === 'success') {
+  var authSuccess = urlParams.get('auth') === 'success';
+  var returnView = 'home';
+  if (authSuccess) {
     history.replaceState({}, '', '/');
+    try { returnView = localStorage.getItem('lu_return_view') || 'home'; localStorage.removeItem('lu_return_view'); } catch(e) {}
   }
   var d2=document.getElementById('lu-diag');
   if(d2){var as=luUser?(luUser.authenticated?'auth:'+luUser.email:'not signed in'):'click Sign In';d2.textContent='JS loaded | '+as;}
-  setView('home');
+  if (returnView === 'email') { openEmailPanel(); }
+  else if (returnView === 'calendar') { openCalendarPanel(); }
+  else if (returnView === 'sharepoint') { handleSharePointClick(); }
+  else { setView('home'); }
   setTimeout(updateHomeStats, 50);
 }
 
