@@ -971,6 +971,30 @@ document.addEventListener('DOMContentLoaded', function() {
   var inner = document.getElementById('home-inner');
   if (inner) homeInnerHTML = inner.innerHTML;
 });
+// ── THEME ──
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  var btn = document.getElementById('theme-btn');
+  if (btn) btn.textContent = theme === 'dark' ? '☽' : '☀';
+}
+
+function toggleTheme() {
+  var current = document.documentElement.getAttribute('data-theme') || 'light';
+  var next = current === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  try { localStorage.setItem('lu_theme', next); } catch(e) {}
+}
+
+// ── SCOPE ──
+function setScope(scope) {
+  searchScope = scope;
+  document.querySelectorAll('.scope-btn').forEach(function(b) { b.classList.remove('active'); });
+  var btn = document.getElementById('scope-' + scope);
+  if (btn) btn.classList.add('active');
+  renderSections();
+}
+
+
 // ── MICROSOFT AUTH + SHAREPOINT ──
 let luUser = null;  // { name, email, authenticated }
 
@@ -3910,6 +3934,14 @@ document.addEventListener('DOMContentLoaded', function() {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
     });
   }
+});
+
+// ── CHAT ENTER KEY ──
+document.addEventListener('DOMContentLoaded', function() {
+  var ci = document.getElementById('chat-input');
+  if (ci) ci.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+  });
 });
 </script>
 
