@@ -553,6 +553,10 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 .chat-input-row input:focus{border-color:var(--teal)}
 .chat-input-row button{background:var(--teal);color:#fff;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;transition:background .15s}
 .chat-input-row button:hover{background:var(--teal-dark,#005f5f)}
+
+#lu-diag{position:fixed;bottom:0;left:0;right:0;background:#0f2d1a;color:#4ade80;
+font-size:11px;font-family:monospace;padding:3px 12px;z-index:99999;
+display:flex;gap:12px;align-items:center}
 </style>
 </head>
 <body>
@@ -952,14 +956,9 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
   <div class="chat-messages" id="chat-messages"></div>
   <div class="chat-input-row">
     <input type="text" id="chat-input" placeholder="Ask anything about the playbook or MFP..." autocomplete="off">
-    <button id="chat-send" onclick="sendChat()">Send</button>
-  </div><!-- end chat-input-row -->
-</div><!-- end chat-drawer -->
-
-<div class="version-stamp">Level Up Playbook v2.1</div>
-
-<script>
+ 
 // ── GLOBALS ──
+<script>
 var homeInnerHTML = '';
 document.addE
 // ── GLOBALS ──
@@ -3400,6 +3399,11 @@ function goHome() {
   if (inner && !inner.querySelector('.home-cards')) {
     inner.innerHTML = homeInnerHTML;
   }
+  var d2=document.getElementById('lu-diag');
+  if(d2){
+    var authStr = luUser ? (luUser.authenticated ? 'YES: '+luUser.email : 'NO') : 'null';
+    d2.textContent = 'JS OK | auth:' + authStr + ' | v2.1';
+  }
   setView('home');
 }
 
@@ -3587,6 +3591,8 @@ async function loadCalendarList() {
 }
 
 async function init() {
+  var d=document.getElementById('lu-diag');
+  if(d) d.textContent='JS: init running...';
   const savedTheme = (() => { try { return localStorage.getItem('lu_theme'); } catch(e) { return null; } })();
   const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
@@ -3680,6 +3686,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('[data-q]');
+  if (btn && btn.classList.contains('mfp-quick-btn')) {
+    mfpQuickAsk(btn.getAttribute('data-q').replace(/&apos;/g, "'"));
+  }
+});
+
+init();
 
 document.addEventListener('click', function(e) {
   var btn = e.target.closest('[data-q]');
