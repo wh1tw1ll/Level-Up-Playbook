@@ -2650,23 +2650,21 @@ async function init() {
 
 
 
-async function handleSharePointClick() {
-  if (!luUser || !luUser.authenticated) await checkAuth();
-  if (luUser && luUser.authenticated) {
-    if (!chatOpen) toggleChat();
-    setTimeout(function() {
-      var inp = document.getElementById('chat-input');
-      if (inp) { inp.value = 'Search SharePoint: '; inp.focus(); }
-    }, 300);
-  } else {
-    window.location.href = '/auth/login';
-  }
+function handleSharePointClick() {
+  if (!chatOpen) toggleChat();
+  setTimeout(function() {
+    var inp = document.getElementById('chat-input');
+    if (!inp) return;
+    if (luUser && luUser.authenticated) {
+      inp.value = 'Search SharePoint: '; inp.focus();
+    } else {
+      inp.value = '';
+      appendMsg('ai', 'To search SharePoint files, you need to sign in with Microsoft first. Click the **Sign In** button in the top right corner, then come back and try again.');
+    }
+  }, 300);
 }
 
 function openEmailPanel() {
-  if (!luUser || !luUser.authenticated) {
-    window.location.href = '/auth/login'; return;
-  }
   document.querySelectorAll('.home-page, .content-panel, .ai-panel').forEach(function(el) {
     el.classList.remove('active');
   });
@@ -2678,9 +2676,6 @@ function openEmailPanel() {
 }
 
 function openCalendarPanel() {
-  if (!luUser || !luUser.authenticated) {
-    window.location.href = '/auth/login'; return;
-  }
   document.querySelectorAll('.home-page, .content-panel, .ai-panel').forEach(function(el) {
     el.classList.remove('active');
   });
