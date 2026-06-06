@@ -1907,9 +1907,9 @@ function openPhaseGuide() {
       <div class="pg-phase-header" onclick="togglePgPhase('${phaseId}')">
         <span style="font-size:18px">${data.icon}</span>
         <strong style="font-size:14px;color:var(--teal);flex:1">${phase}</strong>
-        <span class="pg-phase-chevron" id="${phaseId}-chevron">▾</span>
+        <span class="pg-phase-chevron" id="${phaseId}-chevron">▶</span>
       </div>
-      <div class="pg-phase-body" id="${phaseId}">
+      <div class="pg-phase-body" id="${phaseId}" style="display:none">
         <p class="pg-phase-desc">${data.desc}</p>
         ${data.sections.map(s => {
           const sec = KB.find(k => k.num === s.num);
