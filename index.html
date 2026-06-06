@@ -31,7 +31,7 @@
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal);min-height:100vh;font-size:15px;line-height:1.6;transition:background .2s,color .2s}
 
 /* ── LAYOUT ── */
-.shell{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 92px);max-width:1400px;margin:0 auto}
+.shell{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 92px);max-width:100%;overflow:hidden}
 .topbar{grid-column:1/-1;background:var(--topbar-bg);display:flex;align-items:center;gap:16px;padding:10px 24px;position:sticky;top:0;z-index:100;transition:background .2s;border-bottom:1px solid rgba(255,255,255,.06)}
 .logo{display:flex;align-items:center;gap:0;color:#fff;text-decoration:none;flex-shrink:0}
 #site-logo{height:34px;width:auto;display:block}
@@ -60,6 +60,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
 
 /* ── SIDEBAR ── */
 .sidebar{background:var(--card);border-right:1px solid var(--border);overflow-y:auto;padding:16px 0;transition:background .2s,border-color .2s;height:100%}
+.sidebar.hidden{display:none}
+.playbook-sidebar.hidden{display:none}
+.mfp-sidebar.hidden{display:none}
 .sidebar-section{margin-bottom:8px}
 .sidebar-heading{font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--muted);padding:8px 20px 4px;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;transition:color .15s}
 .sidebar-heading:hover{color:var(--teal)}
@@ -206,8 +209,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
 .section-nav-item.active .section-name{color:var(--teal);font-weight:500}
 
 /* ── MAIN ── */
-.main{display:flex;flex-direction:column;overflow-y:auto;position:relative;height:100%}
-.content-area{flex:1;overflow-y:auto;padding:20px 28px;}
+.main{display:flex;flex-direction:column;overflow:hidden;position:relative;height:100%}
+.content-area{flex:1;overflow-y:auto;padding:24px 32px;min-height:0}
 .results-meta{font-size:12px;color:var(--muted);margin-bottom:20px}
 
 /* ── SECTION CARDS ── */
@@ -541,7 +544,7 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 .chat-drag-handle{padding:10px 16px 6px;cursor:grab;background:var(--card);border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
 .chat-drag-handle span{font-size:12px;font-weight:600;color:var(--muted)}
 .chat-messages{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px;min-height:120px;max-height:calc(60vh - 120px)}
-.chat-msg{max-width:85%;padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.5}
+.chat-msg{max-width:85%;padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.5;word-wrap:break-word;overflow-wrap:break-word;white-space:pre-wrap}
 .chat-msg.user{background:var(--teal);color:#fff;align-self:flex-end;border-radius:12px 12px 3px 12px}
 .chat-msg.ai{background:var(--bg);border:1px solid var(--border);align-self:flex-start;border-radius:12px 12px 12px 3px;color:var(--charcoal)}
 .chat-msg.ai.loading{color:var(--muted);font-style:italic}
@@ -828,15 +831,6 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
       <div class="playbook-content" id="playbook-content">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
           <div class="results-meta" id="results-meta"></div>
-          <div id="collapse-all-btn-wrap"></div>
-        </div>
-        <div id="sections-container"></div>
-      </div>
-    </div>
-  </main>
-
-</div><!-- end app-shell -->
-
 
 <script>
 // ── MICROSOFT AUTH + SHAREPOINT ──
@@ -893,6 +887,41 @@ async function searchSharePoint(query, limit = 5) {
 }
 
 // Enhanced sendChat that also searches SharePoint when user is authenticated
+async function fetchOutlookEmails(limit) {
+  limit = limit || 10;
+  if (!luUser || !luUser.authenticated) return '';
+  try {
+    const r = await fetch('/api/outlook/email?limit=' + limit);
+    if (!r.ok) return '';
+    const data = await r.json();
+    const emails = (data.value || []).slice(0, limit);
+    if (!emails.length) return '';
+    return '\n\n=== RECENT EMAILS ===\n' + emails.map(function(e) {
+      return 'From: ' + (e.from && e.from.emailAddress ? e.from.emailAddress.name : 'Unknown') +
+             '\nSubject: ' + e.subject +
+             '\nDate: ' + new Date(e.receivedDateTime).toLocaleDateString() +
+             '\nPreview: ' + (e.bodyPreview || '').slice(0, 100);
+    }).join('\n---\n');
+  } catch(e) { return ''; }
+}
+
+async function fetchCalendarEvents(days) {
+  days = days || 14;
+  if (!luUser || !luUser.authenticated) return '';
+  try {
+    const r = await fetch('/api/outlook/calendar?days=' + days);
+    if (!r.ok) return '';
+    const data = await r.json();
+    const events = (data.value || []).slice(0, 10);
+    if (!events.length) return '';
+    return '\n\n=== UPCOMING CALENDAR (' + days + ' days) ===\n' + events.map(function(e) {
+      return new Date(e.start.dateTime).toLocaleDateString() + ' ' + new Date(e.start.dateTime).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) +
+             ' - ' + e.subject +
+             (e.location && e.location.displayName ? ' @ ' + e.location.displayName : '');
+    }).join('\n');
+  } catch(e) { return ''; }
+}
+
 async function searchSharePointForChat(query) {
   const data = await searchSharePoint(query, 5);
   if (!data) return '';
@@ -2814,21 +2843,21 @@ async function setProject(projectId) {
 
 function switchSidebarMode(mode) {
   const playbookSidebar = document.getElementById('playbook-sidebar');
-  const mfpSidebar = document.getElementById('mfp-sidebar');
+  const mfpSidebar      = document.getElementById('mfp-sidebar');
   const playbookContent = document.getElementById('playbook-content');
-  const mfpPanel = document.getElementById('mfp-panel');
+  const mfpPanel        = document.getElementById('mfp-panel');
 
   if (mode === 'mfp') {
-    playbookSidebar.classList.add('hidden');
-    mfpSidebar.classList.add('visible');
-    playbookContent.classList.add('hidden');
-    mfpPanel.classList.add('visible');
+    if (playbookSidebar) playbookSidebar.classList.add('hidden');
+    if (mfpSidebar)      mfpSidebar.classList.add('visible');
+    if (playbookContent) playbookContent.classList.add('hidden');
+    if (mfpPanel)        mfpPanel.classList.add('visible');
     renderMFPOverview();
   } else {
-    playbookSidebar.classList.remove('hidden');
-    mfpSidebar.classList.remove('visible');
-    playbookContent.classList.remove('hidden');
-    mfpPanel.classList.remove('visible');
+    if (playbookSidebar) playbookSidebar.classList.remove('hidden');
+    if (mfpSidebar)      mfpSidebar.classList.remove('visible');
+    if (playbookContent) playbookContent.classList.remove('hidden');
+    if (mfpPanel)        mfpPanel.classList.remove('visible');
   }
 }
 
@@ -3544,14 +3573,19 @@ function renderActionItems() {
 
 function handleSharePointClick() {
   if (luUser && luUser.authenticated) {
-    // Already signed in - show a search prompt via chat
     toggleChat();
     setTimeout(function() {
       var input = document.getElementById('chat-input');
-      if (input) { input.value = 'Search SharePoint for: '; input.focus(); }
+      if (input) { 
+        input.value = 'Search SharePoint: '; 
+        input.focus(); 
+        // Position cursor at end
+        input.setSelectionRange(input.value.length, input.value.length);
+      }
     }, 300);
   } else {
-    signInWithMicrosoft();
+    // Redirect to login
+    window.location.href = '/auth/login';
   }
 }
 
