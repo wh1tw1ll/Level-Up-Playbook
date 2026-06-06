@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 let activePhase = null, activeTopic = null, activeSearch = '';
-let collapsedGroups = new Set(['1','6','13','18','37']);
+let collapsedGroups = new Set();
 let openSections = new Set(), bookmarks = new Set();
 let chatHistory = [], chatOpen = false, currentView = 'home';
 let activeProject = 'generic', projectContext = null;
