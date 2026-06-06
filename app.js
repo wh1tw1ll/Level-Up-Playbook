@@ -501,6 +501,14 @@ function escapeHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
+function jsCallArg(v) {
+  // Build an argument string safe for use inside an onclick="..." attribute
+  // Wraps the value in &quot; so it survives HTML attribute parsing
+  return '&quot;' + String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,"\\'") + '&quot;';
+}
+
+
+
 function getCookie(name) {
   var match = ('; ' + document.cookie).match(';\\s*' + name + '=([^;]*)');
   return match ? decodeURIComponent(match[1]) : null;
@@ -654,14 +662,14 @@ function renderSidebar() {
   if (pp) {
     pp.innerHTML = PHASES.map(function(p) {
       var act = activePhase === p ? ' active' : '';
-      return '<button class="phase-pill' + act + '" onclick="setPhase(' + JSON.stringify(p) + ')">' + escapeHtml(p) + '</button>';
+      return '<button class="phase-pill' + act + '" onclick="setPhase(' + jsCallArg(p) + ')">' + escapeHtml(p) + '</button>';
     }).join('');
   }
   var tc = document.getElementById('topic-chips');
   if (tc) {
     tc.innerHTML = ALL_TOPICS.slice(0, 40).map(function(t) {
       var act = activeTopic === t ? ' active' : '';
-      return '<button class="topic-chip' + act + '" onclick="setTopic(' + JSON.stringify(t) + ')">' + escapeHtml(t) + '</button>';
+      return '<button class="topic-chip' + act + '" onclick="setTopic(' + jsCallArg(t) + ')">' + escapeHtml(t) + '</button>';
     }).join('');
   }
 }
@@ -695,7 +703,7 @@ function renderSections() {
       var gInfo = GROUPS[gk];
       var collapsed = collapsedGroups[gk] === true;
       if (gInfo) {
-        html += '<div class="kb-group' + (collapsed ? ' collapsed' : '') + '" onclick="toggleGroup(' + JSON.stringify(gk) + ')">'
+        html += '<div class="kb-group' + (collapsed ? ' collapsed' : '') + '" onclick="toggleGroup(' + jsCallArg(gk) + ')">'
           + '<span class="kb-group-chevron">▼</span>'
           + '<span class="kb-group-title">' + escapeHtml(gInfo.label) + '</span>'
           + '<span class="kb-group-desc">' + escapeHtml(gInfo.desc) + '</span>'
@@ -711,7 +719,7 @@ function renderSections() {
     }).join('');
 
     html += '<div class="section-card' + (isOpen ? ' open' : '') + '">'
-      + '<div class="section-card-header" onclick="toggleSection(' + JSON.stringify(s.num) + ')">'
+      + '<div class="section-card-header" onclick="toggleSection(' + jsCallArg(s.num) + ')">'
       + '<span class="sec-badge">' + escapeHtml(s.num) + '</span>'
       + '<div style="flex:1">'
       + '<div class="sec-title">' + escapeHtml(s.title) + '</div>'
@@ -889,7 +897,7 @@ function renderTemplates() {
         + '</div>'
         + '<div class="mfp-card-summary">' + escapeHtml(t.desc || '') + '</div>'
         + '<div style="display:flex;gap:8px;margin-top:14px">'
-        + '<button class="btn-primary" style="flex:1;padding:8px 14px;font-size:13px" onclick="downloadTemplate(' + JSON.stringify(k) + ')">Download .xlsx</button>'
+        + '<button class="btn-primary" style="flex:1;padding:8px 14px;font-size:13px" onclick="downloadTemplate(' + jsCallArg(k) + ')">Download .xlsx</button>'
         + '</div>'
         + '<div style="font-size:11px;color:var(--muted);margin-top:8px">' + escapeHtml(k) + '</div>'
         + '</div>';
@@ -903,23 +911,51 @@ function renderTemplates() {
 function downloadTemplate(key) {
   var t = TEMPLATES[key];
   if (!t) return;
-  if (!t.data || t.data.length < 100) {
-    alert('Template data not available for: ' + key + '\n\nThe template file has not been packaged into this build yet. Reach out to Greg or Jordan to get the source .xlsx file.');
-    return;
+  // Try GitHub raw URL first (templates folder)
+  var rawUrl = 'https://raw.githubusercontent.com/wh1tw1ll/Level-Up-Playbook/main/templates/' + encodeURIComponent(key);
+  var a = document.createElement('a');
+  a.href = rawUrl; a.download = key; a.target = '_blank';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+function previewTemplate(key) {
+  var t = TEMPLATES[key];
+  if (!t) return;
+  // Build a preview modal showing what's in the template
+  var modal = document.getElementById('modal-template-preview');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'modal-template-preview';
+    modal.className = 'modal-overlay';
+    modal.onclick = function(e) { if (e.target === modal) closeModal('modal-template-preview'); };
+    document.body.appendChild(modal);
   }
-  try {
-    var binary = atob(t.data);
-    var bytes = new Uint8Array(binary.length);
-    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    var blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url; a.download = key;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    setTimeout(function() { URL.revokeObjectURL(url); }, 100);
-  } catch(e) {
-    alert('Error downloading: ' + e.message);
+  var preview = t.preview || t.columns || ['Sheet contains: ' + (t.name || key)];
+  var previewHtml = '';
+  if (Array.isArray(preview)) {
+    previewHtml = '<ul style="padding-left:20px;margin:12px 0">' + preview.map(function(p){
+      return '<li style="margin-bottom:6px;font-size:13px;color:var(--charcoal)">' + escapeHtml(p) + '</li>';
+    }).join('') + '</ul>';
+  } else {
+    previewHtml = '<div style="font-size:13px;color:var(--charcoal);line-height:1.6">' + escapeHtml(String(preview)) + '</div>';
   }
+  modal.innerHTML = '<div class="modal-dialog">'
+    + '<div class="modal-header">'
+    + '<div class="modal-title">' + (t.icon || '📊') + ' ' + escapeHtml(t.name || key) + '</div>'
+    + '<button class="chat-close" onclick="closeModal(\'modal-template-preview\')">×</button>'
+    + '</div>'
+    + '<div class="modal-body">'
+    + '<div style="font-size:13px;color:var(--muted);margin-bottom:14px">' + escapeHtml(t.desc || '') + '</div>'
+    + (t.section ? '<div style="font-size:11px;color:var(--muted);margin-bottom:14px"><strong>Playbook reference:</strong> Section ' + escapeHtml(t.section) + '</div>' : '')
+    + '<div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:6px">What\'s included:</div>'
+    + previewHtml
+    + '<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:flex;gap:8px">'
+    + '<button class="btn-primary" onclick="downloadTemplate(' + jsCallArg(key) + ');closeModal(\'modal-template-preview\')">Download .xlsx</button>'
+    + '<button class="back-btn" style="padding:10px 14px" onclick="closeModal(\'modal-template-preview\')">Close</button>'
+    + '</div>'
+    + '<div style="margin-top:12px;font-size:11px;color:var(--muted)">' + escapeHtml(key) + '</div>'
+    + '</div></div>';
+  modal.classList.add('open');
 }
 // ── ACTION ITEMS ──────────────────────────────────────────────────
 function loadActions(tab) {
@@ -1020,7 +1056,7 @@ function renderSharePoint() {
     + '<div class="sp-chips">'
     + '<span class="sp-chips-label">QUICK:</span>'
     + ['Lemartec','Kroll audit','punch list','change order','invoice','HVAC','closeout','schedule'].map(function(q) {
-        return '<button class="sp-chip" onclick="quickSharePoint(' + JSON.stringify(q) + ')">' + escapeHtml(q) + '</button>';
+        return '<button class="sp-chip" onclick="quickSharePoint(' + jsCallArg(q) + ')">' + escapeHtml(q) + '</button>';
       }).join('')
     + '</div>'
     + '<div id="sp-results"><div style="color:var(--muted);padding:20px 0">Type a search above or pick a quick search to find files.</div></div>';
@@ -1219,7 +1255,7 @@ function openPhaseGuide() {
     var pid = 'pg-phase-' + idx;
     var data = PHASE_GUIDE[phase];
     html += '<div class="pg-phase">'
-      + '<div class="pg-phase-header" onclick="togglePgPhase(' + JSON.stringify(pid) + ')">'
+      + '<div class="pg-phase-header" onclick="togglePgPhase(' + jsCallArg(pid) + ')">'
       + '<span class="pg-phase-chevron" id="' + pid + '-chev">▶</span>'
       + '<span>' + escapeHtml(phase) + '</span>'
       + '</div>'
@@ -1274,7 +1310,7 @@ function renderDecisionTree() {
   }
   body.innerHTML = '<div style="padding:8px"><div style="font-size:16px;font-weight:600;color:var(--charcoal);margin-bottom:16px">' + escapeHtml(cur.q) + '</div>'
     + cur.opts.map(function(opt) {
-      return '<button class="topbar-btn" style="display:block;width:100%;background:var(--cool);color:var(--charcoal);text-align:left;padding:11px 14px;margin-bottom:6px;font-size:14px" onclick="dtChoose(' + JSON.stringify(opt.next) + ')">' + escapeHtml(opt.label) + '</button>';
+      return '<button class="topbar-btn" style="display:block;width:100%;background:var(--cool);color:var(--charcoal);text-align:left;padding:11px 14px;margin-bottom:6px;font-size:14px" onclick="dtChoose(' + jsCallArg(opt.next) + ')">' + escapeHtml(opt.label) + '</button>';
     }).join('')
     + (dtPath.length > 1 ? '<button class="back-btn" onclick="dtBack()" style="margin-top:12px">← Back</button>' : '')
     + '</div>';
