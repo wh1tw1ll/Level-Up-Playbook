@@ -7,7 +7,7 @@ var currentView = 'home';
 var activePhase = null;
 var activeTopic = null;
 var activeSearch = '';
-var collapsedGroups = {};  // {} = all expanded
+var collapsedGroups = {'1':true, '6':true, '13':true, '18':true, '37':true};  // {} = all expanded
 var openSections = {};     // section.num -> true if expanded
 var chatHistory = [];
 var chatOpen = false;
@@ -683,8 +683,13 @@ function renderSections() {
   var showGroups = !activePhase && !activeTopic && !activeSearch;
 
   if (meta) {
-    if (filtered.length === KB.length) meta.textContent = KB.length + ' sections';
-    else meta.textContent = filtered.length + ' of ' + KB.length + ' sections';
+    var allExpanded = Object.keys(collapsedGroups).length === 0;
+    var label = (filtered.length === KB.length) ? (KB.length + ' sections') : (filtered.length + ' of ' + KB.length + ' sections');
+    meta.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">'
+      + '<span>' + label + '</span>'
+      + '<div style="display:flex;gap:6px">'
+      + '<button onclick="' + (allExpanded ? 'collapseAllGroups()' : 'expandAllGroups()') + '" style="background:var(--cool);border:none;padding:5px 11px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--charcoal)">' + (allExpanded ? 'Collapse All' : 'Expand All') + '</button>'
+      + '</div></div>';
   }
 
   if (filtered.length === 0) {
@@ -779,16 +784,21 @@ function toggleSection(num) {
 function setPhase(p) {
   activePhase = (activePhase === p) ? null : p;
   activeTopic = null;
+  // Auto-expand groups when filtering by phase
+  if (activePhase) collapsedGroups = {};
   renderPlaybook();
 }
 
 function setTopic(t) {
   activeTopic = (activeTopic === t) ? null : t;
+  if (activeTopic) collapsedGroups = {};
   renderPlaybook();
 }
 
 function applySearch(q) {
   activeSearch = (q || '').trim();
+  // When searching, auto-expand all groups so results are visible
+  if (activeSearch) collapsedGroups = {};
   if (currentView !== 'playbook') setView('playbook');
   else renderSections();
 }
@@ -799,8 +809,23 @@ function clearFilters() {
   activeSearch = '';
   var si = document.getElementById('search-input');
   if (si) si.value = '';
+  // Reset to clean collapsed state
+  collapsedGroups = {'1':true, '6':true, '13':true, '18':true, '37':true};
+  openSections = {};
   renderPlaybook();
 }
+
+function expandAllGroups() {
+  collapsedGroups = {};
+  renderSections();
+}
+
+function collapseAllGroups() {
+  collapsedGroups = {'1':true, '6':true, '13':true, '18':true, '37':true};
+  openSections = {};
+  renderSections();
+}
+
 
 // ── PROJECTS / MFP ────────────────────────────────────────────────
 function renderProjects() {
