@@ -3514,15 +3514,6 @@ function renderActionItems() {
 }
 
 
-}
-
-
-  document.querySelectorAll('.home-page, .content-panel, .ai-panel').forEach(function(el) { el.classList.remove('active'); });
-  var shell = document.getElementById('app-shell'); if (shell) shell.style.display = 'none';
-  var panel = document.getElementById('calendar-panel'); if (panel) panel.classList.add('active');
-  loadCalendarList();
-}
-
 async function loadEmailList() {
   var list=document.getElementById('email-list');
   if(!list) return;
