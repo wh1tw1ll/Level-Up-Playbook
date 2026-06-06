@@ -1229,7 +1229,7 @@ function renderSections() {
       var gInfo = GROUPS[gk];
       var collapsed = collapsedGroups.has(gk);
       if (gInfo) {
-        html += '<div class="kb-group-header" data-grp="' + gk + '" onclick="toggleGroup('' + gk + '')">'
+        html += '<div class="kb-group-header" data-grp="' + gk + '" onclick="toggleGroup(' + JSON.stringify(gk) + ')">'
           + '<span class="kb-group-chevron' + (collapsed ? ' collapsed' : '') + '">&#9662;</span>'
           + '<span class="kb-group-title">' + gInfo.label + '</span>'
           + '<span class="kb-group-desc">' + gInfo.desc + '</span>'
@@ -1247,7 +1247,7 @@ function renderSections() {
     }).join('');
 
     html += '<div class="section-card' + (isOpen ? ' open' : '') + '" id="sec-' + s.num + '">'
-      + '<div class="section-card-header" onclick="toggleSection('' + s.num + '')">'
+      + '<div class="section-card-header" onclick="toggleSection(' + JSON.stringify(s.num) + ')">'
       + '<span class="sec-badge">' + s.num + '</span>'
       + '<div style="flex:1">'
       + '<div class="sec-title">' + (s.title || '') + '</div>'
@@ -1264,7 +1264,7 @@ function renderSections() {
       if (h2s.length) {
         h2s.forEach(function(heading, idx) {
           var subId = 'subsec-' + s.num + '-' + idx;
-          html += '<div class="subsec-header" onclick="toggleSubsec('' + subId + '')">'
+          html += '<div class="subsec-header" onclick="toggleSubsec(' + JSON.stringify(subId) + ')">'
             + '<span class="subsec-chevron">&#9662;</span><span>' + heading + '</span></div>'
             + '<div class="subsec-body" id="' + subId + '">';
           // Content paragraphs for this subsection
