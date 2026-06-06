@@ -1927,12 +1927,12 @@ function openPhaseGuide() {
 }
 
 function togglePgPhase(id) {
-  const body = document.getElementById(id);
-  const chevron = document.getElementById(id + '-chevron');
+  var body = document.getElementById(id);
+  var chevron = document.getElementById(id + '-chevron');
   if (!body) return;
-  const isOpen = !body.classList.contains('collapsed');
-  body.classList.toggle('collapsed', isOpen);
-  if (chevron) chevron.style.transform = isOpen ? 'rotate(-90deg)' : '';
+  var isHidden = body.style.display === 'none' || body.style.display === '';
+  body.style.display = isHidden ? 'block' : 'none';
+  if (chevron) chevron.textContent = isHidden ? '▾' : '▶';
 }
 
 function closePhaseGuide() {
