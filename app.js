@@ -559,7 +559,7 @@ function signOut() {
   window.location.href = '/auth/logout';
 }
 
-async async function searchSharePoint(query, limit) {
+async function searchSharePoint(query, limit) {
   limit = limit || 10;
   try {
     const res = await fetch('/api/sharepoint/search?query=' + encodeURIComponent(query) + '&limit=' + limit, { credentials: 'include' });
@@ -603,7 +603,7 @@ async function fetchCalendarEvents(days) {
   } catch(e) { return ''; }
 }
 
-async async function searchSharePointForChat(query) {
+async function searchSharePointForChat(query) {
   const data = await searchSharePoint(query, 5);
   if (!data || data.error) return '';
   try {
