@@ -547,7 +547,10 @@ function updateAuthUI() {
   }
 }
 
-function signInWithMicrosoft() { window.location.href = '/auth/login'; }
+function signInWithMicrosoft() {
+  try { localStorage.setItem('lu_return_view', currentView || 'home'); } catch(e) {}
+  window.location.href = '/auth/login';
+}
 
 function signOut() {
   window.location.href = '/auth/logout';
@@ -2590,6 +2593,7 @@ function handleSharePointClick() {
 }
 
 function openEmailPanel() {
+  currentView = 'email';
   document.querySelectorAll('.home-page, .content-panel, .ai-panel').forEach(function(el) {
     el.classList.remove('active');
   });
@@ -2601,6 +2605,7 @@ function openEmailPanel() {
 }
 
 function openCalendarPanel() {
+  currentView = 'calendar';
   document.querySelectorAll('.home-page, .content-panel, .ai-panel').forEach(function(el) {
     el.classList.remove('active');
   });
