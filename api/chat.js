@@ -14,7 +14,11 @@ export default async function handler(req, res) {
   if (!body) return res.status(400).json({ error: 'Missing body' });
 
   const { system, messages } = body;
-  if (!messages) return res.status(400).json({ error: 'Missing messages' });
+  if (!messages || !messages.length) return res.status(400).json({ error: 'Missing messages' });
+
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
+  }
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -26,14 +30,22 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 600,
-        system: system || '',
-        messages,
+        max_tokens: 800,
+        system: (system || '').slice(0, 40000),
+        messages: messages.slice(-6),
       }),
     });
+
+    if (!response.ok) {
+      const errBody = await response.text();
+      console.error('Anthropic error:', response.status, errBody.slice(0, 200));
+      return res.status(response.status).json({ error: errBody.slice(0, 200) });
+    }
+
     const data = await response.json();
-    return res.status(response.ok ? 200 : response.status).json(data);
+    return res.json(data);
   } catch (err) {
+    console.error('Chat handler error:', err.message);
     return res.status(500).json({ error: err.message });
   }
 }
