@@ -595,7 +595,7 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
   <button class="nav-tab" id="nav-playbook" onclick="setView('playbook')">Playbook</button>
   <button class="nav-tab" id="nav-templates" onclick="setView('templates')">Templates</button>
   <button class="nav-tab" id="nav-mfp" onclick="setView('projects')">Projects</button>
-  <button class="nav-tab" id="nav-actions" onclick="setView('actions')">Action Items</button>  <button class="nav-tab" id="nav-calendar" onclick="setView('calendar')">Calendar</button>
+  <button class="nav-tab" id="nav-actions" onclick="setView('actions')">Action Items</button>  <button class="nav-tab" id="nav-calendar" onclick="setView('calendar');(function(){var cp=document.getElementById('calendar-panel');if(cp)cp.classList.add('active');if(window.renderCalendar)renderCalendar();else{var s=document.createElement('script');s.src='/calendar.js';s.onload=function(){renderCalendar();};document.head.appendChild(s);}})()">Calendar</button>
 </nav>
 </div>
 
