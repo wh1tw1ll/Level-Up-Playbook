@@ -935,7 +935,7 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 </div>
 
 <!-- FAB + CHAT DRAWER -->
-<button id="fab" onclick="toggleChat()" title="Ask the Playbook AI">&#10022; Ask AI</button>
+<button id="fab" onclick="console.log('FAB clicked');toggleChat();" title="Ask the Playbook AI">&#10022; Ask AI</button>
 <div class="chat-drawer" id="chat-drawer">
   <div class="chat-drag-handle" id="chat-drag-handle">
     <span>Playbook AI &mdash; Powered by Claude</span>
@@ -956,9 +956,15 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
   </div>
 </div>
 
-<div class="version-
-// Capture home-
-<script>
+<div class="versio
+window.onerror = function(msg, src, line, col, err) {
+  console.error('GLOBAL ERROR:', msg, 'at line', line, src ? src.split('/').pop() : '');
+  return false;
+};
+window.addEventListener('unhandledrejection', function(e) {
+  console.error('UNHANDLED PROMISE:', e.reason);
+});
+
 // Capture home-inner HTML for res// Capture home-
 // Capt
 // Capture home-
@@ -3945,5 +3951,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 document.addEventListener('DOMContentLoaded',function(){var ci=document.getElementById('chat-input');if(ci){ci.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}});}});
+fault();sendChat();}});}});
 </script>
 
