@@ -3801,6 +3801,88 @@ document.addEventListener('click', function(e) {
 
 
 // ── INIT ──
+
+function openEmailPanel() {
+  if (!luUser || !luUser.authenticated) { window.location.href = '/auth/login'; return; }
+  ['home-page','ai-panel','projects-panel','email-panel','calendar-panel'].forEach(function(id){
+    var el=document.getElementById(id); if(el){el.classList.remove('active');}
+  });
+  var shell=document.getElementById('app-shell'); if(shell) shell.style.display='none';
+  var panel=document.getElementById('email-panel');
+  if(panel) panel.classList.add('active');
+  loadEmailList();
+}
+
+function openCalendarPanel() {
+  if (!luUser || !luUser.authenticated) { window.location.href = '/auth/login'; return; }
+  ['home-page','ai-panel','projects-panel','email-panel','calendar-panel'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.classList.remove('active');
+  });
+  var shell=document.getElementById('app-shell'); if(shell) shell.style.display='none';
+  var panel=document.getElementById('calendar-panel');
+  if(panel) panel.classList.add('active');
+  loadCalendarList();
+}
+
+async function loadEmailList() {
+  var list=document.getElementById('email-list');
+  if(!list) return;
+  list.innerHTML='<div style="color:var(--muted);padding:20px 0">Loading emails...</div>';
+  try {
+    var r=await fetch('/api/outlook/email?limit=20',{credentials:'include'});
+    if(!r.ok){list.innerHTML='<div style="color:#c0392b;padding:20px 0">Error '+r.status+'. Please sign in with Microsoft first.</div>';return;}
+    var data=await r.json();
+    var emails=data.value||[];
+    if(!emails.length){list.innerHTML='<div style="color:var(--muted);padding:20px 0">No emails found.</div>';return;}
+    list._emails=emails;
+    list.innerHTML=emails.map(function(e,i){
+      var from=(e.from&&e.from.emailAddress)?(e.from.emailAddress.name||e.from.emailAddress.address):'Unknown';
+      var date=new Date(e.receivedDateTime).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      var dot=e.isRead?'':'<span style="color:var(--teal);font-weight:700;margin-right:4px">●</span>';
+      return '<div style="padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="openEmailIdx('+i+')">'
+        +'<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+        +'<span style="font-weight:600;font-size:13px;color:var(--charcoal)">'+dot+e.subject+'</span>'
+        +'<span style="font-size:11px;color:var(--muted)">'+date+'</span></div>'
+        +'<div style="font-size:12px;color:var(--muted)">'+from+'</div>'
+        +'<div style="font-size:12px;color:var(--muted);margin-top:2px">'+(e.bodyPreview||'').slice(0,120)+'</div>'
+        +'</div>';
+    }).join('');
+  } catch(err){list.innerHTML='<div style="color:#c0392b;padding:20px 0">Error: '+err.message+'</div>';}
+}
+
+function openEmailIdx(i){
+  var list=document.getElementById('email-list');
+  if(list&&list._emails&&list._emails[i]&&list._emails[i].webLink) window.open(list._emails[i].webLink,'_blank');
+}
+
+async function loadCalendarList() {
+  var list=document.getElementById('calendar-list');
+  if(!list) return;
+  list.innerHTML='<div style="color:var(--muted);padding:20px 0">Loading calendar...</div>';
+  try {
+    var r=await fetch('/api/outlook/calendar?days=14',{credentials:'include'});
+    if(!r.ok){list.innerHTML='<div style="color:#c0392b;padding:20px 0">Error '+r.status+'. Please sign in with Microsoft first.</div>';return;}
+    var data=await r.json();
+    var events=data.value||[];
+    if(!events.length){list.innerHTML='<div style="color:var(--muted);padding:20px 0">No upcoming events.</div>';return;}
+    list.innerHTML=events.map(function(ev){
+      var start=new Date(ev.start.dateTime);
+      var end=new Date(ev.end.dateTime);
+      var dateStr=start.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      var timeStr=start.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' - '+end.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      var loc=ev.location&&ev.location.displayName?ev.location.displayName:'';
+      return '<div style="display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)">'
+        +'<div style="min-width:70px;text-align:center;background:var(--teal-light);border-radius:8px;padding:8px 4px;flex-shrink:0">'
+        +'<div style="font-size:11px;color:var(--teal);font-weight:700">'+dateStr.split(' ')[0]+'</div>'
+        +'<div style="font-size:20px;font-weight:800;color:var(--charcoal)">'+start.getDate()+'</div>'
+        +'<div style="font-size:10px;color:var(--muted)">'+dateStr.split(' ').slice(1).join(' ')+'</div></div>'
+        +'<div><div style="font-weight:600;font-size:14px;color:var(--charcoal);margin-bottom:4px">'+ev.subject+'</div>'
+        +'<div style="font-size:12px;color:var(--muted)">'+timeStr+'</div>'
+        +(loc?'<div style="font-size:12px;color:var(--muted)">📍 '+loc+'</div>':'')+'</div></div>';
+    }).join('');
+  } catch(err){list.innerHTML='<div style="color:#c0392b;padding:20px 0">Error: '+err.message+'</div>';}
+}
+
 async function init() {
   const savedTheme = (() => { try { return localStorage.getItem('lu_theme'); } catch(e) { return null; } })();
   const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
