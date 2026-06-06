@@ -16,6 +16,9 @@ let activeProject = 'generic', projectContext = null;
 let luUser = null, notesPanelOpen = false;
 let checklistState = {}, recentSearches = [], notes = {};
 let aiItems = [], personalItems = [], aiTab = 'team', searchScope = 'all';
+const PHASES = ["All Phases", "Pre-Construction", "Design", "Bidding", "Construction", "Closeout", "Post-Opening"];
+const ALL_TOPICS = ["overview", "purpose", "scope", "governance", "mobilization", "communications", "schedule", "budget", "risk", "change orders", "contracts", "procurement", "permits", "quality", "safety", "commissioning", "punch list", "closeout", "owner's rep", "construction", "design", "reporting", "payments", "claims", "sports projects", "stakeholders", "kickoff", "standards", "templates"];
+
 
 const GKEYS = [1, 6, 13, 18, 37];
 
@@ -1153,16 +1156,16 @@ function highlight(text, query) {
 
 function renderSidebar() {
   // Phase pills
-  const pp = document.getElementById('phase-pills');
-  pp.innerHTML = PHASES.map(p =>
-    `<div class="pill ${activePhase===p?'active':''}" onclick="setPhase('${p}')">${p}</div>`
-  ).join('');
+  var pp = document.getElementById('phase-pills');
+  if (pp) pp.innerHTML = PHASES.map(function(p) {
+    return '<div class="pill' + (activePhase===p?' active':'') + '" onclick="setPhase(' + JSON.stringify(p) + ')">' + p + '</div>';
+  }).join('');
 
   // Topics
-  const tl = document.getElementById('topic-list');
-  tl.innerHTML = ALL_TOPICS.slice(0,40).map(t =>
-    `<div class="topic-item ${activeTopic===t?'active':''}" onclick="setTopic('${t}')" title="${t}">${t}</div>`
-  ).join('');
+  var tl = document.getElementById('topic-list');
+  if (tl) tl.innerHTML = ALL_TOPICS.slice(0,40).map(function(t) {
+    return '<div class="topic-item' + (activeTopic===t?' active':'') + '" onclick="setTopic(' + JSON.stringify(t) + ')" title="' + t + '">' + t + '</div>';
+  }).join('');
 
   // Section nav
   const sn = document.getElementById('section-nav');
