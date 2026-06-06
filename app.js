@@ -964,7 +964,9 @@ function doSharePointSearch() {
     .then(function(r) {
       if (!r.ok) {
         if (r.status === 401) {
-          results.innerHTML = '<div style="padding:24px;background:var(--card);border:1px solid var(--border);border-radius:8px">Session expired. <button class="back-btn" style="color:var(--teal);text-decoration:underline" onclick="signInWithMicrosoft()">Sign in again</button></div>';
+          document.cookie = 'lu_session=; Path=/; Max-Age=0';
+          luUser = null; updateAuthUI();
+          results.innerHTML = '<div style="padding:24px;background:var(--card);border:1px solid var(--border);border-radius:8px">Session expired. <button class="signin-btn" onclick="signInWithMicrosoft()" style="margin-top:8px">Sign in again</button></div>';
         } else {
           results.innerHTML = '<div style="padding:24px;color:#c0392b">Search error (' + r.status + '). Please try again.</div>';
         }
@@ -1044,7 +1046,14 @@ function renderEmail() {
       }).join('');
     })
     .catch(function(err) {
-      document.getElementById('email-list').innerHTML = '<div style="padding:24px;color:#c0392b">Error loading emails: ' + escapeHtml(err.message) + '. <button class="back-btn" style="color:var(--teal);text-decoration:underline" onclick="signInWithMicrosoft()">Sign in again</button></div>';
+      var msg = err.message || '';
+      if (msg.indexOf('401') >= 0) {
+        document.cookie = 'lu_session=; Path=/; Max-Age=0';
+        luUser = null; updateAuthUI();
+        document.getElementById('email-content').innerHTML = signInEmptyState('📧','Session expired','Your Microsoft sign-in expired. Sign in again to view your email.');
+      } else {
+        document.getElementById('email-list').innerHTML = '<div style="padding:24px;color:#c0392b">Error loading emails: ' + escapeHtml(msg) + '</div>';
+      }
     });
 }
 
@@ -1102,7 +1111,15 @@ function renderCalendar() {
       }).join('');
     })
     .catch(function(err) {
-      document.getElementById('cal-list').innerHTML = '<div style="padding:24px;color:#c0392b">Error loading calendar: ' + escapeHtml(err.message) + '. <button class="back-btn" style="color:var(--teal);text-decoration:underline" onclick="signInWithMicrosoft()">Sign in again</button></div>';
+      var msg = err.message || '';
+      if (msg.indexOf('401') >= 0) {
+        // Token expired - clear lu_session and prompt re-signin
+        document.cookie = 'lu_session=; Path=/; Max-Age=0';
+        luUser = null; updateAuthUI();
+        document.getElementById('calendar-content').innerHTML = signInEmptyState('📅','Session expired','Your Microsoft sign-in expired. Sign in again to view your calendar.');
+      } else {
+        document.getElementById('cal-list').innerHTML = '<div style="padding:24px;color:#c0392b">Error loading calendar: ' + escapeHtml(msg) + '</div>';
+      }
     });
 }
 
