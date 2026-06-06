@@ -1,17 +1,20 @@
 {
-  "functions": {
-    "api/**/*.js": {
-      "memory": 256,
-      "maxDuration": 15
-    }
-  },
-  "routes": [
-    { "src": "/auth/login",    "dest": "/api/auth/login.js" },
-    { "src": "/auth/callback", "dest": "/api/auth/callback.js" },
-    { "src": "/auth/me",       "dest": "/api/auth/me.js" },
-    { "src": "/auth/logout",   "dest": "/api/auth/logout.js" },
-    { "src": "/api/sharepoint/search", "dest": "/api/sharepoint/search.js" },
-    { "src": "/api/sharepoint/read",   "dest": "/api/sharepoint/read.js" },
-    { "src": "/(.*)",          "dest": "/index.html" }
-  ]
+    "functions": {
+          "api/**/*.js": {
+                  "memory": 256,
+                  "maxDuration": 15
+          }
+    },
+    "routes": [
+          { "src": "/auth/login",            "dest": "/api/auth/login.js" },
+          { "src": "/auth/callback",         "dest": "/api/auth/callback.js" },
+          { "src": "/auth/me",               "dest": "/api/auth/me.js" },
+          { "src": "/auth/logout",           "dest": "/api/auth/logout.js" },
+          { "src": "/api/chat",              "dest": "/api/chat.js" },
+          { "src": "/api/sharepoint/search", "dest": "/api/sharepoint/search.js" },
+          { "src": "/api/sharepoint/read",   "dest": "/api/sharepoint/read.js" },
+          { "src": "/api/outlook/email",     "dest": "/api/outlook/email.js" },
+          { "src": "/api/outlook/calendar",  "dest": "/api/outlook/calendar.js" },
+          { "src": "/(.*)",                  "dest": "/index.html" }
+    ]
 }
