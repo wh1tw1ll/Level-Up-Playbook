@@ -131,9 +131,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
 .mfp-stk-role{color:var(--muted);flex:1}
 .mfp-stk-firm{font-size:11px;color:var(--teal)}
 .mfp-contract-row{padding:10px 0;border-bottom:1px solid var(--border)}
-function handleSharePointClick() {.mfp-contract-party{font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:3px}
+.mfp-contract-row:last-child{border-bottom:none}
+.mfp-contract-party{font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:3px}
 .mfp-contract-detail{font-size:11px;color:var(--muted);line-height:1.5}
-.async function handleSharePointClick() {mfp-schedule-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.mfp-schedule-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
 .mfp-schedule-row:last-child{border-bottom:none}
 .mfp-sched-label{color:var(--charcoal);font-weight:500}
 .mfp-sched-val{font-weight:700;color:var(--teal)}
@@ -533,7 +534,7 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 .ai-form-actions{display:flex;justify-content:flex-end;gap:8px}
 
 /* ── CHAT DRAWER ── */
-#fab{padding:0;position:fixed;bottom:24px;right:24px;z-index:1000;background:var(--teal);color:#fff;border:none;border-radius:50%;width:52px;height:52px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:all .2s}
+#fab{position:fixed;bottom:24px;right:24px;z-index:1000;background:var(--teal);color:#fff;border:none;border-radius:50%;width:52px;height:52px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:all .2s}
 #fab:hover{background:var(--teal-dark,#005f5f);transform:scale(1.05)}
 .chat-drawer{position:fixed;bottom:88px;right:24px;width:380px;max-height:60vh;background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.15);z-index:999;display:flex;flex-direction:column;overflow:hidden;transform:translateY(20px) scale(.95);opacity:0;pointer-events:none;transition:all .2s cubic-bezier(.34,1.56,.64,1)}
 .chat-drawer.open{transform:translateY(0) scale(1);opacity:1;pointer-events:all}
@@ -595,7 +596,7 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
   <button class="nav-tab" id="nav-playbook" onclick="setView('playbook')">Playbook</button>
   <button class="nav-tab" id="nav-templates" onclick="setView('templates')">Templates</button>
   <button class="nav-tab" id="nav-mfp" onclick="setView('projects')">Projects</button>
-  <button class="nav-tab" id="nav-actions" onclick="setView('actions')">Action Items</button>  <button class="nav-tab" id="nav-calendar" onclick="setView('calendar');(function(){var cp=document.getElementById('calendar-panel');if(cp)cp.classList.add('active');if(window.renderCalendar)renderCalendar();else{var s=document.createElement('script');s.src='/calendar.js';s.onload=function(){renderCalendar();};document.head.appendChild(s);}})()">Calendar</button>
+  <button class="nav-tab" id="nav-actions" onclick="setView('actions')">Action Items</button>
 </nav>
 </div>
 
@@ -687,7 +688,7 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
   </div>
 </div>
 
-<!-- CALENDAR PANEL --><div id="calendar-panel" class="home-page">
+<!-- ACTION ITEMS PANEL -->
 <div id="ai-panel" class="ai-panel">
   <div class="ai-panel-inner">
     <div class="ai-panel-header">
