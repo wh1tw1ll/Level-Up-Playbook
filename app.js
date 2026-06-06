@@ -559,13 +559,13 @@ function signOut() {
   window.location.href = '/auth/logout';
 }
 
-async function searchSharePoint(query, limit = 5) {
-  if (!luUser || !luUser.authenticated) return null;
+async async function searchSharePoint(query, limit) {
+  limit = limit || 10;
   try {
-    const res = await fetch(`/api/sharepoint/search?query=${encodeURIComponent(query)}&limit=${limit}`);
-    if (!res.ok) return null;
+    const res = await fetch('/api/sharepoint/search?query=' + encodeURIComponent(query) + '&limit=' + limit, { credentials: 'include' });
+    if (!res.ok) return { error: res.status };
     return await res.json();
-  } catch(e) { return null; }
+  } catch(e) { return { error: e.message }; }
 }
 
 async function fetchOutlookEmails(limit) {
@@ -603,17 +603,17 @@ async function fetchCalendarEvents(days) {
   } catch(e) { return ''; }
 }
 
-async function searchSharePointForChat(query) {
+async async function searchSharePointForChat(query) {
   const data = await searchSharePoint(query, 5);
-  if (!data) return '';
+  if (!data || data.error) return '';
   try {
-    const hits = data.value?.[0]?.hitsContainers?.[0]?.hits || [];
+    const hits = (data.value && data.value[0] && data.value[0].hitsContainers && data.value[0].hitsContainers[0] && data.value[0].hitsContainers[0].hits) || [];
     if (!hits.length) return '';
-    const results = hits.slice(0, 5).map(h => {
+    const results = hits.slice(0, 5).map(function(h) {
       const r = h.resource;
-      return `File: ${r.name}\nURL: ${r.webUrl}\nSnippet: ${h.summary || ''}`;
+      return 'File: ' + r.name + '\nURL: ' + r.webUrl + '\nSnippet: ' + (h.summary || '');
     }).join('\n\n');
-    return results ? `\n\n=== SHAREPOINT FILES FOUND ===\n${results}` : '';
+    return results ? '\n\n=== SHAREPOINT FILES FOUND ===\n' + results : '';
   } catch(e) { return ''; }
 }
 
@@ -2582,17 +2582,109 @@ async function init() {
 
 
 function handleSharePointClick() {
-  if (!chatOpen) toggleChat();
+  currentView = 'sharepoint';
+  document.querySelectorAll('.home-page, .content-panel, .ai-panel').forEach(function(el) {
+    el.classList.remove('active');
+  });
+  var shell = document.getElementById('app-shell');
+  if (shell) shell.style.display = 'none';
+  var panel = document.getElementById('sharepoint-panel');
+  if (panel) panel.classList.add('active');
+  renderSharePointPanel();
+}
+
+function renderSharePointPanel() {
+  var panel = document.getElementById('sharepoint-panel');
+  if (!panel) return;
+  if (!luUser || !luUser.authenticated) {
+    panel.innerHTML = '<div class="home-inner"><div style="display:flex;align-items:center;gap:16px;margin-bottom:24px"><button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:0">&larr; Home</button><div style="display:flex;align-items:center;gap:10px"><span style="font-size:24px">&#128193;</span><div style="font-size:20px;font-weight:700;color:var(--charcoal)">SharePoint Files</div></div></div>'
+      + '<div style="padding:40px 24px;text-align:center;max-width:480px;margin:0 auto"><div style="font-size:32px;margin-bottom:12px">&#128193;</div><div style="font-size:18px;font-weight:700;color:var(--charcoal);margin-bottom:8px">Connect SharePoint</div><div style="font-size:14px;color:var(--muted);margin-bottom:24px">Sign in with your Microsoft account to search Level Up SharePoint documents.</div><button onclick="signInWithMicrosoft()" style="background:#184655;color:#fff;border:none;border-radius:8px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 21 21"><rect width="10" height="10" fill="#F25022"/><rect x="11" width="10" height="10" fill="#7FBA00"/><rect y="11" width="10" height="10" fill="#00A4EF"/><rect x="11" y="11" width="10" height="10" fill="#FFB900"/></svg>Sign in with Microsoft</button></div></div>';
+    return;
+  }
+  panel.innerHTML = '<div class="home-inner">'
+    + '<div style="display:flex;align-items:center;gap:16px;margin-bottom:24px">'
+    + '<button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:0">&larr; Home</button>'
+    + '<div style="display:flex;align-items:center;gap:10px"><span style="font-size:24px">&#128193;</span><div style="font-size:20px;font-weight:700;color:var(--charcoal)">SharePoint Files</div></div>'
+    + '</div>'
+    + '<div style="display:flex;gap:8px;margin-bottom:20px">'
+    + '<input id="sp-search-input" type="text" placeholder="Search SharePoint files... (e.g. Lemartec, punch list, Kroll audit)" '
+    + 'style="flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:var(--card);color:var(--charcoal);outline:none">'
+    + '<button onclick="doSharePointSearch()" style="background:var(--teal);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">Search</button>'
+    + '</div>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px">'
+    + '<span style="font-size:11px;color:var(--muted);font-weight:600;padding:6px 0;margin-right:4px">QUICK SEARCHES:</span>'
+    + '<button onclick="quickSPSearch(\'Lemartec\')" class="sp-chip">Lemartec</button>'
+    + '<button onclick="quickSPSearch(\'Kroll audit\')" class="sp-chip">Kroll audit</button>'
+    + '<button onclick="quickSPSearch(\'punch list\')" class="sp-chip">Punch list</button>'
+    + '<button onclick="quickSPSearch(\'change order\')" class="sp-chip">Change orders</button>'
+    + '<button onclick="quickSPSearch(\'invoice\')" class="sp-chip">Invoices</button>'
+    + '<button onclick="quickSPSearch(\'HVAC\')" class="sp-chip">HVAC</button>'
+    + '</div>'
+    + '<div id="sp-results"><div style="color:var(--muted);font-size:14px;padding:20px 0">Type a search above or pick a quick search to find SharePoint files.</div></div>'
+    + '</div>';
   setTimeout(function() {
-    var inp = document.getElementById('chat-input');
-    if (!inp) return;
-    if (luUser && luUser.authenticated) {
-      inp.value = 'Search SharePoint: '; inp.focus();
-    } else {
-      inp.value = '';
-      appendMsg('ai', 'To search SharePoint files, you need to sign in with Microsoft first. Click the **Sign In** button in the top right corner, then come back and try again.');
+    var inp = document.getElementById('sp-search-input');
+    if (inp) {
+      inp.focus();
+      inp.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); doSharePointSearch(); }
+      });
     }
-  }, 300);
+  }, 100);
+}
+
+function quickSPSearch(q) {
+  var inp = document.getElementById('sp-search-input');
+  if (inp) inp.value = q;
+  doSharePointSearch();
+}
+
+async function doSharePointSearch() {
+  var inp = document.getElementById('sp-search-input');
+  var results = document.getElementById('sp-results');
+  if (!inp || !results) return;
+  var query = inp.value.trim();
+  if (!query) return;
+  results.innerHTML = '<div style="color:var(--muted);padding:20px 0">Searching SharePoint for "' + query + '"...</div>';
+  var data = await searchSharePoint(query, 20);
+  if (!data || data.error) {
+    if (data && data.error === 401) {
+      results.innerHTML = '<div style="padding:24px;background:var(--card);border:1px solid var(--border);border-radius:8px">Your session expired. <button onclick="signInWithMicrosoft()" style="background:none;border:none;color:var(--teal);cursor:pointer;font-family:inherit;text-decoration:underline">Sign in again</button></div>';
+    } else {
+      results.innerHTML = '<div style="padding:24px;color:#c0392b">Search error. Please try again.</div>';
+    }
+    return;
+  }
+  try {
+    var hits = (data.value && data.value[0] && data.value[0].hitsContainers && data.value[0].hitsContainers[0] && data.value[0].hitsContainers[0].hits) || [];
+    if (!hits.length) {
+      results.innerHTML = '<div style="padding:24px;color:var(--muted)">No files found for "' + query + '".</div>';
+      return;
+    }
+    var html = '<div style="font-size:13px;color:var(--muted);margin-bottom:12px">' + hits.length + ' result' + (hits.length===1?'':'s') + ' for "' + query + '"</div>';
+    hits.forEach(function(h) {
+      var r = h.resource;
+      var fileType = (r.name || '').split('.').pop().toLowerCase();
+      var iconMap = { pdf: '&#128196;', docx: '&#128221;', doc: '&#128221;', xlsx: '&#128202;', xls: '&#128202;', pptx: '&#128240;', ppt: '&#128240;', msg: '&#128231;' };
+      var icon = iconMap[fileType] || '&#128196;';
+      var modified = r.lastModifiedDateTime ? new Date(r.lastModifiedDateTime).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '';
+      var author = (r.lastModifiedBy && r.lastModifiedBy.user && r.lastModifiedBy.user.displayName) || '';
+      var snippet = (h.summary || '').replace(/<[^>]+>/g, '').slice(0, 200);
+      html += '<a href="' + r.webUrl + '" target="_blank" style="display:block;padding:14px 16px;margin-bottom:8px;background:var(--card);border:1px solid var(--border);border-radius:8px;text-decoration:none;color:inherit;transition:box-shadow .15s" onmouseover="this.style.boxShadow=\'0 2px 8px rgba(0,0,0,.08)\'" onmouseout="this.style.boxShadow=\'\'">'
+        + '<div style="display:flex;gap:12px;align-items:flex-start">'
+        + '<span style="font-size:24px;flex-shrink:0">' + icon + '</span>'
+        + '<div style="flex:1;min-width:0">'
+        + '<div style="font-weight:600;font-size:14px;color:var(--charcoal);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis">' + r.name + '</div>'
+        + (snippet ? '<div style="font-size:12px;color:var(--muted);margin-bottom:6px;line-height:1.4">' + snippet + '</div>' : '')
+        + '<div style="font-size:11px;color:var(--muted)">' + (modified ? modified : '') + (author ? ' &middot; ' + author : '') + '</div>'
+        + '</div>'
+        + '</div>'
+        + '</a>';
+    });
+    results.innerHTML = html;
+  } catch(e) {
+    results.innerHTML = '<div style="padding:24px;color:#c0392b">Error parsing results: ' + e.message + '</div>';
+  }
 }
 
 function openEmailPanel() {
