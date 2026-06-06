@@ -557,6 +557,10 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 #lu-diag{position:fixed;bottom:0;left:0;right:0;background:#0f2d1a;color:#4ade80;
 font-size:11px;font-family:monospace;padding:3px 12px;z-index:99999;
 display:flex;gap:12px;align-items:center}
+
+.sp-chip{background:var(--card);border:1px solid var(--border);color:var(--charcoal);padding:6px 12px;border-radius:16px;font-size:12px;cursor:pointer;font-family:inherit;transition:all .15s}
+.sp-chip:hover{background:var(--teal-light);border-color:var(--teal);color:var(--teal)}
+
 </style>
 </head>
 <body>
@@ -881,6 +885,14 @@ display:flex;gap:12px;align-items:center}
       </div>
     </div>
   </main>
+
+
+<!-- SHAREPOINT PANEL -->
+<div id="sharepoint-panel" class="content-panel">
+  <div class="home-inner">
+    <div style="color:var(--muted);padding:20px 0">Loading...</div>
+  </div>
+</div>
 
 </div><!-- end app-shell -->
 
