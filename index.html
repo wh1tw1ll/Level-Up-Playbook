@@ -537,9 +537,9 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 .ai-form-actions{display:flex;justify-content:flex-end;gap:8px}
 
 /* ── CHAT DRAWER ── */
-#fab{position:fixed;bottom:28px;right:28px;z-index:1000;background:var(--teal);color:#fff;border:none;border-radius:50px;padding:12px 20px;display:flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.25);font-size:14px;font-weight:600;transition:all .2s}#fab:hover{background:#1d5568;transform:translateY(-2px)}
+#fab{position:fixed;bottom:28px;right:28px;z-index:1000;background:var(--teal);color:#fff;border:none;border-radius:50px;padding:12px 20px;display:flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.25);font-size:14px;font-weight:600;font-family:inherit;transition:all .2s;pointer-events:all}#fab:hover{background:#1d5568;transform:translateY(-2px)}
 #fab:hover{background:var(--teal-dark,#005f5f);transform:scale(1.05)}
-.chat-drawer{position:fixed;bottom:88px;right:24px;width:380px;max-height:60vh;background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.15);z-index:999;display:flex;flex-direction:column;overflow:hidden;transform:translateY(20px) scale(.95);opacity:0;pointer-events:none;transition:all .2s cubic-bezier(.34,1.56,.64,1)}
+.chat-drawer{position:fixed;bottom:88px;right:24px;width:380px;max-height:60vh;background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.15);z-index:1001;display:flex;flex-direction:column;overflow:hidden;transform:translateY(20px) scale(.95);opacity:0;pointer-events:none;transition:all .2s cubic-bezier(.34,1.56,.64,1)}
 .chat-drawer.open{transform:translateY(0) scale(1);opacity:1;pointer-events:all}
 .chat-drag-handle{padding:10px 16px 6px;cursor:grab;background:var(--card);border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
 .chat-drag-handle span{font-size:12px;font-weight:600;color:var(--muted)}
@@ -935,7 +935,7 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 </div>
 
 <!-- FAB + CHAT DRAWER -->
-<div id="fab" onclick="toggleChat()" title="Ask the Playbook AI">&#10022; Ask AI</div>
+<button id="fab" onclick="toggleChat()" title="Ask the Playbook AI">&#10022; Ask AI</button>
 <div class="chat-drawer" id="chat-drawer">
   <div class="chat-drag-handle" id="chat-drag-handle">
     <span>Playbook AI &mdash; Powered by Claude</span>
@@ -956,10 +956,7 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
   </div>
 </div>
 
-<div class="version-stamp">Level Up Playbook v2.1</div>
-
-
-<script>
+<div class="version-
 // Capture home-
 // Capture home-inner HTML for res// Capture home-
 // Capt
@@ -2732,11 +2729,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function toggleChat() {
   chatOpen = !chatOpen;
-  document.getElementById('chat-drawer').classList.toggle('open', chatOpen);
-  document.getElementById('fab').classList.toggle('open', chatOpen);
+  var drawer = document.getElementById('chat-drawer');
+  var fab = document.getElementById('fab');
+  var input = document.getElementById('chat-input');
+  if (drawer) drawer.classList.toggle('open', chatOpen);
+  if (fab) fab.classList.toggle('open', chatOpen);
   if (chatOpen) {
-    if (chatHistory.length === 0) appendMsg('ai', "I'm the Level Up Playbook AI. Ask me anything about managing a sports venue project — from Day 1 mobilization through closeout.");
-    setTimeout(() => document.getElementById('chat-input').focus(), 150);
+    var msgs = document.getElementById('chat-messages');
+    if (msgs && chatHistory.length === 0) {
+      appendMsg('ai', "I'm the Level Up Playbook AI. Ask me anything about managing a sports venue project — from Day 1 mobilization through closeout.");
+    }
+    if (input) setTimeout(function() { input.focus(); }, 150);
   }
 }
 
@@ -5556,6 +5559,10 @@ document.addEventListener('DOMContentLoaded', function() {
   if (chatInput) {
     chatInput.addEventListener('keydown', function(e) {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+    });
+  }
+});
+eventDefault(); sendChat(); }
     });
   }
 });
