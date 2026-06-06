@@ -1683,7 +1683,7 @@ const PHASE_GUIDE = {
 
 function openPhaseGuide() {
   const modal = document.getElementById('phase-guide-modal');
-  const body = document.getElementById('pg-modal-body');
+  const body = document.getElementById('phase-guide-body') || document.getElementById('pg-modal-body');
   
   body.innerHTML = Object.entries(PHASE_GUIDE).map(([phase, data], phaseIdx) => {
     const phaseId = 'pg-phase-' + phaseIdx;
@@ -3755,20 +3755,22 @@ function renderActionItems() {
   };
 }
 
-function handleSharePointClick() {
+async function handleSharePointClick() {
+  // Re-check auth in case cookie loaded after init
+  if (!luUser || !luUser.authenticated) {
+    await checkAuth();
+  }
   if (luUser && luUser.authenticated) {
     toggleChat();
     setTimeout(function() {
       var input = document.getElementById('chat-input');
       if (input) { 
         input.value = 'Search SharePoint: '; 
-        input.focus(); 
-        // Position cursor at end
+        input.focus();
         input.setSelectionRange(input.value.length, input.value.length);
       }
     }, 300);
   } else {
-    // Redirect to login
     window.location.href = '/auth/login';
   }
 }
@@ -3818,5 +3820,14 @@ async function init() {
   setTimeout(updateHomeStats, 50);
 }
 init();
+
+document.addEventListener('DOMContentLoaded', function() {
+  var chatInput = document.getElementById('chat-input');
+  if (chatInput) {
+    chatInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+    });
+  }
+});
 </script>
 
