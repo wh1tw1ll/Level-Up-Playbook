@@ -22,24 +22,35 @@ export default async function handler(req, res) {
       }
     );
     const tokens = await tokenRes.json();
-    if (tokens.error) return res.redirect('/?auth_error=' + encodeURIComponent(tokens.error_description || tokens.error));
+    if (tokens.error) {
+      console.error('Token error:', tokens);
+      return res.redirect('/?auth_error=' + encodeURIComponent(tokens.error_description || tokens.error));
+    }
 
     const meRes = await fetch('https://graph.microsoft.com/v1.0/me', {
       headers: { Authorization: `Bearer ${tokens.access_token}` },
     });
     const me = await meRes.json();
 
-    const payload = JSON.stringify({
+    const expiresAt = Date.now() + ((tokens.expires_in || 3600) * 1000);
+    const name = me.displayName || me.userPrincipalName || 'User';
+    const email = me.mail || me.userPrincipalName || '';
+
+    // Store full auth payload (with token) in HttpOnly cookie for server API calls
+    const authPayload = JSON.stringify({
       access_token:  tokens.access_token,
       refresh_token: tokens.refresh_token || '',
-      expires_at:    Date.now() + ((tokens.expires_in || 3600) * 1000),
-      name:          me.displayName || me.userPrincipalName || 'User',
-      email:         me.mail || me.userPrincipalName || '',
+      expires_at:    expiresAt,
+      name, email,
     });
 
-    res.setHeader('Set-Cookie',
-      `lu_auth=${encodeURIComponent(payload)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${7*24*3600}`
-    );
+    // Store readable session info in second cookie for JS to detect auth state
+    const sessionPayload = JSON.stringify({ name, email, expires_at: expiresAt });
+
+    res.setHeader('Set-Cookie', [
+      `lu_auth=${encodeURIComponent(authPayload)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${7*24*3600}`,
+      `lu_session=${encodeURIComponent(sessionPayload)}; Path=/; Secure; SameSite=Lax; Max-Age=${7*24*3600}`
+    ]);
     res.redirect('/?auth=success');
   } catch(err) {
     console.error('Callback error:', err);
