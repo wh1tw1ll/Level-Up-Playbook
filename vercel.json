@@ -27,10 +27,6 @@
       "dest": "/api/auth/logout.js"
     },
     {
-      "src": "/auth/debug",
-      "dest": "/api/auth/debug.js"
-    },
-    {
       "src": "/api/chat",
       "dest": "/api/chat.js"
     },
