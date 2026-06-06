@@ -952,7 +952,8 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
   </div>
   <div class="chat-messages" id="chat-messages"></div>
   <div class="chat-input-row">
-    <input type="text" id="chat-input" placeholder="Ask anything about the play
+    <input type="text" id="chat-input" placeholder="Ask anything about the playbook or MFP..." autocomplete="off">
+    <button id="chat-send" onclick="sendChat()">Send</button>
 <script>// build:20260606162948
 
 var homeInnerHTML = '';
@@ -3519,53 +3520,31 @@ function renderActionItems() {
 }
 
 async function handleSharePointClick() {
-  await checkAuth();
+  if (!luUser || !luUser.authenticated) await checkAuth();
   if (luUser && luUser.authenticated) {
-    toggleChat();
+    if (!chatOpen) toggleChat();
     setTimeout(function() {
-      var input = document.getElementById('chat-input');
-      if (input) { 
-        input.value = 'Search SharePoint: '; 
-        input.focus();
-        input.setSelectionRange(input.value.length, input.value.length);
-      }
+      var inp = document.getElementById('chat-input');
+      if (inp) { inp.value = 'Search SharePoint: '; inp.focus(); }
     }, 300);
   } else {
     window.location.href = '/auth/login';
   }
 }
 
-function openEmailPanel() {
-  if (!luUser || !luUser.authenticated) {
-    checkAuth().then(function() {
-      if (!luUser || !luUser.authenticated) { window.location.href = '/auth/login'; return; }
-      _showEmailPanel();
-    });
-  } else { _showEmailPanel(); }
-}
-function _showEmailPanel() {
-  document.querySelectorAll('.home-page,.ai-panel,.content-panel').forEach(function(el){el.classList.remove('active');});
-  var shell=document.getElementById('app-shell'); if(shell) shell.style.display='none';
-  var panel=document.getElementById('email-panel');
-  if(panel) panel.classList.add('active');
-  loadEmailList();
-}
+
+
 
 function openCalendarPanel() {
   if (!luUser || !luUser.authenticated) {
-    checkAuth().then(function() {
-      if (!luUser || !luUser.authenticated) { window.location.href = '/auth/login'; return; }
-      _showCalendarPanel();
-    });
-  } else { _showCalendarPanel(); }
-}
-function _showCalendarPanel() {
-  document.querySelectorAll('.home-page,.ai-panel,.content-panel').forEach(function(el){el.classList.remove('active');});
-  var shell=document.getElementById('app-shell'); if(shell) shell.style.display='none';
-  var panel=document.getElementById('calendar-panel');
-  if(panel) panel.classList.add('active');
+    window.location.href = '/auth/login'; return;
+  }
+  document.querySelectorAll('.home-page, .content-panel, .ai-panel').forEach(function(el) { el.classList.remove('active'); });
+  var shell = document.getElementById('app-shell'); if (shell) shell.style.display = 'none';
+  var panel = document.getElementById('calendar-panel'); if (panel) panel.classList.add('active');
   loadCalendarList();
 }
+
 
 async function loadEmailList() {
   var list=document.getElementById('email-list');
