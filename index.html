@@ -664,6 +664,21 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
         <div class="home-card-desc">Search Level Up and MFP documents. Sign in with Microsoft to enable.</div>
         <div class="home-card-meta" id="sharepoint-card-meta">Sign in to connect &rarr;</div>
       </div>
+
+      <div class="home-card" onclick="openEmailPanel()">
+        <div class="home-card-icon">&#128140;</div>
+        <div class="home-card-title">Emails</div>
+        <div class="home-card-desc">Recent Outlook emails. Sign in with Microsoft to access your inbox.</div>
+        <div class="home-card-meta" id="email-card-meta">Sign in to connect &rarr;</div>
+      </div>
+
+      <div class="home-card" onclick="openCalendarPanel()">
+        <div class="home-card-icon">&#128197;</div>
+        <div class="home-card-title">Calendar</div>
+        <div class="home-card-desc">Upcoming meetings and events from your Outlook calendar.</div>
+        <div class="home-card-meta" id="calendar-card-meta">Sign in to connect &rarr;</div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -716,6 +731,33 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
       </div>
     </div>
     <div id="ai-list"></div>
+  </div>
+</div>
+
+
+<!-- EMAIL PANEL -->
+<div id="email-panel" class="home-page">
+  <div class="home-inner">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px">
+      <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:0">&larr; Home</button>
+      <div style="font-size:22px;font-weight:800;color:var(--charcoal)">&#128140; Recent Emails</div>
+    </div>
+    <div id="email-list" style="max-width:800px">
+      <div style="color:var(--muted);font-size:13px">Loading emails...</div>
+    </div>
+  </div>
+</div>
+
+<!-- CALENDAR PANEL -->
+<div id="calendar-panel" class="home-page">
+  <div class="home-inner">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px">
+      <button onclick="goHome()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:0">&larr; Home</button>
+      <div style="font-size:22px;font-weight:800;color:var(--charcoal)">&#128197; Upcoming Calendar</div>
+    </div>
+    <div id="calendar-list" style="max-width:800px">
+      <div style="color:var(--muted);font-size:13px">Loading events...</div>
+    </div>
   </div>
 </div>
 
@@ -824,13 +866,21 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 
   </div><!-- end sidebar -->
 
-<!-- MAIN -->
+  <!-- MAIN CONTENT -->
   <main class="main">
     <div class="content-area" id="content-area">
       <div class="mfp-panel" id="mfp-panel"></div>
       <div class="playbook-content" id="playbook-content">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
           <div class="results-meta" id="results-meta"></div>
+          <div id="collapse-all-btn-wrap"></div>
+        </div>
+        <div id="sections-container"></div>
+      </div>
+    </div>
+  </main>
+
+</div><!-- end app-shell -->
 
 <script>
 // Capture home-inner HTML for restoration after template view
@@ -863,15 +913,21 @@ function updateAuthUI() {
   const userInfo  = document.getElementById('auth-user-info');
   const userName  = document.getElementById('auth-user-name');
   const spMeta = document.getElementById('sharepoint-card-meta');
+  var emailMeta = document.getElementById('email-card-meta');
+  var calMeta = document.getElementById('calendar-card-meta');
   if (luUser && luUser.authenticated) {
     if (signInBtn) signInBtn.style.display = 'none';
     if (userInfo)  userInfo.style.display  = 'flex';
     if (userName)  userName.textContent = luUser.name || luUser.email;
     if (spMeta)    spMeta.textContent = 'Search files →';
+    if (emailMeta) emailMeta.textContent = 'View inbox →';
+    if (calMeta)   calMeta.textContent = 'View calendar →';
   } else {
     if (signInBtn) signInBtn.style.display = 'flex';
     if (userInfo)  userInfo.style.display  = 'none';
     if (spMeta)    spMeta.textContent = 'Sign in to connect →';
+    if (emailMeta) emailMeta.textContent = 'Sign in to connect →';
+    if (calMeta)   calMeta.textContent = 'Sign in to connect →';
   }
 }
 
@@ -3456,8 +3512,9 @@ function setView(view) {
   if (homePage) homePage.classList.remove('active');
   if (aiPanel)  aiPanel.classList.remove('active');
   if (shell)    shell.style.display = 'none';
-  var projPanel = document.getElementById('projects-panel');
-  if (projPanel) projPanel.classList.remove('active');
+  ['projects-panel','email-panel','calendar-panel'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.classList.remove('active');
+  });
   document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active');});
   var tab = document.getElementById('nav-' + (view==='mfp'?'mfp':view));
   if (tab) tab.classList.add('active');
@@ -3673,6 +3730,129 @@ function setScope(scope) {
   if (btn) btn.classList.add('active');
   renderSections();
 }
+
+function openEmailPanel() {
+  if (!luUser || !luUser.authenticated) { signInWithMicrosoft(); return; }
+  // Hide all panels
+  ['home-page','ai-panel','projects-panel','email-panel','calendar-panel'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.classList.remove('active');
+  });
+  var shell = document.getElementById('app-shell'); if (shell) shell.style.display = 'none';
+  var panel = document.getElementById('email-panel');
+  if (panel) panel.classList.add('active');
+  loadEmailList();
+}
+
+function openCalendarPanel() {
+  if (!luUser || !luUser.authenticated) { signInWithMicrosoft(); return; }
+  ['home-page','ai-panel','projects-panel','email-panel','calendar-panel'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.classList.remove('active');
+  });
+  var shell = document.getElementById('app-shell'); if (shell) shell.style.display = 'none';
+  var panel = document.getElementById('calendar-panel');
+  if (panel) panel.classList.add('active');
+  loadCalendarList();
+}
+
+async function loadEmailList() {
+  var list = document.getElementById('email-list');
+  if (!list) return;
+  list.innerHTML = '<div style="color:var(--muted);font-size:13px">Loading emails...</div>';
+  try {
+    var r = await fetch('/api/outlook/email?limit=20');
+    if (!r.ok) { list.innerHTML = '<div style="color:#c0392b">Failed: '+r.status+'</div>'; return; }
+    var data = await r.json();
+    var emails = data.value || [];
+    if (!emails.length) { list.innerHTML = '<div style="color:var(--muted)">No emails found.</div>'; return; }
+    var rows = emails.map(function(e,i) {
+      var from = (e.from && e.from.emailAddress) ? (e.from.emailAddress.name || e.from.emailAddress.address) : 'Unknown';
+      var date = new Date(e.receivedDateTime).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      var unread = !e.isRead ? '<span style="color:var(--teal);font-weight:700"> ● </span>' : '';
+      return '<div data-email-idx="'+i+'" style="padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="openEmail('+i+')">'
+        + '<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+        + '<span style="font-weight:600;font-size:13px;color:var(--charcoal)">'+unread+e.subject+'</span>'
+        + '<span style="font-size:11px;color:var(--muted)">'+date+'</span></div>'
+        + '<div style="font-size:12px;color:var(--muted)">'+from+'</div>'
+        + '<div style="font-size:12px;color:var(--muted);margin-top:2px">'+(e.bodyPreview||'').slice(0,100)+'...</div>'
+        + '</div>';
+    });
+    list.innerHTML = rows.join('');
+    list._emails = emails;
+  } catch(err) { list.innerHTML = '<div style="color:#c0392b">Error: '+err.message+'</div>'; }
+}
+function openEmail(idx) {
+  var list = document.getElementById('email-list');
+  if (list && list._emails && list._emails[idx] && list._emails[idx].webLink) {
+    window.open(list._emails[idx].webLink, '_blank');
+  }
+}
+
+async function loadCalendarList() {
+  var list = document.getElementById('calendar-list');
+  if (!list) return;
+  list.innerHTML = '<div style="color:var(--muted);font-size:13px">Loading events...</div>';
+  try {
+    var r = await fetch('/api/outlook/calendar?days=14');
+    if (!r.ok) { list.innerHTML = '<div style="color:#c0392b">Failed to load calendar ('+r.status+')</div>'; return; }
+    var data = await r.json();
+    var events = data.value || [];
+    if (!events.length) { list.innerHTML = '<div style="color:var(--muted)">No upcoming events in the next 14 days.</div>'; return; }
+    list.innerHTML = events.map(function(ev) {
+      var start = new Date(ev.start.dateTime);
+      var end = new Date(ev.end.dateTime);
+      var dateStr = start.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      var timeStr = start.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' - '+end.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      var loc = ev.location && ev.location.displayName ? ev.location.displayName : '';
+      var organizer = ev.organizer && ev.organizer.emailAddress ? ev.organizer.emailAddress.name : '';
+      return '<div style="padding:12px 0;border-bottom:1px solid var(--border)">'
+        + '<div style="display:flex;gap:16px;align-items:flex-start">'
+        + '<div style="min-width:80px;text-align:center;background:var(--teal-light);border-radius:8px;padding:8px 4px">'
+        + '<div style="font-size:11px;color:var(--teal);font-weight:600">'+dateStr.split(' ')[0]+'</div>'
+        + '<div style="font-size:18px;font-weight:800;color:var(--charcoal)">'+start.getDate()+'</div>'
+        + '<div style="font-size:10px;color:var(--muted)">'+dateStr.split(' ')[1]+' '+dateStr.split(' ')[2]+'</div>'
+        + '</div>'
+        + '<div style="flex:1">'
+        + '<div style="font-weight:600;font-size:14px;color:var(--charcoal);margin-bottom:4px">'+ev.subject+'</div>'
+        + '<div style="font-size:12px;color:var(--muted)">'+timeStr+'</div>'
+        + (loc ? '<div style="font-size:12px;color:var(--muted)">&#128205; '+loc+'</div>' : '')
+        + (organizer ? '<div style="font-size:12px;color:var(--muted)">Organizer: '+organizer+'</div>' : '')
+        + '</div></div></div>';
+    }).join('');
+  } catch(e) { list.innerHTML = '<div style="color:#c0392b">Error: '+e.message+'</div>'; }
+}
+
+
+
+
+
+// ── INIT ──
+
+
+
+// Quick-ask event delegation
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('[data-q]');
+  if (btn && btn.classList.contains('mfp-quick-btn')) {
+    const q = btn.getAttribute('data-q').replace(/&apos;/g, "'");
+    mfpQuickAsk(q);
+  }
+});
+
+
+
+// ── INIT ──
+
+
+
+// Quick-ask event delegation
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('[data-q]');
+  if (btn && btn.classList.contains('mfp-quick-btn')) {
+    const q = btn.getAttribute('data-q').replace(/&apos;/g, "'");
+    mfpQuickAsk(q);
+  }
+});
+
 function getActiveSystemPrompt() {
   if (activeProject !== 'generic' && PROJECT_SYSTEM_PROMPTS[activeProject]) {
     return PROJECT_SYSTEM_PROMPTS[activeProject];
