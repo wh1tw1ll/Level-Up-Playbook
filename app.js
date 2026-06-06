@@ -2561,7 +2561,7 @@ async function loadEmailList() {
   list.innerHTML='<div style="color:var(--muted);padding:20px 0">Loading emails...</div>';
   try {
     var r=await fetch('/api/outlook/email?limit=20',{credentials:'include'});
-    if(!r.ok){list.innerHTML='<div style="color:#c0392b;padding:20px 0">Error '+r.status+'. Please sign in with Microsoft first.</div>';return;}
+    if(!r.ok){list.innerHTML='<div style="padding:40px 24px;text-align:center"><div style="font-size:32px;margin-bottom:12px">&#128140;</div><div style="font-size:18px;font-weight:700;color:var(--charcoal);margin-bottom:8px">Connect your Outlook inbox</div><div style="font-size:14px;color:var(--muted);margin-bottom:24px">Sign in with your Microsoft account to view recent emails from your Level Up inbox.</div><button onclick=\"signInWithMicrosoft()\" style=\"background:#184655;color:#fff;border:none;border-radius:8px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:8px\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 21 21\"><rect width=\"10\" height=\"10\" fill=\"#F25022\"/><rect x=\"11\" width=\"10\" height=\"10\" fill=\"#7FBA00\"/><rect y=\"11\" width=\"10\" height=\"10\" fill=\"#00A4EF\"/><rect x=\"11\" y=\"11\" width=\"10\" height=\"10\" fill=\"#FFB900\"/></svg>Sign in with Microsoft</button></div>';return;}
     var data=await r.json();
     var emails=data.value||[];
     if(!emails.length){list.innerHTML='<div style="color:var(--muted);padding:20px 0">No emails found.</div>';return;}
@@ -2592,7 +2592,7 @@ async function loadCalendarList() {
   list.innerHTML='<div style="color:var(--muted);padding:20px 0">Loading calendar...</div>';
   try {
     var r=await fetch('/api/outlook/calendar?days=14',{credentials:'include'});
-    if(!r.ok){list.innerHTML='<div style="color:#c0392b;padding:20px 0">Error '+r.status+'. Please sign in with Microsoft first.</div>';return;}
+    if(!r.ok){list.innerHTML='<div style="padding:40px 24px;text-align:center"><div style="font-size:32px;margin-bottom:12px">&#128197;</div><div style="font-size:18px;font-weight:700;color:var(--charcoal);margin-bottom:8px">Connect your Outlook calendar</div><div style="font-size:14px;color:var(--muted);margin-bottom:24px">Sign in with your Microsoft account to view upcoming meetings and events.</div><button onclick=\"signInWithMicrosoft()\" style=\"background:#184655;color:#fff;border:none;border-radius:8px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:8px\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 21 21\"><rect width=\"10\" height=\"10\" fill=\"#F25022\"/><rect x=\"11\" width=\"10\" height=\"10\" fill=\"#7FBA00\"/><rect y=\"11\" width=\"10\" height=\"10\" fill=\"#00A4EF\"/><rect x=\"11\" y=\"11\" width=\"10\" height=\"10\" fill=\"#FFB900\"/></svg>Sign in with Microsoft</button></div>';return;}
     var data=await r.json();
     var events=data.value||[];
     if(!events.length){list.innerHTML='<div style="color:var(--muted);padding:20px 0">No upcoming events.</div>';return;}
