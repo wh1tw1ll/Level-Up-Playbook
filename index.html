@@ -485,8 +485,7 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 .chat-tmpl-btns button:last-child{background:var(--teal);color:#fff;border:none}
 
 /* Auth */
-#auth-signin-btn { display: none; }
-#auth-signin-btn.visible { display: flex !important; }
+#auth-signin-btn { display: flex; }
 #auth-user-info.visible { display: flex !important; }
 
 .sticky-header{position:sticky;top:0;z-index:200;width:100%}
@@ -960,6 +959,9 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 <div class="version-stamp">Level Up Playbook v2.1</div>
 
 <script>
+// ── GLOBALS ──
+var homeInnerHTML = '';
+document.addE
 // ── GLOBALS ──
 var homeInnerHTML = '';
 document.addEventListener('DOMContentLoaded', function() {
@@ -1485,7 +1487,7 @@ function updateAuthUI() {
   var spMeta = document.getElementById('sharepoint-card-meta');
 
   if (luUser && luUser.authenticated) {
-    if (signInBtn) signInBtn.style.display = 'none';
+    if (signInBtn) { signInBtn.style.display = 'none'; signInBtn.classList.remove('visible'); }
     if (userInfo) userInfo.style.display = 'flex';
     if (userName) userName.textContent = luUser.name || luUser.email || 'Signed in';
     if (emailMeta) emailMeta.textContent = luUser.email || '';
@@ -1498,7 +1500,7 @@ function updateAuthUI() {
       if (link) link.textContent = 'Search Files →';
     }
   } else {
-    if (signInBtn) signInBtn.style.display = '';
+    if (signInBtn) { signInBtn.style.display = 'flex'; signInBtn.classList.add('visible'); }
     if (userInfo) userInfo.style.display = 'none';
     if (emailMeta) emailMeta.textContent = 'Sign in to enable';
     if (calMeta) calMeta.textContent = 'Sign in to enable';
@@ -3688,6 +3690,3 @@ document.addEventListener('click', function(e) {
 
 init();
 
-</script>
-</body>
-</html>
