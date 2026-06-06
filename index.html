@@ -935,7 +935,7 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 </div>
 
 <!-- FAB + CHAT DRAWER -->
-<button id="fab" onclick="console.log('FAB clicked');toggleChat();" title="Ask the Playbook AI">&#10022; Ask AI</button>
+<button id="fab" onclick="toggleChat()" title="Ask the Playbook AI">&#10022; Ask AI</button>
 <div class="chat-drawer" id="chat-drawer">
   <div class="chat-drag-handle" id="chat-drag-handle">
     <span>Playbook AI &mdash; Powered by Claude</span>
@@ -959,13 +959,7 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 <div class="version-stamp">Level Up Playbook v2.1</div>
 
 <script>
-window.onerror = function(msg, src, line, col, err) {
-  console.error('GLOBAL ERROR:', msg, 'at line', line, src ? src.split('/').pop() : '');
-  return false;
-};
-window.addEventListener('unhandledrejection', function(e) {
-  console.error('UNHANDLED PROMISE:', e.reason);
-});
+window.onerror = function(m
 
 // Capture home-inner HTML for res// Capture home-
 // Capt
@@ -2765,11 +2759,11 @@ function appendMsg(role, text) {
 }
 
 function appendLoading() {
-  const msgs = document.getElementById('chat-messages');
-  const div = document.createElement('div');
-  div.className = 'msg msg-ai msg-loading';
-  div.id = 'loading-msg';
-  div.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+  var msgs = document.getElementById('chat-messages');
+  if (!msgs) return {remove:function(){}};
+  var div = document.createElement('div');
+  div.className = 'chat-msg ai loading';
+  div.innerHTML = '&bull;&bull;&bull;';
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
   return div;
@@ -2837,7 +2831,7 @@ function sendChat() {
     }
   }
   input.value = '';
-  document.getElementById('chat-send-btn').disabled = true;
+  var sendBtn=document.getElementById('chat-send'); if(sendBtn) sendBtn.disabled=true;
 
   appendMsg('user', q);
   chatHistory.push({role:'user', content: q});
@@ -2885,7 +2879,7 @@ Key Points: ${bullets}`;
     if (!response.ok) {
       const errText = await response.text();
       appendMsg('ai', `API error ${response.status}: ${errText.slice(0,200)}`);
-      document.getElementById('chat-send-btn').disabled = false;
+      if(sendBtn) sendBtn.disabled=false;
       return;
     }
 
@@ -2900,8 +2894,8 @@ Key Points: ${bullets}`;
     appendMsg('ai', `Error: ${err.message}`);
   }
 
-  document.getElementById('chat-send-btn').disabled = false;
-  document.getElementById('chat-input').focus();
+  var sb2=document.getElementById('chat-send'); if(sb2) sb2.disabled=false;
+  var ci2=document.getElementById('chat-input'); if(ci2) ci2.focus();
   })();
 }
 
@@ -3952,6 +3946,5 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-document.addEventListener('DOMContentLoaded',function(){var ci=document.getElementById('chat-input');if(ci){ci.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}});}});
-</script>
+document.addEventListener('DOMContentLoaded',function(){var ci=document.getElementById('chat-input');if(ci){ci.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}});}});</script>
 
