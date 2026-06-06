@@ -572,6 +572,7 @@ function toggleTheme() {
 
 // ── VIEW ROUTING ──────────────────────────────────────────────────
 function setView(view) {
+  try {
   currentView = view;
 
   // Hide all views, show target
@@ -604,6 +605,11 @@ function setView(view) {
   else if (view === 'email') renderEmail();
   else if (view === 'calendar') renderCalendar();
   else if (view === 'mfp') renderMFP();
+  } catch(err) {
+    var diag = document.getElementById('lu-diag');
+    if (diag) diag.innerHTML = '<span style="color:#ff6b6b">ERROR in setView(' + view + '): ' + err.message + ' at ' + (err.stack||'').split('\n')[1] + '</span>';
+    console.error('setView error:', err);
+  }
 }
 
 function updateHomeGreeting() {
@@ -1344,10 +1350,14 @@ function init() {
   checkAuthFromCookie();
   updateAuthUI();
 
-  // Diag
+  // Diag with test buttons
   if (diag) {
     var status = luUser && luUser.authenticated ? 'Signed in: ' + luUser.email : 'Not signed in';
-    diag.textContent = 'JS OK · ' + status + ' · ' + KB.length + ' playbook sections loaded';
+    diag.innerHTML = 'JS OK · ' + status + ' · KB=' + KB.length + ' · ' +
+      '<button onclick="setView(\'home\')" style="background:#fff;color:#000;border:none;padding:2px 8px;margin-left:6px;border-radius:3px;cursor:pointer;font-family:monospace;font-size:11px">Home</button>' +
+      '<button onclick="setView(\'playbook\')" style="background:#fff;color:#000;border:none;padding:2px 8px;margin-left:4px;border-radius:3px;cursor:pointer;font-family:monospace;font-size:11px">Playbook</button>' +
+      '<button onclick="setView(\'projects\')" style="background:#fff;color:#000;border:none;padding:2px 8px;margin-left:4px;border-radius:3px;cursor:pointer;font-family:monospace;font-size:11px">Projects</button>' +
+      '<button onclick="alert(\'currentView=\'+currentView+\'\\nactive view: \'+document.querySelector(\'.view.active\').id+\'\\nKB length: \'+KB.length+\'\\nPHASES: \'+PHASES.length+\'\\nALL_TOPICS: \'+ALL_TOPICS.length)" style="background:#fff;color:#000;border:none;padding:2px 8px;margin-left:4px;border-radius:3px;cursor:pointer;font-family:monospace;font-size:11px">Diag</button>';
   }
 
   // Routing
