@@ -2839,52 +2839,55 @@ function sendChat() {
   const projectPrompt = getActiveSystemPrompt();
 
   ;(async () => {
-  // Search SharePoint if authenticated
-  let spContext = '';
-  if (luUser && luUser.authenticated) {
-    spContext = await searchSharePointForChat(q).catch(() => '');
-  }
-  const systemPrompt = projectPrompt + `\n\nFULL PLAYBOOK KNOWLEDGE BASE (methodology & process reference):\n${kbSummary}` + spContext;
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 25000);
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system: systemPrompt,
-        messages: chatHistory.slice(-10)
-      }),
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
+    const systemPrompt = getActiveSystemPrompt();
+    const kbIndex = KB.map(s =>
+      'S' + s.num + ': ' + s.title.replace('SECTION '+s.num+': ','') +
+      ' [' + (s.phases||[]).join('/') + '] ' +
+      (s.bullets||[]).slice(0,2).join(' | ')
+    ).join('\n');
 
-    loader.remove();
+    const system = systemPrompt + '\n\nPLAYBOOK INDEX:\n' + kbIndex;
 
-    if (!response.ok) {
-      const errText = await response.text();
-      appendMsg('ai', `API error ${response.status}: ${errText.slice(0,200)}`);
-      if(sendBtn) sendBtn.disabled=false;
-      return;
+    try {
+      const resp = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system: system,
+          messages: chatHistory.slice(-6)
+        })
+      });
+
+      loader.remove();
+
+      const raw = await resp.text();
+      if (!resp.ok) {
+        appendMsg('ai', 'API error ' + resp.status + ': ' + raw.slice(0, 300));
+        var sb=document.getElementById('chat-send'); if(sb) sb.disabled=false;
+        return;
+      }
+
+      let data;
+      try { data = JSON.parse(raw); } catch(e) {
+        appendMsg('ai', 'Bad response: ' + raw.slice(0, 200));
+        return;
+      }
+
+      const reply = (data.content && data.content[0] && data.content[0].text)
+        ? data.content[0].text
+        : (data.error ? 'Error: ' + data.error : 'No response.');
+
+      chatHistory.push({role:'assistant', content: reply});
+      try { await saveChat(); } catch(e) {}
+      appendMsg('ai', reply);
+
+    } catch(err) {
+      loader.remove();
+      appendMsg('ai', 'Network error: ' + err.message);
     }
 
-    const data = await response.json();
-    const reply = data.content?.[0]?.text || 'No response generated.';
-    chatHistory.push({role:'assistant', content: reply});
-    await saveChat();
-    appendMsg('ai', reply);
-
-  } catch(err) {
-    loader.remove();
-    if (err.name === 'AbortError') {
-      appendMsg('ai', 'Request timed out. Please try a shorter question.');
-    } else {
-      appendMsg('ai', 'Error: ' + err.message);
-    }
-  }
-
-  var sb2=document.getElementById('chat-send'); if(sb2) sb2.disabled=false;
-  var ci2=document.getElementById('chat-input'); if(ci2) ci2.focus();
+    var sb=document.getElementById('chat-send'); if(sb) sb.disabled=false;
+    var ci=document.getElementById('chat-input'); if(ci) ci.focus();
   })();
 }
 
