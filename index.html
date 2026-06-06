@@ -895,7 +895,7 @@ let luUser = null;  // { name, email, authenticated }
 
 async function checkAuth() {
   try {
-    const res = await fetch('/auth/me');
+    const res = await fetch('/auth/me', { credentials: 'include' });
     if (res.ok) {
       luUser = await res.json();
       if (luUser.authenticated) {
@@ -932,9 +932,7 @@ function updateAuthUI() {
   }
 }
 
-function signInWithMicrosoft() {
-  window.location.href = '/auth/login';
-}
+function signInWithMicrosoft() { window.location.href = '/auth/login'; }
 
 function signOut() {
   window.location.href = '/auth/logout';
@@ -2745,14 +2743,18 @@ Key Points: ${bullets}`;
   }
   const systemPrompt = projectPrompt + `\n\nFULL PLAYBOOK KNOWLEDGE BASE (methodology & process reference):\n${kbSummary}` + spContext;
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         system: systemPrompt,
         messages: chatHistory.slice(-10)
-      })
+      }),
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
 
     loader.remove();
 
@@ -3760,7 +3762,7 @@ async function loadEmailList() {
   if (!list) return;
   list.innerHTML = '<div style="color:var(--muted);font-size:13px">Loading emails...</div>';
   try {
-    var r = await fetch('/api/outlook/email?limit=20');
+    var r = await fetch('/api/outlook/email?limit=20', { credentials: 'include' });
     if (!r.ok) { list.innerHTML = '<div style="color:#c0392b">Failed: '+r.status+'</div>'; return; }
     var data = await r.json();
     var emails = data.value || [];
@@ -3793,7 +3795,7 @@ async function loadCalendarList() {
   if (!list) return;
   list.innerHTML = '<div style="color:var(--muted);font-size:13px">Loading events...</div>';
   try {
-    var r = await fetch('/api/outlook/calendar?days=14');
+    var r = await fetch('/api/outlook/calendar?days=14', { credentials: 'include' });
     if (!r.ok) { list.innerHTML = '<div style="color:#c0392b">Failed to load calendar ('+r.status+')</div>'; return; }
     var data = await r.json();
     var events = data.value || [];
@@ -3886,6 +3888,19 @@ async function init() {
   try { await loadRecentSearches(); } catch(e) { console.warn('loadRecentSearches failed', e); }
   try{await loadActionItems();}catch(e){}
   await checkAuth().catch(function(){});
+  // If returning from Microsoft login, show confirmation
+  var urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('auth') === 'success') {
+    history.replaceState({}, '', '/');
+    if (luUser && luUser.authenticated) {
+      // Show brief confirmation
+      setTimeout(function() {
+        var greet = document.getElementById('home-greeting');
+        if (greet) greet.textContent = 'Welcome back, ' + (luUser.name || luUser.email) + ' ✓';
+        setTimeout(function() { updateHomeStats(); }, 2000);
+      }, 100);
+    }
+  }
   setView('home');
 }
 
