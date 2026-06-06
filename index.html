@@ -241,11 +241,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
 .ask-btn button:hover{background:var(--teal);color:#fff}
 
 /* ── FLOATING CHAT ── */
-#fab{position:fixed;bottom:28px;right:28px;z-index:200;background:var(--teal);color:#fff;border-radius:50px;padding:12px 20px;display:flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.25);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;transition:all .2s;user-select:none;border:none}
-#fab:hover{background:#1d5568;transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.3)}
-#fab-icon{font-size:18px;line-height:1}
-#fab.open #fab-label{display:none}
-#fab.open{padding:12px;border-radius:50%}
+
+
+
+
+
 #chat-drawer{position:fixed;bottom:84px;right:28px;z-index:199;width:420px;height:520px;min-width:300px;min-height:260px;max-width:95vw;max-height:95vh;background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.2);display:none;flex-direction:column;overflow:hidden;resize:both}
 #chat-drawer.open{display:flex}
 #chat-drawer.expanded{width:700px;height:75vh}
@@ -271,7 +271,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
 .chat-input-row input:focus{border-color:var(--teal)}
 .chat-input-row button{padding:8px 14px;border-radius:8px;background:var(--teal);color:#fff;border:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500}
 .chat-input-row button:disabled{opacity:.5;cursor:default}
-@media(max-width:520px){#chat-drawer{width:calc(100vw - 24px);right:12px}#fab{bottom:16px;right:16px}}
+@media(max-width:520px){#chat-drawer{width:calc(100vw - 24px);right:12px}}
 
 /* ── BOOKMARKS ── *//* ── BOOKMARKS ── */
 .bookmark-btn{background:none;border:none;cursor:pointer;padding:4px;color:var(--muted);font-size:16px;transition:color .15s;line-height:1}
@@ -537,7 +537,7 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 .ai-form-actions{display:flex;justify-content:flex-end;gap:8px}
 
 /* ── CHAT DRAWER ── */
-#fab{position:fixed;bottom:24px;right:24px;z-index:1000;background:var(--teal);color:#fff;border:none;border-radius:50%;width:52px;height:52px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:all .2s}
+#fab{position:fixed;bottom:28px;right:28px;z-index:1000;background:var(--teal);color:#fff;border:none;border-radius:50px;padding:12px 20px;display:flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.25);font-size:14px;font-weight:600;transition:all .2s}#fab:hover{background:#1d5568;transform:translateY(-2px)}
 #fab:hover{background:var(--teal-dark,#005f5f);transform:scale(1.05)}
 .chat-drawer{position:fixed;bottom:88px;right:24px;width:380px;max-height:60vh;background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.15);z-index:999;display:flex;flex-direction:column;overflow:hidden;transform:translateY(20px) scale(.95);opacity:0;pointer-events:none;transition:all .2s cubic-bezier(.34,1.56,.64,1)}
 .chat-drawer.open{transform:translateY(0) scale(1);opacity:1;pointer-events:all}
@@ -823,9 +823,10 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
         </div>
       </div>
     </div><!-- end playbook-sidebar -->
+  </div><!-- end playbook-sidebar outer -->
 
-    <!-- MFP SIDEBAR -->
-    <div class="mfp-sidebar" id="mfp-sidebar">
+  <!-- MFP SIDEBAR -->
+  <div class="mfp-sidebar" id="mfp-sidebar">
       <button class="mfp-section-btn active" id="mfp-btn-issues" onclick="showMFPSection('issues')">
         <span class="msb-icon">🔴</span>
         <span class="msb-label">Live Issues</span>
@@ -883,6 +884,21 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 </div><!-- end app-shell -->
 
 <script>
+// Capture home-
+// Capture home-inner HTML for restoration after template view
+var homeInnerHTML = '';
+document.addEventListener('DOMContentLoaded', function() {
+  var inner = document.getElementById('home-inner');
+  if (inner) homeInnerHTML = inner.innerHTML;
+});
+// ── MICROSOFT AUTH + SHAREPOINT ──
+let luUser = null;  // { name, email, authenticated }
+
+async function checkAuth() {
+  try {
+    const res = await fetch('/auth/me');
+    if (res.ok) {
+      luUser = aw
 // Capture home-
 // Capture home-inner HTML for restoration after template view
 var homeInnerHTML = '';
@@ -3914,18 +3930,7 @@ document.addEventListener('click', function(e) {
     const q = btn.getAttribute('data-q').replace(/&apos;/g, "'");
     mfpQuickAsk(q);
   }
-});</script>
-
-
-EMPLATE PREVIEW MODAL -->
-<div id="tmpl-preview-modal" class="tmpl-preview-overlay" onclick="if(event.target===this)closeTemplatePreview()">
-  <div class="tmpl-preview-dialog">
-    <div class="tmpl-preview-header">
-      <div>
-        <div class="tmpl-preview-title" id="tmpl-preview-title"></div>
-        <div class="tmpl-preview-desc" id="tmpl-preview-desc"></div>
-      </div>
-      <button class="tmpl-preview-close" onclick="closeTemplatePreview()">&times;</button>
+});;</button>
     </div>
     <div class="tmpl-preview-body">
       <div class="tmpl-preview-label">Preview — Sample Data</div>
@@ -4005,5 +4010,6 @@ EMPLATE PREVIEW MODAL -->
   </div>
 </div>
 <div class="version-stamp">Level Up Playbook v2.1</div>
+</script>
 </body>
 </html>
