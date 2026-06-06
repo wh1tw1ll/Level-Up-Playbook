@@ -894,7 +894,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // ── MICROSOFT AUTH + SHAREPOINT ──
 let luUser = null;  // { name, email, authenticated }
 
-async function checkAuth() {
+{
   try {
     const res = await fetch('/auth/me');
     if (res.ok) {
