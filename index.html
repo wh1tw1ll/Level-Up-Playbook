@@ -3932,16 +3932,5 @@ document.addEventListener('DOMContentLoaded', function() {
   if (chatInput) {
     chatInput.addEventListener('keydown', function(e) {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
-    });
-  }
-});
-
-// ── CHAT ENTER KEY ──
-document.addEventListener('DOMContentLoaded', function() {
-  var ci = document.getElementById('chat-input');
-  if (ci) ci.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
-  });
-});
-</script>
+    });</script>
 
