@@ -210,7 +210,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
 
 /* ── MAIN ── */
 .main{display:flex;flex-direction:column;overflow:hidden;position:relative;height:100%;min-height:0}
-.content-area{flex:1;overflow-y:auto;padding:8px 24px 24px;min-height:0;height:100%}
+.content-area{flex:1;overflow-y:auto;padding:8px 24px 24px;min-height:0}
 .results-meta{font-size:12px;color:var(--muted);margin-bottom:8px;min-height:0}
 
 /* ── SECTION CARDS ── */
@@ -865,15 +865,14 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
       </button>
     </div><!-- end mfp-sidebar -->
 
-  </div><!-- end sidebar -->
+  </aside><!-- end sidebar -->
 
   <!-- MAIN CONTENT -->
   <main class="main">
     <div class="content-area" id="content-area">
       <div class="mfp-panel" id="mfp-panel"></div>
       <div class="playbook-content" id="playbook-content">
-        <div id="results-meta" style="font-size:12px;color:var(--muted);min-height:0;margin-bottom:4px"></div>
-        <div id="collapse-all-btn-wrap" style="margin-bottom:4px"></div>
+        <div id="results-meta" style="font-size:12px;color:var(--muted)"></div><div id="collapse-all-btn-wrap"></div>
         <div id="sections-container"></div>
       </div>
     </div>
@@ -961,6 +960,9 @@ mark{background:#F5D842;color:#111;border-radius:3px;padding:1px 3px;font-weight
 
 
 <script>
+// Capture home-
+// Capture home-inner HTML for res// Capture home-
+// Capt
 // Capture home-
 // Capture home-inner HTML for res// Capture home-
 // Capture home-inner HTML for restoration after template view
@@ -3811,7 +3813,5 @@ async function init() {
   setTimeout(updateHomeStats, 50);
 }
 init();
-
 </script>
-
 
