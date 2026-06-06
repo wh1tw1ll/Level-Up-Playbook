@@ -2830,18 +2830,11 @@ function sendChat() {
 
   const loader = appendLoading();
 
-  // Build full knowledge base context - no truncation
+  // Build compact KB index (titles + key points only to stay within token limits)
   const kbSummary = KB.map(s => {
-    const h2s = (s.h2 || []).join(' | ');
-    const content = (s.content || []).join(' ');
-    const bullets = (s.bullets || []).join(' | ');
-    return `## Section ${s.num}: ${s.title}
-Phases: ${(s.phases||[]).join(', ')}
-Topics: ${(s.topics||[]).join(', ')}
-Subsections: ${h2s}
-Content: ${content}
-Key Points: ${bullets}`;
-  }).join('\n\n');
+    const bullets = (s.bullets || []).slice(0, 3).join(' | ');
+    return `S${s.num}: ${s.title.replace('SECTION '+s.num+': ','')} [${(s.phases||[]).join('/')}] ${bullets}`;
+  }).join('\n');
 
   const projectPrompt = getActiveSystemPrompt();
 
@@ -2883,7 +2876,11 @@ Key Points: ${bullets}`;
 
   } catch(err) {
     loader.remove();
-    appendMsg('ai', `Error: ${err.message}`);
+    if (err.name === 'AbortError') {
+      appendMsg('ai', 'Request timed out. Please try a shorter question.');
+    } else {
+      appendMsg('ai', 'Error: ' + err.message);
+    }
   }
 
   var sb2=document.getElementById('chat-send'); if(sb2) sb2.disabled=false;
