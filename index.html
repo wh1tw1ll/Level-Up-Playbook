@@ -2505,6 +2505,9 @@ function renderSections() {
 
 
 function renderAll() {
+  // Reset scroll position to top of content area
+  var ca = document.getElementById('content-area');
+  if (ca) ca.scrollTop = 0;
   renderSidebar();
   renderSections();
 }
@@ -3616,6 +3619,7 @@ function setView(view) {
       var pb=document.getElementById('active-project-bar'); if(pb) pb.classList.remove('visible');
     }
     switchSidebarMode('generic'); renderAll();
+    var ca=document.getElementById('content-area'); if(ca) ca.scrollTop=0;
   } else if (view === 'projects') {
     var projPanel = document.getElementById('projects-panel');
     if (projPanel) projPanel.classList.add('active');
