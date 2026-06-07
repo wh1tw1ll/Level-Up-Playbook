@@ -9,6 +9,7 @@ var activeTopic = null;
 var activeSearch = '';
 var collapsedGroups = {'1':true, '6':true, '13':true, '18':true, '37':true};  // {} = all expanded
 var openSections = {};     // section.num -> true if expanded
+var openSubsecs = {};      // subsection ID -> true if expanded
 var chatHistory = [];
 var chatOpen = false;
 var projectContext = null;
@@ -739,15 +740,23 @@ function renderSections() {
     var bullets = s.bullets || [];
 
     if (h2s.length > 0) {
-      // Distribute content across H2 sections
+      // Each H2 is a collapsible subsection
       var perSection = Math.ceil(content.length / h2s.length);
       h2s.forEach(function(heading, idx) {
-        html += '<h3>' + escapeHtml(heading) + '</h3>';
+        var subId = s.num + '_' + idx;
+        var subOpen = openSubsecs[subId] === true;
+        html += '<div class="subsec">'
+          + '<div class="subsec-header" onclick="toggleSubsec(' + jsCallArg(subId) + ')">'
+          + '<span class="subsec-chevron">' + (subOpen ? '▼' : '▶') + '</span>'
+          + '<span>' + escapeHtml(heading) + '</span>'
+          + '</div>'
+          + '<div class="subsec-body" style="display:' + (subOpen ? 'block' : 'none') + '">';
         var start = idx * perSection;
         var chunk = content.slice(start, start + perSection);
         chunk.forEach(function(p) {
           html += '<p>' + escapeHtml(p) + '</p>';
         });
+        html += '</div></div>';
       });
     } else {
       content.forEach(function(p) {
@@ -778,6 +787,12 @@ function toggleGroup(gk) {
 function toggleSection(num) {
   if (openSections[num]) delete openSections[num];
   else openSections[num] = true;
+  renderSections();
+}
+
+function toggleSubsec(id) {
+  if (openSubsecs[id]) delete openSubsecs[id];
+  else openSubsecs[id] = true;
   renderSections();
 }
 
@@ -812,6 +827,7 @@ function clearFilters() {
   // Reset to clean collapsed state
   collapsedGroups = {'1':true, '6':true, '13':true, '18':true, '37':true};
   openSections = {};
+  openSubsecs = {};
   renderPlaybook();
 }
 
@@ -823,6 +839,7 @@ function expandAllGroups() {
 function collapseAllGroups() {
   collapsedGroups = {'1':true, '6':true, '13':true, '18':true, '37':true};
   openSections = {};
+  openSubsecs = {};
   renderSections();
 }
 
