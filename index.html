@@ -151,7 +151,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
 .chat-quick{background:var(--cool);border:none;border-radius:12px;padding:5px 11px;font-size:11px;cursor:pointer;font-family:inherit;color:var(--charcoal)}
 .chat-quick:hover{background:var(--teal-light)}
 .chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;min-height:200px}
-.chat-msg{max-width:85%;padding:9px 13px;border-radius:14px;font-size:13px;line-height:1.5;word-wrap:break-word}
+.chat-msg{max-width:85%;padding:9px 13px;border-radius:14px;font-size:13px;line-height:1.5;word-wrap:break-word;white-space:pre-wrap}
 .chat-msg.user{background:var(--teal);color:#fff;align-self:flex-end;border-bottom-right-radius:3px}
 .chat-msg.ai{background:var(--cool);color:var(--charcoal);align-self:flex-start;border-bottom-left-radius:3px}
 .chat-msg.ai.loading{color:var(--muted);font-style:italic;animation:pulse 1.5s ease-in-out infinite}
@@ -421,7 +421,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
   <div class="luna-page">
     <div class="luna-badge">🔮</div>
     <div class="luna-title">L.U.N.A.</div>
-    <div class="luna-sub">Level Up Navigational Assistant — ask anything about MFP or the Playbook</div>
+    <div class="luna-sub">Level Up Navigator & Advisor — ask anything about MFP or the Playbook</div>
     <div class="luna-search-row">
       <input id="luna-input" class="luna-input" type="text" placeholder="Ask anything about the project, budget, punch list, change orders..." autocomplete="off" onkeydown="if(event.key==='Enter')lunaAsk()">
       <button class="luna-btn" onclick="lunaAsk()">Ask</button>
