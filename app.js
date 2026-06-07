@@ -1,5 +1,5 @@
 // ── LEVEL UP PLAYBOOK ─ APP.JS ──────────────────────────────────────
-// Clean rewrite. All state, data, and behavior in this file.
+// Clean rewrite. All state, data, and behavior in this file. v20260607
 
 // ── STATE ─────────────────────────────────────────────────────────
 var luUser = null;
@@ -924,6 +924,9 @@ function renderTemplates() {
     return;
   }
 
+  var catState = {};
+  try { var saved = localStorage.getItem('lu_tmpl_cats'); if (saved) catState = JSON.parse(saved); } catch(e) {}
+
   // Group by category
   var byCategory = {};
   keys.forEach(function(k) {
@@ -937,13 +940,20 @@ function renderTemplates() {
   var orderedCats = categoryOrder.filter(function(c) { return byCategory[c]; })
     .concat(Object.keys(byCategory).filter(function(c) { return categoryOrder.indexOf(c) < 0; }));
 
-  var html = '<div style="font-size:13px;color:var(--muted);margin-bottom:20px">' + keys.length + ' Excel templates, all branded with Level Up styling. Each is ready to use and editable.</div>';
+  var html = '<div style="font-size:13px;color:var(--muted);margin-bottom:20px">' + keys.length + ' Excel templates, all branded with Level Up styling. Click a category to expand.</div>';
 
   orderedCats.forEach(function(cat) {
     var items = byCategory[cat];
-    html += '<div style="margin-bottom:28px">'
-      + '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border)">' + escapeHtml(cat) + ' &middot; ' + items.length + '</div>'
+    var isOpen = catState[cat] === true;
+    html += '<div class="tmpl-cat" style="margin-bottom:8px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--card)">'
+      + '<div class="tmpl-cat-header" onclick="toggleTmplCat(' + jsCallArg(cat) + ')" style="display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none;transition:background .15s" onmouseover="this.style.background=\'var(--teal-light)\'" onmouseout="this.style.background=\'transparent\'">'
+      + '<span class="tmpl-chevron" style="font-size:11px;color:var(--muted);transition:transform .15s;' + (isOpen ? 'transform:rotate(90deg)' : '') + '">▶</span>'
+      + '<span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--charcoal);flex:1">' + escapeHtml(cat) + '</span>'
+      + '<span style="font-size:11px;color:var(--muted);font-weight:600">' + items.length + ' template' + (items.length > 1 ? 's' : '') + '</span>'
+      + '</div>'
+      + '<div class="tmpl-cat-body" style="' + (isOpen ? 'display:block' : 'display:none') + ';padding:4px 16px 16px;border-top:1px solid var(--border)">'
       + '<div class="mfp-grid">';
+
     items.forEach(function(item) {
       var k = item.key;
       var t = item.t;
@@ -961,10 +971,47 @@ function renderTemplates() {
         + '<div style="font-size:11px;color:var(--muted);margin-top:8px">' + escapeHtml(k) + '</div>'
         + '</div>';
     });
-    html += '</div></div>';
+
+    html += '</div></div></div>';
   });
 
   grid.innerHTML = html;
+}
+
+function toggleTmplCat(cat) {
+  var state = {};
+  try { var saved = localStorage.getItem('lu_tmpl_cats'); if (saved) state = JSON.parse(saved); } catch(e) {}
+  state[cat] = !state[cat];
+  try { localStorage.setItem('lu_tmpl_cats', JSON.stringify(state)); } catch(e) {}
+  renderTemplates();
+}
+
+// ── L.U.N.A. RESPONSE FORMATTER ───────────────────────────────────
+// Converts markdown links to clickable navigation in the Playbook
+function formatLunaResponse(text) {
+  if (!text) return '';
+  var html = escapeHtml(text);
+  // Convert [text](template:key) → click to open Templates tab
+  html = html.replace(/\[([^\]]+)\]\(template:([^)]+)\)/g,
+    '<a href="#" onclick="setView(\'templates\');return false" style="color:var(--teal);text-decoration:underline;font-weight:600">$1</a>');
+  // Convert [text](section:num) → click to open Playbook at section
+  html = html.replace(/\[([^\]]+)\]\(section:(\d+)\)/g,
+    '<a href="#" onclick="setView(\'playbook\');jumpTo(\'$2\');return false" style="color:var(--teal);text-decoration:underline;font-weight:600">$1</a>');
+  // Convert [text](templates) → click to open Templates tab
+  html = html.replace(/\[([^\]]+)\]\(templates\)/g,
+    '<a href="#" onclick="setView(\'templates\');return false" style="color:var(--teal);text-decoration:underline;font-weight:600">$1</a>');
+  // Convert [text](playbook) → click to open Playbook tab
+  html = html.replace(/\[([^\]]+)\]\(playbook\)/g,
+    '<a href="#" onclick="setView(\'playbook\');return false" style="color:var(--teal);text-decoration:underline;font-weight:600">$1</a>');
+  // Convert [text](projects) → click to open Projects tab
+  html = html.replace(/\[([^\]]+)\]\(projects\)/g,
+    '<a href="#" onclick="setView(\'projects\');return false" style="color:var(--teal);text-decoration:underline;font-weight:600">$1</a>');
+  // Convert external markdown links [text](url)
+  html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
+    '<a href="$2" target="_blank" rel="noopener" style="color:var(--teal);text-decoration:underline">$1</a>');
+  // Convert newlines to <br>
+  html = html.replace(/\n/g, '<br>');
+  return html;
 }
 
 function downloadTemplate(key) {
