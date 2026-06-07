@@ -648,6 +648,75 @@ function updateHomeGreeting() {
     if (firstName) g += ', ' + firstName;
   }
   el.textContent = g;
+    renderReminders();
+  }
+
+// ── REMINDERS ──────────────────────────────────────────────────────
+function renderReminders() {
+  var el = document.getElementById('home-reminders');
+  if (!el) return;
+  var now = new Date();
+  var day = now.getDate();
+  var month = now.getMonth();
+  var year = now.getFullYear();
+
+  var reminders = [];
+
+  // Monthly Draw Package — due 10th of every month
+  var drawDue = new Date(year, month, 10);
+  if (day > 10) drawDue.setMonth(month + 1);
+  var drawDays = Math.round((drawDue - now) / 86400000);
+  reminders.push({
+    icon: '💰',
+    title: 'Monthly Draw Package',
+    desc: 'Due in ' + drawDays + ' day' + (drawDays !== 1 ? 's' : ''),
+    urgent: drawDays <= 3,
+    warn: drawDays <= 7 && drawDays > 3
+  });
+
+  // Monthly Expense Report — due 5th of every month
+  var expDue = new Date(year, month, 5);
+  if (day > 5) expDue.setMonth(month + 1);
+  var expDays = Math.round((expDue - now) / 86400000);
+  reminders.push({
+    icon: '🧾',
+    title: 'Monthly Expense Report',
+    desc: 'Due in ' + expDays + ' day' + (expDays !== 1 ? 's' : ''),
+    urgent: expDays <= 3,
+    warn: expDays <= 7 && expDays > 3
+  });
+
+  // Weekly Project Events Calendar — due every Friday
+  var friday = new Date(now);
+  friday.setDate(now.getDate() + (5 - now.getDay() + 7) % 7);
+  if (friday.getDay() !== 5) friday.setDate(friday.getDate() + (5 - friday.getDay()));
+  if (now.getDay() > 5) friday.setDate(friday.getDate() + 7);
+  if (now.getDay() === 5 && now.getHours() >= 17) friday.setDate(friday.getDate() + 7);
+  var calDays = Math.round((friday - now) / 86400000);
+  reminders.push({
+    icon: '📅',
+    title: 'Weekly Events Calendar',
+    desc: calDays === 0 ? 'Due today' : 'Due in ' + calDays + ' day' + (calDays !== 1 ? 's' : ''),
+    urgent: calDays <= 1,
+    warn: calDays <= 2 && calDays > 1
+  });
+
+  var html = '';
+  reminders.forEach(function(r) {
+    var cls = r.urgent ? 'reminder urgent' : r.warn ? 'reminder warn' : 'reminder';
+    var bg = r.urgent ? '#fce8e8' : r.warn ? '#fef4e0' : 'var(--card)';
+    var border = r.urgent ? '#e74c3c' : r.warn ? '#e67e22' : 'var(--border)';
+    var txtColor = r.urgent ? '#c0392b' : r.warn ? '#a05c00' : 'var(--muted)';
+    html += '<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:' + bg + ';border:1px solid ' + border + ';border-radius:8px;margin-bottom:6px">'
+      + '<span style="font-size:18px">' + r.icon + '</span>'
+      + '<div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--charcoal)">' + escapeHtml(r.title) + '</div>'
+      + '<div style="font-size:12px;color:' + txtColor + '">' + escapeHtml(r.desc) + '</div></div>'
+      + (r.urgent ? '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#e74c3c;background:rgba(231,76,60,.12);padding:3px 8px;border-radius:6px">Due Soon</span>' : '')
+      + (r.warn ? '<span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#e67e22">Coming Up</span>' : '')
+      + '</div>';
+  });
+
+  el.innerHTML = html;
 }
 
 // ── PLAYBOOK RENDER ───────────────────────────────────────────────
