@@ -517,18 +517,32 @@ function getCookie(name) {
 
 // ── AUTH ──────────────────────────────────────────────────────────
 function checkAuthFromCookie() {
-  // Read lu_session cookie (set by callback, readable by JS)
   var raw = getCookie('lu_session');
   if (raw) {
     try {
       var data = JSON.parse(raw);
-      if (data && data.expires_at && Date.now() < data.expires_at) {
+      if (data && data.name && data.expires_at && Date.now() < data.expires_at) {
         luUser = { authenticated: true, name: data.name, email: data.email };
         return true;
       }
     } catch(e) {}
   }
   luUser = null;
+  return false;
+}
+
+async function tryRefresh() {
+  try {
+    var res = await fetch('/auth/me', { credentials: 'include' });
+    if (res.ok) {
+      var data = await res.json();
+      if (data.authenticated) {
+        luUser = { authenticated: true, name: data.name, email: data.email };
+        updateAuthUI();
+        return true;
+      }
+    }
+  } catch(e) {}
   return false;
 }
 
@@ -969,6 +983,7 @@ function previewTemplate(key) {
     modal = document.createElement('div');
     modal.id = 'modal-template-preview';
     modal.className = 'modal-overlay';
+    modal.style.display = 'none';
     modal.onclick = function(e) { if (e.target === modal) closeModal('modal-template-preview'); };
     document.body.appendChild(modal);
   }
@@ -1212,9 +1227,15 @@ function renderEmail() {
     .catch(function(err) {
       var msg = err.message || '';
       if (msg.indexOf('401') >= 0) {
-        document.cookie = 'lu_session=; Path=/; Max-Age=0';
-        luUser = null; updateAuthUI();
-        document.getElementById('email-content').innerHTML = signInEmptyState('📧','Session expired','Your Microsoft sign-in expired. Sign in again to view your email.');
+        // Try silent refresh before giving up
+        tryRefresh().then(function(ok) {
+          if (ok) { renderEmail(); }
+          else {
+            document.cookie = 'lu_session=; Path=/; Max-Age=0';
+            luUser = null; updateAuthUI();
+            document.getElementById('email-content').innerHTML = signInEmptyState('📧','Sign in to view email','Connect your Microsoft account to see your Outlook inbox.');
+          }
+        });
       } else {
         document.getElementById('email-list').innerHTML = '<div style="padding:24px;color:#c0392b">Error loading emails: ' + escapeHtml(msg) + '</div>';
       }
@@ -1365,7 +1386,9 @@ function dtReset()      { dtPath = ['root']; renderDecisionTree(); }
 // ── MODALS ─────────────────────────────────────────────────────────
 function closeModal(id) {
   var m = document.getElementById(id);
-  if (m) m.classList.remove('open');
+  if (!m) return;
+  m.classList.remove('open');
+  m.style.display = 'none';
 }
 
 // ── CHAT ───────────────────────────────────────────────────────────
