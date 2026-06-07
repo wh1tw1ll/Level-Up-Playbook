@@ -909,7 +909,7 @@ function renderMFP() {
     + '<div class="mfp-card"><div class="mfp-card-head"><span class="mfp-icon">🏗</span><span class="mfp-card-title">Day 2 Items</span><span class="mfp-badge warn">60+</span></div><div class="mfp-card-summary">Owner-directed post-opening scope. Each requires scope definition, cost estimate, owner authorization. Distinct from punch list.</div></div>'
     + '<div class="mfp-card"><div class="mfp-card-head"><span class="mfp-icon">👥</span><span class="mfp-card-title">Stakeholders</span></div><div class="mfp-card-summary">Owner: Graham Oxley (day-to-day), Devon McCorkle &amp; Victor Oliver (approvers). CM/GC: Lemartec. AOR: ARQ. Cost Recovery: Kroll.</div></div>'
     + '</div>'
-    + '<div style="margin-top:24px"><button class="btn-primary" onclick="toggleChat()">Ask AI about MFP →</button></div>';
+    + '<div style="margin-top:24px"><button class="btn-primary" onclick="toggleChat()">Ask L.U.N.A. about MFP →</button></div>';
 }
 
 // ── TEMPLATES ─────────────────────────────────────────────────────
@@ -1399,7 +1399,7 @@ function toggleChat() {
   if (d) d.classList.toggle('open', chatOpen);
   if (chatOpen) {
     if (chatHistory.length === 0) {
-      appendMsg('ai', "Hi Whitney. I'm the Playbook AI. Ask me anything about the playbook or MFP — Day 1 mobilization, change orders, punch list disputes, Kroll audit, anything.");
+      appendMsg('ai', "Hi Whitney. I'm L.U.N.A. — your Executive Operating Partner. Ask me anything about the playbook or MFP — Day 1 mobilization, change orders, punch list disputes, Kroll audit, anything.");
     }
     setTimeout(function() {
       var ci = document.getElementById('chat-input');
@@ -1453,7 +1453,7 @@ function sendChat() {
     return 'S' + s.num + ': ' + (s.title || '').replace('SECTION ' + s.num + ': ','') + ' [' + (s.phases||[]).join('/') + ']';
   }).join('\\n');
 
-  var systemPrompt = 'You are the Level Up Playbook AI assisting Whitney Williams, Principal-in-Charge at Level Up Project Development. Answer concisely and practically. Reference specific playbook sections by number when relevant. The playbook has 43 sections:\\n\\n' + kbIndex;
+  var systemPrompt = 'You are L.U.N.A. (Level Up Navigational Assistant), assisting Whitney Williams, Principal-in-Charge at Level Up Project Development. Answer concisely and practically. Reference specific playbook sections by number when relevant. The playbook has 43 sections:\\n\\n' + kbIndex;
 
   fetch('/api/chat', {
     method: 'POST',
