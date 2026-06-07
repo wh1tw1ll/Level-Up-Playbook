@@ -19,11 +19,7 @@
     { "src": "/api/sharepoint/read", "dest": "/api/sharepoint/read.js" },
     { "src": "/api/outlook/email", "dest": "/api/outlook/email.js" },
     { "src": "/api/outlook/calendar", "dest": "/api/outlook/calendar.js" },
-    { "src": "/app.js", "dest": "/app.js" },
-    { "src": "/styles.css", "dest": "/styles.css" },
-    { "src": "/data/(.*)", "dest": "/data/$1" },
-    { "src": "/templates/(.*)", "dest": "/templates/$1" },
-    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
