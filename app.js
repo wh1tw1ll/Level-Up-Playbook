@@ -47,11 +47,11 @@ async function loadKB() {
     // If playbook view is active, re-render
         if (currentView === 'playbook') renderPlaybook();
         // Update diag bar with actual KB count
-        var diag = document.getElementById('lu-diag');
-        if (diag) {
-          var status = luUser && luUser.authenticated ? 'Signed in: ' + luUser.email : 'Not signed in';
-          diag.innerHTML = 'JS OK · ' + status + ' · KB=' + KB.length + ' · HomePlaybookProjectsTemplatesActionsL.U.N.A.Diag';
-        }
+        var footerEl = document.getElementById('footer-status-text');
+            if (footerEl) {
+              var status = luUser && luUser.authenticated ? 'Signed in: ' + luUser.email : 'Not signed in';
+              footerEl.textContent = 'JS OK · ' + status + ' · KB=' + KB.length;
+            }
   } catch(e) {
     console.error('Failed to load KB:', e);
   }
@@ -200,7 +200,7 @@ function setView(view) {
   window.scrollTo(0, 0);
 
   // View-specific render
-  if (view === 'home') updateHomeGreeting();
+  if (view === 'home') { updateHomeGreeting(); renderStats(); }
   else if (view === 'playbook') renderPlaybook();
   else if (view === 'projects') renderProjects();
   else if (view === 'templates') renderTemplates();
@@ -211,10 +211,8 @@ function setView(view) {
   else if (view === 'mfp') renderMFP();
     else if (view === 'luna') renderLuna();
     } catch(err) {
-    var diag = document.getElementById('lu-diag');
-    if (diag) diag.innerHTML = '<span style="color:#ff6b6b">ERROR in setView(' + view + '): ' + err.message + ' at ' + (err.stack||'').split('\n')[1] + '</span>';
-    console.error('setView error:', err);
-  }
+        console.error('setView error:', err);
+      }
 }
 
 function updateHomeGreeting() {
@@ -229,6 +227,34 @@ function updateHomeGreeting() {
   el.textContent = g;
     renderReminders();
   }
+
+// ── SIDEBAR TOGGLE ──────────────────────────────────────────────────
+function toggleSidebar() {
+  var sidebar = document.getElementById('playbook-sidebar');
+  if (sidebar) sidebar.classList.toggle('collapsed');
+}
+
+// ── STATS BAR ───────────────────────────────────────────────────────
+function renderStats() {
+  var el = document.getElementById('home-greeting');
+  if (!el) return;
+  // Remove existing stats bar if present
+  var existing = document.getElementById('stats-bar');
+  if (existing) existing.remove();
+  // Build stats
+  var stats = [
+    { icon: '📚', label: 'Sections', value: KB.length || '—' },
+    { icon: '📑', label: 'Templates', value: Object.keys(TEMPLATES).length || '—' },
+    { icon: '🔴', label: 'Active Issues', value: '5' },
+    { icon: '🔍', label: 'Cost Recovery', value: 'Jun 30' },
+  ];
+  var html = '<div id="stats-bar" class="stats-bar">';
+  stats.forEach(function(s) {
+    html += '<div class="stat-item"><span class="stat-item-icon">' + s.icon + '</span><div><div class="stat-item-label">' + s.label + '</div><div class="stat-item-value">' + s.value + '</div></div></div>';
+  });
+  html += '</div>';
+  el.insertAdjacentHTML('afterend', html);
+}
 
 // ── REMINDERS ──────────────────────────────────────────────────────
 function renderReminders() {
@@ -1357,8 +1383,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ── INIT ───────────────────────────────────────────────────────────
 function init() {
-  var diag = document.getElementById('lu-diag');
-  if (diag) diag.textContent = 'Initializing...';
+  // Set initial footer status
+  var footer = document.getElementById('footer-status-text');
+  if (footer) footer.textContent = 'JS OK · Initializing...';
 
   // Theme
   try {
@@ -1371,20 +1398,14 @@ function init() {
   checkAuthFromCookie();
   updateAuthUI();
 
-  // Diag with test buttons
-  if (diag) {
+  // Update footer status
+  if (footer) {
     var status = luUser && luUser.authenticated ? 'Signed in: ' + luUser.email : 'Not signed in';
-    diag.innerHTML = 'JS OK · ' + status + ' · KB=' + KB.length + ' · ' +
-          '<button onclick="setView(\'home\')" style="background:#fff;color:#000;border:none;padding:2px 8px;margin-left:6px;border-radius:3px;cursor:pointer;font-family:monospace;font-size:11px">Home</button>' +
-          '<button onclick="setView(\'playbook\')" style="background:#fff;color:#000;border:none;padding:2px 8px;margin-left:4px;border-radius:3px;cursor:pointer;font-family:monospace;font-size:11px">Playbook</button>' +
-          '<button onclick="setView(\'projects\')" style="background:#fff;color:#000;border:none;padding:2px 8px;margin-left:4px;border-radius:3px;cursor:pointer;font-family:monospace;font-size:11px">Projects</button>' +
-          '<button onclick="setView(\'templates\')" style="background:#fff;color:#000;border:none;padding:2px 8px;margin-left:4px;border-radius:3px;cursor:pointer;font-family:monospace;font-size:11px">Templates</button>' +
-          '<button onclick="setView(\'actions\')" style="background:#fff;color:#000;border:none;padding:2px 8px;margin-left:4px;border-radius:3px;cursor:pointer;font-family:monospace;font-size:11px">Actions</button>' +
-          '<button onclick="setView(\'luna\')" style="background:#fff;color:#000;border:none;padding:2px 8px;margin-left:4px;border-radius:3px;cursor:pointer;font-family:monospace;font-size:11px">L.U.N.A.</button>' +
-          '<button onclick="alert(\'currentView=\'+currentView+\'\\nactive view: \'+document.querySelector(\'.view.active\').id+\'\\nKB length: \'+KB.length+\'\\nPHASES: \'+PHASES.length+\'\\nALL_TOPICS: \'+ALL_TOPICS.length)" style="background:#fff;color:#000;border:none;padding:2px 8px;margin-left:4px;border-radius:3px;cursor:pointer;font-family:monospace;font-size:11px">Diag</button>';
+    footer.textContent = 'JS OK · ' + status + ' · KB=' + KB.length;
   }
 
-  // Routing
+  // Render stats on home page
+  renderStats();
   var urlParams = new URLSearchParams(window.location.search);
   var authSuccess = urlParams.get('auth') === 'success';
   var returnView = 'home';
