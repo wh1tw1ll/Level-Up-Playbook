@@ -45,7 +45,7 @@ export default async function handler(req, res) {
     });
 
     // Store readable session info in second cookie for JS to detect auth state
-    const sessionPayload = JSON.stringify({ name, email, expires_at: expiresAt });
+    const sessionPayload = JSON.stringify({ name, email, expires_at: Date.now() + 7*24*3600*1000 }); // 7 days
 
     res.setHeader('Set-Cookie', [
       `lu_auth=${encodeURIComponent(authPayload)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${7*24*3600}`,
