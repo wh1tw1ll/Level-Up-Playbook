@@ -45,7 +45,13 @@ async function loadKB() {
     ALL_TOPICS = Object.keys(set).sort();
     kbLoaded = true;
     // If playbook view is active, re-render
-    if (currentView === 'playbook') renderPlaybook();
+        if (currentView === 'playbook') renderPlaybook();
+        // Update diag bar with actual KB count
+        var diag = document.getElementById('lu-diag');
+        if (diag) {
+          var status = luUser && luUser.authenticated ? 'Signed in: ' + luUser.email : 'Not signed in';
+          diag.innerHTML = 'JS OK · ' + status + ' · KB=' + KB.length + ' · HomePlaybookProjectsTemplatesActionsL.U.N.A.Diag';
+        }
   } catch(e) {
     console.error('Failed to load KB:', e);
   }
