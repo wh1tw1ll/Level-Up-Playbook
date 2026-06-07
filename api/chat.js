@@ -16,34 +16,49 @@ export default async function handler(req, res) {
   const { system, messages } = body;
   if (!messages || !messages.length) return res.status(400).json({ error: 'Missing messages' });
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: 'OPENROUTER_API_KEY not configured' });
   }
 
+  // Build OpenRouter-compatible messages array
+  const openRouterMessages = [];
+  if (system) {
+    openRouterMessages.push({ role: 'system', content: system.slice(0, 16000) });
+  }
+  (messages || []).slice(-6).forEach(function(m) {
+    openRouterMessages.push({ role: m.role || 'user', content: m.content });
+  });
+
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'Authorization': 'Bearer ' + apiKey,
+        'HTTP-Referer': 'https://level-up-playbook.vercel.app',
+        'X-Title': 'Level Up Playbook L.U.N.A.',
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 800,
-        system: (system || '').slice(0, 40000),
-        messages: messages.slice(-6),
+        model: 'deepseek/deepseek-chat',  // DeepSeek V3 — $0.14/M tokens
+        max_tokens: 1000,
+        temperature: 0.3,
+        messages: openRouterMessages,
       }),
     });
 
     if (!response.ok) {
       const errBody = await response.text();
-      console.error('Anthropic error:', response.status, errBody.slice(0, 200));
+      console.error('OpenRouter error:', response.status, errBody.slice(0, 200));
       return res.status(response.status).json({ error: errBody.slice(0, 200) });
     }
 
     const data = await response.json();
-    return res.json(data);
+    // Convert OpenRouter format to match what app.js expects
+    const reply = data.choices && data.choices[0] && data.choices[0].message;
+    return res.json({
+      content: [{ text: reply ? reply.content : 'No response.' }]
+    });
   } catch (err) {
     console.error('Chat handler error:', err.message);
     return res.status(500).json({ error: err.message });
