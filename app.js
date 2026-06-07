@@ -945,14 +945,14 @@ function renderTemplates() {
   orderedCats.forEach(function(cat) {
     var items = byCategory[cat];
     var isOpen = catState[cat] === true;
-    html += '<div class="tmpl-cat" style="margin-bottom:8px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--card)">'
-      + '<div class="tmpl-cat-header" onclick="toggleTmplCat(' + jsCallArg(cat) + ')" style="display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none;transition:background .15s" onmouseover="this.style.background=\'var(--teal-light)\'" onmouseout="this.style.background=\'transparent\'">'
-      + '<span class="tmpl-chevron" style="font-size:11px;color:var(--muted);transition:transform .15s;' + (isOpen ? 'transform:rotate(90deg)' : '') + '">▶</span>'
-      + '<span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--charcoal);flex:1">' + escapeHtml(cat) + '</span>'
-      + '<span style="font-size:11px;color:var(--muted);font-weight:600">' + items.length + ' template' + (items.length > 1 ? 's' : '') + '</span>'
-      + '</div>'
-      + '<div class="tmpl-cat-body" style="' + (isOpen ? 'display:block' : 'display:none') + ';padding:4px 16px 16px;border-top:1px solid var(--border)">'
-      + '<div class="mfp-grid">';
+    html += '<div class="tmpl-cat" style="margin-bottom:8px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--card);transition:box-shadow .2s">'
+          + '<div class="tmpl-cat-header" onclick="toggleTmplCat(' + jsCallArg(cat) + ')" style="display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;user-select:none;transition:background .15s" onmouseover="this.style.background=\'var(--teal-light)\'" onmouseout="this.style.background=\'\'">'
+          + '<span class="tmpl-chevron" style="font-size:10px;color:var(--teal);transition:transform .2s ease;' + (isOpen ? 'transform:rotate(90deg)' : '') + '">▶</span>'
+          + '<span style="font-size:13px;font-weight:700;color:var(--charcoal);flex:1">' + escapeHtml(cat) + '</span>'
+          + '<span style="font-size:11px;color:var(--muted);font-weight:600;background:var(--cool);padding:3px 10px;border-radius:10px">' + items.length + '</span>'
+          + '</div>'
+          + '<div class="tmpl-cat-body" style="' + (isOpen ? 'display:block' : 'display:none') + ';padding:6px 18px 18px;border-top:1px solid var(--border);animation:' + (isOpen ? 'fadeIn .2s ease' : '') + '">'
+          + '<div class="mfp-grid">';
 
     items.forEach(function(item) {
       var k = item.key;
@@ -1017,54 +1017,54 @@ function formatLunaResponse(text) {
 function downloadTemplate(key) {
   var t = TEMPLATES[key];
   if (!t) return;
-  // Try GitHub raw URL first (templates folder)
-  var rawUrl = 'https://raw.githubusercontent.com/wh1tw1ll/Level-Up-Playbook/main/templates/' + encodeURIComponent(key);
-  var a = document.createElement('a');
-  a.href = rawUrl; a.download = key; a.target = '_blank';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  var url = 'https://raw.githubusercontent.com/wh1tw1ll/Level-Up-Playbook/main/templates/' + encodeURIComponent(key);
+  var btn = event && event.target ? event.target : null;
+  if (btn) { btn.disabled = true; btn.textContent = 'Downloading...'; }
+  fetch(url).then(function(r) {
+    if (!r.ok) throw new Error('File not found');
+    return r.blob();
+  }).then(function(blob) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = key;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function() { URL.revokeObjectURL(a.href); }, 10000);
+    if (btn) { btn.disabled = false; btn.textContent = 'Download'; }
+  }).catch(function(err) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Download'; }
+    // Fallback: try opening in new tab
+    window.open(url, '_blank');
+  });
 }
 
 function previewTemplate(key) {
   var t = TEMPLATES[key];
   if (!t) return;
-  // Build a preview modal showing what's in the template
-  var modal = document.getElementById('modal-template-preview');
-  if (!modal) {
-    modal = document.createElement('div');
-    modal.id = 'modal-template-preview';
-    modal.className = 'modal-overlay';
-    modal.style.display = 'none';
-    modal.onclick = function(e) { if (e.target === modal) closeModal('modal-template-preview'); };
-    document.body.appendChild(modal);
-  }
-  var preview = t.preview || t.columns || ['Sheet contains: ' + (t.name || key)];
-  var previewHtml = '';
-  if (Array.isArray(preview)) {
-    previewHtml = '<ul style="padding-left:20px;margin:12px 0">' + preview.map(function(p){
-      return '<li style="margin-bottom:6px;font-size:13px;color:var(--charcoal)">' + escapeHtml(p) + '</li>';
-    }).join('') + '</ul>';
-  } else {
-    previewHtml = '<div style="font-size:13px;color:var(--charcoal);line-height:1.6">' + escapeHtml(String(preview)) + '</div>';
-  }
-  modal.innerHTML = '<div class="modal-dialog">'
+  var html = '<div class="modal-dialog" style="max-width:640px">'
     + '<div class="modal-header">'
     + '<div class="modal-title">' + (t.icon || '📊') + ' ' + escapeHtml(t.name || key) + '</div>'
     + '<button class="chat-close" onclick="closeModal(\'modal-template-preview\')">×</button>'
     + '</div>'
-    + '<div class="modal-body">'
-    + '<div style="font-size:13px;color:var(--muted);margin-bottom:14px">' + escapeHtml(t.desc || '') + '</div>'
-    + (t.section ? '<div style="font-size:11px;color:var(--muted);margin-bottom:14px"><strong>Playbook reference:</strong> Section ' + escapeHtml(t.section) + '</div>' : '')
-    + '<div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:6px">What\'s included:</div>'
-    + previewHtml
-    + '<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:flex;gap:8px">'
-    + '<button class="btn-primary" onclick="downloadTemplate(' + jsCallArg(key) + ');closeModal(\'modal-template-preview\')">Download .xlsx</button>'
-    + '<button class="back-btn" style="padding:10px 14px" onclick="closeModal(\'modal-template-preview\')">Close</button>'
+    + '<div class="modal-body" style="padding:20px 24px">'
+    + '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">'
+    + '<span style="background:var(--teal-light);color:var(--teal);font-size:12px;font-weight:600;padding:4px 10px;border-radius:6px">' + escapeHtml(t.category || 'General') + '</span>'
+    + (t.section ? '<span style="background:var(--cool);color:var(--charcoal);font-size:12px;font-weight:600;padding:4px 10px;border-radius:6px">Section ' + escapeHtml(t.section) + '</span>' : '')
+    + '<span style="background:var(--cool);color:var(--charcoal);font-size:12px;padding:4px 10px;border-radius:6px">' + escapeHtml(key) + '</span>'
     + '</div>'
-    + '<div style="margin-top:12px;font-size:11px;color:var(--muted)">' + escapeHtml(key) + '</div>'
+    + '<p style="font-size:14px;line-height:1.7;color:var(--charcoal);margin-bottom:20px">' + escapeHtml(t.desc || '') + '</p>'
+    + '<div style="background:var(--bg);border-radius:8px;padding:14px 16px;font-size:13px;line-height:1.6;color:var(--muted)">'
+    + '✅ Ready to use — contains working formulas, data validation dropdowns, and conditional formatting.<br>'
+    + '📥 Click <strong>Download</strong> to get a fillable .xlsx file you can edit in Excel.'
+    + '</div>'
+    + '<div style="margin-top:20px;display:flex;gap:10px">'
+    + '<button class="btn-primary" onclick="downloadTemplate(\'' + key.replace(/'/g,"\\'") + '\')">📥 Download Now</button>'
+    + '<button style="flex:1;padding:10px 20px;font-size:14px;background:var(--cool);color:var(--charcoal);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600" onclick="closeModal(\'modal-template-preview\')">Close</button>'
+    + '</div>'
     + '</div></div>';
-  modal.classList.add('open');
+  showModal('modal-template-preview', html);
 }
-// ── ACTION ITEMS ──────────────────────────────────────────────────
 function loadActions(tab) {
   tab = tab || window.aiTab || 'team';
   try { return JSON.parse(localStorage.getItem('lu_actions_' + tab) || '[]'); }
@@ -1435,11 +1435,22 @@ function dtReset()      { dtPath = ['root']; renderDecisionTree(); }
 
 // ── MODALS ─────────────────────────────────────────────────────────
 function closeModal(id) {
-  var m = document.getElementById(id);
-  if (!m) return;
-  m.classList.remove('open');
-  m.style.display = 'none';
+  var el = document.getElementById(id);
+  if (el) el.classList.remove('open');
 }
+
+function showModal(id, html) {
+  var el = document.getElementById(id);
+  if (!el) {
+    el = document.createElement('div');
+    el.id = id;
+    el.className = 'modal-overlay';
+    el.onclick = function(e) { if (e.target === el) el.classList.remove('open'); };
+    document.body.appendChild(el);
+  }
+  el.innerHTML = html;
+  setTimeout(function() { el.classList.add('open'); }, 10);
+  }
 
 // ── CHAT ───────────────────────────────────────────────────────────
 function toggleChat() {
