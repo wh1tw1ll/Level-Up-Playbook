@@ -1009,15 +1009,115 @@ function renderMFP() {
     + '<div style="font-size:14px;color:var(--charcoal);line-height:1.6">Home opener April 4, 2026 — completed. Active workstreams: punch list closeout, Kroll cost recovery audit (delivery June 30), Lemartec contract closeout, HVAC service agreement transfer, Day 2 owner requests log.</div>'
     + '</div>'
     + '<div class="mfp-grid">'
-    + '<div class="mfp-card"><div class="mfp-card-head"><span class="mfp-icon">🔴</span><span class="mfp-card-title">Live Issues</span><span class="mfp-badge red">5 HIGH</span></div><div class="mfp-card-summary">ARQ payment hold (~$1.5M Feb-Apr invoices), Kroll audit deadline, Lemartec punch list disputes, HVAC contractor departure risk, Lemartec indirect cost gap.</div></div>'
-    + '<div class="mfp-card"><div class="mfp-card-head"><span class="mfp-icon">💰</span><span class="mfp-card-title">Financials</span></div><div class="mfp-card-summary">Lemartec: $553M revised, 94.2% complete. Miller Electric: $28M outstanding. ARQ: ~$1.5M on hold. Retainage held: substantial.</div></div>'
-    + '<div class="mfp-card"><div class="mfp-card-head"><span class="mfp-icon">📋</span><span class="mfp-card-title">Punch List</span><span class="mfp-badge warn">Active</span></div><div class="mfp-card-summary">Tile installation deficiency and surface-mounted electrical conduit (spec required concealed) are active disputes with Lemartec. Position: correction, not credit.</div></div>'
-    + '<div class="mfp-card"><div class="mfp-card-head"><span class="mfp-icon">🔍</span><span class="mfp-card-title">Cost Recovery / Kroll</span><span class="mfp-badge warn">Jun 30</span></div><div class="mfp-card-summary">Independent analyst engaged. Target: $9M+ recoverable. Scope: CO clawbacks, VE credits, OCIP, quantity verification, duplicate COs, defective work credits.</div></div>'
-    + '<div class="mfp-card"><div class="mfp-card-head"><span class="mfp-icon">🏗</span><span class="mfp-card-title">Day 2 Items</span><span class="mfp-badge warn">60+</span></div><div class="mfp-card-summary">Owner-directed post-opening scope. Each requires scope definition, cost estimate, owner authorization. Distinct from punch list.</div></div>'
-    + '<div class="mfp-card"><div class="mfp-card-head"><span class="mfp-icon">👥</span><span class="mfp-card-title">Stakeholders</span></div><div class="mfp-card-summary">Owner: Graham Oxley (day-to-day), Devon McCorkle &amp; Victor Oliver (approvers). CM/GC: Lemartec. AOR: ARQ. Cost Recovery: Kroll.</div></div>'
+    + '<div class="mfp-card" onclick="showMFPDetail(\'issues\')"><div class="mfp-card-head"><span class="mfp-icon">🔴</span><span class="mfp-card-title">Live Issues</span><span class="mfp-badge red">5 HIGH</span></div><div class="mfp-card-summary">ARQ payment hold (~$1.5M Feb-Apr invoices), Kroll audit deadline, Lemartec punch list disputes, HVAC contractor departure risk, Lemartec indirect cost gap.</div></div>'
+    + '<div class="mfp-card" onclick="showMFPDetail(\'financials\')"><div class="mfp-card-head"><span class="mfp-icon">💰</span><span class="mfp-card-title">Financials</span></div><div class="mfp-card-summary">Total budget: $824M. Stadium: $553M revised, 94.2% complete. Miller Electric: $28M outstanding. ARQ: ~$1.5M on hold. Retainage held: $25.5M.</div></div>'
+    + '<div class="mfp-card" onclick="showMFPDetail(\'punchlist\')"><div class="mfp-card-head"><span class="mfp-icon">📋</span><span class="mfp-card-title">Punch List</span><span class="mfp-badge warn">Active</span></div><div class="mfp-card-summary">Tile installation deficiency and surface-mounted electrical conduit (spec required concealed) are active disputes with Lemartec. Position: correction, not credit.</div></div>'
+    + '<div class="mfp-card" onclick="showMFPDetail(\'kroll\')"><div class="mfp-card-head"><span class="mfp-icon">🔍</span><span class="mfp-card-title">Cost Recovery / Kroll</span><span class="mfp-badge warn">Jun 30</span></div><div class="mfp-card-summary">Independent analyst engaged. Target: $9M+ recoverable. Scope: CO clawbacks, VE credits, OCIP, quantity verification, duplicate COs, defective work credits.</div></div>'
+    + '<div class="mfp-card" onclick="showMFPDetail(\'day2\')"><div class="mfp-card-head"><span class="mfp-icon">🏗</span><span class="mfp-card-title">Day 2 Items</span><span class="mfp-badge warn">60+</span></div><div class="mfp-card-summary">Owner-directed post-opening scope. Each requires scope definition, cost estimate, owner authorization. Distinct from punch list.</div></div>'
+    + '<div class="mfp-card" onclick="showMFPDetail(\'stakeholders\')"><div class="mfp-card-head"><span class="mfp-icon">👥</span><span class="mfp-card-title">Stakeholders</span></div><div class="mfp-card-summary">Owner: Graham Oxley (day-to-day), Devon McCorkle &amp; Victor Oliver (approvers). CM/GC: Lemartec. AOR: ARQ. Cost Recovery: Kroll.</div></div>'
     + '</div>'
     + '<div style="margin-top:24px"><button class="btn-primary" onclick="toggleChat()">Ask L.U.N.A. about MFP →</button></div>';
-}
+    }
+
+    function showMFPDetail(view) {
+      var details = {
+        issues: {
+          icon: '🔴', title: 'Live Issues',
+          body: '<div style="margin-bottom:16px"><strong style="font-size:15px;color:var(--charcoal)">5 High Priority Issues</strong></div>'
+            + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+            + '<strong>1. ARQ Payment Hold</strong><br>~$1.5M in Feb-Apr invoices on hold. Disputed work quality and incomplete deliverables.<br>'
+            + '<span style="font-size:11px;color:var(--muted)">Owner: Graham Oxley | Status: Open</span></div>'
+            + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+            + '<strong>2. Kroll Cost Recovery Audit</strong><br>Independent analyst engaged. Target: $9M+ recoverable. Delivery: June 30, 2026.<br>'
+            + '<span style="font-size:11px;color:var(--muted)">Owner: Whitney Williams | Status: In Progress</span></div>'
+            + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+            + '<strong>3. Punch List: Tile Installation Deficiency</strong><br>Surface-mounted electrical conduit violates spec requiring concealed. Position: correction, not credit.<br>'
+            + '<span style="font-size:11px;color:var(--muted)">Disputed with Lemartec | Status: Open</span></div>'
+            + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+            + '<strong>4. HVAC Service Agreement — Hill York</strong><br>Contractor departure risk. Urgent — pending signature.<br>'
+            + '<span style="font-size:11px;color:var(--muted)">Status: Urgent / Pending Signature</span></div>'
+            + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+            + '<strong>5. Lemartec Indirect Costs</strong><br>$39.5M indirect cost payment gap. General requirements, general conditions, CM fee, and insurance unpaid.<br>'
+            + '<span style="font-size:11px;color:var(--muted)">Status: Open</span></div>'
+        },
+        financials: {
+          icon: '💰', title: 'Financials',
+          body: '<div style="margin-bottom:12px"><strong style="font-size:15px">Budget Summary</strong> <span style="font-size:12px;color:var(--muted)">(as of May 13, 2026)</span></div>'
+            + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+            + '<div style="background:var(--bg);border-radius:8px;padding:12px"><span style="font-size:11px;color:var(--muted);display:block">Total Budget</span><strong style="font-size:18px">$824.2M</strong></div>'
+            + '<div style="background:var(--bg);border-radius:8px;padding:12px"><span style="font-size:11px;color:var(--muted);display:block">Paid to Date</span><strong style="font-size:18px">$412.7M</strong></div>'
+            + '<div style="background:var(--bg);border-radius:8px;padding:12px"><span style="font-size:11px;color:var(--muted);display:block">Incurred to Date</span><strong style="font-size:18px">$440.4M</strong></div>'
+            + '<div style="background:var(--bg);border-radius:8px;padding:12px"><span style="font-size:11px;color:var(--muted);display:block">Past Due</span><strong style="font-size:18px;color:#c0392b">$11.8M</strong></div>'
+            + '<div style="background:var(--bg);border-radius:8px;padding:12px"><span style="font-size:11px;color:var(--muted);display:block">Base Contract</span><strong style="font-size:18px">$530.4M</strong></div>'
+            + '<div style="background:var(--bg);border-radius:8px;padding:12px"><span style="font-size:11px;color:var(--muted);display:block">Approved COs</span><strong style="font-size:18px">$45.3M</strong></div>'
+            + '<div style="background:var(--bg);border-radius:8px;padding:12px"><span style="font-size:11px;color:var(--muted);display:block">Retainage Held</span><strong style="font-size:18px">$25.5M</strong></div>'
+            + '<div style="background:var(--bg);border-radius:8px;padding:12px"><span style="font-size:11px;color:var(--muted);display:block">% Complete</span><strong style="font-size:18px">94.2%</strong></div>'
+            + '</div>'
+            + '<div style="margin-top:16px;padding:12px;background:var(--teal-light);border-radius:8px;font-size:13px">'
+            + '<strong>Stadium Direct Costs:</strong> $530.4M base + $45.3M approved COs + $30.4M direct cost passthrough = $612.7M committed.<br>'
+            + '<strong>Lemartec Indirects:</strong> $39.6M total (GR $4M, GC $18.9M, CM fee $16.1M, insurance $0.1M) — all unpaid.<br>'
+            + '<strong>Miller Electric:</strong> $28M outstanding</div>'
+        },
+        punchlist: {
+          icon: '📋', title: 'Punch List',
+          body: '<div style="margin-bottom:16px"><strong>Active Punch List Closeout</strong> <span style="font-size:12px;color:var(--muted)">— Stadium is open and operational</span></div>'
+            + '<div style="background:var(--bg);border-radius:8px;padding:14px;margin-bottom:12px">'
+            + '<strong>Primary Disputes:</strong><br>'
+            + '• <strong>Tile Installation Deficiency</strong> — Disputed with Lemartec. Position: correction, not credit.<br>'
+            + '• <strong>Surface-Mounted Electrical Conduit</strong> — Spec required concealed. Position: correction, not credit.<br><br>'
+            + '<strong>Note:</strong> Day 2 items (60+ owner-directed post-opening scope) are distinct from punch list. Each needs scope definition, cost estimate, and owner authorization.</div>'
+            + '<div style="padding:12px;background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;font-size:13px">'
+            + '<strong>⚡ Position:</strong> Correction, not credit. We hold that defective work must be corrected at the contractor\'s cost. This is not a change order issue — it\'s a quality/compliance issue under the existing contract.</div>'
+        },
+        kroll: {
+          icon: '🔍', title: 'Cost Recovery — Kroll Audit',
+          body: '<div style="margin-bottom:16px"><strong>Kroll Independent Cost Recovery Audit</strong> <span style="font-size:12px;color:var(--muted)">— Delivery: June 30, 2026</span></div>'
+            + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">'
+            + '<div style="background:var(--bg);border-radius:8px;padding:14px;text-align:center"><span style="font-size:11px;color:var(--muted);display:block">Recovery Target</span><strong style="font-size:22px;color:var(--teal)">$9M+</strong></div>'
+            + '<div style="background:var(--bg);border-radius:8px;padding:14px;text-align:center"><span style="font-size:11px;color:var(--muted);display:block">Deadline</span><strong style="font-size:18px">Jun 30</strong></div>'
+            + '</div>'
+            + '<div style="background:var(--bg);border-radius:8px;padding:14px;font-size:13px">'
+            + '<strong>Audit Scope:</strong><br>• CO clawbacks (overpriced / unjustified change orders)<br>• Value Engineering (VE) credits not properly applied<br>• OCIP insurance credit reconciliation<br>• Quantity verification (paid for but not installed)<br>• Duplicate COs (same scope charged twice)<br>• Defective work credits (correction costs back-charged)</div>'
+        },
+        day2: {
+          icon: '🏗', title: 'Day 2 Items',
+          body: '<div style="margin-bottom:16px"><strong>Owner-Directed Post-Opening Scope</strong> <span style="font-size:12px;color:var(--muted)">— 60+ items in various stages</span></div>'
+            + '<div style="background:var(--bg);border-radius:8px;padding:14px;font-size:13px">'
+            + 'Day 2 items are owner-directed scope additions after the stadium opened. They are <strong>distinct from punch list</strong> items (which are defect corrections under existing contracts).<br><br>'
+            + '<strong>Each Day 2 item requires:</strong><br>'
+            + '1. Scope definition<br>2. Cost estimate<br>3. Owner authorization<br><br>'
+            + '<strong>Current status:</strong> Multiple items in various stages — from initial request through approved and in progress.</div>'
+        },
+        stakeholders: {
+          icon: '👥', title: 'Stakeholders',
+          body: '<div style="margin-bottom:16px"><strong>Project Stakeholders</strong></div>'
+            + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+            + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>Owner</strong><br>Miami Freedom Park, LLC<br>Jorge Mas · Jose Mas<br><span style="font-size:12px;color:var(--muted)">Graham Oxley (day-to-day)<br>Devon McCorkle (approver)<br>Victor Oliver (approver)</span></div>'
+            + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>CM / GC</strong><br>Lemartec Corporation<br><span style="font-size:12px;color:var(--muted)">Construction Manager as Agent</span></div>'
+            + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>Architect of Record</strong><br>Arquitectonica (ARQ)<br><span style="font-size:12px;color:var(--muted)">Agreement executed July 27, 2023</span></div>'
+            + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>Design Architect</strong><br>MANICA Architecture<br><span style="font-size:12px;color:var(--muted)">Agreement executed July 27, 2023</span></div>'
+            + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>Cost Recovery</strong><br>Kroll<br><span style="font-size:12px;color:var(--muted)">Target: $9M+ recoverable<br>Delivery: June 30</span></div>'
+            + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>IMCF Operations</strong><br>Antonio Torres Roman (Lead)<br>Kaitlyn Stolzenberg<br>Nelson Fuentes (Facilities)</div>'
+            + '</div>'
+        }
+      };
+      var d = details[view];
+      if (!d) return;
+      var html = '<div class="modal-dialog" style="max-width:680px">'
+        + '<div class="modal-header"><div class="modal-title">' + d.icon + ' ' + d.title + '</div>'
+        + '<button class="chat-close" onclick="closeModal(\'modal-mfp-detail\')">×</button></div>'
+        + '<div class="modal-body" style="padding:20px 24px">' + d.body + '</div></div>';
+      var existing = document.getElementById('modal-mfp-detail');
+      if (!existing) {
+        var overlay = document.createElement('div');
+        overlay.id = 'modal-mfp-detail';
+        overlay.className = 'modal-overlay';
+        overlay.onclick = function(e) { if (e.target === this) closeModal('modal-mfp-detail'); };
+        document.body.appendChild(overlay);
+      }
+      document.getElementById('modal-mfp-detail').innerHTML = html;
+      document.getElementById('modal-mfp-detail').classList.add('open');
+    }
 
 // ── TEMPLATES ─────────────────────────────────────────────────────
 function renderTemplates() {
