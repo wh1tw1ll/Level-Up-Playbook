@@ -11,6 +11,7 @@ var collapsedGroups = {'1':true, '6':true, '13':true, '18':true, '37':true};  //
 var openSections = {};     // section.num -> true if expanded
 var openSubsecs = {};      // subsection ID -> true if expanded
 var chatHistory = [];
+var lunaHistory = [];
 var chatOpen = false;
 var projectContext = null;
 
@@ -629,7 +630,8 @@ function setView(view) {
   else if (view === 'email') renderEmail();
   else if (view === 'calendar') renderCalendar();
   else if (view === 'mfp') renderMFP();
-  } catch(err) {
+    else if (view === 'luna') renderLuna();
+    } catch(err) {
     var diag = document.getElementById('lu-diag');
     if (diag) diag.innerHTML = '<span style="color:#ff6b6b">ERROR in setView(' + view + '): ' + err.message + ' at ' + (err.stack||'').split('\n')[1] + '</span>';
     console.error('setView error:', err);
@@ -1555,9 +1557,120 @@ function init() {
   }
 
   setView(returnView);
-}
+  }
 
-if (document.readyState === 'loading') {
+  // ── L.U.N.A. TAB ──────────────────────────────────────────────────
+  function renderLuna() {
+    // Focus input when tab opens
+    setTimeout(function() {
+      var inp = document.getElementById('luna-input');
+      if (inp) inp.focus();
+    }, 100);
+    // Show previous conversation if any
+    var results = document.getElementById('luna-results');
+    if (results && lunaHistory.length > 0) {
+      var html = '<div class="luna-history">';
+      for (var i = 0; i < lunaHistory.length; i++) {
+        var entry = lunaHistory[i];
+        html += '<div class="luna-result-q"><span class="luna-result-q-icon">Q:</span>' + escapeHtml(entry.q) + '</div>';
+        html += '<div class="luna-result-a">' + escapeHtml(entry.a) + '</div>';
+      }
+      html += '</div>';
+      results.innerHTML = html;
+    }
+  }
+
+  function lunaAsk() {
+    var inp = document.getElementById('luna-input');
+    var btn = document.querySelector('.luna-btn');
+    if (!inp) return;
+    var q = inp.value.trim();
+    if (!q) return;
+    inp.value = '';
+    lunaDoAsk(q, btn);
+  }
+
+  function lunaAskQuick(q) {
+    var btn = document.querySelector('.luna-btn');
+    lunaDoAsk(q, btn);
+  }
+
+  function lunaDoAsk(q, btn) {
+    if (btn) btn.disabled = true;
+    // Disable all quick buttons
+    document.querySelectorAll('.luna-quick').forEach(function(b) { b.disabled = true; });
+
+    var results = document.getElementById('luna-results');
+    if (!results) return;
+
+    // Add question bubble
+    var qDiv = document.createElement('div');
+    qDiv.className = 'luna-result-q';
+    qDiv.innerHTML = '<span class="luna-result-q-icon">Q:</span>' + escapeHtml(q);
+    results.appendChild(qDiv);
+
+    // Add loading answer bubble
+    var aDiv = document.createElement('div');
+    aDiv.className = 'luna-result-a loading';
+    aDiv.textContent = 'Thinking...';
+    results.appendChild(aDiv);
+
+    // Build system prompt with KB index
+    var kbIndex = KB.map(function(s) {
+      return 'S' + s.num + ': ' + (s.title || '').replace('SECTION ' + s.num + ': ','') + ' [' + (s.phases||[]).join('/') + ']';
+    }).join('\\n');
+
+    var systemPrompt = 'You are L.U.N.A. (Level Up Navigational Assistant), assisting Whitney Williams, Principal-in-Charge at Level Up Project Development. Answer concisely and practically. Reference specific playbook sections by number when relevant. The playbook has 43 sections:\\n\\n' + kbIndex;
+
+    // Build context from last 6 history entries
+    var ctxMessages = [];
+    var startIdx = Math.max(0, lunaHistory.length - 3);
+    for (var i = startIdx; i < lunaHistory.length; i++) {
+      ctxMessages.push({ role: 'user', content: lunaHistory[i].q });
+      ctxMessages.push({ role: 'assistant', content: lunaHistory[i].a });
+    }
+    ctxMessages.push({ role: 'user', content: q });
+
+    fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: systemPrompt,
+        messages: ctxMessages.slice(-6)
+      })
+    })
+      .then(function(r) {
+        return r.text().then(function(text) { return { ok: r.ok, status: r.status, text: text }; });
+      })
+      .then(function(res) {
+        aDiv.className = 'luna-result-a';
+        if (btn) btn.disabled = false;
+        document.querySelectorAll('.luna-quick').forEach(function(b) { b.disabled = false; });
+        if (!res.ok) {
+          aDiv.textContent = 'Error ' + res.status + ': ' + res.text.slice(0, 300);
+          return;
+        }
+        var data;
+        try { data = JSON.parse(res.text); } catch(e) {
+          aDiv.textContent = 'Bad response from server: ' + res.text.slice(0, 200);
+          return;
+        }
+        var reply = (data.content && data.content[0] && data.content[0].text) || data.error || 'No response.';
+        aDiv.textContent = reply;
+        lunaHistory.push({ q: q, a: reply });
+      })
+      .catch(function(err) {
+        aDiv.className = 'luna-result-a';
+        aDiv.textContent = 'Network error: ' + (err.message || err);
+        if (btn) btn.disabled = false;
+        document.querySelectorAll('.luna-quick').forEach(function(b) { b.disabled = false; });
+      });
+
+    // Scroll results into view
+    setTimeout(function() { results.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, 100);
+  }
+
+  if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
   init();
