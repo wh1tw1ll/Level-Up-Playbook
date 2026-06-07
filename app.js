@@ -953,7 +953,8 @@ function renderTemplates() {
         + '</div>'
         + '<div class="mfp-card-summary">' + escapeHtml(t.desc || '') + '</div>'
         + '<div style="display:flex;gap:8px;margin-top:14px">'
-        + '<button class="btn-primary" style="flex:1;padding:8px 14px;font-size:13px" onclick="downloadTemplate(' + jsCallArg(k) + ')">Download .xlsx</button>'
+        + '<button class="btn-primary" style="flex:1;padding:8px 14px;font-size:13px" onclick="previewTemplate(' + jsCallArg(k) + ')">Preview</button>'
+        + '<button style="flex:1;padding:8px 14px;font-size:13px;background:var(--cool);color:var(--charcoal);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600" onclick="downloadTemplate(' + jsCallArg(k) + ')">Download</button>'
         + '</div>'
         + '<div style="font-size:11px;color:var(--muted);margin-top:8px">' + escapeHtml(k) + '</div>'
         + '</div>';
