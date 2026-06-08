@@ -608,9 +608,9 @@ function applySearch(q) {
     }
 
     // Search projects/mfp
-    var projectKeywords = ['mfp', 'freedom park', 'stadium', 'lemartec', 'kroll', 'arq', 'punch', 'financial', 'budget', 'change order', 'closeout', 'miller', 'day 2', 'issue'];
+    var projectKeywords = ['mfp', 'freedom park', 'stadium', 'lemartec', 'arq', 'punch', 'financial', 'budget', 'change order', 'closeout', 'miller', 'day 2', 'issue'];
     if (ql && projectKeywords.some(function(kw) { return kw.indexOf(ql) >= 0 || ql.indexOf(kw) >= 0; })) {
-      results.push({type: 'project', label: 'Project: Miami Freedom Park Stadium', id: 'mfp', preview: 'Post-opening closeout. Home opener April 4, 2026. Active workstreams: punch list closeout, Kroll audit, Lemartec contract closeout.'});
+      results.push({type: 'project', label: 'Project: Miami Freedom Park Stadium', id: 'mfp', preview: 'Post-opening closeout. Home opener April 4, 2026. Active workstreams: punch list closeout, cost recovery audit, Lemartec contract closeout.'});
     }
 
     // Highlight function
@@ -704,12 +704,12 @@ function renderProjects() {
     + '<span class="mfp-card-title">Miami Freedom Park Stadium</span>'
     + '<span class="mfp-badge red">Active</span>'
     + '</div>'
-    + '<div class="mfp-card-summary">Post-opening closeout. Home opener April 4, 2026. Kroll audit, punch list disputes with Lemartec, ARQ payment hold, HVAC service agreement.</div>'
+    + '<div class="mfp-card-summary">Post-opening closeout. Home opener April 4, 2026. cost recovery audit, punch list disputes with Lemartec, ARQ payment hold, HVAC service agreement.</div>'
     + '<div class="mfp-card-bullets">'
     + 'Total commitments: ' + stadiumRevised + '<br>'
     + 'Paid: ' + stadiumPaid + ', Balance: ' + stadiumBal + '<br>'
     + 'Hard cost budget: ' + stadiumBudget + '<br>'
-    + 'Kroll cost recovery target: $9M+<br>'
+    + 'Cost recovery target: $9M+<br>'
     + 'Audit final delivery: June 30, 2026'
     + '</div>'
     + '</div>'
@@ -751,21 +751,20 @@ function renderMFP() {
     var retainVal = S ? fm(S.retainage_held) : '';
     var pastDueVal = S ? fm(S.past_due) : '';
     var approvedCOs = S ? fm(S.approved_cos_total) : '';
-    var krollTarget = S ? '$' + Math.abs(S.kroll_recovery_target || 9000000).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') + '+ recoverable' : '$9M+';
+    
     var daysPast = S ? S.days_past_baseline + ' days past baseline' : '153 days past baseline';
     var millerOut = H ? fm(H.commitments.find(function(c){return c.company.indexOf('MILLER')>=0;}).balance) : '';
     el.innerHTML = '<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px">'
       + '<div style="font-size:13px;color:var(--muted);margin-bottom:4px">CURRENT PHASE <span style="color:#c0392b;font-weight:700">| ' + daysPast + '</span></div>'
       + '<div style="font-size:18px;font-weight:700;color:var(--charcoal);margin-bottom:8px">Post-Opening / Active Closeout</div>'
-      + '<div style="font-size:14px;color:var(--charcoal);line-height:1.6">Home opener April 4, 2026 completed. Targeting final completion ' + (S ? S.target_completion : 'July 31, 2026') + '. Active workstreams: punch list closeout, Kroll cost recovery audit (delivery June 30), Lemartec contract closeout, HVAC service agreement transfer, Day 2 owner requests log.</div>'
+      + '<div style="font-size:14px;color:var(--charcoal);line-height:1.6">Home opener April 4, 2026 completed. Targeting final completion ' + (S ? S.target_completion : 'July 31, 2026') + '. Active workstreams: punch list closeout, cost recovery audit (delivery June 30), Lemartec contract closeout, HVAC service agreement transfer, Day 2 owner requests log.</div>'
     + '</div>'
     + '<div class="mfp-grid">'
-    + '<div class="mfp-card" onclick="toggleMFPExpand(this, \'issues\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDD34</span><span class="mfp-card-title">Live Issues</span><span class="mfp-badge red">5 HIGH</span></div><div class="mfp-card-summary">ARQ payment hold (~$1.5M Feb-Apr invoices), Kroll audit deadline, Lemartec punch list disputes, HVAC contractor departure risk, Lemartec indirect cost gap.</div><div class="mfp-expand-content"></div></div>'
+    + '<div class="mfp-card" onclick="toggleMFPExpand(this, \'issues\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDD34</span><span class="mfp-card-title">Live Issues</span><span class="mfp-badge red">5 HIGH</span></div><div class="mfp-card-summary">ARQ payment hold (~$1.5M Feb-Apr invoices), cost recovery audit deadline, Lemartec punch list disputes, HVAC contractor departure risk, Lemartec indirect cost gap.</div><div class="mfp-expand-content"></div></div>'
     + '<div class="mfp-card" onclick="toggleMFPExpand(this, \'financials\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDCB0</span><span class="mfp-card-title">Financials</span></div><div class="mfp-card-summary">Total budget: ' + budgetVal + '. Stadium: ' + stadiumVal + ' revised, ' + pctComplete + ' complete. Miller Electric outstanding: ' + millerOut + '. Retainage: ' + retainVal + '.</div><div class="mfp-expand-content"></div></div>'
     + '<div class="mfp-card" onclick="toggleMFPExpand(this, \'punchlist\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDCCB</span><span class="mfp-card-title">Punch List</span><span class="mfp-badge warn">Active</span></div><div class="mfp-card-summary">Tile installation deficiency and surface-mounted electrical conduit (spec required concealed) are active disputes with Lemartec. Position: correction, not credit.</div><div class="mfp-expand-content"></div></div>'
-    + '<div class="mfp-card" onclick="toggleMFPExpand(this, \'kroll\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDD0D</span><span class="mfp-card-title">Cost Recovery / Kroll</span><span class="mfp-badge warn">Jun 30</span></div><div class="mfp-card-summary">Independent analyst engaged. Target: $9M+ recoverable. Scope: CO clawbacks, VE credits, OCIP, quantity verification, duplicate COs, defective work credits.</div><div class="mfp-expand-content"></div></div>'
     + '<div class="mfp-card" onclick="toggleMFPExpand(this, \'day2\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83C\uDFD7</span><span class="mfp-card-title">Day 2 Items</span><span class="mfp-badge warn">60+</span></div><div class="mfp-card-summary">Owner-directed post-opening scope. Each requires scope definition, cost estimate, owner authorization. Distinct from punch list.</div><div class="mfp-expand-content"></div></div>'
-    + '<div class="mfp-card" onclick="toggleMFPExpand(this, \'stakeholders\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDC65</span><span class="mfp-card-title">Stakeholders</span></div><div class="mfp-card-summary">Owner: Graham Oxley (day-to-day), Devon McCorkle &amp; Victor Oliver (approvers). CM/GC: Lemartec. AOR: ARQ. Cost Recovery: Kroll.</div><div class="mfp-expand-content"></div></div>'
+    + '<div class="mfp-card" onclick="toggleMFPExpand(this, \'stakeholders\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDC65</span><span class="mfp-card-title">Stakeholders</span></div><div class="mfp-card-summary">Owner: Graham Oxley (day-to-day), Devon McCorkle &amp; Victor Oliver (approvers). CM/GC: Lemartec. AOR: ARQ.</div><div class="mfp-expand-content"></div></div>'
     + '</div>'
     + '<div style="margin-top:24px"><button class="btn-primary" onclick="toggleChat()">Ask L.U.N.A. about MFP \u2192</button></div>';
     }
@@ -789,21 +788,18 @@ function renderMFP() {
                   var details = {
         issues: {
           icon: '🔴', title: 'Live Issues',
-          body: '<div style="margin-bottom:16px"><strong style="font-size:15px;color:var(--charcoal)">5 High Priority Issues</strong></div>'
+          body: '<div style="margin-bottom:16px"><strong style="font-size:15px;color:var(--charcoal)">4 High Priority Issues</strong></div>'
             + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
             + '<strong>1. ARQ Payment Hold</strong><br>~$1.5M in Feb-Apr invoices on hold. Disputed work quality and incomplete deliverables.<br>'
             + '<span style="font-size:11px;color:var(--muted)">Owner: Graham Oxley | Status: Open</span></div>'
             + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
-            + '<strong>2. Kroll Cost Recovery Audit</strong><br>Independent analyst engaged. Target: $9M+ recoverable. Delivery: June 30, 2026.<br>'
-            + '<span style="font-size:11px;color:var(--muted)">Owner: Whitney Williams | Status: In Progress</span></div>'
-            + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
-            + '<strong>3. Punch List: Tile Installation Deficiency</strong><br>Surface-mounted electrical conduit violates spec requiring concealed. Position: correction, not credit.<br>'
+            + '<strong>2. Punch List: Tile Installation Deficiency</strong><br>Surface-mounted electrical conduit violates spec requiring concealed. Position: correction, not credit.<br>'
             + '<span style="font-size:11px;color:var(--muted)">Disputed with Lemartec | Status: Open</span></div>'
             + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
-            + '<strong>4. HVAC Service Agreement — Hill York</strong><br>Contractor departure risk. Urgent — pending signature.<br>'
+            + '<strong>3. HVAC Service Agreement — Hill York</strong><br>Contractor departure risk. Urgent — pending signature.<br>'
             + '<span style="font-size:11px;color:var(--muted)">Status: Urgent / Pending Signature</span></div>'
             + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
-            + '<strong>5. Lemartec Indirect Costs</strong><br>$39.5M indirect cost payment gap. General requirements, general conditions, CM fee, and insurance unpaid.<br>'
+            + '<strong>4. Lemartec Indirect Costs</strong><br>$39.5M indirect cost payment gap. General requirements, general conditions, CM fee, and insurance unpaid.<br>'
             + '<span style="font-size:11px;color:var(--muted)">Status: Open</span></div>'
         },
         financials: {
@@ -924,16 +920,6 @@ function renderMFP() {
             + '<div style="padding:12px;background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;font-size:13px">'
             + '<strong>⚡ Position:</strong> Correction, not credit. We hold that defective work must be corrected at the contractor\'s cost. This is not a change order issue — it\'s a quality/compliance issue under the existing contract.</div>'
         },
-        kroll: {
-          icon: '🔍', title: 'Cost Recovery — Kroll Audit',
-          body: '<div style="margin-bottom:16px"><strong>Kroll Independent Cost Recovery Audit</strong> <span style="font-size:12px;color:var(--muted)">— Delivery: June 30, 2026</span></div>'
-            + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">'
-            + '<div style="background:var(--bg);border-radius:8px;padding:14px;text-align:center"><span style="font-size:11px;color:var(--muted);display:block">Recovery Target</span><strong style="font-size:22px;color:var(--teal)">$9M+</strong></div>'
-            + '<div style="background:var(--bg);border-radius:8px;padding:14px;text-align:center"><span style="font-size:11px;color:var(--muted);display:block">Deadline</span><strong style="font-size:18px">Jun 30</strong></div>'
-            + '</div>'
-            + '<div style="background:var(--bg);border-radius:8px;padding:14px;font-size:13px">'
-            + '<strong>Audit Scope:</strong><br>• CO clawbacks (overpriced / unjustified change orders)<br>• Value Engineering (VE) credits not properly applied<br>• OCIP insurance credit reconciliation<br>• Quantity verification (paid for but not installed)<br>• Duplicate COs (same scope charged twice)<br>• Defective work credits (correction costs back-charged)</div>'
-        },
         day2: {
           icon: '🏗', title: 'Day 2 Items',
           body: '<div style="margin-bottom:16px"><strong>Owner-Directed Post-Opening Scope</strong> <span style="font-size:12px;color:var(--muted)">— 60+ items in various stages</span></div>'
@@ -951,7 +937,7 @@ function renderMFP() {
             + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>CM / GC</strong><br>Lemartec Corporation<br><span style="font-size:12px;color:var(--muted)">Construction Manager as Agent</span></div>'
             + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>Architect of Record</strong><br>Arquitectonica (ARQ)<br><span style="font-size:12px;color:var(--muted)">Agreement executed July 27, 2023</span></div>'
             + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>Design Architect</strong><br>MANICA Architecture<br><span style="font-size:12px;color:var(--muted)">Agreement executed July 27, 2023</span></div>'
-            + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>Cost Recovery</strong><br>Kroll<br><span style="font-size:12px;color:var(--muted)">Target: $9M+ recoverable<br>Delivery: June 30</span></div>'
+            + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>Cost Recovery Audit</strong><br>Independent analyst (confidential)<br>n style="font-size:12px;color:var(--muted)">Target: $9M+ recoverable<br>Delivery: June 30</span></div>'
             + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>IMCF Operations</strong><br>Antonio Torres Roman (Lead)<br>Kaitlyn Stolzenberg<br>Nelson Fuentes (Facilities)</div>'
             + '</div>'
         }
@@ -1228,12 +1214,12 @@ function renderSharePoint() {
     return;
   }
   el.innerHTML = '<div class="sp-search-row">'
-    + '<input id="sp-search" class="sp-search-input" type="text" placeholder="Search SharePoint files (e.g. Lemartec, punch list, Kroll)...">'
+    + '<input id="sp-search" class="sp-search-input" type="text" placeholder="Search SharePoint files (e.g. Lemartec, punch list, change order)...">'
     + '<button class="btn-primary" onclick="doSharePointSearch()">Search</button>'
     + '</div>'
     + '<div class="sp-chips">'
     + '<span class="sp-chips-label">QUICK:</span>'
-    + ['Lemartec','Kroll audit','punch list','change order','invoice','HVAC','closeout','schedule'].map(function(q) {
+    + ['Lemartec','cost recovery','punch list','change order','invoice','HVAC','closeout','schedule'].map(function(q) {
         return '<button class="sp-chip" onclick="quickSharePoint(' + jsCallArg(q) + ')">' + escapeHtml(q) + '</button>';
       }).join('')
     + '</div>'
@@ -1596,7 +1582,7 @@ function toggleChat() {
   if (d) d.classList.toggle('open', chatOpen);
   if (chatOpen) {
     if (chatHistory.length === 0) {
-      appendMsg('ai', "Hi Whitney. I'm L.U.N.A. — your Executive Operating Partner. Ask me anything about the playbook or MFP — Day 1 mobilization, change orders, punch list disputes, Kroll audit, anything.");
+      appendMsg('ai', "Hi Whitney. I'm L.U.N.A. — your Executive Operating Partner. Ask me anything about the playbook or MFP — Day 1 mobilization, change orders, punch list disputes, cost recovery audit, anything.");
     }
     setTimeout(function() {
       var ci = document.getElementById('chat-input');
@@ -1886,9 +1872,9 @@ function init() {
       }
 
       // Search project context
-      var projectKW = ['mfp','freedom park','stadium','lemartec','kroll','arq','punch','budget','change order','closeout','miller'];
+      var projectKW = ['mfp','freedom park','stadium','lemartec','arq','punch','budget','change order','closeout','miller'];
       if (projectKW.some(function(kw){return kw.indexOf(ql)>=0||ql.indexOf(kw)>=0;})) {
-        results.push({type:'project', label:'Project: Miami Freedom Park Stadium', id:'mfp', preview:'Post-opening closeout. Active workstreams: punch list closeout, Kroll audit, Lemartec contract closeout.'});
+        results.push({type:'project', label:'Project: Miami Freedom Park Stadium', id:'mfp', preview:'Post-opening closeout. Active workstreams: punch list closeout, cost recovery audit, Lemartec contract closeout.'});
       }
 
       if (results.length === 0) { dd.classList.remove('show'); dd.innerHTML = ''; return; }

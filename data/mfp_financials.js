@@ -70,8 +70,6 @@ window.__MFP_FINANCIALS = {
     retainage_held: 25454318,
     days_past_baseline: 153,
     target_completion: "July 31, 2026",
-    home_opener: "April 4, 2026",
-    kroll_recovery_target: 9000000,
-    kroll_delivery: "June 30, 2026"
+    home_opener: "April 4, 2026"
   }
 };
