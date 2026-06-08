@@ -2079,3 +2079,6 @@ function verifyPassword() {
     if (overlay) { overlay.style.display = 'flex'; overlay.classList.add('open'); }
   });
 })();
+
+// ── BOOT ──────────────────────────────────────────────────────────
+init();
