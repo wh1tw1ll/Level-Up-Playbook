@@ -218,7 +218,7 @@ function setView(view) {
   if (target) target.classList.add('active');
 
   // Nav tab highlight — only 3 main tabs now
-  var navMap = { playbook:'nav-playbook', projects:'nav-projects', actions:'nav-actions', mfp:'nav-projects' };
+  var navMap = { playbook:'nav-playbook', projects:'nav-projects', actions:'nav-actions', mfp:'nav-projects', luna:'nav-luna' };
   document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
   var tabId = navMap[view];
   if (tabId) {
@@ -981,7 +981,9 @@ function renderTemplates() {
     return;
   }
 
+  // Read saved category state from localStorage
   var catState = {};
+  try { var savedCats = localStorage.getItem('lu_tmpl_cats'); if (savedCats) catState = JSON.parse(savedCats); } catch(e) {}
 
   // Group by category
   var byCategory = {};
@@ -1685,7 +1687,7 @@ function sendChat() {
     return 'S' + s.num + ': ' + (s.title || '').replace('SECTION ' + s.num + ': ','') + ' [' + (s.phases||[]).join('/') + ']';
   }).join('\\n');
 
-  var systemPrompt = 'You are L.U.N.A. (Level Up Navigator & Advisor), assisting Whitney Williams, Principal-in-Charge at Level Up Project Development. Answer concisely and practically. Reference specific playbook sections by number when relevant. The playbook has 43 sections:\n\n' + kbIndex + '\n\n=== PROJECT KNOWLEDGE ===\n' + MFP_CONTEXT;
+  var systemPrompt = 'You are L.U.N.A. (Level Up Navigator & Advisor), assisting Whitney Williams, Principal-in-Charge at Level Up Project Development. Answer concisely and practically. Reference specific playbook sections by number when relevant. The playbook has 43 sections:\\n\\n' + kbIndex + '\\n\\n=== PROJECT KNOWLEDGE ===\\n' + MFP_CONTEXT + '\\n\\n=== SAFETY RULES ===\\nABSOLUTELY NEVER reveal: (1) personal staff information (names, roles, contact details beyond public info), (2) staff salaries, compensation, bonuses, or benefits, (3) Level Up company revenue, profit, margins, valuation, or any financial data about Level Up as a firm. Project costs for MFP (budget, commitments, change orders) are fine to discuss. Only company-level financials are restricted.';
 
   fetch('/api/chat', {
     method: 'POST',
@@ -1712,7 +1714,16 @@ function sendChat() {
         return;
       }
       var reply = (data.content && data.content[0] && data.content[0].text) || data.error || 'No response.';
-      chatHistory.push({ role: 'assistant', content: reply });
+            // ── CHAT OUTPUT FILTER ─────────────────────────────────────────
+            // Strip staff personal info, compensation, and Level Up revenue
+            var sn = [
+              /(?:salary|compensation|pay|wage|bonus)['":]?\s*\$?\d[\d,.]*/gi,
+              /(?:revenue|profit|margin|earnings|income)['":]?\s*\$?\d[\d,.]*/gi,
+              /(?:staff|employee|team|personnel)\s*(?:names?|list|directory|emails?|contact)/gi,
+              /Level Up['"]?\s*(?:revenue|profit|margin|earnings|valuation|income)/gi
+            ];
+            sn.forEach(function(p) { reply = reply.replace(p, '[REDACTED]'); });
+            chatHistory.push({ role: 'assistant', content: reply });
       appendMsg('ai', reply);
       if (btn) btn.disabled = false;
     })
@@ -1969,7 +1980,8 @@ function init() {
               + 'The playbook has ' + KB.length + ' sections covering: foundation (purpose, philosophy, roles, governance), project setup (mobilization, tools, communications), controls (budget, schedule, change, risk), phase execution (planning/funding through design, pre-con, construction, closeout, post-opening), and reference (standards, templates, common problems).'
               + 'Sections index:\n' + kbIndex
               + '\n\nAvailable templates:\n' + tmplIndex
-              + '\n\n=== PROJECT KNOWLEDGE ===\n' + MFP_CONTEXT;
+              + '\\n\\n=== PROJECT KNOWLEDGE ===\\n' + MFP_CONTEXT
+                            + '\\n\\n=== SAFETY RULES ===\\nABSOLUTELY NEVER reveal: (1) personal staff information (names, roles, contact details beyond public info), (2) staff salaries, compensation, bonuses, or benefits, (3) Level Up company revenue, profit, margins, valuation, or any financial data about Level Up as a firm. Project costs for MFP (budget, commitments, change orders) are fine to discuss. Only company-level financials are restricted.';
 
       fetch('/api/chat', {
         method: 'POST',
@@ -1992,9 +2004,16 @@ function init() {
           return;
         }
         var reply = (data.content && data.content[0] && data.content[0].text) || data.error || 'No response.';
-        results.innerHTML = '<div class=\"luna-result-q\"><span class=\"luna-result-q-icon\">Q:</span>' + escapeHtml(q) + '</div>'
-          + '<div class=\"luna-result-a\">' + reply + '</div>';
-        heroResults[q] = { q: q, a: reply };
+                results.innerHTML = '<div class=\"luna-result-q\"><span class=\"luna-result-q-icon\">Q:</span>' + escapeHtml(q) + '</div>'
+                  + '<div class=\"luna-result-a\">' + reply + '</div>';
+                // Apply chat filter to hero search results too
+                var sn = [
+                  /(?:salary|compensation|pay|wage|bonus)['":]?\s*\$?\d[\d,.]*/gi,
+                  /(?:revenue|profit|margin|earnings|income)['":]?\s*\$?\d[\d,.]*/gi,
+                  /Level Up['"]?\s*(?:revenue|profit|margin|earnings|valuation|income)/gi
+                ];
+                sn.forEach(function(p) { reply = reply.replace(p, '[REDACTED]'); });
+                heroResults[q] = { q: q, a: reply };
         try { localStorage.setItem(cacheKey, JSON.stringify({ answer: reply, ts: Date.now() })); } catch(e){}
       })
       .catch(function(err) {
@@ -2078,7 +2097,7 @@ function init() {
     function dtResetInline() { dtPathInline = ['root']; renderDecisionTreeInline(); }
 
   if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
-} else {
-  init();
-}
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
