@@ -2022,10 +2022,6 @@ function init() {
       });
     }
 
-    // ── INLINE PHASE GUIDE ──────────────────────────────────────────────
-    function renderPhaseGuideInline() {
-}
-}
 
 // ── PASSWORD GATE ───────────────────────────────────────────────────
 function verifyPassword() {
