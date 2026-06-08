@@ -2059,24 +2059,17 @@ function verifyPassword() {
   });
 }
 
-// Check auth on page load — skip password if cookie exists
+// Check auth on page load — hide password overlay if cookie exists
 (function checkSiteAuth() {
   fetch('/api/check-auth').then(function(r) { return r.json(); }).then(function(data) {
     var overlay = document.getElementById('password-overlay');
     if (!overlay) return;
     if (data.authed) {
+      overlay.classList.remove('open');
       overlay.style.display = 'none';
-    } else {
-      overlay.style.display = 'flex';
-      overlay.classList.add('open');
-      setTimeout(function() {
-        var inp = document.getElementById('password-input');
-        if (inp) inp.focus();
-      }, 100);
     }
   }).catch(function() {
-    var overlay = document.getElementById('password-overlay');
-    if (overlay) { overlay.style.display = 'flex'; overlay.classList.add('open'); }
+    // Overlay stays visible by default
   });
 })();
 
