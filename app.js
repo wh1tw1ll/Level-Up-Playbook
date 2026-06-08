@@ -1848,7 +1848,7 @@ function init() {
       var phases = ['Pre-Construction','Design','Construction','Closeout','Post-Opening'];
       phases.forEach(function(phase, idx) {
         var pid = 'pgi-phase-' + idx;
-        var data = window.PHASE_GUIDE ? window.PHASE_GUIDE[phase] : null;
+        var data = typeof PHASE_GUIDE !== 'undefined' ? PHASE_GUIDE[phase] : null;
         if (!data) return;
         html += '<div class=\"pg-phase\">'
           + '<button class=\"pg-phase-header\" onclick=\"togglePgPhaseInline(' + jsCallArg(pid) + ')\">'
@@ -1886,7 +1886,7 @@ function init() {
     function renderDecisionTreeInline() {
       var body = document.getElementById('dt-body-inline');
       if (!body) return;
-      var cur = window.DT_TREE ? window.DT_TREE[dtPathInline[dtPathInline.length-1]] : null;
+      var cur = typeof DT_TREE !== 'undefined' ? DT_TREE[dtPathInline[dtPathInline.length-1]] : null;
       if (!cur) {
         body.innerHTML = '<div style=\"padding:20px;color:var(--muted)\">Decision tree not available.</div>';
         return;
