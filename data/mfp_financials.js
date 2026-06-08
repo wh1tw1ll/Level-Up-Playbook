@@ -90,8 +90,8 @@ window.__MFP_FINANCIALS = {
       {category:"Tax (7%)",amount:1030750}
     ],
     // Additional soft costs from Budget files
-    freight: 12300000,
-    customs_duties: 12500000,
+    freight: 16112254,       // From Contract Summary May 23 2026 - FRACHT vendor ($16,112,254 total via COs, $14,917,048 paid)
+    customs_duties: 13989138, // From Contract Summary May 23 2026 - U.S. Customs vendor ($13,989,138 total via COs, fully paid)
     contingency: 15500000,
     owner_rep: null,        // Level Up fee — confidential
     legal: null,            // Not found in files yet
