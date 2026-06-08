@@ -529,12 +529,88 @@ function setTopic(t) {
 var searchTimer = null;
 function applySearch(q) {
   if (searchTimer) clearTimeout(searchTimer);
+  var searchWrap = document.querySelector('.search-wrap');
+  var existing = document.getElementById('search-results-dropdown');
+  if (existing) existing.remove();
   searchTimer = setTimeout(function() {
     activeSearch = (q || '').trim();
-    // When searching, auto-expand all groups so results are visible
+    if (!activeSearch) {
+      // Clear search results dropdown
+      var dd = document.getElementById('search-results-dropdown');
+      if (dd) dd.remove();
+      if (currentView === 'playbook') renderSections();
+      return;
+    }
+    var ql = activeSearch.toLowerCase();
+    var results = [];
+
+    // Search playbook sections
+    if (window.__KNOWLEDGE_BASE) {
+      window.__KNOWLEDGE_BASE.forEach(function(s) {
+        var match = (s.title && s.title.toLowerCase().indexOf(ql) >= 0) || (s.body && s.body.toLowerCase().indexOf(ql) >= 0);
+        if (match) results.push({type: 'playbook', label: 'Section ' + s.id + ': ' + s.title, id: s.id, preview: (s.body || '').substring(0, 120)});
+      });
+    }
+
+    // Search templates
+    if (window.__TEMPLATES) {
+      Object.keys(window.__TEMPLATES).forEach(function(k) {
+        var t = window.__TEMPLATES[k];
+        var match = (t.name && t.name.toLowerCase().indexOf(ql) >= 0) || (t.desc && t.desc.toLowerCase().indexOf(ql) >= 0) || (k && k.toLowerCase().indexOf(ql) >= 0);
+        if (match) results.push({type: 'template', label: 'Template: ' + t.name, id: k, preview: (t.desc || '').substring(0, 120)});
+      });
+    }
+
+    // Search projects/mfp
+    var projectKeywords = ['mfp', 'freedom park', 'stadium', 'lemartec', 'kroll', 'arq', 'punch', 'financial', 'budget', 'change order', 'closeout', 'miller', 'day 2', 'issue'];
+    if (ql && projectKeywords.some(function(kw) { return kw.indexOf(ql) >= 0 || ql.indexOf(kw) >= 0; })) {
+      results.push({type: 'project', label: 'Project: Miami Freedom Park Stadium', id: 'mfp', preview: 'Post-opening closeout. Home opener April 4, 2026. Active workstreams: punch list closeout, Kroll audit, Lemartec contract closeout.'});
+    }
+
+    // Highlight function
+    function highlightText(text, query) {
+      if (!query || !text) return text;
+      var re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+      return text.replace(re, '<mark style="background:#fff3a8;padding:1px 2px;border-radius:2px">$1</mark>');
+    }
+
+    // Render dropdown
+    if (results.length) {
+      var searchRect = searchWrap ? searchWrap.getBoundingClientRect() : {left: 0, top: 0, width: 0};
+      var dd = document.createElement('div');
+      dd.id = 'search-results-dropdown';
+      dd.style.cssText = 'position:fixed;top:' + (searchRect.bottom + 4) + 'px;left:' + searchRect.left + 'px;width:' + Math.max(searchRect.width, 300) + 'px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:1000;padding:8px 0';
+      dd.innerHTML = '<div style="padding:6px 14px 8px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)">' + results.length + ' result' + (results.length > 1 ? 's' : '') + ' for "' + activeSearch + '"</div>';
+      results.forEach(function(r) {
+        var icon = r.type === 'playbook' ? '\uD83D\uDCD6' : r.type === 'template' ? '\uD83D\uDCC1' : '\uD83C\uDFDF';
+        var onClick = "var dd=document.getElementById('search-results-dropdown');if(dd)dd.remove();document.getElementById('search-input').value='';activeSearch='';";
+        if (r.type === 'playbook') onClick += "setView('playbook');jumpTo('" + r.id + "');";
+        else if (r.type === 'template') onClick += "setView('templates');";
+        else if (r.type === 'project') onClick += "setView('mfp');";
+        dd.innerHTML += '<div class="search-result-item" style="padding:10px 14px;cursor:pointer;transition:background .1s;border-bottom:1px solid var(--border)" onmouseover="this.style.background=\'var(--teal-light)\'" onmouseout="this.style.background=\'\'" onclick="' + onClick + '">'
+          + '<div style="display:flex;align-items:center;gap:8px">'
+          + '<span>' + icon + '</span>'
+          + '<span style="font-size:13px;font-weight:600;color:var(--charcoal);flex:1">' + highlightText(r.label, activeSearch) + '</span>'
+          + (r.id ? '<span style="font-size:10px;color:var(--muted);background:var(--cool);padding:2px 6px;border-radius:4px">' + r.type + '</span>' : '')
+          + '</div>'
+          + (r.preview ? '<div style="font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4">' + highlightText(r.preview, activeSearch) + '</div>' : '')
+          + '</div>';
+      });
+      document.body.appendChild(dd);
+
+      // Click outside to close
+      var closeHandler = function(e) {
+        if (!dd.contains(e.target) && e.target.id !== 'search-input') {
+          dd.remove();
+          document.removeEventListener('click', closeHandler);
+        }
+      };
+      setTimeout(function() { document.addEventListener('click', closeHandler); }, 10);
+    }
+
+    // Also render playbook with results if on that view
     if (activeSearch) collapsedGroups = {};
-    if (currentView !== 'playbook') setView('playbook');
-    else renderSections();
+    if (currentView === 'playbook') renderSections();
   }, 250);
 }
 
@@ -568,20 +644,25 @@ function collapseAllGroups() {
 function renderProjects() {
   var grid = document.getElementById('projects-grid');
   if (!grid) return;
+  var F = window.__MFP_FINANCIALS;
+  var H = F ? F.hard : null;
+  var stadiumRevised = H ? '$' + Math.abs(H.total_revised).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') : '$553M';
+  var stadiumPct = H ? (H.total_pct_paid).toFixed(1) + '%' : '94.2%';
   grid.innerHTML = '<div class="mfp-card" onclick="setView(\'mfp\')">'
     + '<div class="mfp-card-head">'
-    + '<span class="mfp-icon">🏟</span>'
+    + '<span class="mfp-icon">\uD83C\uDFDF</span>'
     + '<span class="mfp-card-title">Miami Freedom Park Stadium</span>'
     + '<span class="mfp-badge red">Active</span>'
     + '</div>'
     + '<div class="mfp-card-summary">Post-opening closeout. Home opener April 4, 2026. Kroll audit, punch list disputes with Lemartec, ARQ payment hold, HVAC service agreement.</div>'
     + '<div class="mfp-card-bullets">'
-    + '· Lemartec: $553M revised, 94.2% complete<br>'
-    + '· Kroll cost recovery target: $9M+<br>'
-    + '· Audit final delivery: June 30, 2026'
-    + '</div>'
-    + '</div>'
-    + '<div class="mfp-card" style="opacity:.6;cursor:default" onclick="alert(\'Sixers arena pursuit \\u2014 currently in pitch phase\')">'
+        + 'Total commitments: ' + stadiumRevised + '<br>'
+        + (H ? 'Paid: $' + Math.abs(H.total_paid).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') + ', Balance: $' + Math.abs(H.total_balance).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') + '<br>' : '')
+        + 'Kroll cost recovery target: $9M+<br>'
+        + 'Audit final delivery: June 30, 2026'
+        + '</div>'
+        + '</div>'
+        + '<div class="mfp-card" style="opacity:.6;cursor:default" onclick="alert(\'Sixers arena pursuit \\u2014 currently in pitch phase\')">'
     + '<div class="mfp-card-head">'
     + '<span class="mfp-icon">🏀</span>'
     + '<span class="mfp-card-title">Sixers Arena (Philadelphia)</span>'
@@ -602,24 +683,49 @@ function renderProjects() {
 function renderMFP() {
   var el = document.getElementById('mfp-content');
   if (!el) return;
+  var F = window.__MFP_FINANCIALS;
+  var S = F ? F.summary : null;
+  var H = F ? F.hard : null;
+  function fm(n){ if (n==null) return '$0'; var s=Math.abs(n).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,'); return '$'+s; }
+  var stadiumVal = S ? fm(S.stadium_base_contract) : '$530M';
+  var pctComplete = S ? S.stadium_pct_complete.toFixed(1) + '%' : '94.2%';
+  var budgetVal = S ? fm(S.total_budget) : '$824M';
+  var paidVal = S ? fm(S.paid_to_date) : '';
+  var retainVal = S ? fm(S.retainage_held) : '';
+  var millerOut = H ? fm(H.commitments.find(function(c){return c.company.indexOf('MILLER')>=0;}).balance) : '';
   el.innerHTML = '<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px">'
     + '<div style="font-size:13px;color:var(--muted);margin-bottom:4px">CURRENT PHASE</div>'
     + '<div style="font-size:18px;font-weight:700;color:var(--charcoal);margin-bottom:8px">Post-Opening / Active Closeout</div>'
-    + '<div style="font-size:14px;color:var(--charcoal);line-height:1.6">Home opener April 4, 2026 — completed. Active workstreams: punch list closeout, Kroll cost recovery audit (delivery June 30), Lemartec contract closeout, HVAC service agreement transfer, Day 2 owner requests log.</div>'
+    + '<div style="font-size:14px;color:var(--charcoal);line-height:1.6">Home opener April 4, 2026 completed. Active workstreams: punch list closeout, Kroll cost recovery audit (delivery June 30), Lemartec contract closeout, HVAC service agreement transfer, Day 2 owner requests log.</div>'
     + '</div>'
     + '<div class="mfp-grid">'
-    + '<div class="mfp-card" onclick="showMFPDetail(\'issues\')"><div class="mfp-card-head"><span class="mfp-icon">🔴</span><span class="mfp-card-title">Live Issues</span><span class="mfp-badge red">5 HIGH</span></div><div class="mfp-card-summary">ARQ payment hold (~$1.5M Feb-Apr invoices), Kroll audit deadline, Lemartec punch list disputes, HVAC contractor departure risk, Lemartec indirect cost gap.</div></div>'
-    + '<div class="mfp-card" onclick="showMFPDetail(\'financials\')"><div class="mfp-card-head"><span class="mfp-icon">💰</span><span class="mfp-card-title">Financials</span></div><div class="mfp-card-summary">Total budget: $824M. Stadium: $553M revised, 94.2% complete. Miller Electric: $28M outstanding. ARQ: ~$1.5M on hold. Retainage held: $25.5M.</div></div>'
-    + '<div class="mfp-card" onclick="showMFPDetail(\'punchlist\')"><div class="mfp-card-head"><span class="mfp-icon">📋</span><span class="mfp-card-title">Punch List</span><span class="mfp-badge warn">Active</span></div><div class="mfp-card-summary">Tile installation deficiency and surface-mounted electrical conduit (spec required concealed) are active disputes with Lemartec. Position: correction, not credit.</div></div>'
-    + '<div class="mfp-card" onclick="showMFPDetail(\'kroll\')"><div class="mfp-card-head"><span class="mfp-icon">🔍</span><span class="mfp-card-title">Cost Recovery / Kroll</span><span class="mfp-badge warn">Jun 30</span></div><div class="mfp-card-summary">Independent analyst engaged. Target: $9M+ recoverable. Scope: CO clawbacks, VE credits, OCIP, quantity verification, duplicate COs, defective work credits.</div></div>'
-    + '<div class="mfp-card" onclick="showMFPDetail(\'day2\')"><div class="mfp-card-head"><span class="mfp-icon">🏗</span><span class="mfp-card-title">Day 2 Items</span><span class="mfp-badge warn">60+</span></div><div class="mfp-card-summary">Owner-directed post-opening scope. Each requires scope definition, cost estimate, owner authorization. Distinct from punch list.</div></div>'
-    + '<div class="mfp-card" onclick="showMFPDetail(\'stakeholders\')"><div class="mfp-card-head"><span class="mfp-icon">👥</span><span class="mfp-card-title">Stakeholders</span></div><div class="mfp-card-summary">Owner: Graham Oxley (day-to-day), Devon McCorkle &amp; Victor Oliver (approvers). CM/GC: Lemartec. AOR: ARQ. Cost Recovery: Kroll.</div></div>'
+    + '<div class="mfp-card" onclick="toggleMFPExpand(this, \'issues\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDD34</span><span class="mfp-card-title">Live Issues</span><span class="mfp-badge red">5 HIGH</span></div><div class="mfp-card-summary">ARQ payment hold (~$1.5M Feb-Apr invoices), Kroll audit deadline, Lemartec punch list disputes, HVAC contractor departure risk, Lemartec indirect cost gap.</div><div class="mfp-expand-content"></div></div>'
+    + '<div class="mfp-card" onclick="toggleMFPExpand(this, \'financials\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDCB0</span><span class="mfp-card-title">Financials</span></div><div class="mfp-card-summary">Total budget: ' + budgetVal + '. Stadium: ' + stadiumVal + ' revised, ' + pctComplete + ' complete. Miller Electric outstanding: ' + millerOut + '. Retainage: ' + retainVal + '.</div><div class="mfp-expand-content"></div></div>'
+    + '<div class="mfp-card" onclick="toggleMFPExpand(this, \'punchlist\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDCCB</span><span class="mfp-card-title">Punch List</span><span class="mfp-badge warn">Active</span></div><div class="mfp-card-summary">Tile installation deficiency and surface-mounted electrical conduit (spec required concealed) are active disputes with Lemartec. Position: correction, not credit.</div><div class="mfp-expand-content"></div></div>'
+    + '<div class="mfp-card" onclick="toggleMFPExpand(this, \'kroll\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDD0D</span><span class="mfp-card-title">Cost Recovery / Kroll</span><span class="mfp-badge warn">Jun 30</span></div><div class="mfp-card-summary">Independent analyst engaged. Target: $9M+ recoverable. Scope: CO clawbacks, VE credits, OCIP, quantity verification, duplicate COs, defective work credits.</div><div class="mfp-expand-content"></div></div>'
+    + '<div class="mfp-card" onclick="toggleMFPExpand(this, \'day2\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83C\uDFD7</span><span class="mfp-card-title">Day 2 Items</span><span class="mfp-badge warn">60+</span></div><div class="mfp-card-summary">Owner-directed post-opening scope. Each requires scope definition, cost estimate, owner authorization. Distinct from punch list.</div><div class="mfp-expand-content"></div></div>'
+    + '<div class="mfp-card" onclick="toggleMFPExpand(this, \'stakeholders\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDC65</span><span class="mfp-card-title">Stakeholders</span></div><div class="mfp-card-summary">Owner: Graham Oxley (day-to-day), Devon McCorkle &amp; Victor Oliver (approvers). CM/GC: Lemartec. AOR: ARQ. Cost Recovery: Kroll.</div><div class="mfp-expand-content"></div></div>'
     + '</div>'
-    + '<div style="margin-top:24px"><button class="btn-primary" onclick="toggleChat()">Ask L.U.N.A. about MFP →</button></div>';
+    + '<div style="margin-top:24px"><button class="btn-primary" onclick="toggleChat()">Ask L.U.N.A. about MFP \u2192</button></div>';
     }
+    function toggleMFPExpand(card, view) {
+          var content = card.querySelector('.mfp-expand-content');
+          if (!content) return;
+          if (content.innerHTML) {
+            content.innerHTML = '';
+            content.style.display = 'none';
+            card.classList.remove('expanded');
+            return;
+          }
+          var details = window.__MFP_DETAILS;
+          if (!details || !details[view]) return;
+          content.innerHTML = details[view].body;
+          content.style.display = 'block';
+          card.classList.add('expanded');
+        }
 
-    function showMFPDetail(view) {
-      var details = {
+        function showMFPDetail(view) {
+                  var details = {
         issues: {
           icon: '🔴', title: 'Live Issues',
           body: '<div style="margin-bottom:16px"><strong style="font-size:15px;color:var(--charcoal)">5 High Priority Issues</strong></div>'
@@ -789,6 +895,7 @@ function renderMFP() {
             + '</div>'
         }
       };
+      window.__MFP_DETAILS = details;
       var d = details[view];
       if (!d) return;
       var html = '<div class="modal-dialog" style="max-width:680px">'
