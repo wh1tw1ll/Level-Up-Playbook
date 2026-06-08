@@ -723,6 +723,12 @@ function renderMFP() {
   var S = F ? F.summary : null;
   var H = F ? F.hard : null;
   function fm(n){ if (n==null) return '$0'; var s=Math.abs(n).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,'); return '$'+s; }
+  // Ensure MFP_DETAILS is available for inline card expansion
+    if (!window.__MFP_DETAILS) {
+      showMFPDetail('issues');
+      var mfpModal = document.getElementById('modal-mfp-detail');
+      if (mfpModal) mfpModal.classList.remove('open');
+    }
   var stadiumVal = S ? fm(S.stadium_base_contract) : '$530M';
   var pctComplete = S ? S.stadium_pct_complete.toFixed(1) + '%' : '94.2%';
   var budgetVal = S ? fm(S.total_budget) : '$824M';
@@ -972,39 +978,47 @@ function renderTemplates() {
     byCategory[cat].push({ key: k, t: t });
   });
 
-  var categoryOrder = ['Foundation','Project Controls','Construction','Closeout','Project Setup','Other'];
+  var categoryOrder = ['Project Controls','Financial','Meetings','Contracts & Procurement','Field & Construction','Reporting','Other'];
   var orderedCats = categoryOrder.filter(function(c) { return byCategory[c]; })
     .concat(Object.keys(byCategory).filter(function(c) { return categoryOrder.indexOf(c) < 0; }));
 
-  var html = '<div style="font-size:13px;color:var(--muted);margin-bottom:20px">' + keys.length + ' Excel templates, all branded with Level Up styling. Click a category to expand.</div>';
+  var html = '<div style="margin-bottom:24px">'
+    + '<div style="font-size:14px;font-weight:700;color:var(--charcoal);margin-bottom:4px">' + keys.length + ' Templates</div>'
+    + '<div style="font-size:13px;color:var(--muted)">Branded Excel workbooks. Click to expand a category, then preview or download.</div>'
+    + '</div>';
 
   orderedCats.forEach(function(cat) {
     var items = byCategory[cat];
     var isOpen = catState[cat] === true;
-    html += '<div class="tmpl-cat" style="margin-bottom:8px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--card);transition:box-shadow .2s">'
-          + '<div class="tmpl-cat-header" onclick="toggleTmplCat(' + jsCallArg(cat) + ')" style="display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;user-select:none;transition:background .15s" onmouseover="this.style.background=\'var(--teal-light)\'" onmouseout="this.style.background=\'\'">'
-          + '<span class="tmpl-chevron" style="font-size:10px;color:var(--teal);transition:transform .2s ease">' + (isOpen ? '▼' : '▶') + '</span>'
-          + '<span style="font-size:13px;font-weight:700;color:var(--charcoal);flex:1">' + escapeHtml(cat) + '</span>'
-          + '<span style="font-size:11px;color:var(--muted);font-weight:600;background:var(--cool);padding:3px 10px;border-radius:10px">' + items.length + '</span>'
-          + '</div>'
-          + '<div class="tmpl-cat-body" style="' + (isOpen ? 'display:block' : 'display:none') + ';padding:6px 18px 18px;border-top:1px solid var(--border);animation:' + (isOpen ? 'fadeIn .2s ease' : '') + '">'
-          + '<div class="mfp-grid">';
+    var catIcon = cat === 'Project Controls' ? '📊' : cat === 'Financial' ? '💰' : cat === 'Meetings' ? '📋' : cat === 'Contracts & Procurement' ? '📝' : cat === 'Field & Construction' ? '🔨' : cat === 'Reporting' ? '📈' : '📁';
+    html += '<div style="margin-bottom:10px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--card);transition:box-shadow .2s">'
+      + '<div class="tmpl-cat-header" onclick="toggleTmplCat(' + jsCallArg(cat) + ')" style="display:flex;align-items:center;gap:12px;padding:16px 20px;cursor:pointer;user-select:none;transition:all .15s">'
+      + '<span style="font-size:18px">' + catIcon + '</span>'
+      + '<span style="font-size:14px;font-weight:700;color:var(--charcoal);flex:1">' + escapeHtml(cat) + '</span>'
+      + '<span class="tmpl-chevron" style="font-size:11px;color:var(--teal);transition:transform .2s ease;background:var(--teal-light);padding:2px 8px;border-radius:6px">' + (isOpen ? '▲' : '▼') + ' ' + items.length + '</span>'
+      + '</div>'
+      + '<div class="tmpl-cat-body" style="' + (isOpen ? 'display:block' : 'display:none') + ';padding:6px 20px 20px;border-top:1px solid var(--border)">'
+      + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">';
 
     items.forEach(function(item) {
       var k = item.key;
       var t = item.t;
-      html += '<div class="mfp-card">'
-        + '<div class="mfp-card-head">'
-        + '<span class="mfp-icon">' + (t.icon || '📊') + '</span>'
-        + '<span class="mfp-card-title">' + escapeHtml(t.name || k) + '</span>'
-        + (t.section ? '<span class="mfp-badge">§' + escapeHtml(t.section) + '</span>' : '')
+      html += '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;transition:box-shadow .15s">'
+        + '<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">'
+        + '<span style="font-size:22px;flex-shrink:0">' + (t.icon || '📊') + '</span>'
+        + '<div style="flex:1;min-width:0">'
+        + '<div style="font-size:14px;font-weight:700;color:var(--charcoal);line-height:1.3">' + escapeHtml(t.name || k) + '</div>'
+        + '<div style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4">' + escapeHtml(t.desc || '') + '</div>'
         + '</div>'
-        + '<div class="mfp-card-summary">' + escapeHtml(t.desc || '') + '</div>'
-        + '<div style="display:flex;gap:8px;margin-top:14px">'
-        + '<button class="btn-primary" style="flex:1;padding:8px 14px;font-size:13px" onclick="previewTemplate(' + jsCallArg(k) + ')">Preview</button>'
-        + '<button style="flex:1;padding:8px 14px;font-size:13px;background:var(--cool);color:var(--charcoal);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600" onclick="downloadTemplate(' + jsCallArg(k) + ')">Download</button>'
         + '</div>'
-        + '<div style="font-size:11px;color:var(--muted);margin-top:8px">' + escapeHtml(k) + '</div>'
+        + '<div style="display:flex;gap:6px;margin-top:auto;flex-wrap:wrap">'
+        + '<button style="flex:1;padding:8px 12px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onclick="previewTemplate(' + jsCallArg(k) + ')">Preview</button>'
+        + '<button style="flex:1;padding:8px 12px;background:var(--cool);color:var(--charcoal);border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onclick="downloadTemplate(' + jsCallArg(k) + ')">Download</button>'
+        + '</div>'
+        + '<div style="display:flex;gap:6px;margin-top:6px;font-size:10px;color:var(--muted)">'
+        + (t.section ? '<span style="background:var(--cool);padding:2px 6px;border-radius:4px">Section ' + escapeHtml(t.section) + '</span>' : '')
+        + '<span style="background:var(--cool);padding:2px 6px;border-radius:4px;overflow:hidden;text-overflow:ellipsis">' + escapeHtml(k) + '</span>'
+        + '</div>'
         + '</div>';
     });
 
