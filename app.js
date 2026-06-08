@@ -3,17 +3,19 @@
 
 // ── STATE ─────────────────────────────────────────────────────────
 var luUser = null;
-var currentView = 'home';
+var currentView = 'luna';
+var currentPbView = 'sections';
 var activePhase = null;
 var activeTopic = null;
 var activeSearch = '';
 var collapsedGroups = {'1':true, '6':true, '13':true, '18':true, '37':true};  // {} = all expanded
-var openSections = {};     // section.num -> true if expanded
-var openSubsecs = {};      // subsection ID -> true if expanded
+var openSections = {};
+var openSubsecs = {};
 var chatHistory = [];
 var lunaHistory = [];
 var chatOpen = false;
 var projectContext = null;
+var heroResults = {};
 
 var PHASES = ['Pre-Construction','Design','Construction','Closeout','Post-Opening','All Phases'];
 var GROUPS = {
@@ -166,6 +168,7 @@ function toggleTheme() {
 // ── VIEW ROUTING ──────────────────────────────────────────────────
 function jumpTo(num) {
   setView('playbook');
+  setPlaybookView('sections');
   openSections[num] = true;
   collapsedGroups = {};
   setTimeout(function() {
@@ -173,6 +176,36 @@ function jumpTo(num) {
     var el = document.querySelector('.section-card[data-num="' + num + '"]');
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 50);
+}
+
+function goHome() {
+  setView('luna');
+}
+
+function setPlaybookView(subview) {
+  currentPbView = subview;
+  // Update sub-nav tabs
+  document.querySelectorAll('.subnav-tab').forEach(function(t) {
+    t.classList.toggle('active', t.getAttribute('data-pbview') === subview);
+  });
+  renderPbView();
+}
+
+function renderPbView() {
+  if (currentPbView === 'sections') {
+    renderPlaybook();
+  } else if (currentPbView === 'templates') {
+    renderTemplates();
+  } else if (currentPbView === 'guide') {
+    renderPhaseGuideInline();
+  } else if (currentPbView === 'decision') {
+    renderDecisionTreeInline();
+  }
+  // Show the right sub-view div
+  document.querySelectorAll('.pb-subview').forEach(function(v) { v.classList.remove('active'); });
+  var map = { sections:'pb-sections-view', templates:'pb-templates-view', guide:'pb-guide-view', decision:'pb-decision-view' };
+  var el = document.getElementById(map[currentPbView]);
+  if (el) el.classList.add('active');
 }
 
 function setView(view) {
@@ -184,35 +217,33 @@ function setView(view) {
   var target = document.getElementById('view-' + view);
   if (target) target.classList.add('active');
 
-  // Nav tab highlight
+  // Nav tab highlight — only 3 main tabs now
+  var navMap = { playbook:'nav-playbook', projects:'nav-projects', actions:'nav-actions', mfp:'nav-projects' };
   document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
-  var tab = document.getElementById('nav-' + view);
-  if (tab) tab.classList.add('active');
-  else {
-    // Fallback: highlight related top-level tab
-    var related = { sharepoint: 'home', email: 'home', calendar: 'home', mfp: 'projects' }[view];
-    if (related) {
-      var rt = document.getElementById('nav-' + related);
-      if (rt) rt.classList.add('active');
-    }
+  var tabId = navMap[view];
+  if (tabId) {
+    var tab = document.getElementById(tabId);
+    if (tab) tab.classList.add('active');
   }
+
+  // Sub-nav visibility
+  var subnav = document.getElementById('subnav-playbook');
+  if (subnav) subnav.style.display = (view === 'playbook') ? 'flex' : 'none';
 
   window.scrollTo(0, 0);
 
   // View-specific render
-  if (view === 'home') { updateHomeGreeting(); renderStats(); }
-  else if (view === 'playbook') renderPlaybook();
+  if (view === 'luna') { renderHero(); }
+  else if (view === 'playbook') renderPbView();
   else if (view === 'projects') renderProjects();
-  else if (view === 'templates') renderTemplates();
   else if (view === 'actions') renderActions();
   else if (view === 'sharepoint') renderSharePoint();
   else if (view === 'email') renderEmail();
   else if (view === 'calendar') renderCalendar();
   else if (view === 'mfp') renderMFP();
-    else if (view === 'luna') renderLuna();
-    } catch(err) {
-        console.error('setView error:', err);
-      }
+  } catch(err) {
+      console.error('setView error:', err);
+    }
 }
 
 function updateHomeGreeting() {
@@ -618,7 +649,7 @@ function clearFilters() {
   activePhase = null;
   activeTopic = null;
   activeSearch = '';
-  var si = document.getElementById('search-input');
+  var si = document.getElementById('luna-hero-input');
   if (si) si.value = '';
   // Reset to clean collapsed state
   collapsedGroups = {'1':true, '6':true, '13':true, '18':true, '37':true};
@@ -646,23 +677,28 @@ function renderProjects() {
   if (!grid) return;
   var F = window.__MFP_FINANCIALS;
   var H = F ? F.hard : null;
+  var S = F ? F.summary : null;
   var stadiumRevised = H ? '$' + Math.abs(H.total_revised).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') : '$553M';
   var stadiumPct = H ? (H.total_pct_paid).toFixed(1) + '%' : '94.2%';
-  grid.innerHTML = '<div class="mfp-card" onclick="setView(\'mfp\')">'
+  var stadiumPaid = H ? '$' + Math.abs(H.total_paid).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') : '';
+  var stadiumBal = H ? '$' + Math.abs(H.total_balance).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') : '';
+  var stadiumBudget = S ? '$' + Math.abs(S.stadium_base_contract || S.total_budget || 0).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') : '$530M';
+  grid.innerHTML = '<div class="mfp-card" onclick="setView(\'mfp\')" style="cursor:pointer">'
     + '<div class="mfp-card-head">'
-    + '<span class="mfp-icon">\uD83C\uDFDF</span>'
+    + '<span class="mfp-icon">🏟</span>'
     + '<span class="mfp-card-title">Miami Freedom Park Stadium</span>'
     + '<span class="mfp-badge red">Active</span>'
     + '</div>'
     + '<div class="mfp-card-summary">Post-opening closeout. Home opener April 4, 2026. Kroll audit, punch list disputes with Lemartec, ARQ payment hold, HVAC service agreement.</div>'
     + '<div class="mfp-card-bullets">'
-        + 'Total commitments: ' + stadiumRevised + '<br>'
-        + (H ? 'Paid: $' + Math.abs(H.total_paid).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') + ', Balance: $' + Math.abs(H.total_balance).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') + '<br>' : '')
-        + 'Kroll cost recovery target: $9M+<br>'
-        + 'Audit final delivery: June 30, 2026'
-        + '</div>'
-        + '</div>'
-        + '<div class="mfp-card" style="opacity:.6;cursor:default" onclick="alert(\'Sixers arena pursuit \\u2014 currently in pitch phase\')">'
+    + 'Total commitments: ' + stadiumRevised + '<br>'
+    + 'Paid: ' + stadiumPaid + ', Balance: ' + stadiumBal + '<br>'
+    + 'Hard cost budget: ' + stadiumBudget + '<br>'
+    + 'Kroll cost recovery target: $9M+<br>'
+    + 'Audit final delivery: June 30, 2026'
+    + '</div>'
+    + '</div>'
+    + '<div class="mfp-card" style="opacity:.6;cursor:pointer" onclick="alert(\'Sixers arena pursuit — currently in pitch phase\')">'
     + '<div class="mfp-card-head">'
     + '<span class="mfp-icon">🏀</span>'
     + '<span class="mfp-card-title">Sixers Arena (Philadelphia)</span>'
@@ -670,7 +706,7 @@ function renderProjects() {
     + '</div>'
     + '<div class="mfp-card-summary">Pitch package complete for EVP Alex Kafenbaum. DD phase. Targeting Q1/Q2 2031 opening.</div>'
     + '</div>'
-    + '<div class="mfp-card" style="opacity:.6;cursor:default" onclick="alert(\'DOVA Sacramento \\u2014 SD phase\')">'
+    + '<div class="mfp-card" style="opacity:.6;cursor:pointer" onclick="alert(\'DOVA Sacramento — SD phase\')">'
     + '<div class="mfp-card-head">'
     + '<span class="mfp-icon">🏗</span>'
     + '<span class="mfp-card-title">DOVA (Sacramento)</span>'
@@ -1556,12 +1592,15 @@ function sendChat() {
 document.addEventListener('keydown', function(e) {
   if (e.key === '/' && !['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) {
     e.preventDefault();
-    var si = document.getElementById('search-input');
+    var si = document.getElementById('luna-hero-input');
+    if (!si) si = document.getElementById('search-input');
     if (si) { si.focus(); si.select(); }
   }
   if (e.key === 'Escape') {
     closeModal('modal-phase-guide');
     closeModal('modal-decision');
+    var dd = document.getElementById('luna-hero-dropdown');
+    if (dd) dd.classList.remove('show');
   }
 });
 
@@ -1601,97 +1640,156 @@ function init() {
   }
 
   // Render stats on home page
-  renderStats();
-  var urlParams = new URLSearchParams(window.location.search);
-  var authSuccess = urlParams.get('auth') === 'success';
-  var returnView = 'home';
-  if (authSuccess) {
-    history.replaceState({}, '', '/');
-    try {
-      returnView = localStorage.getItem('lu_return_view') || 'home';
-      localStorage.removeItem('lu_return_view');
-    } catch(e) {}
-  }
-
-  setView(returnView);
-  }
-
-  // ── L.U.N.A. TAB ──────────────────────────────────────────────────
-  function renderLuna() {
-    // Focus input when tab opens
-    setTimeout(function() {
-      var inp = document.getElementById('luna-input');
-      if (inp) inp.focus();
-    }, 100);
-    // Show previous conversation if any
-    var results = document.getElementById('luna-results');
-    if (results && lunaHistory.length > 0) {
-      var html = '<div class="luna-history">';
-      for (var i = 0; i < lunaHistory.length; i++) {
-        var entry = lunaHistory[i];
-        html += '<div class="luna-result-q"><span class="luna-result-q-icon">Q:</span>' + escapeHtml(entry.q) + '</div>';
-        html += '<div class="luna-result-a">' + escapeHtml(entry.a) + '</div>';
-      }
-      html += '</div>';
-      results.innerHTML = html;
+    renderStats();
+    var urlParams = new URLSearchParams(window.location.search);
+    var authSuccess = urlParams.get('auth') === 'success';
+    var returnView = 'luna';
+    if (authSuccess) {
+      history.replaceState({}, '', '/');
+      try {
+        returnView = localStorage.getItem('lu_return_view') || 'luna';
+        localStorage.removeItem('lu_return_view');
+      } catch(e) {}
     }
-  }
 
-  function lunaAsk() {
-    var inp = document.getElementById('luna-input');
-    var btn = document.querySelector('.luna-btn');
-    if (!inp) return;
-    var q = inp.value.trim();
-    if (!q) return;
-    inp.value = '';
-    lunaDoAsk(q, btn);
-  }
+    setView(returnView);
+    }
 
-  function lunaAskQuick(q) {
-    var btn = document.querySelector('.luna-btn');
-    lunaDoAsk(q, btn);
-  }
+  // ── L.U.N.A. HERO (default home view) ───────────────────────────────
+    function renderHero() {
+      var results = document.getElementById('luna-hero-results');
+      if (results && Object.keys(heroResults).length > 0) {
+        var html = '';
+        for (var key in heroResults) {
+          var entry = heroResults[key];
+          html += '<div class=\"luna-result-q\"><span class=\"luna-result-q-icon\">Q:</span>' + escapeHtml(entry.q) + '</div>';
+          html += '<div class=\"luna-result-a\">' + escapeHtml(entry.a) + '</div>';
+        }
+        results.innerHTML = html;
+      }
+      setTimeout(function() {
+        var inp = document.getElementById('luna-hero-input');
+        if (inp) inp.focus();
+      }, 200);
+    }
 
-  function lunaDoAsk(q, btn) {
-      if (btn) btn.disabled = true;
-      // Disable all quick buttons
-      document.querySelectorAll('.luna-quick').forEach(function(b) { b.disabled = true; });
+    function heroSearch() {
+      var inp = document.getElementById('luna-hero-input');
+      if (!inp) return;
+      var q = inp.value.trim();
+      if (!q) return;
+      inp.value = '';
+      // Clear dropdown
+      var dd = document.getElementById('luna-hero-dropdown');
+      if (dd) { dd.classList.remove('show'); dd.innerHTML = ''; }
+      // Also remove from server-side search result
+      heroDoAsk(q);
+    }
 
-      var results = document.getElementById('luna-results');
+    function heroSearchType(val) {
+      var dd = document.getElementById('luna-hero-dropdown');
+      if (!dd) return;
+      var q = val.trim();
+      if (!q) { dd.classList.remove('show'); dd.innerHTML = ''; return; }
+      var ql = q.toLowerCase();
+      var results = [];
+
+      // Search KB
+      KB.forEach(function(s) {
+        var hay = [s.title, s.num].concat(s.topics || []).concat(s.h2 || []).concat(s.content || []).concat(s.bullets || []).join(' ').toLowerCase();
+        if (hay.indexOf(ql) >= 0) {
+          results.push({type:'playbook', label:'Section ' + s.num + ': ' + (s.title || ''), id:s.num, preview:(s.content||[]).slice(0,2).join(' ').substring(0,120)});
+        }
+      });
+
+      // Search templates
+      for (var key in TEMPLATES) {
+        var t = TEMPLATES[key];
+        if ((t.name && t.name.toLowerCase().indexOf(ql) >= 0) || (t.desc && t.desc.toLowerCase().indexOf(ql) >= 0)) {
+          results.push({type:'template', label:'Template: ' + (t.name||key), id:key, preview:(t.desc||'').substring(0,120)});
+        }
+      }
+
+      // Search project context
+      var projectKW = ['mfp','freedom park','stadium','lemartec','kroll','arq','punch','budget','change order','closeout','miller'];
+      if (projectKW.some(function(kw){return kw.indexOf(ql)>=0||ql.indexOf(kw)>=0;})) {
+        results.push({type:'project', label:'Project: Miami Freedom Park Stadium', id:'mfp', preview:'Post-opening closeout. Active workstreams: punch list closeout, Kroll audit, Lemartec contract closeout.'});
+      }
+
+      if (results.length === 0) { dd.classList.remove('show'); dd.innerHTML = ''; return; }
+
+      // Highlight function
+      function hl(text) {
+        if (!text) return '';
+        var re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+        return text.replace(re, '<mark>$1</mark>');
+      }
+
+      var icons = {playbook:'📚', template:'📑', project:'🏟'};
+      var html = '<div class=\"luna-hero-dropdown-inner\">';
+      html += '<div style=\"padding:6px 14px 8px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)\">' + results.length + ' result' + (results.length>1?'s':'') + ' for &quot;' + escapeHtml(q) + '&quot;</div>';
+      results.slice(0, 10).forEach(function(r) {
+        var icon = icons[r.type]||'📄';
+        var onClick = "var dd=document.getElementById('luna-hero-dropdown');if(dd){dd.classList.remove('show');dd.innerHTML=''}document.getElementById('luna-hero-input').value='';";
+        if (r.type === 'playbook') onClick += "setView('playbook');setPlaybookView('sections');jumpTo('" + r.id + "');";
+        else if (r.type === 'template') onClick += "setView('playbook');setPlaybookView('templates');";
+        else if (r.type === 'project') onClick += "setView('mfp');";
+        html += '<div class=\"luna-hero-dd-item\" onclick=\"' + onClick + '\">'
+          + '<span class=\"luna-hero-dd-icon\">' + icon + '</span>'
+          + '<div style=\"flex:1;min-width:0\">'
+          + '<div class=\"luna-hero-dd-text\">' + hl(r.label) + '</div>'
+          + (r.preview ? '<div class=\"luna-hero-dd-desc\">' + hl(r.preview) + '</div>' : '')
+          + '</div><span class=\"luna-hero-dd-src\">' + r.type + '</span></div>';
+      });
+      html += '</div>';
+      dd.innerHTML = html;
+      dd.classList.add('show');
+
+      // Click outside to close
+      var closeHandler = function(e) {
+        if (!dd.contains(e.target) && e.target.id !== 'luna-hero-input') {
+          dd.classList.remove('show');
+          document.removeEventListener('click', closeHandler);
+        }
+      };
+      setTimeout(function() { document.addEventListener('click', closeHandler); }, 10);
+    }
+
+    function heroQuick(q) {
+      var inp = document.getElementById('luna-hero-input');
+      if (inp) inp.value = q;
+      heroSearch();
+    }
+
+    function heroDoAsk(q) {
+      var btn = document.querySelector('.luna-hero-btn');
+      var results = document.getElementById('luna-hero-results');
       if (!results) return;
 
-      // Clear previous results — Google-style, fresh every search
-      results.innerHTML = '';
+      if (btn) btn.disabled = true;
+      document.querySelectorAll('.luna-hero-quick').forEach(function(b) { b.disabled = true; });
 
-      // Add question bubble
-      var qDiv = document.createElement('div');
-      qDiv.className = 'luna-result-q';
-      qDiv.innerHTML = '<span class="luna-result-q-icon">Q:</span>' + escapeHtml(q);
-      results.appendChild(qDiv);
+      // Show loading
+      results.innerHTML = '<div class=\"luna-result-q\"><span class=\"luna-result-q-icon\">Q:</span>' + escapeHtml(q) + '</div>'
+        + '<div class=\"luna-result-a loading\">Thinking...</div>';
+      results.scrollIntoView({ behavior: 'smooth', block: 'end' });
 
-      // Add loading answer bubble
-      var aDiv = document.createElement('div');
-      aDiv.className = 'luna-result-a loading';
-      aDiv.textContent = 'Thinking...';
-      results.appendChild(aDiv);
+      // Check cache (1-hour)
+      var cacheKey = 'luna_' + q.toLowerCase().trim().replace(/[^a-z0-9]/g,'_').slice(0,80);
+      try {
+        var cached = JSON.parse(localStorage.getItem(cacheKey));
+        if (cached && cached.ts > Date.now() - 3600000) {
+          results.innerHTML = '<div class=\"luna-result-q\"><span class=\"luna-result-q-icon\">Q:</span>' + escapeHtml(q) + '</div>'
+            + '<div class=\"luna-result-a\">' + cached.answer + '</div>';
+          heroResults[q] = { q: q, a: cached.answer };
+          if (btn) btn.disabled = false;
+          document.querySelectorAll('.luna-hero-quick').forEach(function(b) { b.disabled = false; });
+          return;
+        }
+      } catch(e) {}
 
-            // Check response cache (1-hour expiry)
-            var cacheKey = 'luna_' + q.toLowerCase().trim().replace(/[^a-z0-9]/g,'_').slice(0,80);
-            try {
-              var cached = JSON.parse(localStorage.getItem(cacheKey));
-              if (cached && cached.ts > Date.now() - 3600000) {
-                aDiv.className = 'luna-result-a';
-                aDiv.textContent = cached.answer;
-                if (btn) btn.disabled = false;
-                document.querySelectorAll('.luna-quick').forEach(function(b) { b.disabled = false; });
-                setTimeout(function() { results.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, 100);
-                return;
-              }
-            } catch(e) {}
-
-            // Build system prompt with KB index + template index
       var kbIndex = KB.map(function(s) {
-        return 'S' + s.num + ': ' + (s.title || '').replace('SECTION ' + s.num + ': ','') + ' [' + (s.phases||[]).join('/') + ']';
+        return 'S' + s.num + ': ' + (s.title||'').replace('SECTION ' + s.num + ': ','') + ' [' + (s.phases||[]).join('/') + ']';
       }).join('\\n');
 
       var tmplIndex = '';
@@ -1701,52 +1799,114 @@ function init() {
       }
 
       var systemPrompt = 'You are L.U.N.A. (Level Up Navigator & Advisor), assisting Whitney Williams, Principal-in-Charge at Level Up Project Development. '
-              + 'This is a search interface — answer concisely and directly like Google. Use paragraph breaks and bullet points for readability. '
-              + 'When the user asks about a template, name the exact template file and the playbook section it belongs to (e.g. "Go to Templates → 03_Change_Order_Log.xlsx" or "See Section 16"). '
-              + 'When referencing a playbook section, say "See Section X: Title". Be specific and actionable. '
-              + 'The playbook has 43 sections:\n\n' + kbIndex
-              + '\n\nAvailable templates:\n' + tmplIndex
-              + '\n\n=== PROJECT KNOWLEDGE ===\n' + MFP_CONTEXT;
+        + 'This is a search interface — answer concisely and directly like Google. Use paragraph breaks and bullet points for readability. '
+        + 'When the user asks about a template, name the exact template file and the playbook section it belongs to. '
+        + 'When referencing a playbook section, say "See Section X: Title". Be specific and actionable. '
+        + 'The playbook has ' + KB.length + ' sections:\\n\\n' + kbIndex
+        + '\\n\\nAvailable templates:\\n' + tmplIndex
+        + '\\n\\n=== PROJECT KNOWLEDGE ===\\n' + MFP_CONTEXT;
 
       fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system: systemPrompt,
-          messages: [{ role: 'user', content: q }]
-        })
+        body: JSON.stringify({ system: systemPrompt, messages: [{ role: 'user', content: q }] })
       })
-        .then(function(r) {
-          return r.text().then(function(text) { return { ok: r.ok, status: r.status, text: text }; });
-        })
-        .then(function(res) {
-          aDiv.className = 'luna-result-a';
-          if (btn) btn.disabled = false;
-          document.querySelectorAll('.luna-quick').forEach(function(b) { b.disabled = false; });
-          if (!res.ok) {
-            aDiv.textContent = 'Error ' + res.status + ': ' + res.text.slice(0, 300);
-            return;
-          }
-          var data;
-          try { data = JSON.parse(res.text); } catch(e) {
-            aDiv.textContent = 'Bad response from server: ' + res.text.slice(0, 200);
-            return;
-          }
-          var reply = (data.content && data.content[0] && data.content[0].text) || data.error || 'No response.';
-                    aDiv.textContent = reply;
-                    // Cache the response
-                    try { localStorage.setItem(cacheKey, JSON.stringify({ answer: reply, ts: Date.now() })); } catch(e){}
-        })
-        .catch(function(err) {
-          aDiv.className = 'luna-result-a';
-          aDiv.textContent = 'Network error: ' + (err.message || err);
-          if (btn) btn.disabled = false;
-          document.querySelectorAll('.luna-quick').forEach(function(b) { b.disabled = false; });
-        });
-
-      // Scroll results into view
-      setTimeout(function() { results.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, 100);
+      .then(function(r) { return r.text().then(function(text) { return { ok: r.ok, status: r.status, text: text }; }); })
+      .then(function(res) {
+        if (btn) btn.disabled = false;
+        document.querySelectorAll('.luna-hero-quick').forEach(function(b) { b.disabled = false; });
+        if (!res.ok) {
+          results.innerHTML = '<div class=\"luna-result-q\"><span class=\"luna-result-q-icon\">Q:</span>' + escapeHtml(q) + '</div>'
+            + '<div class=\"luna-result-a\">Error ' + res.status + ': ' + res.text.slice(0, 300) + '</div>';
+          return;
+        }
+        var data;
+        try { data = JSON.parse(res.text); } catch(e) {
+          results.innerHTML = '<div class=\"luna-result-q\"><span class=\"luna-result-q-icon\">Q:</span>' + escapeHtml(q) + '</div>'
+            + '<div class=\"luna-result-a\">Bad response from server: ' + res.text.slice(0, 200) + '</div>';
+          return;
+        }
+        var reply = (data.content && data.content[0] && data.content[0].text) || data.error || 'No response.';
+        results.innerHTML = '<div class=\"luna-result-q\"><span class=\"luna-result-q-icon\">Q:</span>' + escapeHtml(q) + '</div>'
+          + '<div class=\"luna-result-a\">' + reply + '</div>';
+        heroResults[q] = { q: q, a: reply };
+        try { localStorage.setItem(cacheKey, JSON.stringify({ answer: reply, ts: Date.now() })); } catch(e){}
+      })
+      .catch(function(err) {
+        if (btn) btn.disabled = false;
+        document.querySelectorAll('.luna-hero-quick').forEach(function(b) { b.disabled = false; });
+        results.innerHTML = '<div class=\"luna-result-q\"><span class=\"luna-result-q-icon\">Q:</span>' + escapeHtml(q) + '</div>'
+          + '<div class=\"luna-result-a\">Network error: ' + (err.message || err) + '</div>';
+      });
     }
+
+    // ── INLINE PHASE GUIDE ──────────────────────────────────────────────
+    function renderPhaseGuideInline() {
+      var body = document.getElementById('pg-body-inline');
+      if (!body) return;
+      var html = '';
+      var phases = ['Pre-Construction','Design','Construction','Closeout','Post-Opening'];
+      phases.forEach(function(phase, idx) {
+        var pid = 'pgi-phase-' + idx;
+        var data = window.PHASE_GUIDE ? window.PHASE_GUIDE[phase] : null;
+        if (!data) return;
+        html += '<div class=\"pg-phase\">'
+          + '<button class=\"pg-phase-header\" onclick=\"togglePgPhaseInline(' + jsCallArg(pid) + ')\">'
+          + '<span class=\"pg-phase-chevron\" id=\"' + pid + '-chev\">▶</span>'
+          + '<span>' + escapeHtml(phase) + '</span>'
+          + '</button>'
+          + '<div class=\"pg-phase-body\" id=\"' + pid + '\" style=\"display:none\">';
+        if (data.essential) {
+          html += '<h4>Essential reading</h4><ul>';
+          data.essential.forEach(function(s) { html += '<li>' + escapeHtml(s) + '</li>'; });
+          html += '</ul>';
+        }
+        if (data.supporting) {
+          html += '<h4>Supporting</h4><ul>';
+          data.supporting.forEach(function(s) { html += '<li>' + escapeHtml(s) + '</li>'; });
+          html += '</ul>';
+        }
+        html += '</div></div>';
+      });
+      body.innerHTML = html;
+    }
+
+    function togglePgPhaseInline(pid) {
+      var body = document.getElementById(pid);
+      var chev = document.getElementById(pid + '-chev');
+      if (!body) return;
+      var isHidden = body.style.display === 'none' || !body.style.display;
+      body.style.display = isHidden ? 'block' : 'none';
+      if (chev) chev.textContent = isHidden ? '▼' : '▶';
+    }
+
+    // ── INLINE DECISION TREE ────────────────────────────────────────────
+    var dtPathInline = ['root'];
+
+    function renderDecisionTreeInline() {
+      var body = document.getElementById('dt-body-inline');
+      if (!body) return;
+      var cur = window.DT_TREE ? window.DT_TREE[dtPathInline[dtPathInline.length-1]] : null;
+      if (!cur) {
+        body.innerHTML = '<div style=\"padding:20px;color:var(--muted)\">Decision tree not available.</div>';
+        return;
+      }
+      if (cur.answer) {
+        body.innerHTML = '<div class=\"dt-answer\">' + escapeHtml(cur.answer) + '</div>'
+          + (cur.sections ? '<div class=\"dt-meta\">See sections: ' + cur.sections.join(', ') + '</div>' : '')
+          + '<button class=\"btn-primary\" onclick=\"dtResetInline()\">Start over</button>';
+        return;
+      }
+      body.innerHTML = '<div class=\"dt-q\">' + escapeHtml(cur.q) + '</div>'
+        + cur.opts.map(function(opt) {
+          return '<button class=\"dt-opt\" onclick=\"dtChooseInline(' + jsCallArg(opt.next) + ')\">' + escapeHtml(opt.label) + '</button>';
+        }).join('')
+        + (dtPathInline.length > 1 ? '<button id=\"dt-back\" class=\"back-btn\" onclick=\"dtBackInline()\">← Back</button>' : '');
+    }
+
+    function dtChooseInline(next) { dtPathInline.push(next); renderDecisionTreeInline(); }
+    function dtBackInline() { if (dtPathInline.length > 1) dtPathInline.pop(); renderDecisionTreeInline(); }
+    function dtResetInline() { dtPathInline = ['root']; renderDecisionTreeInline(); }
 
   if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);

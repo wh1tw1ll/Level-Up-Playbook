@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Level Up Playbook</title>
+<title>L.U.N.A. — Level Up Project Development</title>
 <script>
 (function(){
   var t;try{t=localStorage.getItem('lu_theme')}catch(e){}
@@ -12,30 +12,24 @@
 })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260607">
+<link rel="stylesheet" href="styles.css?v=20260608">
 </head>
 <body>
 
-<div class="sticky-header">
+<!-- ===== TOPBAR ===== -->
 <header class="topbar">
-  <a class="logo" href="#" onclick="setView('home');return false;" title="Home">
-      <svg viewBox="0 0 815.73 474.34" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="height:28px;width:auto;display:block"><g fill="#fff">
-      <path d="m265.9,207.31v43.5h35.59c0,8.47-6.87,15.34-15.34,15.34h-39.15v-58.85h18.9Z"/>
-      <path d="m363.87,207.31v13.52h-37.65v8.54h36.46v14h-36.46v9.1h38.12v13.68h-56.87v-53.05c0-3.2,2.6-5.8,5.8-5.8h50.59Z"/>
-      <path d="m391.76,257.42l-23.91-50.11h21.91l18.51,41.92,18.51-41.92h20.09l-22.79,49.88c-2.5,5.46-7.95,8.97-13.96,8.97h-4.51c-5.91,0-11.3-3.4-13.85-8.74Z"/>
-      <path d="m507.75,207.31v13.52h-37.65v8.54h36.46v14h-36.46v9.1h38.12v13.68h-56.87v-53.05c0-3.2,2.6-5.8,5.8-5.8h50.59Z"/>
-      <path d="m536.55,207.31v43.5h35.59c0,8.47-6.87,15.34-15.34,15.34h-39.15v-58.85h18.9Z"/>
-      <path d="m601.32,236.26v-28.95h13.02c3.2,0,5.8,2.6,5.8,5.8v22.91c0,6.64,2.06,15.42,16.21,15.42h.4c14.08,0,15.98-8.78,15.98-15.42v-22.91c0-3.2,2.6-5.8,5.8-5.8h13.02v28.95c0,11.71-3.72,30.77-33.85,30.77h-2.29c-31.32,0-34.09-19.14-34.09-30.77Z"/>
-      <path d="m700.41,247.97v18.19h-18.9v-53.05c0-3.2,2.6-5.8,5.8-5.8h35.65c20.33,0,26.02,8.15,26.02,19.69v.95c0,11.47-5.93,20.01-26.02,20.01h-22.54Zm0-14.08h20.96c5.85,0,7.99-2.53,7.99-6.17v-.24c0-3.48-2.14-6.01-7.99-6.01h-20.96v12.42Z"/>
-    </g>
-  <g fill="#fff">
-      <path d="m103.45,259.42l11.24,19.81c.2.35-.05.79-.46.79h-27.76c-3.09,0-5.95-1.66-7.47-4.35l-11.12-19.58c-1.48-2.61-1.5-5.8-.03-8.43l27.24-48.92c1.52-2.72,4.39-4.41,7.51-4.41h27.58c.4,0,.66.44.46.79l-29.19,52.42c-1.46,2.62-1.45,5.81.03,8.42l1.97,3.47Z"/>
-      <path d="m218,195.11l-10.54,18.88-20.8,37.29-13.59,24.34c-1.52,2.72-4.39,4.41-7.51,4.41h-35.6c-3.09,0-5.95-1.66-7.48-4.35l-11.12-19.58c-1.48-2.61-1.5-5.81-.04-8.43l27.25-48.92c1.52-2.72,4.39-4.41,7.51-4.41h27.58c.41,0,.66.44.47.79l-30.84,55.37c-.2.36.06.79.47.79h4.31c3.11,0,5.98-1.69,7.51-4.41l26.86-48.13c1.52-2.72,4.39-4.41,7.51-4.41h27.59c.4,0,.66.44.46.79Z"/>
-    </g></svg>
-    </a>
-  <div class="search-wrap">
-    <input id="search-input" class="search-input" type="text" placeholder="Search the playbook..." oninput="applySearch(this.value)">
-  </div>
+  <a class="luna-logo-link" href="#" onclick="goHome();return false" title="L.U.N.A. Home">
+    <svg class="luna-wordmark-svg" viewBox="0 0 3000 516" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+      <text x="80" y="380" font-family="'DM Sans','Helvetica Neue',Arial,sans-serif" font-weight="700" font-size="340" fill="#fff" letter-spacing="-4">L</text>
+      <circle cx="530" cy="260" r="28" fill="#fff"/>
+      <text x="580" y="380" font-family="'DM Sans','Helvetica Neue',Arial,sans-serif" font-weight="700" font-size="340" fill="#fff" letter-spacing="-4">U</text>
+      <circle cx="950" cy="260" r="28" fill="#fff"/>
+      <text x="1000" y="380" font-family="'DM Sans','Helvetica Neue',Arial,sans-serif" font-weight="700" font-size="340" fill="#fff" letter-spacing="-4">N</text>
+      <circle cx="1370" cy="260" r="28" fill="#fff"/>
+      <text x="1420" y="380" font-family="'DM Sans','Helvetica Neue',Arial,sans-serif" font-weight="700" font-size="340" fill="#fff" letter-spacing="-4">A</text>
+    </svg>
+  </a>
+  <span class="topbar-tagline">Powered by Level Up Project Development</span>
   <button id="theme-btn" class="topbar-btn" onclick="toggleTheme()" title="Toggle theme">☀</button>
   <div id="auth-user-info" class="topbar-user" style="display:none">
     <span id="auth-user-name"></span>
@@ -46,72 +40,49 @@
     Sign in
   </button>
 </header>
-<nav class="nav">
-  <button class="nav-tab active" id="nav-home" onclick="setView('home')">Home</button>
+
+<!-- ===== NAV TABS ===== -->
+<nav class="nav" id="main-nav">
   <button class="nav-tab" id="nav-playbook" onclick="setView('playbook')">Playbook</button>
   <button class="nav-tab" id="nav-projects" onclick="setView('projects')">Projects</button>
-  <button class="nav-tab" id="nav-templates" onclick="setView('templates')">Templates</button>
   <button class="nav-tab" id="nav-actions" onclick="setView('actions')">Action Items</button>
-  <button class="nav-tab" id="nav-luna" onclick="setView('luna')">L.U.N.A.</button>
 </nav>
-</div>
 
-<!-- HOME VIEW -->
-<div id="view-home" class="view active">
-  <div class="home-greeting" id="home-greeting">Good morning</div>
-  <div class="home-sub">Level Up Project Development — PM Playbook</div>
-    <div id="home-reminders" style="margin-bottom:24px"></div>
-    <div class="home-grid">
-    <button class="home-card accent" onclick="setView('playbook')">
-      <div class="home-card-icon">📚</div>
-      <div class="home-card-title">Playbook</div>
-      <div class="home-card-desc">44 sections across 5 groups — methodology, controls, phase execution, and reference material.</div>
-      <div class="home-card-link">Open Playbook →</div>
-    </button>
-    <button class="home-card" onclick="setView('projects')">
-      <div class="home-card-icon">📂</div>
-      <div class="home-card-title">Projects</div>
-      <div class="home-card-desc">Active projects and dashboards. MFP Stadium currently active — Post-Opening Closeout.</div>
-      <div class="home-card-badge" id="projects-badge">1 Active</div>
-      <div class="home-card-link">Open Projects →</div>
-    </button>
-    <button class="home-card" onclick="setView('actions')">
-      <div class="home-card-icon">✅</div>
-      <div class="home-card-title">Action Items</div>
-      <div class="home-card-desc">Track open action items across all projects.</div>
-      <div class="home-card-link">View Action Items →</div>
-    </button>
-    <button class="home-card" onclick="setView('templates')">
-          <div class="home-card-icon">📑</div>
-          <div class="home-card-title">Templates</div>
-          <div class="home-card-desc">10 branded Excel templates — risk register, budget tracker, change order log, and more.</div>
-          <div class="home-card-link">Browse Templates →</div>
-        </button>
-        <button class="home-card" onclick="openPhaseGuide()">
-          <div class="home-card-icon">📖</div>
-          <div class="home-card-title">Phase Reading Guide</div>
-          <div class="home-card-desc">Find which sections to read based on your current project phase.</div>
-          <div class="home-card-link">Open Guide →</div>
-        </button>
-        <button class="home-card" onclick="openDecisionTree()">
-          <div class="home-card-icon">🔀</div>
-          <div class="home-card-title">What Do I Do?</div>
-          <div class="home-card-desc">Answer a few questions to find the right playbook section.</div>
-          <div class="home-card-link">Open Decision Guide →</div>
-        </button>
-        <button class="home-card" onclick="setView('luna')">
-          <div class="home-card-icon">🔮</div>
-          <div class="home-card-title">Ask L.U.N.A.</div>
-          <div class="home-card-desc">Search anything about the playbook or your projects. Get instant answers.</div>
-          <div class="home-card-link">Open L.U.N.A. →</div>
-        </button>
+<!-- ===== PLAYBOOK SUB-NAV ===== -->
+<nav class="subnav" id="subnav-playbook" style="display:none">
+  <button class="subnav-tab active" data-pbview="sections" onclick="setPlaybookView('sections')">Sections</button>
+  <button class="subnav-tab" data-pbview="templates" onclick="setPlaybookView('templates')">Templates</button>
+  <button class="subnav-tab" data-pbview="guide" onclick="setPlaybookView('guide')">Phase Reading Guide</button>
+  <button class="subnav-tab" data-pbview="decision" onclick="setPlaybookView('decision')">What Do I Do?</button>
+</nav>
+
+<!-- ===== LUNA HERO VIEW (default home) ===== -->
+<div id="view-luna" class="view active">
+  <div class="luna-hero">
+    <div class="luna-hero-wordmark">L.U.N.A.</div>
+    <div class="luna-hero-subtitle">Level Up Navigator &amp; Advisor</div>
+    <div class="luna-hero-search-row">
+      <input id="luna-hero-input" class="luna-hero-input" type="text" placeholder="Ask anything about the playbook, projects, budget, punch list, change orders..." autocomplete="off" onkeydown="if(event.key==='Enter')heroSearch()" oninput="heroSearchType(this.value)">
+      <button class="luna-hero-btn" onclick="heroSearch()">Ask</button>
+    </div>
+    <div id="luna-hero-dropdown" class="luna-hero-dropdown"></div>
+    <div class="luna-hero-quicks">
+      <button class="luna-hero-quick" onclick="heroQuick('Who is Glenn Rieder and why are they everywhere on punch list?')">🧩 Glenn Rieder punch list</button>
+      <button class="luna-hero-quick" onclick="heroQuick('Top 10 change orders by dollar value')">💰 Top change orders</button>
+      <button class="luna-hero-quick" onclick="heroQuick('How many punch items are overdue and who owns them?')">⏰ Overdue punch items</button>
+      <button class="luna-hero-quick" onclick="heroQuick('What is the current budget status and remaining contingency?')">📊 Budget status</button>
+      <button class="luna-hero-quick" onclick="heroQuick('Current project schedule — baseline vs actual')">📅 Schedule status</button>
+    </div>
+    <div id="luna-hero-results" class="luna-hero-results"></div>
+    <div class="luna-hero-footer">L.U.N.A. — Level Up Navigator &amp; Advisor</div>
   </div>
 </div>
 
-<!-- PLAYBOOK VIEW -->
+<!-- ===== PLAYBOOK VIEW ===== -->
 <div id="view-playbook" class="view">
-  <div class="shell">
-    <aside class="sidebar" id="playbook-sidebar">
+  <div id="pb-sections-view" class="pb-subview active">
+    <div class="shell">
+      <aside class="sidebar" id="playbook-sidebar">
         <button class="sidebar-toggle" onclick="toggleSidebar()">☰ Filters</button>
         <div id="sidebar-content">
           <div class="sidebar-section">
@@ -127,14 +98,33 @@
           </div>
         </div>
       </aside>
-    <main class="content-area">
-      <div id="results-meta" class="results-meta"></div>
-      <div id="sections-container"></div>
-    </main>
+      <main class="content-area">
+        <div id="results-meta" class="results-meta"></div>
+        <div id="sections-container"></div>
+      </main>
+    </div>
+  </div>
+  <div id="pb-templates-view" class="pb-subview">
+    <div class="view-header" style="padding:24px 24px 0">
+      <div class="view-title"><span>📑</span> Templates &amp; Downloads</div>
+    </div>
+    <div id="templates-grid" class="mfp-grid" style="padding:0 24px 24px"></div>
+  </div>
+  <div id="pb-guide-view" class="pb-subview">
+    <div class="view-header" style="padding:24px 24px 0">
+      <div class="view-title"><span>📖</span> Phase Reading Guide</div>
+    </div>
+    <div id="pg-body-inline" style="padding:0 24px 24px;max-width:800px"></div>
+  </div>
+  <div id="pb-decision-view" class="pb-subview">
+    <div class="view-header" style="padding:24px 24px 0">
+      <div class="view-title"><span>🔀</span> What Do I Do?</div>
+    </div>
+    <div id="dt-body-inline" style="padding:0 24px 24px;max-width:700px"></div>
   </div>
 </div>
 
-<!-- PROJECTS VIEW -->
+<!-- ===== PROJECTS VIEW ===== -->
 <div id="view-projects" class="view">
   <div class="view-header">
     <div class="view-title"><span>📂</span> Projects</div>
@@ -142,15 +132,7 @@
   <div class="mfp-grid" id="projects-grid"></div>
 </div>
 
-<!-- TEMPLATES VIEW -->
-<div id="view-templates" class="view">
-  <div class="view-header">
-    <div class="view-title"><span>📑</span> Templates &amp; Downloads</div>
-  </div>
-  <div id="templates-grid" class="mfp-grid"></div>
-</div>
-
-<!-- ACTIONS VIEW -->
+<!-- ===== ACTION ITEMS VIEW ===== -->
 <div id="view-actions" class="view">
   <div class="view-header">
     <div class="view-title"><span>✅</span> Action Items</div>
@@ -158,55 +140,7 @@
   <div id="actions-content"></div>
 </div>
 
-<!-- SHAREPOINT VIEW -->
-<div id="view-sharepoint" class="view">
-  <div class="view-header">
-    <button class="back-btn" onclick="setView('home')">← Home</button>
-    <div class="view-title"><span>📁</span> SharePoint Files</div>
-  </div>
-  <div id="sp-content"></div>
-</div>
-
-<!-- EMAIL VIEW -->
-<div id="view-email" class="view">
-  <div class="view-header">
-    <button class="back-btn" onclick="setView('home')">← Home</button>
-    <div class="view-title"><span>📧</span> Recent Emails</div>
-  </div>
-  <div id="email-content"></div>
-</div>
-
-<!-- CALENDAR VIEW -->
-<div id="view-calendar" class="view">
-  <div class="view-header">
-    <button class="back-btn" onclick="setView('home')">← Home</button>
-    <div class="view-title"><span>📅</span> Upcoming Calendar</div>
-  </div>
-  <div id="calendar-content"></div>
-</div>
-
-<!-- L.U.N.A. VIEW -->
-<div id="view-luna" class="view">
-  <div class="luna-page">
-    <div class="luna-badge">🔮</div>
-    <div class="luna-title">L.U.N.A.</div>
-    <div class="luna-sub">Level Up Navigator & Advisor — ask anything about the playbook or your projects</div>
-    <div class="luna-search-row">
-      <input id="luna-input" class="luna-input" type="text" placeholder="Ask anything about the project, budget, punch list, change orders..." autocomplete="off" onkeydown="if(event.key==='Enter')lunaAsk()">
-      <button class="luna-btn" onclick="lunaAsk()">Ask</button>
-    </div>
-    <div class="luna-quicks">
-      <button class="luna-quick" onclick="lunaAskQuick('Who is Glenn Rieder and why are they everywhere on punch list?')">🧩 Glenn Rieder punch list</button>
-      <button class="luna-quick" onclick="lunaAskQuick('Top 10 change orders by dollar value')">💰 Top change orders</button>
-      <button class="luna-quick" onclick="lunaAskQuick('How many punch items are overdue and who owns them?')">⏰ Overdue punch items</button>
-      <button class="luna-quick" onclick="lunaAskQuick('What is the current budget status and remaining contingency?')">📊 Budget status</button>
-      <button class="luna-quick" onclick="lunaAskQuick('Current project schedule — baseline vs actual')">📅 Schedule status</button>
-    </div>
-    <div id="luna-results" class="luna-results"></div>
-  </div>
-</div>
-
-<!-- MFP DETAIL VIEW -->
+<!-- ===== SECONDARY VIEWS ===== -->
 <div id="view-mfp" class="view">
   <div class="view-header">
     <button class="back-btn" onclick="setView('projects')">← Projects</button>
@@ -215,7 +149,32 @@
   <div id="mfp-content"></div>
 </div>
 
-<!-- PHASE GUIDE MODAL -->
+<div id="view-sharepoint" class="view">
+  <div class="view-header">
+    <div class="view-title"><span>📁</span> SharePoint Files</div>
+  </div>
+  <div id="sp-content"></div>
+</div>
+
+<div id="view-email" class="view">
+  <div class="view-header">
+    <div class="view-title"><span>📧</span> Recent Emails</div>
+  </div>
+  <div id="email-content"></div>
+</div>
+
+<div id="view-calendar" class="view">
+  <div class="view-header">
+    <div class="view-title"><span>📅</span> Upcoming Calendar</div>
+  </div>
+  <div id="calendar-content"></div>
+</div>
+
+<!-- ===== LEGACY VIEWS (for shares/links) ===== -->
+<div id="view-templates" class="view"></div>
+<div id="view-home" class="view"></div>
+
+<!-- ===== MODALS ===== -->
 <div id="modal-phase-guide" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-phase-guide')">
   <div class="modal-dialog">
     <div class="modal-header">
@@ -226,7 +185,6 @@
   </div>
 </div>
 
-<!-- DECISION TREE MODAL -->
 <div id="modal-decision" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-decision')">
   <div class="modal-dialog">
     <div class="modal-header">
@@ -237,7 +195,9 @@
   </div>
 </div>
 
-<!-- AI CHAT -->
+<div id="modal-template-preview" class="modal-overlay"></div>
+
+<!-- ===== AI CHAT ===== -->
 <button id="fab" onclick="toggleChat()" title="Open L.U.N.A. Chat">✦ L.U.N.A. Chat</button>
 <div id="chat-drawer" class="chat-drawer">
   <div class="chat-header">
@@ -258,23 +218,23 @@
   </div>
 </div>
 
-<!-- FOOTER -->
+<!-- ===== FOOTER ===== -->
 <div class="site-footer">
-  <span>© 2026 Level Up Project Development — PM Playbook</span>
+  <span>© 2026 Level Up Project Development — L.U.N.A. Playbook</span>
   <span class="footer-status">
     <span id="footer-status-text">JS OK</span>
     <span>·</span>
-    <a href="#" onclick="setView('home');return false">Home</a>
+    <a href="#" onclick="goHome();return false">Home</a>
     <a href="#" onclick="setView('playbook');return false">Playbook</a>
-    <a href="#" onclick="setView('luna');return false">L.U.N.A.</a>
+    <a href="#" onclick="setView('projects');return false">Projects</a>
   </span>
 </div>
 
-<!-- DATA SCRIPTS (loaded before app.js) -->
-<script src="data/templates.js?v=20260607"></script>
-<script src="data/glossary.js?v=20260607"></script>
-<script src="data/mfp_context.js?v=20260607"></script>
-  <script src="data/mfp_financials.js?v=20260607"></script>
-<script defer src="app.js?v=20260607"></script>
+<!-- ===== DATA SCRIPTS ===== -->
+<script src="data/templates.js?v=20260608"></script>
+<script src="data/glossary.js?v=20260608"></script>
+<script src="data/mfp_context.js?v=20260608"></script>
+<script src="data/mfp_financials.js?v=20260608"></script>
+<script defer src="app.js?v=20260608"></script>
 </body>
 </html>
