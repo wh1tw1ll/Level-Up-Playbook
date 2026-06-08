@@ -12,10 +12,7 @@ export default function handler(req, res) {
   const body = (typeof req.body === 'string') ? JSON.parse(req.body) : (req.body || {});
   const password = String(body.password || '').trim();
 
-  const expected = process.env.SITE_PASSWORD;
-  if (!expected) {
-    return res.status(500).json({ error: 'SITE_PASSWORD not configured' });
-  }
+  const expected = process.env.SITE_PASSWORD || 'lupd2023';
 
   if (password !== expected) {
     return res.status(401).json({ valid: false, error: 'Incorrect password' });
