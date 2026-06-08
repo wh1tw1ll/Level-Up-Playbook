@@ -1790,9 +1790,7 @@ function init() {
       // Update data sync timestamp
       var freqEl = document.querySelector('.luna-status-freq');
       if (freqEl) {
-        var now = new Date();
-        var timeStr = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        freqEl.textContent = 'Data updated ' + timeStr;
+        freqEl.textContent = 'Data: static as of Jun 8';
       }
     var urlParams = new URLSearchParams(window.location.search);
     var authSuccess = urlParams.get('auth') === 'success';
@@ -2026,78 +2024,62 @@ function init() {
 
     // ── INLINE PHASE GUIDE ──────────────────────────────────────────────
     function renderPhaseGuideInline() {
-      var body = document.getElementById('pg-body-inline');
-      if (!body) return;
-      if (typeof PHASE_GUIDE === 'undefined') {
-        body.innerHTML = '<div style="padding:20px;color:var(--muted)">Phase Guide data not loaded.</div>';
-        return;
-      }
-      var html = '';
-      var phases = Object.keys(PHASE_GUIDE);
-      phases.forEach(function(phase, idx) {
-        var pid = 'pgi-phase-' + idx;
-        var data = PHASE_GUIDE[phase];
-        html += '<div class="pg-phase">'
-          + '<button class="pg-phase-header" onclick="togglePgPhaseInline(' + jsCallArg(pid) + ')">'
-          + '<span class="pg-phase-chevron" id="' + pid + '-chev">▶</span>'
-          + '<span>' + (data.icon || '📖') + ' ' + escapeHtml(phase) + '</span>'
-          + '</button>'
-          + '<div class="pg-phase-body" id="' + pid + '" style="display:none">';
-        if (data.desc) {
-          html += '<p style="margin-bottom:12px;font-size:14px">' + escapeHtml(data.desc) + '</p>';
-        }
-        if (data.sections && data.sections.length) {
-          html += '<h4>Key sections for this phase</h4><ul>';
-          data.sections.forEach(function(s) {
-            var sectionTitle = 'Section ' + s.num;
-            html += '<li><strong>' + sectionTitle + '</strong> &mdash; ' + escapeHtml(s.why) + '</li>';
-          });
-          html += '</ul>';
-        }
-        html += '</div></div>';
-      });
-      body.innerHTML = html;
+}
+}
+
+// ── PASSWORD GATE ───────────────────────────────────────────────────
+function verifyPassword() {
+  var inp = document.getElementById('password-input');
+  var btn = document.getElementById('password-btn');
+  var err = document.getElementById('password-error');
+  if (!inp || !btn) return;
+  var pw = inp.value.trim();
+  if (!pw) { err.textContent = 'Please enter a password.'; err.style.display = 'block'; return; }
+  btn.disabled = true;
+  btn.textContent = 'Checking...';
+  err.style.display = 'none';
+  fetch('/api/verify-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pw })
+  }).then(function(r) {
+    if (!r.ok) {
+      if (r.status === 401) throw new Error('Incorrect password');
+      throw new Error('Server error (' + r.status + ')');
     }
-
-    function togglePgPhaseInline(pid) {
-      var body = document.getElementById(pid);
-      var chev = document.getElementById(pid + '-chev');
-      if (!body) return;
-      var isHidden = body.style.display === 'none' || !body.style.display;
-      body.style.display = isHidden ? 'block' : 'none';
-      if (chev) chev.textContent = isHidden ? '▼' : '▶';
+    return r.json();
+  }).then(function(data) {
+    if (data.valid) {
+      document.getElementById('password-overlay').classList.remove('open');
+      document.getElementById('password-overlay').style.display = 'none';
     }
+  }).catch(function(e) {
+    err.textContent = e.message;
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Unlock';
+    inp.value = '';
+    inp.focus();
+  });
+}
 
-    // ── INLINE DECISION TREE ────────────────────────────────────────────
-    var dtPathInline = ['root'];
-
-    function renderDecisionTreeInline() {
-      var body = document.getElementById('dt-body-inline');
-      if (!body) return;
-      var cur = typeof DT_TREE !== 'undefined' ? DT_TREE[dtPathInline[dtPathInline.length-1]] : null;
-      if (!cur) {
-        body.innerHTML = '<div style=\"padding:20px;color:var(--muted)\">Decision tree not available.</div>';
-        return;
-      }
-      if (cur.answer) {
-        body.innerHTML = '<div class=\"dt-answer\">' + escapeHtml(cur.answer) + '</div>'
-          + (cur.sections ? '<div class=\"dt-meta\">See sections: ' + cur.sections.join(', ') + '</div>' : '')
-          + '<button class=\"btn-primary\" onclick=\"dtResetInline()\">Start over</button>';
-        return;
-      }
-      body.innerHTML = '<div class=\"dt-q\">' + escapeHtml(cur.q) + '</div>'
-        + cur.opts.map(function(opt) {
-          return '<button class=\"dt-opt\" onclick=\"dtChooseInline(' + jsCallArg(opt.next) + ')\">' + escapeHtml(opt.label) + '</button>';
-        }).join('')
-        + (dtPathInline.length > 1 ? '<button id=\"dt-back\" class=\"back-btn\" onclick=\"dtBackInline()\">← Back</button>' : '');
+// Check auth on page load — skip password if cookie exists
+(function checkSiteAuth() {
+  fetch('/api/check-auth').then(function(r) { return r.json(); }).then(function(data) {
+    var overlay = document.getElementById('password-overlay');
+    if (!overlay) return;
+    if (data.authed) {
+      overlay.style.display = 'none';
+    } else {
+      overlay.style.display = 'flex';
+      overlay.classList.add('open');
+      setTimeout(function() {
+        var inp = document.getElementById('password-input');
+        if (inp) inp.focus();
+      }, 100);
     }
-
-    function dtChooseInline(next) { dtPathInline.push(next); renderDecisionTreeInline(); }
-    function dtBackInline() { if (dtPathInline.length > 1) dtPathInline.pop(); renderDecisionTreeInline(); }
-    function dtResetInline() { dtPathInline = ['root']; renderDecisionTreeInline(); }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  }).catch(function() {
+    var overlay = document.getElementById('password-overlay');
+    if (overlay) { overlay.style.display = 'flex'; overlay.classList.add('open'); }
+  });
+})();

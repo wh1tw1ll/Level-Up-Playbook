@@ -88,7 +88,7 @@
     <div id="luna-hero-results" class="luna-hero-results"></div>
     <div class="luna-status-bar">
       <span>Search playbook, projects, budget, templates, and more</span>
-      <span class="luna-status-freq">Data: synced minutes ago</span>
+      <span class="luna-status-freq">Data: static as of Jun 8</span>
     </div>
     <div class="luna-hero-footer">L.U.N.A. — Level Up Network Agent</div>
   </div>
@@ -241,6 +241,22 @@
     </div>
     <div class="chat-resize-handle" id="chat-resize-handle"></div>
   </div>
+
+<!-- ===== PASSWORD GATE ===== -->
+<div id="password-overlay" class="password-overlay" style="display:none">
+  <div class="password-modal">
+    <div class="password-modal-logo">
+      <img src="assets/lockup-black.svg?v=1" alt="Level Up" style="height:36px">
+    </div>
+    <div class="password-modal-title">L.U.N.A. — Level Up Network Agent</div>
+    <div class="password-modal-desc">Enter the team password to access the playbook, project intelligence, and L.U.N.A. search.</div>
+    <div class="password-input-row">
+      <input id="password-input" class="password-input" type="password" placeholder="Enter team password..." autocomplete="off" onkeydown="if(event.key==='Enter')verifyPassword()">
+      <button id="password-btn" class="password-btn" onclick="verifyPassword()">Unlock</button>
+    </div>
+    <div id="password-error" class="password-error" style="display:none"></div>
+  </div>
+</div>
 
 <!-- ===== FOOTER ===== -->
 <div class="site-footer">
