@@ -18,18 +18,10 @@
 
 <!-- ===== TOPBAR ===== -->
 <header class="topbar">
-  <a class="luna-logo-link" href="#" onclick="goHome();return false" title="L.U.N.A. Home">
-    <svg class="luna-wordmark-svg" viewBox="0 0 3000 516" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-      <text x="80" y="380" font-family="'DM Sans','Helvetica Neue',Arial,sans-serif" font-weight="700" font-size="340" fill="#fff" letter-spacing="-4">L</text>
-      <circle cx="530" cy="260" r="28" fill="#fff"/>
-      <text x="580" y="380" font-family="'DM Sans','Helvetica Neue',Arial,sans-serif" font-weight="700" font-size="340" fill="#fff" letter-spacing="-4">U</text>
-      <circle cx="950" cy="260" r="28" fill="#fff"/>
-      <text x="1000" y="380" font-family="'DM Sans','Helvetica Neue',Arial,sans-serif" font-weight="700" font-size="340" fill="#fff" letter-spacing="-4">N</text>
-      <circle cx="1370" cy="260" r="28" fill="#fff"/>
-      <text x="1420" y="380" font-family="'DM Sans','Helvetica Neue',Arial,sans-serif" font-weight="700" font-size="340" fill="#fff" letter-spacing="-4">A</text>
-    </svg>
+  <a class="topbar-logo-link" href="#" onclick="goHome();return false" title="Level Up Home">
+    <img class="topbar-logo" src="assets/level-up-logo.jpg?v=1" alt="Level Up Project Development">
   </a>
-  <span class="topbar-tagline">Powered by Level Up Project Development</span>
+  <span class="topbar-tagline">L.U.N.A. — Level Up Navigator &amp; Advisor</span>
   <button id="theme-btn" class="topbar-btn" onclick="toggleTheme()" title="Toggle theme">☀</button>
   <div id="auth-user-info" class="topbar-user" style="display:none">
     <span id="auth-user-name"></span>
@@ -61,18 +53,25 @@
   <div class="luna-hero">
     <div class="luna-hero-wordmark">L.U.N.A.</div>
     <div class="luna-hero-subtitle">Level Up Navigator &amp; Advisor</div>
+    <div class="luna-hero-brand-row">
+      <img class="luna-hero-brand-logo" src="assets/level-up-logo.jpg?v=1" alt="Level Up">
+      <span class="luna-hero-brand-text">by Level Up Project Development</span>
+    </div>
     <div class="luna-hero-search-row">
       <input id="luna-hero-input" class="luna-hero-input" type="text" placeholder="Ask anything about the playbook, projects, budget, punch list, change orders..." autocomplete="off" onkeydown="if(event.key==='Enter')heroSearch()" oninput="heroSearchType(this.value)">
       <button class="luna-hero-btn" onclick="heroSearch()">Ask</button>
     </div>
     <div id="luna-hero-dropdown" class="luna-hero-dropdown"></div>
     <div class="luna-hero-quicks">
-      <button class="luna-hero-quick" onclick="heroQuick('Who is Glenn Rieder and why are they everywhere on punch list?')">🧩 Glenn Rieder punch list</button>
-      <button class="luna-hero-quick" onclick="heroQuick('Top 10 change orders by dollar value')">💰 Top change orders</button>
-      <button class="luna-hero-quick" onclick="heroQuick('How many punch items are overdue and who owns them?')">⏰ Overdue punch items</button>
-      <button class="luna-hero-quick" onclick="heroQuick('What is the current budget status and remaining contingency?')">📊 Budget status</button>
-      <button class="luna-hero-quick" onclick="heroQuick('Current project schedule — baseline vs actual')">📅 Schedule status</button>
-    </div>
+          <button class="luna-hero-quick" onclick="heroQuick('What does an owner\u2019s rep do and how do I get started on a new project?')">🏗 Owner\u2019s rep 101</button>
+          <button class="luna-hero-quick" onclick="heroQuick('What are the critical milestones in a sports venue development timeline?')">🏟 Stadium development milestones</button>
+          <button class="luna-hero-quick" onclick="heroQuick('How do I review, challenge, and negotiate a change order?')">📋 Change order review guide</button>
+          <button class="luna-hero-quick" onclick="heroQuick('What are the top risks on sports projects and how do I mitigate them?')">⚠ Top project risks</button>
+          <button class="luna-hero-quick" onclick="heroQuick('What is the current status of Miami Freedom Park Stadium?')">🔴 MFP project status</button>
+          <button class="luna-hero-quick" onclick="heroQuick('How do I set up project governance and decision-making authority?')">👥 Governance setup</button>
+          <button class="luna-hero-quick" onclick="heroQuick('What is the punch list closeout process and best practices?')">✅ Punch list closeout</button>
+          <button class="luna-hero-quick" onclick="heroQuick('What documents do I need at each project phase?')">📁 Documents by phase</button>
+        </div>
     <div id="luna-hero-results" class="luna-hero-results"></div>
     <div class="luna-hero-footer">L.U.N.A. — Level Up Navigator &amp; Advisor</div>
   </div>
@@ -205,12 +204,12 @@
     <button class="chat-close" onclick="toggleChat()">×</button>
   </div>
   <div id="chat-quicks" class="chat-quicks">
-    <button class="chat-quick" onclick="quickChat('Day 1 checklist')">Day 1 checklist</button>
-    <button class="chat-quick" onclick="quickChat('DAS coordination')">DAS coordination</button>
-    <button class="chat-quick" onclick="quickChat('VE timing')">VE timing</button>
-    <button class="chat-quick" onclick="quickChat('Schedule risks')">Schedule risks</button>
-    <button class="chat-quick" onclick="quickChat('Punch list strategy')">Punch list strategy</button>
-  </div>
+      <button class="chat-quick" onclick="quickChat('What are the top risks on sports projects?')">Top sports project risks</button>
+      <button class="chat-quick" onclick="quickChat('How do I set up project governance?')">Set up governance</button>
+      <button class="chat-quick" onclick="quickChat('What\u2019s the MFP Kroll audit status?')">Kroll audit</button>
+      <button class="chat-quick" onclick="quickChat('Punch list closeout best practices')">Punch list closeout</button>
+      <button class="chat-quick" onclick="quickChat('Change order review checklist')">CO review checklist</button>
+    </div>
   <div id="chat-messages" class="chat-messages"></div>
   <div class="chat-input-row">
     <input id="chat-input" class="chat-input" type="text" placeholder="Ask anything about the playbook or MFP..." autocomplete="off">

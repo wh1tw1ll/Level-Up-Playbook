@@ -1399,6 +1399,11 @@ function renderCalendar() {
 function openPhaseGuide() {
   var body = document.getElementById('pg-body');
   if (!body) return;
+  if (typeof PHASE_GUIDE === 'undefined') {
+    body.innerHTML = '<div style="padding:20px;color:var(--muted)">Phase Guide data not loaded.</div>';
+    document.getElementById('modal-phase-guide').classList.add('open');
+    return;
+  }
   var html = '';
   var phases = Object.keys(PHASE_GUIDE);
   phases.forEach(function(phase, idx) {
@@ -1407,17 +1412,17 @@ function openPhaseGuide() {
     html += '<div class="pg-phase">'
       + '<div class="pg-phase-header" onclick="togglePgPhase(' + jsCallArg(pid) + ')">'
       + '<span class="pg-phase-chevron" id="' + pid + '-chev">▶</span>'
-      + '<span>' + escapeHtml(phase) + '</span>'
+      + '<span>' + (data.icon || '📖') + ' ' + escapeHtml(phase) + '</span>'
       + '</div>'
       + '<div class="pg-phase-body" id="' + pid + '" style="display:none">';
-    if (data.essential) {
-      html += '<h4>Essential reading</h4><ul>';
-      data.essential.forEach(function(s) { html += '<li>' + escapeHtml(s) + '</li>'; });
-      html += '</ul>';
+    if (data.desc) {
+      html += '<p style="margin-bottom:12px;font-size:14px">' + escapeHtml(data.desc) + '</p>';
     }
-    if (data.supporting) {
-      html += '<h4>Supporting</h4><ul>';
-      data.supporting.forEach(function(s) { html += '<li>' + escapeHtml(s) + '</li>'; });
+    if (data.sections && data.sections.length) {
+      html += '<h4>Key sections for this phase</h4><ul>';
+      data.sections.forEach(function(s) {
+        html += '<li><strong>Section ' + s.num + '</strong> &mdash; ' + escapeHtml(s.why) + '</li>';
+      });
       html += '</ul>';
     }
     html += '</div></div>';
@@ -1695,12 +1700,32 @@ function init() {
       var results = [];
 
       // Search KB
-      KB.forEach(function(s) {
-        var hay = [s.title, s.num].concat(s.topics || []).concat(s.h2 || []).concat(s.content || []).concat(s.bullets || []).join(' ').toLowerCase();
-        if (hay.indexOf(ql) >= 0) {
-          results.push({type:'playbook', label:'Section ' + s.num + ': ' + (s.title || ''), id:s.num, preview:(s.content||[]).slice(0,2).join(' ').substring(0,120)});
-        }
-      });
+            KB.forEach(function(s) {
+              var hay = [s.title, s.num].concat(s.topics || []).concat(s.h2 || []).concat(s.content || []).concat(s.bullets || []).join(' ').toLowerCase();
+              if (hay.indexOf(ql) >= 0) {
+                // Build a smarter excerpt: find the matching content chunk
+                var preview = '';
+                var contents = s.content || [];
+                var bullets = s.bullets || [];
+                for (var ci = 0; ci < contents.length; ci++) {
+                  if (contents[ci].toLowerCase().indexOf(ql) >= 0) {
+                    preview = contents[ci].substring(0, 160);
+                    break;
+                  }
+                }
+                if (!preview) {
+                  for (var bi = 0; bi < bullets.length; bi++) {
+                    if (bullets[bi].toLowerCase().indexOf(ql) >= 0) {
+                      preview = bullets[bi].substring(0, 160);
+                      break;
+                    }
+                  }
+                }
+                if (!preview && s.h2 && s.h2.length) preview = s.h2[0].substring(0, 120);
+                if (!preview) preview = (s.content || []).slice(0, 2).join(' ').substring(0, 120);
+                results.push({type:'playbook', label:'Section ' + s.num + ': ' + (s.title || ''), id:s.num, preview:preview});
+              }
+            });
 
       // Search templates
       for (var key in TEMPLATES) {
@@ -1728,18 +1753,18 @@ function init() {
       var icons = {playbook:'📚', template:'📑', project:'🏟'};
       var html = '<div class=\"luna-hero-dropdown-inner\">';
       html += '<div style=\"padding:6px 14px 8px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)\">' + results.length + ' result' + (results.length>1?'s':'') + ' for &quot;' + escapeHtml(q) + '&quot;</div>';
-      results.slice(0, 10).forEach(function(r) {
-        var icon = icons[r.type]||'📄';
-        var onClick = "var dd=document.getElementById('luna-hero-dropdown');if(dd){dd.classList.remove('show');dd.innerHTML=''}document.getElementById('luna-hero-input').value='';";
-        if (r.type === 'playbook') onClick += "setView('playbook');setPlaybookView('sections');jumpTo('" + r.id + "');";
-        else if (r.type === 'template') onClick += "setView('playbook');setPlaybookView('templates');";
-        else if (r.type === 'project') onClick += "setView('mfp');";
-        html += '<div class=\"luna-hero-dd-item\" onclick=\"' + onClick + '\">'
-          + '<span class=\"luna-hero-dd-icon\">' + icon + '</span>'
-          + '<div style=\"flex:1;min-width:0\">'
-          + '<div class=\"luna-hero-dd-text\">' + hl(r.label) + '</div>'
-          + (r.preview ? '<div class=\"luna-hero-dd-desc\">' + hl(r.preview) + '</div>' : '')
-          + '</div><span class=\"luna-hero-dd-src\">' + r.type + '</span></div>';
+      results.slice(0, 20).forEach(function(r) {
+              var icon = icons[r.type]||'📄';
+              var onClick = "var dd=document.getElementById('luna-hero-dropdown');if(dd){dd.classList.remove('show');dd.innerHTML=''}document.getElementById('luna-hero-input').value='';";
+              if (r.type === 'playbook') onClick += "setView('playbook');setPlaybookView('sections');jumpTo('" + r.id + "');";
+              else if (r.type === 'template') onClick += "setView('playbook');setPlaybookView('templates');";
+              else if (r.type === 'project') onClick += "setView('mfp');";
+              html += '<div class="luna-hero-dd-item" onclick="' + onClick + '">'
+                + '<span class="luna-hero-dd-icon">' + icon + '</span>'
+                + '<div style="flex:1;min-width:0">'
+                + '<div class="luna-hero-dd-text">' + hl(r.label) + '</div>'
+                + (r.preview ? '<div class="luna-hero-dd-desc">' + hl(r.preview.substring(0, 160)) + '</div>' : '')
+                + '</div><span class="luna-hero-dd-src">' + r.type + '</span></div>';
       });
       html += '</div>';
       dd.innerHTML = html;
@@ -1798,13 +1823,16 @@ function init() {
         tmplIndex += key + ' — ' + t.name + ' (' + t.category + ') — Section ' + t.section + '\\n';
       }
 
-      var systemPrompt = 'You are L.U.N.A. (Level Up Navigator & Advisor), assisting Whitney Williams, Principal-in-Charge at Level Up Project Development. '
-        + 'This is a search interface — answer concisely and directly like Google. Use paragraph breaks and bullet points for readability. '
-        + 'When the user asks about a template, name the exact template file and the playbook section it belongs to. '
-        + 'When referencing a playbook section, say "See Section X: Title". Be specific and actionable. '
-        + 'The playbook has ' + KB.length + ' sections:\\n\\n' + kbIndex
-        + '\\n\\nAvailable templates:\\n' + tmplIndex
-        + '\\n\\n=== PROJECT KNOWLEDGE ===\\n' + MFP_CONTEXT;
+      var systemPrompt = 'You are L.U.N.A. (Level Up Navigator & Advisor), the institutional knowledge engine for Level Up Project Development. You assist Whitney Williams, Principal-in-Charge. '
+              + 'Your knowledge spans: owner\'s representation, project management, construction management, sports venue development (NFL, MLS, NBA), stadium delivery, contract administration (CMA/GMP/Design-Bid-Build), cost management, schedule management, risk management, and project controls. '
+              + 'You have deep expertise in development management — the full lifecycle from site selection, feasibility, and entitlements through design, construction, commissioning, closeout, and operations. '
+              + 'You understand the nuances of sports venue development: league standards, venue technology (DAS/IPTV/scoreboards), premium seating, sponsorship integration (naming rights, signage), broadcast requirements, and game-day operations readiness. '
+              + 'Answer concisely and directly like Google. Use paragraph breaks and bullet points for readability. When referencing a playbook section, say "See Section X: Title". Be specific and actionable. '
+              + 'When discussing costs or budgets, always include specific dollar figures from available data. For MFP-specific questions, reference real data from the project: Miller Electric ($84.9M), Baker Concrete ($61.8M), total commitments ($505M+), hard cost budget ($530M+). '
+              + 'The playbook has ' + KB.length + ' sections covering: foundation (purpose, philosophy, roles, governance), project setup (mobilization, tools, communications), controls (budget, schedule, change, risk), phase execution (planning/funding through design, pre-con, construction, closeout, post-opening), and reference (standards, templates, common problems).'
+              + 'Sections index:\n' + kbIndex
+              + '\n\nAvailable templates:\n' + tmplIndex
+              + '\n\n=== PROJECT KNOWLEDGE ===\n' + MFP_CONTEXT;
 
       fetch('/api/chat', {
         method: 'POST',
@@ -1844,26 +1872,30 @@ function init() {
     function renderPhaseGuideInline() {
       var body = document.getElementById('pg-body-inline');
       if (!body) return;
+      if (typeof PHASE_GUIDE === 'undefined') {
+        body.innerHTML = '<div style="padding:20px;color:var(--muted)">Phase Guide data not loaded.</div>';
+        return;
+      }
       var html = '';
-      var phases = ['Pre-Construction','Design','Construction','Closeout','Post-Opening'];
+      var phases = Object.keys(PHASE_GUIDE);
       phases.forEach(function(phase, idx) {
         var pid = 'pgi-phase-' + idx;
-        var data = typeof PHASE_GUIDE !== 'undefined' ? PHASE_GUIDE[phase] : null;
-        if (!data) return;
-        html += '<div class=\"pg-phase\">'
-          + '<button class=\"pg-phase-header\" onclick=\"togglePgPhaseInline(' + jsCallArg(pid) + ')\">'
-          + '<span class=\"pg-phase-chevron\" id=\"' + pid + '-chev\">▶</span>'
-          + '<span>' + escapeHtml(phase) + '</span>'
+        var data = PHASE_GUIDE[phase];
+        html += '<div class="pg-phase">'
+          + '<button class="pg-phase-header" onclick="togglePgPhaseInline(' + jsCallArg(pid) + ')">'
+          + '<span class="pg-phase-chevron" id="' + pid + '-chev">▶</span>'
+          + '<span>' + (data.icon || '📖') + ' ' + escapeHtml(phase) + '</span>'
           + '</button>'
-          + '<div class=\"pg-phase-body\" id=\"' + pid + '\" style=\"display:none\">';
-        if (data.essential) {
-          html += '<h4>Essential reading</h4><ul>';
-          data.essential.forEach(function(s) { html += '<li>' + escapeHtml(s) + '</li>'; });
-          html += '</ul>';
+          + '<div class="pg-phase-body" id="' + pid + '" style="display:none">';
+        if (data.desc) {
+          html += '<p style="margin-bottom:12px;font-size:14px">' + escapeHtml(data.desc) + '</p>';
         }
-        if (data.supporting) {
-          html += '<h4>Supporting</h4><ul>';
-          data.supporting.forEach(function(s) { html += '<li>' + escapeHtml(s) + '</li>'; });
+        if (data.sections && data.sections.length) {
+          html += '<h4>Key sections for this phase</h4><ul>';
+          data.sections.forEach(function(s) {
+            var sectionTitle = 'Section ' + s.num;
+            html += '<li><strong>' + sectionTitle + '</strong> &mdash; ' + escapeHtml(s.why) + '</li>';
+          });
           html += '</ul>';
         }
         html += '</div></div>';

@@ -288,7 +288,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
 /* ===== NEW LUNA HERO PAGE ===== */
 .luna-hero{max-width:860px;margin:0 auto;padding:80px 24px 48px;text-align:center;min-height:calc(100vh - 200px);display:flex;flex-direction:column;align-items:center}
 .luna-hero-wordmark{font-family:'DM Sans',sans-serif;font-weight:800;font-size:72px;color:var(--teal);letter-spacing:-3px;line-height:1;margin-bottom:6px}
-.luna-hero-subtitle{font-size:16px;color:var(--muted);margin-bottom:40px;font-weight:400}
+.luna-hero-subtitle{font-size:16px;color:var(--muted);margin-bottom:6px;font-weight:400}
+.luna-hero-brand-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:36px;opacity:.7}
+.luna-hero-brand-logo{height:20px;width:auto;display:block}
+.luna-hero-brand-text{font-size:13px;color:var(--muted);font-weight:400}
 .luna-hero-search-row{display:flex;gap:10px;width:100%;max-width:680px;position:relative;margin-bottom:28px}
 .luna-hero-input{flex:1;padding:16px 22px;border:2px solid var(--border);border-radius:14px;font-size:16px;font-family:inherit;background:var(--card);color:var(--charcoal);outline:none;transition:border-color .15s,box-shadow .15s}
 .luna-hero-input:focus{border-color:var(--teal);box-shadow:0 0 0 4px rgba(24,70,85,.1)}
@@ -321,10 +324,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
 .luna-hero-dd-item mark{background:#fff3a8;padding:1px 2px;border-radius:2px}
 
 /* ===== TOPBAR LUNA WORDMARK ===== */
-.luna-logo-link{display:flex;align-items:center;text-decoration:none;flex-shrink:0}
-.luna-wordmark-svg{height:22px;width:auto;display:block;min-width:120px}
+.topbar-logo-link{display:flex;align-items:center;text-decoration:none;flex-shrink:0}
+.topbar-logo{height:32px;width:auto;display:block;filter:brightness(0) invert(1)}
 .topbar-tagline{font-size:12px;color:rgba(255,255,255,.55);font-weight:400;letter-spacing:.02em;flex-shrink:0}
 @media (max-width:700px){.topbar-tagline{display:none}}
+@media (max-width:600px){.topbar-logo{height:24px}}
 
 /* ===== SUB-NAV ===== */
 .subnav{background:var(--bg);padding:0 24px;display:flex;gap:0;border-bottom:1px solid var(--border)}
@@ -360,7 +364,7 @@ mark.search-highlight{background:#fff3a8;padding:1px 2px;border-radius:2px;color
 @media (max-width:900px){
   .luna-hero{padding:48px 20px 32px;min-height:auto}
   .luna-hero-wordmark{font-size:48px}
-  .luna-hero-subtitle{font-size:14px;margin-bottom:28px}
+  .luna-hero-subtitle{font-size:14px;margin-bottom:24px}
   .subnav{padding:0 12px;overflow-x:auto}
   .subnav-tab{padding:8px 14px;font-size:11px;white-space:nowrap}
 }
