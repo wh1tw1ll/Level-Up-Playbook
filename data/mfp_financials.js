@@ -71,23 +71,24 @@ window.__MFP_FINANCIALS = {
       {firm:"BNI",scope:"Structural Peer Review",fee:48000},
       {firm:"Studio08",scope:"Door Hardware Consulting",fee:55250}
     ],
-    // FF&E Budget (from FF&E Budget.xlsx — total $18,259,000)
-    ffe_budget: 18259000,
+    // FF&E Budget (from Llinx portal — 1,831 orders, excl. DreamSeats)
+    ffe_budget: 15767602,
+    ffe_source: "llinx_export_20260608",
     ffe_breakdown: [
-      {category:"Grounds & Field Equipment",amount:3525000},
-      {category:"Facilities Operations",amount:1075000},
-      {category:"Food & Beverage",amount:3500000},
-      {category:"Broadcast & Event Ops",amount:150000},
-      {category:"Merchandise & Retail",amount:750000},
-      {category:"FF&E (Designed)",amount:2225000},
-      {category:"Football Operations",amount:300000},
-      {category:"Technology",amount:2200000},
-      {category:"Security",amount:750000},
-      {category:"Artwork & Activations",amount:250000},
-      {category:"Warehouse/Delivery (4%)",amount:589000},
-      {category:"Installation (8%)",amount:1178000},
-      {category:"Freight (5%)",amount:736250},
-      {category:"Tax (7%)",amount:1030750}
+      {category:"Grounds & Field Equipment",amount:4259412, detail:"159 items — grow lights, turf equipment"},
+      {category:"Portable Carts & OS&E",amount:2258454, detail:"30-Carts $1.2M / 31-OS&E $208K / 32-OS&E2 $878K"},
+      {category:"FF&E (ARQ Designed)",amount:2139469, detail:"159 items — planters, barstools, fixtures"},
+      {category:"Technology & POS",amount:1924535, detail:"82-Comm $424K / 83-POS $724K / 86-BoxOffice $777K"},
+      {category:"Building Operations",amount:922013, detail:"20-Ops $87K / 21-Waste $529K / 22-Vehicles $263K / 23-Storage $42K"},
+      {category:"Installation",amount:861257, detail:"54 items — on-site PM, labor"},
+      {category:"Team Spaces & Sports Equipment",amount:817944, detail:"70-Team $236K / 72-Sports $582K"},
+      {category:"Warehousing & Freight",amount:769984, detail:"95-Warehouse $444K / 99-SeatFreight $326K"},
+      {category:"Security Equipment",amount:650943, detail:"41 items — X-ray, screening"},
+      {category:"Concourse Furniture",amount:440630, detail:"19 items — tables, dining sets"},
+      {category:"Appliances",amount:305171, detail:"23 items — fridges, microwaves"},
+      {category:"Platforms & Staging",amount:296366, detail:"Field stairs, pitchside seating"},
+      {category:"FFE Samples & Attic Stock",amount:90605, detail:"1-Samples $21K / 64-Attic $70K"},
+      {category:"Broadcast & Event Ops",amount:30819, detail:"3 items — mannequins, allowance"}
     ],
     // Additional soft costs from Budget files
     freight: 16112254,       // From Contract Summary May 23 2026 - FRACHT vendor ($16,112,254 total via COs, $14,917,048 paid)
