@@ -17,6 +17,7 @@
 <body>
 
 <!-- ===== TOPBAR ===== -->
+<div class="sticky-header">
 <header class="topbar">
   <a class="topbar-logo-link" href="#" onclick="goHome();return false" title="Level Up Home">
       <img class="topbar-logo" src="assets/lockup-black.svg?v=1" alt="Level Up Project Development">
@@ -46,7 +47,8 @@
   <button class="subnav-tab" data-pbview="templates" onclick="setPlaybookView('templates')">Templates</button>
   <button class="subnav-tab" data-pbview="guide" onclick="setPlaybookView('guide')">Phase Reading Guide</button>
   <button class="subnav-tab" data-pbview="decision" onclick="setPlaybookView('decision')">What Do I Do?</button>
-</nav>
+  </nav>
+  </div>
 
 <!-- ===== LUNA HERO VIEW (default home) ===== -->
 <div id="view-luna" class="view active">
@@ -63,7 +65,7 @@
                 <g transform="translate(4498 60)"><path d="M62 495 H143 A62 62 0 0 1 205 557 V638 A62 62 0 0 1 143 700 H62 A62 62 0 0 1 0 638 V557 A62 62 0 0 1 62 495 Z" fill="currentColor" fill-rule="nonzero"/></g>
               </svg>
             </div>
-                  <div class="luna-hero-subtitle">Level Up Project Search &amp; Intelligence</div>
+                  <div class="luna-hero-subtitle">Level Up Network Agent</div>
     <div id="luna-reminders" class="luna-reminders"></div>
     <div class="luna-hero-search-row">
       <input id="luna-hero-input" class="luna-hero-input" type="text" placeholder="Ask anything about the playbook, projects, budget, punch list, change orders..." autocomplete="off" onkeydown="if(event.key==='Enter')heroSearch()" oninput="heroSearchType(this.value)">
@@ -85,14 +87,19 @@
       <span>Search playbook, projects, budget, templates, and more</span>
       <span class="luna-status-freq">Data: synced minutes ago</span>
     </div>
-    <div class="luna-hero-footer">L.U.N.A. — Level Up Project Search &amp; Intelligence</div>
+    <div class="luna-hero-footer">L.U.N.A. — Level Up Network Agent</div>
   </div>
 </div>
 
 <!-- ===== PLAYBOOK VIEW ===== -->
 <div id="view-playbook" class="view">
   <div id="pb-sections-view" class="pb-subview active">
-    <div class="shell">
+      <div class="pb-search-row">
+        <input id="pb-search-input" class="pb-search-input" type="text" placeholder="Search playbook sections, topics, templates..." autocomplete="off" onkeydown="if(event.key==='Enter')pbSearch()" oninput="pbSearchType(this.value)">
+        <button class="pb-search-btn" onclick="pbSearch()">Search</button>
+        <span id="pb-search-count" class="pb-search-count"></span>
+      </div>
+      <div class="shell">
       <aside class="sidebar" id="playbook-sidebar">
         <button class="sidebar-toggle" onclick="toggleSidebar()">☰ Filters</button>
         <div id="sidebar-content">
@@ -211,9 +218,12 @@
 <!-- ===== AI CHAT ===== -->
 <button id="fab" onclick="toggleChat()" title="Open L.U.N.A. Chat">✦ L.U.N.A. Chat</button>
 <div id="chat-drawer" class="chat-drawer">
-  <div class="chat-header">
+  <div class="chat-header" id="chat-header-drag">
     <div class="chat-header-title">L.U.N.A. — Project Intelligence</div>
-    <button class="chat-close" onclick="toggleChat()">×</button>
+    <div style="display:flex;gap:4px">
+      <button class="chat-close" onclick="toggleChatSize()" title="Toggle size">⛶</button>
+      <button class="chat-close" onclick="toggleChat()">×</button>
+    </div>
   </div>
   <div id="chat-quicks" class="chat-quicks">
       <button class="chat-quick" onclick="quickChat('What are the top risks on sports projects?')">Top sports project risks</button>
@@ -223,10 +233,11 @@
     </div>
   <div id="chat-messages" class="chat-messages"></div>
   <div class="chat-input-row">
-    <input id="chat-input" class="chat-input" type="text" placeholder="Ask anything about the playbook or MFP..." autocomplete="off">
-    <button id="chat-send" class="chat-send" onclick="sendChat()">Send</button>
+      <input id="chat-input" class="chat-input" type="text" placeholder="Ask anything about the playbook or MFP..." autocomplete="off">
+      <button id="chat-send" class="chat-send" onclick="sendChat()">Send</button>
+    </div>
+    <div class="chat-resize-handle" id="chat-resize-handle"></div>
   </div>
-</div>
 
 <!-- ===== FOOTER ===== -->
 <div class="site-footer">
@@ -245,6 +256,7 @@
 <script src="data/glossary.js?v=20260608"></script>
 <script src="data/mfp_context.js?v=20260608"></script>
 <script src="data/mfp_financials.js?v=20260608"></script>
+<script src="data/inline_fix.js?v=20260608"></script>
 <script defer src="app.js?v=20260608"></script>
 </body>
 </html>
