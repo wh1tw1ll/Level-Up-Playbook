@@ -787,181 +787,302 @@ function renderMFP() {
         }
 
         function showMFPDetail(view) {
-                  var details = {
-        issues: {
-          icon: '🔴', title: 'Live Issues',
-          body: '<div style="margin-bottom:16px"><strong style="font-size:15px;color:var(--charcoal)">4 High Priority Issues</strong></div>'
-            + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
-            + '<strong>1. ARQ Payment Hold</strong><br>~$1.5M in Feb-Apr invoices on hold. Disputed work quality and incomplete deliverables.<br>'
-            + '<span style="font-size:11px;color:var(--muted)">Owner: Graham Oxley | Status: Open</span></div>'
-            + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
-            + '<strong>2. Punch List: Tile Installation Deficiency</strong><br>Surface-mounted electrical conduit violates spec requiring concealed. Position: correction, not credit.<br>'
-            + '<span style="font-size:11px;color:var(--muted)">Disputed with Lemartec | Status: Open</span></div>'
-            + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
-            + '<strong>3. HVAC Service Agreement — Hill York</strong><br>Contractor departure risk. Urgent — pending signature.<br>'
-            + '<span style="font-size:11px;color:var(--muted)">Status: Urgent / Pending Signature</span></div>'
-            + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
-            + '<strong>4. Lemartec Indirect Costs</strong><br>$39.5M indirect cost payment gap. General requirements, general conditions, CM fee, and insurance unpaid.<br>'
-            + '<span style="font-size:11px;color:var(--muted)">Status: Open</span></div>'
-        },
-        financials: {
-                  icon: '💰', title: 'Financials',
-                  body: (function(){
-                    var F = window.__MFP_FINANCIALS;
-                    if (!F) return '<div style="padding:24px;text-align:center;color:var(--muted)">Financial data not loaded.</div>';
-                    var H = F.hard;
-                    var S = F.summary;
-                    // format helper
-                    function fm(n){ if (n==null) return '—'; var s=Math.abs(n).toFixed(2).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,'); return (n<0?'($':'\u200b$')+s+(n<0?')':''); }
-
-                    var html = '<div style="margin-bottom:16px">'
-                      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
-                      + '<strong style="font-size:16px">Budget Overview</strong>'
-                      + '<span style="font-size:11px;color:var(--muted)">From Procore Commitments</span>'
-                      + '</div>'
-                      + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:16px">'
-                      + '<div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center"><span style="font-size:10px;color:var(--muted);display:block">Total Budget</span><strong style="font-size:16px">' + fm(S.total_budget) + '</strong></div>'
-                      + '<div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center"><span style="font-size:10px;color:var(--muted);display:block">Paid to Date</span><strong style="font-size:16px">' + fm(S.paid_to_date) + '</strong></div>'
-                      + '<div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center"><span style="font-size:10px;color:var(--muted);display:block">Past Due</span><strong style="font-size:16px;color:#c0392b">' + fm(S.past_due) + '</strong></div>'
-                      + '<div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center"><span style="font-size:10px;color:var(--muted);display:block">Retainage</span><strong style="font-size:16px">' + fm(S.retainage_held) + '</strong></div>'
-                      + '</div>'
-
-                    // HARD vs SOFT breakdown
-                    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">'
-                      + '<div style="background:#eaf7f5;border:1px solid var(--teal);border-radius:10px;padding:16px">'
-                      + '<span style="font-size:11px;color:var(--teal);font-weight:700;text-transform:uppercase;display:block;margin-bottom:6px">🔨 Hard Costs (Procore)</span>'
-                      + '<strong style="font-size:20px;color:var(--charcoal)">' + fm(H.total_revised) + '</strong><br>'
-                      + '<span style="font-size:12px;color:var(--muted)">' + H.commitments.length + ' active commitments · ' + fm(H.total_original) + ' base + ' + fm(H.total_approved_cos) + ' COs</span>'
-                      + '</div>'
-                      + '<div style="background:#f5f5f5;border:1px solid var(--border);border-radius:10px;padding:16px;border-style:dashed">'
-                      + '<span style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;display:block;margin-bottom:6px">📄 Soft Costs (TBD)</span>'
-                      + '<strong style="font-size:20px;color:var(--muted)">—</strong><br>'
-                      + '<span style="font-size:12px;color:var(--muted)">Design fees, permits, OCIP, testing, commissioning — from budget docs once available</span>'
-                      + '</div>'
-                      + '</div>'
-
-                    // SUBCONTRACTOR TABLE
-                    html += '<div style="font-size:14px;font-weight:700;color:var(--charcoal);margin-bottom:10px">Subcontractor Breakdown — Hard Costs</div>'
-                      + '<div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px;background:var(--card);margin-bottom:16px">'
-                      + '<table style="width:100%;border-collapse:collapse;font-size:12px;min-width:700px">'
-                      + '<thead><tr style="background:var(--teal);color:#fff;font-size:11px;text-transform:uppercase;letter-spacing:.3px">'
-                      + '<th style="padding:10px 8px;text-align:left">#</th>'
-                      + '<th style="padding:10px 8px;text-align:left">Subcontractor</th>'
-                      + '<th style="padding:10px 8px;text-align:left">Scope</th>'
-                      + '<th style="padding:10px 8px;text-align:right">Base</th>'
-                      + '<th style="padding:10px 8px;text-align:right">Approved COs</th>'
-                      + '<th style="padding:10px 8px;text-align:right">Revised</th>'
-                      + '<th style="padding:10px 8px;text-align:right">Paid</th>'
-                      + '<th style="padding:10px 8px;text-align:right">%</th>'
-                      + '<th style="padding:10px 8px;text-align:right">Balance</th>'
-                      + '</tr></thead><tbody>';
-
-                    var subs = H.commitments;
-                    // Sort by revised amount descending
-                    subs.sort(function(a,b){ return b.revised - a.revised; });
-                    subs.forEach(function(sub,i){
-                      var coClass = sub.co < 0 ? 'color:#c0392b' : '';
-                      html += '<tr style="border-top:1px solid var(--border)">'
-                        + '<td style="padding:7px 8px;color:var(--muted)">' + (i+1) + '</td>'
-                        + '<td style="padding:7px 8px;font-weight:600;white-space:nowrap">' + sub.company.replace(/,? (INC|LLC|CORP|CO).*/,'') + '</td>'
-                        + '<td style="padding:7px 8px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + sub.title + '">' + sub.title + '</td>'
-                        + '<td style="padding:7px 8px;text-align:right;white-space:nowrap">' + fm(sub.orig) + '</td>'
-                        + '<td style="padding:7px 8px;text-align:right;white-space:nowrap;' + coClass + '">' + fm(sub.co) + '</td>'
-                        + '<td style="padding:7px 8px;text-align:right;white-space:nowrap;font-weight:700">' + fm(sub.revised) + '</td>'
-                        + '<td style="padding:7px 8px;text-align:right;white-space:nowrap">' + fm(sub.paid) + '</td>'
-                        + '<td style="padding:7px 8px;text-align:right;white-space:nowrap">' + sub.pct_paid.toFixed(1) + '%</td>'
-                        + '<td style="padding:7px 8px;text-align:right;white-space:nowrap;font-weight:600' + (sub.balance > 1000000 ? ';color:#c0392b' : '') + '">' + fm(sub.balance) + '</td>'
-                        + '</tr>';
-                    });
-
-                    // Totals row
-                    html += '<tr style="border-top:2px solid var(--charcoal);background:var(--teal-light);font-weight:700">'
-                      + '<td style="padding:9px 8px"></td>'
-                      + '<td style="padding:9px 8px"><strong>TOTAL</strong></td>'
-                      + '<td style="padding:9px 8px"></td>'
-                      + '<td style="padding:9px 8px;text-align:right">' + fm(H.total_original) + '</td>'
-                      + '<td style="padding:9px 8px;text-align:right">' + fm(H.total_approved_cos) + '</td>'
-                      + '<td style="padding:9px 8px;text-align:right">' + fm(H.total_revised) + '</td>'
-                      + '<td style="padding:9px 8px;text-align:right">' + fm(H.total_paid) + '</td>'
-                      + '<td style="padding:9px 8px;text-align:right">' + H.total_pct_paid.toFixed(1) + '%</td>'
-                      + '<td style="padding:9px 8px;text-align:right">' + fm(H.total_balance) + '</td>'
-                      + '</tr>'
-
-                    html += '</tbody></table></div>'
-
-                    // Design team placeholder
-                    html += '<div style="background:#f0f4ff;border:1px solid #4a90d9;border-radius:10px;padding:16px;margin-bottom:16px">'
-                      + '<span style="font-size:11px;font-weight:700;text-transform:uppercase;display:block;margin-bottom:6px">🎨 Design Team (Pending Budget Docs)</span>'
-                      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px">'
-                      + '<div><strong>AOR:</strong> Arquitectonica (ARQ)</div>'
-                      + '<div><strong>Design Architect:</strong> MANICA Architecture</div>'
-                      + '<div><strong>Geotech:</strong> PSI — $22.5K (in hard costs above)</div>'
-                      + '<div><strong>Contract values:</strong> Will be populated from budget docs</div>'
-                      + '</div></div>'
-
-                    // Links
-                    html += '<div style="margin-top:12px;padding:12px;background:var(--teal-light);border-radius:8px;font-size:13px">'
-                      + '<strong>🔗 Quick Links</strong><br>'
-                      + '• <a href="https://app.procore.com/2916773/project/commitments" target="_blank" style="color:var(--teal)">Procore — Commitments</a><br>'
-                      + '• <a href="https://app.procore.com/2916773/project/drawings" target="_blank" style="color:var(--teal)">Procore — Drawing Set</a><br>'
-                      + '• <a href="https://app.procore.com/2916773/project/change_orders" target="_blank" style="color:var(--teal)">Procore — Change Orders</a><br>'
-                      + '• <a href="https://app.procore.com/2916773/project/budget" target="_blank" style="color:var(--teal)">Procore — Budget</a>'
-                      + '</div>'
-
-                    return html;
-                  })()
+                          var details = {
+                issues: {
+                  icon: '🔴', title: 'Live Issues',
+                  body: '<div style="margin-bottom:16px"><strong style="font-size:15px;color:var(--charcoal)">4 High Priority Issues</strong></div>'
+                    + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+                    + '<strong>1. ARQ Payment Hold</strong><br>~$1.5M in Feb-Apr invoices on hold. Disputed work quality and incomplete deliverables.<br>'
+                    + '<span style="font-size:11px;color:var(--muted)">Owner: Graham Oxley | Status: Open</span></div>'
+                    + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+                    + '<strong>2. Punch List: Tile Installation Deficiency</strong><br>Surface-mounted electrical conduit violates spec requiring concealed. Position: correction, not credit.<br>'
+                    + '<span style="font-size:11px;color:var(--muted)">Disputed with Lemartec | Status: Open</span></div>'
+                    + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+                    + '<strong>3. HVAC Service Agreement — Hill York</strong><br>Contractor departure risk. Urgent — pending signature.<br>'
+                    + '<span style="font-size:11px;color:var(--muted)">Status: Urgent / Pending Signature</span></div>'
+                    + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+                    + '<strong>4. Lemartec Indirect Costs</strong><br>$39.5M indirect cost payment gap. General requirements, general conditions, CM fee, and insurance unpaid.<br>'
+                    + '<span style="font-size:11px;color:var(--muted)">Status: Open</span></div>'
                 },
-        punchlist: {
-          icon: '📋', title: 'Punch List',
-          body: '<div style="margin-bottom:16px"><strong>Active Punch List Closeout</strong> <span style="font-size:12px;color:var(--muted)">— Stadium is open and operational</span></div>'
-            + '<div style="background:var(--bg);border-radius:8px;padding:14px;margin-bottom:12px">'
-            + '<strong>Primary Disputes:</strong><br>'
-            + '• <strong>Tile Installation Deficiency</strong> — Disputed with Lemartec. Position: correction, not credit.<br>'
-            + '• <strong>Surface-Mounted Electrical Conduit</strong> — Spec required concealed. Position: correction, not credit.<br><br>'
-            + '<strong>Note:</strong> Day 2 items (60+ owner-directed post-opening scope) are distinct from punch list. Each needs scope definition, cost estimate, and owner authorization.</div>'
-            + '<div style="padding:12px;background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;font-size:13px">'
-            + '<strong>⚡ Position:</strong> Correction, not credit. We hold that defective work must be corrected at the contractor\'s cost. This is not a change order issue — it\'s a quality/compliance issue under the existing contract.</div>'
-        },
-        day2: {
-          icon: '🏗', title: 'Day 2 Items',
-          body: '<div style="margin-bottom:16px"><strong>Owner-Directed Post-Opening Scope</strong> <span style="font-size:12px;color:var(--muted)">— 60+ items in various stages</span></div>'
-            + '<div style="background:var(--bg);border-radius:8px;padding:14px;font-size:13px">'
-            + 'Day 2 items are owner-directed scope additions after the stadium opened. They are <strong>distinct from punch list</strong> items (which are defect corrections under existing contracts).<br><br>'
-            + '<strong>Each Day 2 item requires:</strong><br>'
-            + '1. Scope definition<br>2. Cost estimate<br>3. Owner authorization<br><br>'
-            + '<strong>Current status:</strong> Multiple items in various stages — from initial request through approved and in progress.</div>'
-        },
-        stakeholders: {
-          icon: '👥', title: 'Stakeholders',
-          body: '<div style="margin-bottom:16px"><strong>Project Stakeholders</strong></div>'
-            + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-            + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>Owner</strong><br>Miami Freedom Park, LLC<br>Jorge Mas · Jose Mas<br><span style="font-size:12px;color:var(--muted)">Graham Oxley (day-to-day)<br>Devon McCorkle (approver)<br>Victor Oliver (approver)</span></div>'
-            + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>CM / GC</strong><br>Lemartec Corporation<br><span style="font-size:12px;color:var(--muted)">Construction Manager as Agent</span></div>'
-            + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>Architect of Record</strong><br>Arquitectonica (ARQ)<br><span style="font-size:12px;color:var(--muted)">Agreement executed July 27, 2023</span></div>'
-            + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>Design Architect</strong><br>MANICA Architecture<br><span style="font-size:12px;color:var(--muted)">Agreement executed July 27, 2023</span></div>'
-            + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>Cost Recovery Audit</strong><br>Independent analyst (confidential)<br>n style="font-size:12px;color:var(--muted)">Target: $9M+ recoverable<br>Delivery: June 30</span></div>'
-            + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>IMCF Operations</strong><br>Antonio Torres Roman (Lead)<br>Kaitlyn Stolzenberg<br>Nelson Fuentes (Facilities)</div>'
-            + '</div>'
-        }
-      };
-      window.__MFP_DETAILS = details;
-      var d = details[view];
-      if (!d) return;
-      var html = '<div class="modal-dialog" style="max-width:680px">'
-        + '<div class="modal-header"><div class="modal-title">' + d.icon + ' ' + d.title + '</div>'
-        + '<button class="chat-close" onclick="closeModal(\'modal-mfp-detail\')">×</button></div>'
-        + '<div class="modal-body" style="padding:20px 24px">' + d.body + '</div></div>';
-      var existing = document.getElementById('modal-mfp-detail');
-      if (!existing) {
-        var overlay = document.createElement('div');
-        overlay.id = 'modal-mfp-detail';
-        overlay.className = 'modal-overlay';
-        overlay.onclick = function(e) { if (e.target === this) closeModal('modal-mfp-detail'); };
-        document.body.appendChild(overlay);
-      }
-      document.getElementById('modal-mfp-detail').innerHTML = html;
-      document.getElementById('modal-mfp-detail').classList.add('open');
-    }
+                financials: {
+                          icon: '💰', title: 'Financials',
+                          body: (function(){
+                            var F = window.__MFP_FINANCIALS;
+                            if (!F) return '<div style="padding:24px;text-align:center;color:var(--muted)">Financial data not loaded.</div>';
+                            var H = F.hard;
+                            var S = F.soft;
+                            var Su = F.summary;
+                            function fm(n){ if (n==null) return '—'; var s=Math.abs(n).toFixed(2).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,'); return (n<0?'($':'\\u200b$')+s+(n<0?')':''); }
+
+                            var html = '<div style="margin-bottom:16px">'
+                              + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
+                              + '<strong style="font-size:16px">Budget Overview</strong>'
+                              + '<span style="font-size:11px;color:var(--muted)">From Procore + Budget Files</span>'
+                              + '</div>'
+                              + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:16px">'
+                              + '<div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center"><span style="font-size:10px;color:var(--muted);display:block">Total Budget</span><strong style="font-size:16px">' + fm(Su.total_budget) + '</strong></div>'
+                              + '<div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center"><span style="font-size:10px;color:var(--muted);display:block">Paid to Date</span><strong style="font-size:16px">' + fm(Su.paid_to_date) + '</strong></div>'
+                              + '<div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center"><span style="font-size:10px;color:var(--muted);display:block">Past Due</span><strong style="font-size:16px;color:#c0392b">' + fm(Su.past_due) + '</strong></div>'
+                              + '<div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center"><span style="font-size:10px;color:var(--muted);display:block">Retainage</span><strong style="font-size:16px">' + fm(Su.retainage_held) + '</strong></div>'
+                              + '</div>'
+
+                            // HARD vs SOFT costs side by side
+                            var softTotal = S.design_total + (S.ffe_budget || 0) + (S.freight || 0) + (S.customs_duties || 0) + (S.contingency || 0);
+                            var allHardCosts = H.total_revised;
+                            var allSoftCosts = softTotal;
+                            var grandTotal = allHardCosts + allSoftCosts;
+
+                            html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">'
+                              + '<div style="background:#eaf7f5;border:1px solid var(--teal);border-radius:10px;padding:16px">'
+                              + '<span style="font-size:11px;color:var(--teal);font-weight:700;text-transform:uppercase;display:block;margin-bottom:6px">🔨 Hard Costs (Procore)</span>'
+                              + '<strong style="font-size:20px;color:var(--charcoal)">' + fm(allHardCosts) + '</strong><br>'
+                              + '<span style="font-size:12px;color:var(--muted)">' + H.commitments.length + ' active commitments · ' + fm(H.total_original) + ' base + ' + fm(H.total_approved_cos) + ' COs</span>'
+                              + '</div>'
+                              + '<div style="background:#f0f4ff;border:1px solid #4a90d9;border-radius:10px;padding:16px">'
+                              + '<span style="font-size:11px;color:#4a90d9;font-weight:700;text-transform:uppercase;display:block;margin-bottom:6px">📄 Soft Costs (Budget Files)</span>'
+                              + '<strong style="font-size:20px;color:var(--charcoal)">' + fm(allSoftCosts) + '</strong><br>'
+                              + '<span style="font-size:12px;color:var(--muted)">Design fees, FF&E, freight, duties, contingency</span>'
+                              + '</div>'
+                              + '</div>'
+
+                            // ESTIMATED TOTAL
+                            html += '<div style="background:var(--charcoal);color:#fff;border-radius:10px;padding:14px 18px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center">'
+                              + '<strong>Estimated Total Project Cost (Hard + Soft)</strong>'
+                              + '<strong style="font-size:20px">' + fm(grandTotal) + '</strong>'
+                              + '</div>'
+
+                            // === SOFT COSTS BREAKDOWN ===
+                            html += '<div style="font-size:14px;font-weight:700;color:var(--charcoal);margin-bottom:10px">Soft Cost Breakdown</div>'
+                              // Design Team
+                              + '<div style="background:#f0f4ff;border:1px solid #4a90d9;border-radius:10px;padding:14px;margin-bottom:10px">'
+                              + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+                              + '<strong>🎨 Design Team (' + S.design_team.length + ' firms)</strong>'
+                              + '<strong style="font-size:16px;color:#4a90d9">' + fm(S.design_total) + '</strong>'
+                              + '</div>'
+                              + '<div style="max-height:300px;overflow-y:auto;margin-top:6px">';
+
+                            // Sort design team by fee descending
+                            var sortedDesign = S.design_team.slice().sort(function(a,b){ return b.fee - a.fee; });
+                            sortedDesign.forEach(function(d,i){
+                              html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px">'
+                                + '<div><strong>' + d.firm + '</strong><br><span style="font-size:11px;color:var(--muted)">' + d.scope + '</span></div>'
+                                + '<strong>' + fm(d.fee) + '</strong></div>';
+                            });
+
+                            html += '</div></div>'
+
+                              // FF&E
+                              + '<div style="background:#fffbee;border:1px solid #e6a817;border-radius:10px;padding:14px;margin-bottom:10px">'
+                              + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+                              + '<strong>🪑 FF&E Budget</strong>'
+                              + '<strong style="font-size:16px;color:#e6a817">' + fm(S.ffe_budget) + '</strong>'
+                              + '</div>';
+
+                            S.ffe_breakdown.forEach(function(f){
+                              html += '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--charcoal);padding:3px 0;border-bottom:1px solid var(--border)">'
+                                + '<span>' + f.category + '</span>'
+                                + '<span>' + fm(f.amount) + '</span></div>';
+                            });
+
+                            html += '</div>'
+
+                              // Other Soft Costs
+                              + '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">'
+                              + '<strong>📊 Other Identified Soft Costs</strong>'
+                              + '<div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border);margin-top:6px"><span>Freight</span><strong>' + fm(S.freight) + '</strong></div>'
+                              + '<div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border)"><span>Customs Duties / Tariffs</span><strong>' + fm(S.customs_duties) + '</strong></div>'
+                              + '<div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0"><span>Contingency</span><strong>' + fm(S.contingency) + '</strong></div>'
+                              + '</div>'
+
+                              // PENDING ITEMS
+                              + '<div style="background:#fff4f0;border:1px solid #d35400;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:13px">'
+                              + '<strong>⚠️ Soft Costs Still Pending from Files:</strong><br>'
+                              + '<span style="color:var(--muted)">OCIP/Insurance, Legal Fees, Owner\'s Rep Fees (Level Up), Commissioning — not yet sourced from available budget documents.</span>'
+                              + '</div>'
+
+                            // SUBCONTRACTOR TABLE
+                            html += '<div style="font-size:14px;font-weight:700;color:var(--charcoal);margin-bottom:10px">Subcontractor Breakdown — Hard Costs</div>'
+                              + '<div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px;background:var(--card);margin-bottom:16px">'
+                              + '<table style="width:100%;border-collapse:collapse;font-size:12px;min-width:700px">'
+                              + '<thead><tr style="background:var(--teal);color:#fff;font-size:11px;text-transform:uppercase;letter-spacing:.3px">'
+                              + '<th style="padding:10px 8px;text-align:left">#</th>'
+                              + '<th style="padding:10px 8px;text-align:left">Subcontractor</th>'
+                              + '<th style="padding:10px 8px;text-align:left">Scope</th>'
+                              + '<th style="padding:10px 8px;text-align:right">Base</th>'
+                              + '<th style="padding:10px 8px;text-align:right">Approved COs</th>'
+                              + '<th style="padding:10px 8px;text-align:right">Revised</th>'
+                              + '<th style="padding:10px 8px;text-align:right">Paid</th>'
+                              + '<th style="padding:10px 8px;text-align:right">%</th>'
+                              + '<th style="padding:10px 8px;text-align:right">Balance</th>'
+                              + '</tr></thead><tbody>';
+
+                            var subs = H.commitments;
+                            subs.sort(function(a,b){ return b.revised - a.revised; });
+                            subs.forEach(function(sub,i){
+                              var coClass = sub.co < 0 ? 'color:#c0392b' : '';
+                              html += '<tr style="border-top:1px solid var(--border)">'
+                                + '<td style="padding:7px 8px;color:var(--muted)">' + (i+1) + '</td>'
+                                + '<td style="padding:7px 8px;font-weight:600;white-space:nowrap">' + sub.company.replace(/,? (INC|LLC|CORP|CO).*/,'') + '</td>'
+                                + '<td style="padding:7px 8px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + sub.title + '">' + sub.title + '</td>'
+                                + '<td style="padding:7px 8px;text-align:right;white-space:nowrap">' + fm(sub.orig) + '</td>'
+                                + '<td style="padding:7px 8px;text-align:right;white-space:nowrap;' + coClass + '">' + fm(sub.co) + '</td>'
+                                + '<td style="padding:7px 8px;text-align:right;white-space:nowrap;font-weight:700">' + fm(sub.revised) + '</td>'
+                                + '<td style="padding:7px 8px;text-align:right;white-space:nowrap">' + fm(sub.paid) + '</td>'
+                                + '<td style="padding:7px 8px;text-align:right;white-space:nowrap">' + sub.pct_paid.toFixed(1) + '%</td>'
+                                + '<td style="padding:7px 8px;text-align:right;white-space:nowrap;font-weight:600' + (sub.balance > 1000000 ? ';color:#c0392b' : '') + '">' + fm(sub.balance) + '</td>'
+                                + '</tr>';
+                            });
+
+                            html += '<tr style="border-top:2px solid var(--charcoal);background:var(--teal-light);font-weight:700">'
+                              + '<td style="padding:9px 8px"></td>'
+                              + '<td style="padding:9px 8px"><strong>TOTAL</strong></td>'
+                              + '<td style="padding:9px 8px"></td>'
+                              + '<td style="padding:9px 8px;text-align:right">' + fm(H.total_original) + '</td>'
+                              + '<td style="padding:9px 8px;text-align:right">' + fm(H.total_approved_cos) + '</td>'
+                              + '<td style="padding:9px 8px;text-align:right">' + fm(H.total_revised) + '</td>'
+                              + '<td style="padding:9px 8px;text-align:right">' + fm(H.total_paid) + '</td>'
+                              + '<td style="padding:9px 8px;text-align:right">' + H.total_pct_paid.toFixed(1) + '%</td>'
+                              + '<td style="padding:9px 8px;text-align:right">' + fm(H.total_balance) + '</td>'
+                              + '</tr>'
+
+                            html += '</tbody></table></div>'
+
+                            // Links
+                            html += '<div style="margin-top:12px;padding:12px;background:var(--teal-light);border-radius:8px;font-size:13px">'
+                              + '<strong>🔗 Quick Links</strong><br>'
+                              + '• <a href="https://app.procore.com/2916773/project/commitments" target="_blank" style="color:var(--teal)">Procore — Commitments</a><br>'
+                              + '• <a href="https://app.procore.com/2916773/project/drawings" target="_blank" style="color:var(--teal)">Procore — Drawing Set</a><br>'
+                              + '• <a href="https://app.procore.com/2916773/project/change_orders" target="_blank" style="color:var(--teal)">Procore — Change Orders</a><br>'
+                              + '• <a href="https://app.procore.com/2916773/project/budget" target="_blank" style="color:var(--teal)">Procore — Budget</a>'
+                              + '</div>'
+
+                            return html;
+                          })()
+                        },
+                punchlist: {
+                  icon: '📋', title: 'Punch List',
+                  body: '<div style="margin-bottom:16px"><strong>Active Punch List Closeout</strong> <span style="font-size:12px;color:var(--muted)">— Stadium is open and operational</span></div>'
+                    + '<div style="background:var(--bg);border-radius:8px;padding:14px;margin-bottom:12px">'
+                    + '<strong>Primary Disputes:</strong><br>'
+                    + '• <strong>Tile Installation Deficiency</strong> — Disputed with Lemartec. Position: correction, not credit.<br>'
+                    + '• <strong>Surface-Mounted Electrical Conduit</strong> — Spec required concealed. Position: correction, not credit.<br><br>'
+                    + '<strong>Note:</strong> Day 2 items (60+ owner-directed post-opening scope) are distinct from punch list. Each needs scope definition, cost estimate, and owner authorization.</div>'
+                    + '<div style="padding:12px;background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;font-size:13px">'
+                    + '<strong>⚡ Position:</strong> Correction, not credit. We hold that defective work must be corrected at the contractor\'s cost. This is not a change order issue — it\'s a quality/compliance issue under the existing contract.</div>'
+                },
+                day2: {
+                  icon: '🏗', title: 'Day 2 Items',
+                  body: '<div style="margin-bottom:16px"><strong>Owner-Directed Post-Opening Scope</strong> <span style="font-size:12px;color:var(--muted)">— 60+ items in various stages</span></div>'
+                    + '<div style="background:var(--bg);border-radius:8px;padding:14px;font-size:13px">'
+                    + 'Day 2 items are owner-directed scope additions after the stadium opened. They are <strong>distinct from punch list</strong> items (which are defect corrections under existing contracts).<br><br>'
+                    + '<strong>Each Day 2 item requires:</strong><br>'
+                    + '1. Scope definition<br>2. Cost estimate<br>3. Owner authorization<br><br>'
+                    + '<strong>Current status:</strong> Multiple items in various stages — from initial request through approved and in progress.</div>'
+                },
+                stakeholders: {
+                  icon: '👥', title: 'Stakeholders',
+                  body: '<div style="margin-bottom:16px"><strong>Project Stakeholders</strong></div>'
+                    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+                    + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>Owner</strong><br>Miami Freedom Park, LLC<br>Jorge Mas · Jose Mas<br><span style="font-size:12px;color:var(--muted)">Graham Oxley (day-to-day)<br>Devon McCorkle (approver)<br>Victor Oliver (approver)</span></div>'
+                    + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>CM / GC</strong><br>Lemartec Corporation<br><span style="font-size:12px;color:var(--muted)">Construction Manager as Agent</span></div>'
+                    + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>Architect of Record</strong><br>Arquitectonica (ARQ)<br><span style="font-size:12px;color:var(--muted)">Agreement executed July 27, 2023</span></div>'
+                    + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>Design Architect</strong><br>MANICA Architecture<br><span style="font-size:12px;color:var(--muted)">Agreement executed July 27, 2023</span></div>'
+                    + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>Cost Recovery Audit</strong><br>Independent analyst (confidential)<br><span style="font-size:12px;color:var(--muted)">Target: $9M+ recoverable<br>Delivery: June 30</span></div>'
+                    + '<div style="background:var(--bg);border-radius:8px;padding:14px"><strong>IMCF Operations</strong><br>Antonio Torres Roman (Lead)<br>Kaitlyn Stolzenberg<br>Nelson Fuentes (Facilities)</div>'
+                    + '</div>'
+                }
+              };
+              window.__MFP_DETAILS = details;
+              var d = details[view];
+              if (!d) return;
+
+              // Build modal HTML with resize handle
+              var html = '<div class="modal-dialog" style="max-width:' + (view === 'financials' ? '960' : '680') + 'px">'
+                + '<div class="modal-header"><div class="modal-title">' + d.icon + ' ' + d.title + '</div>'
+                + '<button class="chat-close" onclick="closeModal(\'modal-mfp-detail\')">×</button></div>'
+                + '<div class="modal-body" style="padding:20px 24px">' + d.body + '</div>'
+                + '<div class="modal-resize-handle"></div></div>';
+
+              var existing = document.getElementById('modal-mfp-detail');
+              if (!existing) {
+                var overlay = document.createElement('div');
+                overlay.id = 'modal-mfp-detail';
+                overlay.className = 'modal-overlay';
+                overlay.onclick = function(e) { if (e.target === this) closeModal('modal-mfp-detail'); };
+                document.body.appendChild(overlay);
+              }
+              document.getElementById('modal-mfp-detail').innerHTML = html;
+              document.getElementById('modal-mfp-detail').classList.add('open');
+
+              // ── DRAGGABLE ──
+              var dialog = document.querySelector('#modal-mfp-detail .modal-dialog');
+              var header = document.querySelector('#modal-mfp-detail .modal-header');
+              if (dialog && header) {
+                var dragOffX = 0, dragOffY = 0, dragActive = false;
+                header.onmousedown = function(e) {
+                  if (e.target.closest('button')) return;
+                  dragActive = true;
+                  dragOffX = e.clientX - dialog.offsetLeft;
+                  dragOffY = e.clientY - dialog.offsetTop;
+                  dialog.classList.add('dragging');
+                  e.preventDefault();
+                };
+                document.onmousemove = function(e) {
+                  if (!dragActive) return;
+                  var overlay = document.getElementById('modal-mfp-detail');
+                  var oRect = overlay.getBoundingClientRect();
+                  var maxW = oRect.width - dialog.offsetWidth;
+                  var maxH = oRect.height - dialog.offsetHeight;
+                  var x = Math.max(0, Math.min(maxW, e.clientX - dragOffX));
+                  var y = Math.max(0, Math.min(maxH, e.clientY - dragOffY));
+                  dialog.style.left = x + 'px';
+                  dialog.style.top = y + 'px';
+                  dialog.style.margin = '0';
+                };
+                document.onmouseup = function() {
+                  if (dragActive) {
+                    dragActive = false;
+                    dialog.classList.remove('dragging');
+                  }
+                };
+              }
+
+              // ── RESIZABLE ──
+              var handle = document.querySelector('#modal-mfp-detail .modal-resize-handle');
+              if (dialog && handle) {
+                var resizeActive = false, startX, startY, startW, startH;
+                handle.onmousedown = function(e) {
+                  resizeActive = true;
+                  startX = e.clientX;
+                  startY = e.clientY;
+                  startW = dialog.offsetWidth;
+                  startH = dialog.offsetHeight;
+                  dialog.classList.add('resizing');
+                  e.preventDefault();
+                  e.stopPropagation();
+                };
+                handle._resizeMove = function(e) {
+                  if (!resizeActive) return;
+                  var overlay = document.getElementById('modal-mfp-detail');
+                  var oRect = overlay.getBoundingClientRect();
+                  var newW = Math.max(320, Math.min(oRect.width - 40, startW + (e.clientX - startX)));
+                  var newH = Math.max(200, Math.min(oRect.height - 40, startH + (e.clientY - startY)));
+                  dialog.style.width = newW + 'px';
+                  dialog.style.height = newH + 'px';
+                  dialog.style.maxWidth = 'none';
+                  dialog.style.maxHeight = 'none';
+                };
+                handle._resizeUp = function() {
+                  if (resizeActive) {
+                    resizeActive = false;
+                    dialog.classList.remove('resizing');
+                  }
+                };
+                // Use event listeners directly (not ondocument to avoid conflict with drag)
+                document.addEventListener('mousemove', handle._resizeMove);
+                document.addEventListener('mouseup', handle._resizeUp);
+              }
+            }
 
 // ── TEMPLATES ─────────────────────────────────────────────────────
 function renderTemplates() {

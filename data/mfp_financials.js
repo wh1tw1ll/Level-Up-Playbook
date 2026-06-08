@@ -1,8 +1,7 @@
 // Level Up Playbook — MFP Financial Data (from Procore Commitments, contract docs, and CMA)
-// Updated June 8, 2026 — based on Procore sync and contract document extraction
-// Hard Costs — 24 subcontractors, 25 contracts
-// Soft Costs — TBD from budget docs (pending file access)
-// Design Team — TBD from budget docs (ARQ, MANICA, engineers)
+// Updated June 8, 2026 — including soft costs from budget files and design consultant log
+// Hard Costs — 24 subcontractors, 25 contracts from Procore
+// Soft Costs — from MFP Master Design Consultant Log, FF&E Budget, Construction Budget
 
 window.__MFP_FINANCIALS = {
   hard: {
@@ -14,7 +13,7 @@ window.__MFP_FINANCIALS = {
     total_paid: 412731063.00,
     total_pct_paid: 77.87,
     total_balance: 117295495.99,
-    co_volume_total: 505234546.35,  // Total volume including COs
+    co_volume_total: 505234546.35,
     // 24 subcontractors, 25 contracts
     commitments: [
       {company:"QUALICO STEEL CO., INC.",title:"Structural Steel",contract:"19069-SC-001",orig:12754688.00,co:3789983.12,revised:16544671.12,invoiced:16544671.12,paid:16309671.12,pct_paid:98.58,balance:235000.00},
@@ -45,15 +44,61 @@ window.__MFP_FINANCIALS = {
     ]
   },
   soft: {
-    // PENDING: Will populate from budget docs once file access granted
-    note: "Soft costs to be added from budget/accounting documents — expected to include design fees (ARQ, MANICA, engineers), permits, OCIP, testing, commissioning, legal, owner's rep",
-    design_team: [],
-    permits: null,
-    testing: null,
-    commissioning: null,
-    ocip: null,
-    legal: null,
-    owner_rep: null
+    // Soft Costs from MFP Master Design Consultant Log (Stadium only)
+    design_total: 28451538.00,
+    design_team: [
+      {firm:"MANICA Architecture",scope:"Design Architect",fee:5389750},
+      {firm:"Arquitectonica (ARQ)",scope:"Architect of Record",fee:6964543},
+      {firm:"ARQ Interiors",scope:"Interior Design",fee:476025},
+      {firm:"Thornton Tomassetti",scope:"Structural Engineering",fee:3452120},
+      {firm:"Schlaich Bergermann Partner (SBP)",scope:"Canopy Structural Design",fee:1574400},
+      {firm:"WJHW",scope:"Acoustical / Low Voltage / Communications",fee:3452120},
+      {firm:"Smith Seckman Reid (SSR)",scope:"MEP Engineering",fee:2501594},
+      {firm:"Kimley-Horn",scope:"Civil Engineering",fee:566500},
+      {firm:"Gensler",scope:"Signage & Wayfinding",fee:1207000},
+      {firm:"HLB",scope:"Specialty Lighting",fee:291583},
+      {firm:"SOCOTEC / SLS",scope:"Fire & Life Safety / Accessibility",fee:407500},
+      {firm:"SOCOTEC / SLS",scope:"LEED Certification",fee:237006},
+      {firm:"Duray",scope:"Food & Beverage Consulting",fee:168400},
+      {firm:"Millennium",scope:"Field Design",fee:140000},
+      {firm:"BCNO.3",scope:"Project Manual",fee:135000},
+      {firm:"Persohn/Hahn",scope:"Vertical Transportation",fee:58775},
+      {firm:"Divergent Thinkers",scope:"BIM + 4D Modeling",fee:372000},
+      {firm:"Cini-Little",scope:"Waste Management Consulting",fee:29225},
+      {firm:"Pacifica",scope:"Material Testing & Inspection",fee:318829},
+      {firm:"Smith-Emery",scope:"Steel Testing & Inspection",fee:417083},
+      {firm:"ViewPointe Consulting",scope:"Permit Expediting",fee:188835},
+      {firm:"BNI",scope:"Structural Peer Review",fee:48000},
+      {firm:"Studio08",scope:"Door Hardware Consulting",fee:55250}
+    ],
+    // FF&E Budget (from FF&E Budget.xlsx — total $18,259,000)
+    ffe_budget: 18259000,
+    ffe_breakdown: [
+      {category:"Grounds & Field Equipment",amount:3525000},
+      {category:"Facilities Operations",amount:1075000},
+      {category:"Food & Beverage",amount:3500000},
+      {category:"Broadcast & Event Ops",amount:150000},
+      {category:"Merchandise & Retail",amount:750000},
+      {category:"FF&E (Designed)",amount:2225000},
+      {category:"Football Operations",amount:300000},
+      {category:"Technology",amount:2200000},
+      {category:"Security",amount:750000},
+      {category:"Artwork & Activations",amount:250000},
+      {category:"Warehouse/Delivery (4%)",amount:589000},
+      {category:"Installation (8%)",amount:1178000},
+      {category:"Freight (5%)",amount:736250},
+      {category:"Tax (7%)",amount:1030750}
+    ],
+    // Additional soft costs from Budget files
+    freight: 12300000,
+    customs_duties: 12500000,
+    contingency: 15500000,
+    owner_rep: null,        // Level Up fee — confidential
+    legal: null,            // Not found in files yet
+    ocip: null,             // Not found in files yet
+    commissioning: null,    // Not found in files yet
+    permits: 188835,        // Included in design_team (ViewPointe)
+    note: "Design team fees from Master Consultant Log (Stadium only). Other soft costs (OCIP, legal, owner's rep, commissioning) not yet sourced from files"
   },
   // Project context summary from mfp_context.js and contract extraction
   summary: {
