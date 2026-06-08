@@ -289,7 +289,7 @@ function renderStats() {
 
 // ── REMINDERS ──────────────────────────────────────────────────────
 function renderReminders() {
-  var el = document.getElementById('home-reminders');
+  var el = document.getElementById('luna-reminders');
   if (!el) return;
   var now = new Date();
   var day = now.getDate();
@@ -967,7 +967,6 @@ function renderTemplates() {
   }
 
   var catState = {};
-  try { var saved = localStorage.getItem('lu_tmpl_cats'); if (saved) catState = JSON.parse(saved); } catch(e) {}
 
   // Group by category
   var byCategory = {};
@@ -1659,7 +1658,14 @@ function init() {
   }
 
   // Render stats on home page
-    renderStats();
+      renderStats();
+      // Update data sync timestamp
+      var freqEl = document.querySelector('.luna-status-freq');
+      if (freqEl) {
+        var now = new Date();
+        var timeStr = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        freqEl.textContent = 'Data updated ' + timeStr;
+      }
     var urlParams = new URLSearchParams(window.location.search);
     var authSuccess = urlParams.get('auth') === 'success';
     var returnView = 'luna';

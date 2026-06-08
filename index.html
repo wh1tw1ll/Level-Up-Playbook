@@ -19,9 +19,9 @@
 <!-- ===== TOPBAR ===== -->
 <header class="topbar">
   <a class="topbar-logo-link" href="#" onclick="goHome();return false" title="Level Up Home">
-    <img class="topbar-logo" src="assets/level-up-logo.jpg?v=1" alt="Level Up Project Development">
-  </a>
-  <span class="topbar-tagline">L.U.N.A. — Level Up Navigator &amp; Advisor</span>
+      <img class="topbar-logo" src="assets/lockup-black.svg?v=1" alt="Level Up Project Development">
+    </a>
+  <span class="topbar-tagline">Level Up Project Search &amp; Intelligence</span>
   <button id="theme-btn" class="topbar-btn" onclick="toggleTheme()" title="Toggle theme">☀</button>
   <div id="auth-user-info" class="topbar-user" style="display:none">
     <span id="auth-user-name"></span>
@@ -63,11 +63,8 @@
                 <g transform="translate(4498 60)"><path d="M62 495 H143 A62 62 0 0 1 205 557 V638 A62 62 0 0 1 143 700 H62 A62 62 0 0 1 0 638 V557 A62 62 0 0 1 62 495 Z" fill="currentColor" fill-rule="nonzero"/></g>
               </svg>
             </div>
-      <div class="luna-hero-subtitle">Level Up Navigator &amp; Advisor</div>
-      <div class="luna-hero-brand-row">
-      <img class="luna-hero-brand-logo" src="assets/level-up-logo.jpg?v=1" alt="Level Up">
-      <span class="luna-hero-brand-text">Powered by Level Up Project Development</span>
-    </div>
+                  <div class="luna-hero-subtitle">Level Up Project Search &amp; Intelligence</div>
+    <div id="luna-reminders" class="luna-reminders"></div>
     <div class="luna-hero-search-row">
       <input id="luna-hero-input" class="luna-hero-input" type="text" placeholder="Ask anything about the playbook, projects, budget, punch list, change orders..." autocomplete="off" onkeydown="if(event.key==='Enter')heroSearch()" oninput="heroSearchType(this.value)">
       <button class="luna-hero-btn" onclick="heroSearch()">Ask</button>
@@ -84,7 +81,11 @@
           <button class="luna-hero-quick" onclick="heroQuick('What documents do I need at each project phase?')">📁 Documents by phase</button>
         </div>
     <div id="luna-hero-results" class="luna-hero-results"></div>
-    <div class="luna-hero-footer">L.U.N.A. — Level Up Navigator &amp; Advisor</div>
+    <div class="luna-status-bar">
+      <span>Search playbook, projects, budget, templates, and more</span>
+      <span class="luna-status-freq">Data: synced minutes ago</span>
+    </div>
+    <div class="luna-hero-footer">L.U.N.A. — Level Up Project Search &amp; Intelligence</div>
   </div>
 </div>
 
