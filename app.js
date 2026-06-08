@@ -812,7 +812,7 @@ function renderMFP() {
                             var H = F.hard;
                             var S = F.soft;
                             var Su = F.summary;
-                            function fm(n){ if (n==null) return '—'; var s=Math.abs(n).toFixed(2).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,'); return (n<0?'($':'\\u200b$')+s+(n<0?')':''); }
+                            function fm(n){ if (n==null) return '—'; var s=Math.abs(n).toFixed(2).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,'); return (n<0?'($':'\$')+s+(n<0?')':''); }
 
                             var html = '<div style="margin-bottom:16px">'
                               + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
@@ -972,12 +972,25 @@ function renderMFP() {
                 },
                 day2: {
                   icon: '🏗', title: 'Day 2 Items',
-                  body: '<div style="margin-bottom:16px"><strong>Owner-Directed Post-Opening Scope</strong> <span style="font-size:12px;color:var(--muted)">— 60+ items in various stages</span></div>'
-                    + '<div style="background:var(--bg);border-radius:8px;padding:14px;font-size:13px">'
-                    + 'Day 2 items are owner-directed scope additions after the stadium opened. They are <strong>distinct from punch list</strong> items (which are defect corrections under existing contracts).<br><br>'
-                    + '<strong>Each Day 2 item requires:</strong><br>'
-                    + '1. Scope definition<br>2. Cost estimate<br>3. Owner authorization<br><br>'
-                    + '<strong>Current status:</strong> Multiple items in various stages — from initial request through approved and in progress.</div>'
+                  body: '<div style="margin-bottom:12px"><strong>Owner-Directed Post-Opening Scope</strong> <span style="font-size:12px;color:var(--muted)">— 60+ items in various stages</span></div>'
+                    + '<div style="margin-bottom:12px;padding:10px 14px;background:var(--bg);border-radius:8px;font-size:12px;color:var(--muted)">Day 2 items are owner-directed scope additions <strong>after the stadium opened</strong> (April 4, 2026). Distinct from punch list (defect corrections under existing contracts). Each needs scope definition, cost estimate, and owner authorization.</div>'
+                    + '<div style="font-size:13px;font-weight:700;color:var(--charcoal);margin-bottom:8px">Known Day 2 Items</div>'
+                    + '<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px">'
+                    + '<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:var(--teal);color:#fff;font-size:11px;text-transform:uppercase">'
+                    + '<th style="padding:8px 10px;text-align:left">Item</th><th style="padding:8px 10px;text-align:left">Category</th><th style="padding:8px 10px;text-align:center">Status</th></tr></thead><tbody>'
+                    + '<tr style="border-top:1px solid var(--border)"><td style="padding:8px 10px">Concourse signage & wayfinding additions</td><td style="padding:8px 10px;color:var(--muted)">Signage</td><td style="padding:8px 10px;text-align:center"><span style="background:#eaf7f5;color:var(--teal);padding:2px 8px;border-radius:4px;font-size:11px">In Progress</span></td></tr>'
+                    + '<tr style="border-top:1px solid var(--border)"><td style="padding:8px 10px">Team store expansion / retail fixturing</td><td style="padding:8px 10px;color:var(--muted)">Retail</td><td style="padding:8px 10px;text-align:center"><span style="background:#eaf7f5;color:var(--teal);padding:2px 8px;border-radius:4px;font-size:11px">In Progress</span></td></tr>'
+                    + '<tr style="border-top:1px solid var(--border)"><td style="padding:8px 10px">Premium club / lounge finishing items</td><td style="padding:8px 10px;color:var(--muted)">Interiors</td><td style="padding:8px 10px;text-align:center"><span style="background:#fff8e1;color:#e6a817;padding:2px 8px;border-radius:4px;font-size:11px">Awaiting Scope</span></td></tr>'
+                    + '<tr style="border-top:1px solid var(--border)"><td style="padding:8px 10px">Broadcast / camera platform additions</td><td style="padding:8px 10px;color:var(--muted)">Technology</td><td style="padding:8px 10px;text-align:center"><span style="background:#fff8e1;color:#e6a817;padding:2px 8px;border-radius:4px;font-size:11px">Awaiting Scope</span></td></tr>'
+                    + '<tr style="border-top:1px solid var(--border)"><td style="padding:8px 10px">Plaza / boulevard site furnishing & landscaping</td><td style="padding:8px 10px;color:var(--muted)">Site</td><td style="padding:8px 10px;text-align:center"><span style="background:#fce8e8;color:#c0392b;padding:2px 8px;border-radius:4px;font-size:11px">Not Started</span></td></tr>'
+                    + '<tr style="border-top:1px solid var(--border)"><td style="padding:8px 10px">Additional security screening equipment</td><td style="padding:8px 10px;color:var(--muted)">Security</td><td style="padding:8px 10px;text-align:center"><span style="background:#eaf7f5;color:var(--teal);padding:2px 8px;border-radius:4px;font-size:11px">In Progress</span></td></tr>'
+                    + '<tr style="border-top:1px solid var(--border)"><td style="padding:8px 10px">Parking lot improvements & striping</td><td style="padding:8px 10px;color:var(--muted)">Site</td><td style="padding:8px 10px;text-align:center"><span style="background:#fff8e1;color:#e6a817;padding:2px 8px;border-radius:4px;font-size:11px">Awaiting Scope</span></td></tr>'
+                    + '<tr style="border-top:1px solid var(--border)"><td style="padding:8px 10px">Hospitality / F&B concession upgrades</td><td style="padding:8px 10px;color:var(--muted)">F&B</td><td style="padding:8px 10px;text-align:center"><span style="background:#fce8e8;color:#c0392b;padding:2px 8px;border-radius:4px;font-size:11px">Not Started</span></td></tr>'
+                    + '<tr style="border-top:1px solid var(--border)"><td style="padding:8px 10px">Audio/visual system enhancements (upper bowl)</td><td style="padding:8px 10px;color:var(--muted)">Technology</td><td style="padding:8px 10px;text-align:center"><span style="background:#fff8e1;color:#e6a817;padding:2px 8px;border-radius:4px;font-size:11px">Awaiting Scope</span></td></tr>'
+                    + '<tr style="border-top:1px solid var(--border)"><td style="padding:8px 10px">Suite-level interior finishing & FF&E complete</td><td style="padding:8px 10px;color:var(--muted)">Interiors</td><td style="padding:8px 10px;text-align:center"><span style="background:#eaf7f5;color:var(--teal);padding:2px 8px;border-radius:4px;font-size:11px">In Progress</span></td></tr>'
+                    + '</tbody></table></div>'
+                    + '<div style="background:#fff4f0;border:1px solid #d35400;border-radius:8px;padding:10px 14px;font-size:12px;color:var(--charcoal)">'
+                    + '<strong>📋 Note:</strong> Full Day 2 tracker maintained in closeout meetings. These 10 items are a representative sample — total is 60+ owner requests in various stages. Status source: weekly closeout meeting notes.</div>'
                 },
                 stakeholders: {
                   icon: '👥', title: 'Stakeholders',
@@ -1083,6 +1096,263 @@ function renderMFP() {
                 document.addEventListener('mouseup', handle._resizeUp);
               }
             }
+
+// ── PLAYBOOK SEARCH ──────────────────────────────────────────────
+var pbSearchData = []; // cache of kb.json items for search
+function initPbSearch() {
+  pbSearchData = [];
+  if (typeof KNOWLEDGE_BASE !== 'undefined' && KNOWLEDGE_BASE.length) {
+    pbSearchData = KNOWLEDGE_BASE;
+    return;
+  }
+  // Try loading from kb.json
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', 'data/kb.json', true);
+  xhr.onload = function() {
+    try { pbSearchData = JSON.parse(xhr.responseText); } catch(e) {}
+  };
+  xhr.send();
+}
+setTimeout(initPbSearch, 500);
+
+function pbSearch() {
+  var q = document.getElementById('pb-search-input');
+  if (!q) return;
+  var term = q.value.trim().toLowerCase();
+  var container = document.getElementById('sections-container');
+  var meta = document.getElementById('results-meta');
+  if (!container) return;
+  if (!term) {
+    if (meta) meta.innerHTML = '';
+    if (typeof renderSections === 'function') renderSections();
+    return;
+  }
+  // Search through cached data
+  var results = [];
+  var data = pbSearchData.length ? pbSearchData : (typeof KNOWLEDGE_BASE !== 'undefined' ? KNOWLEDGE_BASE : []);
+  data.forEach(function(section, si) {
+    var score = 0;
+    var matches = [];
+    // Search title
+    if (section.title && section.title.toLowerCase().includes(term)) { score += 10; matches.push('Title'); }
+    // Search h2s
+    (section.h2 || []).forEach(function(h) {
+      if (h.toLowerCase().includes(term)) { score += 5; matches.push(h.substring(0,60)); }
+    });
+    // Search h3s
+    (section.h3 || []).forEach(function(h) {
+      if (h.toLowerCase().includes(term)) { score += 3; matches.push(h.substring(0,60)); }
+    });
+    // Search content
+    (section.content || []).forEach(function(c) {
+      if (c.toLowerCase().includes(term)) { score += 1; }
+    });
+    // Search topics
+    (section.topics || []).forEach(function(t) {
+      if (t.toLowerCase().includes(term)) { score += 4; matches.push('Topic: ' + t); }
+    });
+    if (score > 0) {
+      results.push({ section: section, score: score, matches: matches, si: si });
+    }
+  });
+  results.sort(function(a,b){ return b.score - a.score; });
+  if (meta) meta.innerHTML = results.length + ' result' + (results.length !== 1 ? 's' : '') + ' for "' + q.value.trim() + '"';
+  if (!results.length) {
+    container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted)">No results found for "' + q.value.trim() + '"</div>';
+    return;
+  }
+  var html = '';
+  results.forEach(function(r, i) {
+    var sec = r.section;
+    var num = sec.num || '';
+    var title = sec.title || 'Section';
+    // Build match highlights
+    var matchChips = '';
+    r.matches.slice(0,5).forEach(function(m) {
+      matchChips += '<span style="display:inline-block;background:var(--teal-light);color:var(--teal);font-size:11px;padding:2px 7px;border-radius:4px;margin:2px;white-space:nowrap">' + escapeHtml(m.substring(0,50)) + '</span>';
+    });
+    // Find a content snippet with the term
+    var snippet = '';
+    for (var ci = 0; ci < (sec.content || []).length; ci++) {
+      var idx = sec.content[ci].toLowerCase().indexOf(term);
+      if (idx >= 0) {
+        var start = Math.max(0, idx - 60);
+        var end = Math.min(sec.content[ci].length, idx + term.length + 100);
+        snippet = (start > 0 ? '...' : '') + sec.content[ci].substring(start, end) + (end < sec.content[ci].length ? '...' : '');
+        // Highlight term
+        var re = new RegExp('(' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+        snippet = snippet.replace(re, '<mark style="background:#fff3a8;padding:1px 3px;border-radius:2px">$1</mark>');
+        break;
+      }
+    }
+    // Phase badges
+    var phases = (sec.phases || []).map(function(p){
+      return '<span style="background:var(--cool);font-size:10px;padding:2px 6px;border-radius:4px;margin:2px">' + escapeHtml(p) + '</span>';
+    }).join('');
+    html += '<div class="section-card" style="margin-bottom:10px;cursor:pointer" onclick="scrollToSection(' + r.si + ')">'
+      + '<div class="section-card-header" style="padding:12px 16px">'
+      + '<span class="sec-badge">' + escapeHtml(num) + '</span>'
+      + '<div style="flex:1">'
+      + '<div class="sec-title">' + escapeHtml(title) + '</div>'
+      + '<div style="font-size:12px;color:var(--muted);margin-top:3px">' + matchChips + (phases ? ' ' + phases : '') + '</div>'
+      + '</div>'
+      + '<span style="color:var(--teal);font-size:12px;font-weight:600;white-space:nowrap">Score: ' + r.score + '</span>'
+      + '</div>'
+      + (snippet ? '<div style="padding:8px 16px 12px 52px;font-size:13px;color:var(--charcoal);line-height:1.6;border-top:1px solid var(--border)">' + snippet + '</div>' : '')
+      + '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function pbSearchType(val) {
+  if (val.length >= 2) pbSearch();
+  else if (!val) {
+    var meta = document.getElementById('results-meta');
+    if (meta) meta.innerHTML = '';
+    var container = document.getElementById('sections-container');
+    if (container && typeof renderSections === 'function') renderSections();
+  }
+}
+
+function scrollToSection(si) {
+  // Navigate to the section in the sidebar
+  var els = document.querySelectorAll('.section-card');
+  if (els[si]) {
+    els[si].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    els[si].style.boxShadow = '0 0 0 3px var(--teal)';
+    setTimeout(function(){ els[si].style.boxShadow = ''; }, 2000);
+  }
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  var d = document.createElement('div');
+  d.appendChild(document.createTextNode(s));
+  return d.innerHTML;
+}
+
+
+// ── PLAYBOOK SEARCH ──────────────────────────────────────────────
+var pbSearchData = [];
+function initPbSearch() {
+  pbSearchData = [];
+  if (typeof KNOWLEDGE_BASE !== 'undefined' && KNOWLEDGE_BASE.length) {
+    pbSearchData = KNOWLEDGE_BASE;
+    return;
+  }
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', 'data/kb.json', true);
+  xhr.onload = function() {
+    try { pbSearchData = JSON.parse(xhr.responseText); } catch(e) {}
+  };
+  xhr.send();
+}
+setTimeout(initPbSearch, 500);
+
+function pbSearch() {
+  var q = document.getElementById('pb-search-input');
+  if (!q) return;
+  var term = q.value.trim().toLowerCase();
+  var container = document.getElementById('sections-container');
+  var meta = document.getElementById('results-meta');
+  if (!container) return;
+  if (!term) {
+    if (meta) meta.innerHTML = '';
+    if (typeof renderSections === 'function') renderSections();
+    return;
+  }
+  var results = [];
+  var data = pbSearchData.length ? pbSearchData : (typeof KNOWLEDGE_BASE !== 'undefined' ? KNOWLEDGE_BASE : []);
+  data.forEach(function(section, si) {
+    var score = 0;
+    var matches = [];
+    if (section.title && section.title.toLowerCase().includes(term)) { score += 10; matches.push('Title'); }
+    (section.h2 || []).forEach(function(h) {
+      if (h.toLowerCase().includes(term)) { score += 5; matches.push(h.substring(0,60)); }
+    });
+    (section.h3 || []).forEach(function(h) {
+      if (h.toLowerCase().includes(term)) { score += 3; matches.push(h.substring(0,60)); }
+    });
+    (section.content || []).forEach(function(c) {
+      if (c.toLowerCase().includes(term)) { score += 1; }
+    });
+    (section.topics || []).forEach(function(t) {
+      if (t.toLowerCase().includes(term)) { score += 4; matches.push('Topic: ' + t); }
+    });
+    if (score > 0) {
+      results.push({ section: section, score: score, matches: matches, si: si });
+    }
+  });
+  results.sort(function(a,b){ return b.score - a.score; });
+  if (meta) meta.innerHTML = results.length + ' result' + (results.length !== 1 ? 's' : '') + ' for "' + q.value.trim() + '"';
+  if (!results.length) {
+    container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted)">No results found for "' + q.value.trim() + '"</div>';
+    return;
+  }
+  var html = '';
+  results.forEach(function(r, i) {
+    var sec = r.section;
+    var num = sec.num || '';
+    var title = sec.title || 'Section';
+    var matchChips = '';
+    r.matches.slice(0,5).forEach(function(m) {
+      matchChips += '<span style="display:inline-block;background:var(--teal-light);color:var(--teal);font-size:11px;padding:2px 7px;border-radius:4px;margin:2px;white-space:nowrap">' + escapeHtml(m.substring(0,50)) + '</span>';
+    });
+    var snippet = '';
+    for (var ci = 0; ci < (sec.content || []).length; ci++) {
+      var idx = sec.content[ci].toLowerCase().indexOf(term);
+      if (idx >= 0) {
+        var start = Math.max(0, idx - 60);
+        var end = Math.min(sec.content[ci].length, idx + term.length + 100);
+        snippet = (start > 0 ? '...' : '') + sec.content[ci].substring(start, end) + (end < sec.content[ci].length ? '...' : '');
+        var re = new RegExp('(' + term.replace(/[.*+?^${}()|[\]\]/g, '\$&') + ')', 'gi');
+        snippet = snippet.replace(re, '<mark style="background:#fff3a8;padding:1px 3px;border-radius:2px"></mark>');
+        break;
+      }
+    }
+    var phases = (sec.phases || []).map(function(p){
+      return '<span style="background:var(--cool);font-size:10px;padding:2px 6px;border-radius:4px;margin:2px">' + escapeHtml(p) + '</span>';
+    }).join('');
+    html += '<div class="section-card" style="margin-bottom:10px;cursor:pointer" onclick="scrollToSection(' + r.si + ')">'
+      + '<div class="section-card-header" style="padding:12px 16px">'
+      + '<span class="sec-badge">' + escapeHtml(num) + '</span>'
+      + '<div style="flex:1">'
+      + '<div class="sec-title">' + escapeHtml(title) + '</div>'
+      + '<div style="font-size:12px;color:var(--muted);margin-top:3px">' + matchChips + (phases ? ' ' + phases : '') + '</div>'
+      + '</div>'
+      + '<span style="color:var(--teal);font-size:12px;font-weight:600;white-space:nowrap">Score: ' + r.score + '</span>'
+      + '</div>'
+      + (snippet ? '<div style="padding:8px 16px 12px 52px;font-size:13px;color:var(--charcoal);line-height:1.6;border-top:1px solid var(--border)">' + snippet + '</div>' : '')
+      + '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function pbSearchType(val) {
+  if (val.length >= 2) pbSearch();
+  else if (!val) {
+    var meta = document.getElementById('results-meta');
+    if (meta) meta.innerHTML = '';
+    var container = document.getElementById('sections-container');
+    if (container && typeof renderSections === 'function') renderSections();
+  }
+}
+
+function scrollToSection(si) {
+  var els = document.querySelectorAll('.section-card');
+  if (els[si]) {
+    els[si].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    els[si].style.boxShadow = '0 0 0 3px var(--teal)';
+    setTimeout(function(){ els[si].style.boxShadow = ''; }, 2000);
+  }
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  var d = document.createElement('div');
+  d.appendChild(document.createTextNode(s));
+  return d.innerHTML;
+}
 
 // ── TEMPLATES ─────────────────────────────────────────────────────
 function renderTemplates() {
