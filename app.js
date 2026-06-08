@@ -745,15 +745,19 @@ function renderMFP() {
       if (mfpModal) mfpModal.classList.remove('open');
     }
   var stadiumVal = S ? fm(S.stadium_base_contract) : '$530M';
-  var pctComplete = S ? S.stadium_pct_complete.toFixed(1) + '%' : '94.2%';
-  var budgetVal = S ? fm(S.total_budget) : '$824M';
-  var paidVal = S ? fm(S.paid_to_date) : '';
-  var retainVal = S ? fm(S.retainage_held) : '';
-  var millerOut = H ? fm(H.commitments.find(function(c){return c.company.indexOf('MILLER')>=0;}).balance) : '';
-  el.innerHTML = '<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px">'
-    + '<div style="font-size:13px;color:var(--muted);margin-bottom:4px">CURRENT PHASE</div>'
-    + '<div style="font-size:18px;font-weight:700;color:var(--charcoal);margin-bottom:8px">Post-Opening / Active Closeout</div>'
-    + '<div style="font-size:14px;color:var(--charcoal);line-height:1.6">Home opener April 4, 2026 completed. Active workstreams: punch list closeout, Kroll cost recovery audit (delivery June 30), Lemartec contract closeout, HVAC service agreement transfer, Day 2 owner requests log.</div>'
+    var pctComplete = S ? S.stadium_pct_complete.toFixed(1) + '%' : '94.2%';
+    var budgetVal = S ? fm(S.total_budget) : '$824M';
+    var paidVal = S ? fm(S.paid_to_date) : '';
+    var retainVal = S ? fm(S.retainage_held) : '';
+    var pastDueVal = S ? fm(S.past_due) : '';
+    var approvedCOs = S ? fm(S.approved_cos_total) : '';
+    var krollTarget = S ? '$' + Math.abs(S.kroll_recovery_target || 9000000).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') + '+ recoverable' : '$9M+';
+    var daysPast = S ? S.days_past_baseline + ' days past baseline' : '153 days past baseline';
+    var millerOut = H ? fm(H.commitments.find(function(c){return c.company.indexOf('MILLER')>=0;}).balance) : '';
+    el.innerHTML = '<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px">'
+      + '<div style="font-size:13px;color:var(--muted);margin-bottom:4px">CURRENT PHASE <span style="color:#c0392b;font-weight:700">| ' + daysPast + '</span></div>'
+      + '<div style="font-size:18px;font-weight:700;color:var(--charcoal);margin-bottom:8px">Post-Opening / Active Closeout</div>'
+      + '<div style="font-size:14px;color:var(--charcoal);line-height:1.6">Home opener April 4, 2026 completed. Targeting final completion ' + (S ? S.target_completion : 'July 31, 2026') + '. Active workstreams: punch list closeout, Kroll cost recovery audit (delivery June 30), Lemartec contract closeout, HVAC service agreement transfer, Day 2 owner requests log.</div>'
     + '</div>'
     + '<div class="mfp-grid">'
     + '<div class="mfp-card" onclick="toggleMFPExpand(this, \'issues\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDD34</span><span class="mfp-card-title">Live Issues</span><span class="mfp-badge red">5 HIGH</span></div><div class="mfp-card-summary">ARQ payment hold (~$1.5M Feb-Apr invoices), Kroll audit deadline, Lemartec punch list disputes, HVAC contractor departure risk, Lemartec indirect cost gap.</div><div class="mfp-expand-content"></div></div>'
@@ -810,7 +814,7 @@ function renderMFP() {
                     var H = F.hard;
                     var S = F.summary;
                     // format helper
-                    function fm(n){ if (n==null) return '—'; var s=Math.abs(n).toFixed(2).replace(/(\\d)(?=(\\d\\d\\d)+(?!\\d))/g,'$1,'); return (n<0?'($':'\u200b$')+s+(n<0?')':''); }
+                    function fm(n){ if (n==null) return '—'; var s=Math.abs(n).toFixed(2).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,'); return (n<0?'($':'\u200b$')+s+(n<0?')':''); }
 
                     var html = '<div style="margin-bottom:16px">'
                       + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'

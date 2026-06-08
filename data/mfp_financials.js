@@ -1,4 +1,5 @@
-// Level Up Playbook — MFP Financial Data (from Procore Commitments)
+// Level Up Playbook — MFP Financial Data (from Procore Commitments, contract docs, and CMA)
+// Updated June 8, 2026 — based on Procore sync and contract document extraction
 // Hard Costs — 24 subcontractors, 25 contracts
 // Soft Costs — TBD from budget docs (pending file access)
 // Design Team — TBD from budget docs (ARQ, MANICA, engineers)
@@ -6,13 +7,14 @@
 window.__MFP_FINANCIALS = {
   hard: {
     total_original: 484725419.99,
-    total_approved_cos: 20509126.36,
-    total_revised: 505234546.35,
+    total_approved_cos: 45301139.00,
+    total_revised: 530026558.99,
     total_pending_cos: 4868713.98,
     total_invoiced: 459357694.50,
-    total_paid: 399979579.48,
-    total_pct_paid: 79.17,
-    total_balance: 105254966.87,
+    total_paid: 412731063.00,
+    total_pct_paid: 77.87,
+    total_balance: 117295495.99,
+    co_volume_total: 505234546.35,  // Total volume including COs
     // 24 subcontractors, 25 contracts
     commitments: [
       {company:"QUALICO STEEL CO., INC.",title:"Structural Steel",contract:"19069-SC-001",orig:12754688.00,co:3789983.12,revised:16544671.12,invoiced:16544671.12,paid:16309671.12,pct_paid:98.58,balance:235000.00},
@@ -53,7 +55,7 @@ window.__MFP_FINANCIALS = {
     legal: null,
     owner_rep: null
   },
-  // Project context summary from mfp_context.js (consolidated)
+  // Project context summary from mfp_context.js and contract extraction
   summary: {
     total_budget: 824199990,
     budget_at_closing: 710953041,
@@ -63,7 +65,13 @@ window.__MFP_FINANCIALS = {
     past_due: 11779630,
     stadium_base_contract: 530448817,
     stadium_pct_complete: 94.2,
+    approved_cos_total: 45301139,
     lemartec_indirects_outstanding: 39639976,
-    retainage_held: 25454318
+    retainage_held: 25454318,
+    days_past_baseline: 153,
+    target_completion: "July 31, 2026",
+    home_opener: "April 4, 2026",
+    kroll_recovery_target: 9000000,
+    kroll_delivery: "June 30, 2026"
   }
 };
