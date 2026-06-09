@@ -53,11 +53,15 @@ export default async function handler(req, res) {
   if (!query) return res.status(400).json({ error: 'query required' });
 
   try {
-    const r = await fetch('https://graph.microsoft.com/v1.0/search/query', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${refreshed.access_token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ requests: [{ entityTypes:['driveItem'], query:{queryString:query}, from:0, size:20 }] }),
-    });
-    res.json(await r.json());
-  } catch(e) { res.status(500).json({ error: e.message }); }
+      const r = await fetch('https://graph.microsoft.com/v1.0/search/query', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${refreshed.access_token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requests: [{ entityTypes:['driveItem'], query:{queryString:query}, from:0, size:20 }] }),
+      });
+      if (!r.ok) {
+        const errText = await r.text().catch(() => 'Unknown error');
+        return res.status(r.status).json({ error: `Graph API error: ${r.status}`, detail: errText.slice(0, 500) });
+      }
+      res.json(await r.json());
+    } catch(e) { res.status(500).json({ error: e.message }); }
 }

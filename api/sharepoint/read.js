@@ -1,4 +1,39 @@
 // api/sharepoint/read.js — reads a specific file via driveId + itemId
+async function refreshIfNeeded(tokenData) {
+  if (tokenData.expires_at > Date.now() + 5*60*1000) return tokenData;
+  if (!tokenData.refresh_token) return null;
+  const TENANT_ID = process.env.LU_TENANT_ID;
+  const r = await fetch(`https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: process.env.LU_CLIENT_ID,
+      client_secret: process.env.LU_CLIENT_SECRET,
+      refresh_token: tokenData.refresh_token,
+      grant_type: 'refresh_token',
+      scope: 'openid profile email offline_access Files.Read.All Sites.Read.All Mail.Read Calendars.Read User.Read'
+    })
+  });
+  const tokens = await r.json();
+  if (tokens.error || !tokens.access_token) return null;
+  return {
+    access_token: tokens.access_token,
+    refresh_token: tokens.refresh_token || tokenData.refresh_token,
+    expires_at: Date.now() + ((tokens.expires_in || 3600) * 1000),
+    name: tokenData.name,
+    email: tokenData.email
+  };
+}
+
+function writeRefreshCookies(res, data) {
+  const authPayload = JSON.stringify(data);
+  const sessionPayload = JSON.stringify({ name: data.name, email: data.email, expires_at: data.expires_at });
+  res.setHeader('Set-Cookie', [
+    `lu_auth=${encodeURIComponent(authPayload)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${7*24*3600}`,
+    `lu_session=${encodeURIComponent(sessionPayload)}; Path=/; Secure; SameSite=Lax; Max-Age=${7*24*3600}`
+  ]);
+}
+
 export default async function handler(req, res) {
     // Parse cookie manually (consistent with other auth endpoints)
   const raw = req.headers['cookie'] || '';
@@ -10,10 +45,14 @@ export default async function handler(req, res) {
   let tokenData;
     try {
           tokenData = JSON.parse(decodeURIComponent(enc));
-          if (Date.now() > tokenData.expires_at) return res.status(401).json({ error: 'Session expired' });
     } catch {
           return res.status(401).json({ error: 'Invalid auth' });
     }
+
+  // Refresh token if needed
+  const refreshed = await refreshIfNeeded(tokenData);
+  if (!refreshed) return res.status(401).json({ error: 'Session expired' });
+  if (refreshed !== tokenData) writeRefreshCookies(res, refreshed);
 
   const { driveId, itemId } = req.query;
     if (!driveId || !itemId) return res.status(400).json({ error: 'driveId and itemId required' });

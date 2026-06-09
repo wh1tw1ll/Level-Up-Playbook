@@ -9,10 +9,12 @@
   var t;try{t=localStorage.getItem('lu_theme')}catch(e){}
   if(!t) t=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
   document.documentElement.setAttribute('data-theme',t);
+  // Sync theme button icon immediately to avoid flash
+  document.documentElement.setAttribute('data-btn-theme', t === 'dark' ? '☾' : '☀');
 })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260608-16">
+<link rel="stylesheet" href="styles.css?v=20260608-17">
 </head>
 <body>
 
@@ -23,7 +25,7 @@
       <img class="topbar-logo" src="assets/lockup-black.svg?v=1" alt="Level Up Project Development">
     </a>
   <span class="topbar-tagline">Level Up Project Search &amp; Intelligence</span>
-  <button id="theme-btn" class="topbar-btn" onclick="toggleTheme()" title="Toggle theme">☀</button>
+  <button id="theme-btn" class="topbar-btn" onclick="toggleTheme()" title="Toggle theme"></button>
   <div id="auth-user-info" class="topbar-user" style="display:none">
     <span id="auth-user-name"></span>
     <button class="topbar-btn" onclick="signOut()">Sign out</button>
@@ -294,6 +296,6 @@
             <script src="data/mfp_financials.js?v=20260608"></script>
             <script src="data/mfp_cowatchdog.js?v=20260608"></script>
             <script src="data/kb.js?v=20260608"></script>
-      <script defer src="app.js?v=20260608-16"></script>
+      <script defer src="app.js?v=20260608-17"></script>
 </body>
 </html>

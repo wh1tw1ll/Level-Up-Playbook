@@ -54,10 +54,14 @@ export default async function handler(req, res) {
 
   const limit = Math.min(parseInt(req.query.limit||'20'), 50);
   try {
-    const r = await fetch(
-      `https://graph.microsoft.com/v1.0/me/messages?$top=${limit}&$select=subject,from,receivedDateTime,bodyPreview,isRead,webLink&$orderby=receivedDateTime desc`,
-      { headers: { Authorization: `Bearer ${refreshed.access_token}` } }
-    );
-    res.json(await r.json());
-  } catch(e) { res.status(500).json({ error: e.message }); }
+      const r = await fetch(
+        `https://graph.microsoft.com/v1.0/me/messages?$top=${limit}&$select=subject,from,receivedDateTime,bodyPreview,isRead,webLink&$orderby=receivedDateTime desc`,
+        { headers: { Authorization: `Bearer ${refreshed.access_token}` } }
+      );
+      if (!r.ok) {
+        const errText = await r.text().catch(() => 'Unknown error');
+        return res.status(r.status).json({ error: `Graph API error: ${r.status}`, detail: errText.slice(0, 500) });
+      }
+      res.json(await r.json());
+    } catch(e) { res.status(500).json({ error: e.message }); }
 }

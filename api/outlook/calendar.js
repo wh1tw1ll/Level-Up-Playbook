@@ -53,10 +53,14 @@ export default async function handler(req, res) {
   const now  = new Date().toISOString();
   const end  = new Date(Date.now() + days*86400000).toISOString();
   try {
-    const r = await fetch(
-      `https://graph.microsoft.com/v1.0/me/calendarview?startDateTime=${now}&endDateTime=${end}&$top=20&$select=subject,start,end,location,organizer,webLink,bodyPreview&$orderby=start/dateTime`,
-      { headers: { Authorization: `Bearer ${refreshed.access_token}`, Prefer: 'outlook.timezone="Eastern Standard Time"' } }
-    );
-    res.json(await r.json());
-  } catch(e) { res.status(500).json({ error: e.message }); }
+      const r = await fetch(
+        `https://graph.microsoft.com/v1.0/me/calendarview?startdatetime=${start}&enddatetime=${end}&$select=subject,start,end,location,isOnlineMeeting,onlineMeetingUrl&$top=50&$orderby=start/dateTime`,
+        { headers: { Authorization: `Bearer ${refreshed.access_token}` } }
+      );
+      if (!r.ok) {
+        const errText = await r.text().catch(() => 'Unknown error');
+        return res.status(r.status).json({ error: `Graph API error: ${r.status}`, detail: errText.slice(0, 500) });
+      }
+      res.json(await r.json());
+    } catch(e) { res.status(500).json({ error: e.message }); }
 }

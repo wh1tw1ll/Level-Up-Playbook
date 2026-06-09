@@ -153,8 +153,7 @@ function signOut() {
 // ── THEME ─────────────────────────────────────────────────────────
 function applyTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
-  var btn = document.getElementById('theme-btn');
-  if (btn) btn.textContent = t === 'dark' ? '☽' : '☀';
+  document.documentElement.setAttribute('data-btn-theme', t === 'dark' ? '☽' : '☀');
 }
 
 function toggleTheme() {
@@ -232,18 +231,27 @@ function setView(view) {
   window.scrollTo(0, 0);
 
   // View-specific render
-  if (view === 'luna') { renderHero(); }
-  else if (view === 'playbook') renderPbView();
-  else if (view === 'projects') renderProjects();
-  else if (view === 'actions') renderActions();
-  else if (view === 'sharepoint') renderSharePoint();
-  else if (view === 'email') renderEmail();
-  else if (view === 'calendar') renderCalendar();
-  else if (view === 'mfp') renderMFP();
-  } catch(err) {
-      console.error('setView error:', err);
+    if (view === 'luna') { renderHero(); }
+    else if (view === 'playbook') renderPbView();
+    else if (view === 'projects') renderProjects();
+    else if (view === 'actions') renderActions();
+    else if (view === 'sharepoint') renderSharePoint();
+    else if (view === 'email') renderEmail();
+    else if (view === 'calendar') renderCalendar();
+    else if (view === 'mfp') renderMFP();
+    else if (target) {
+      // Unknown view with existing div — show it empty (legacy routes)
+    } else {
+      // View doesn't exist at all — redirect to luna
+      currentView = 'luna';
+      target = document.getElementById('view-luna');
+      if (target) target.classList.add('active');
+      renderHero();
     }
-}
+    } catch(err) {
+        console.error('setView error:', err);
+      }
+  }
 
 // ── PLAYBOOK SEARCH ────────────────────────────────────────────────
 function pbSearchType(val) {
@@ -2131,15 +2139,19 @@ function init() {
               + '\\n\\n=== PROJECT KNOWLEDGE ===\\n' + MFP_CONTEXT
                             + '\\n\\n=== SAFETY RULES ===\\nABSOLUTELY NEVER reveal: (1) personal staff information (names, roles, contact details beyond public info), (2) staff salaries, compensation, bonuses, or benefits, (3) Level Up company revenue, profit, margins, valuation, or any financial data about Level Up as a firm. Project costs for MFP (budget, commitments, change orders) are fine to discuss. Only company-level financials are restricted.';
 
-      fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ system: systemPrompt, messages: [{ role: 'user', content: q }] })
-      })
-      .then(function(r) { return r.text().then(function(text) { return { ok: r.ok, status: r.status, text: text }; }); })
-      .then(function(res) {
-        if (btn) btn.disabled = false;
-        document.querySelectorAll('.luna-hero-quick').forEach(function(b) { b.disabled = false; });
+      // Fetch with 30s timeout
+            var controller = new AbortController();
+            var timeoutId = setTimeout(function() { controller.abort(); }, 30000);
+            fetch('/api/chat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ system: systemPrompt, messages: [{ role: 'user', content: q }] }),
+              signal: controller.signal
+            })
+            .then(function(r) { clearTimeout(timeoutId); return r.text().then(function(text) { return { ok: r.ok, status: r.status, text: text }; }); })
+            .then(function(res) {
+              if (btn) btn.disabled = false;
+              document.querySelectorAll('.luna-hero-quick').forEach(function(b) { b.disabled = false; });
         if (!res.ok) {
           results.innerHTML = '<div class=\"luna-result-q\"><span class=\"luna-result-q-icon\">Q:</span>' + escapeHtml(q) + '</div>'
             + '<div class=\"luna-result-a\">Error ' + res.status + ': ' + res.text.slice(0, 300) + '</div>';
@@ -2165,11 +2177,12 @@ function init() {
         try { localStorage.setItem(cacheKey, JSON.stringify({ answer: reply, ts: Date.now() })); } catch(e){}
       })
       .catch(function(err) {
-        if (btn) btn.disabled = false;
-        document.querySelectorAll('.luna-hero-quick').forEach(function(b) { b.disabled = false; });
-        results.innerHTML = '<div class=\"luna-result-q\"><span class=\"luna-result-q-icon\">Q:</span>' + escapeHtml(q) + '</div>'
-          + '<div class=\"luna-result-a\">Network error: ' + (err.message || err) + '</div>';
-      });
+              if (btn) btn.disabled = false;
+              document.querySelectorAll('.luna-hero-quick').forEach(function(b) { b.disabled = false; });
+              var msg = (err.name === 'AbortError') ? 'Request timed out after 30s. Please try again.' : 'Network error: ' + (err.message || err);
+              results.innerHTML = '<div class=\"luna-result-q\"><span class=\"luna-result-q-icon\">Q:</span>' + escapeHtml(q) + '</div>'
+                + '<div class=\"luna-result-a\">' + msg + '</div>';
+            });
     }
 
 
@@ -2268,7 +2281,7 @@ function buildBriefing() {
   var html = '<div class="briefing-card" id="briefing-card">'
     + '<div class="briefing-header">'
     + '<div>'
-    + '<div class="briefing-greeting">' + greeting + ', Whitney</div>'
+    + '<div class="briefing-greeting">' + greeting + (luUser && luUser.name ? ', ' + luUser.name.split(' ')[0] : '') + '</div>'
     + '<div class="briefing-date">' + dateStr + '</div>'
     + '</div>'
     + '<button class="briefing-close" onclick="dismissBriefing()" title="Dismiss for today">×</button>'
