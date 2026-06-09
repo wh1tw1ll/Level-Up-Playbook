@@ -813,17 +813,20 @@ function renderMFP() {
                             var Su = F.summary;
                             function fm(n){ if (n==null) return '—'; var s=Math.abs(n).toFixed(2).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,'); return (n<0?'($':'\$')+s+(n<0?')':''); }
 
-                            var html = '<div style="margin-bottom:16px">'
-                              + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
-                              + '<strong style="font-size:16px">Budget Overview</strong>'
-                              + '<span style="font-size:11px;color:var(--muted)">From Procore + Budget Files</span>'
-                              + '</div>'
-                              + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:16px">'
-                              + '<div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center"><span style="font-size:10px;color:var(--muted);display:block">Total Budget</span><strong style="font-size:16px">' + fm(Su.total_budget) + '</strong></div>'
-                              + '<div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center"><span style="font-size:10px;color:var(--muted);display:block">Paid to Date</span><strong style="font-size:16px">' + fm(Su.paid_to_date) + '</strong></div>'
-                              + '<div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center"><span style="font-size:10px;color:var(--muted);display:block">Past Due</span><strong style="font-size:16px;color:#c0392b">' + fm(Su.past_due) + '</strong></div>'
-                              + '<div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center"><span style="font-size:10px;color:var(--muted);display:block">Retainage</span><strong style="font-size:16px">' + fm(Su.retainage_held) + '</strong></div>'
-                              + '</div>'
+                            // BUDGET ARC — full evolution from closing to current
+                                                        html += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;padding:12px 16px;background:var(--bg);border-radius:10px;border:1px solid var(--border)">'
+                                                          + '<div style="flex:1;text-align:center"><span style="font-size:10px;color:var(--muted);display:block">Budget at Closing</span><strong style="font-size:15px">' + fm(Su.budget_at_closing) + '</strong></div>'
+                                                          + '<span style="font-size:18px;color:var(--muted)">→</span>'
+                                                          + '<div style="flex:1;text-align:center;background:var(--teal-light);border-radius:8px;padding:8px"><span style="font-size:10px;color:var(--teal);display:block;font-weight:600">+ Realized Changes</span><strong style="font-size:15px;color:var(--teal)">+' + fm(Su.realized_changes) + '</strong></div>'
+                                                          + '<span style="font-size:18px;color:var(--muted)">→</span>'
+                                                          + '<div style="flex:1;text-align:center"><span style="font-size:10px;color:var(--muted);display:block">Current Total Budget</span><strong style="font-size:15px">' + fm(Su.total_budget) + '</strong></div>'
+                                                          + '</div>'
+                                                          + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:16px">'
+                                                          + '<div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center"><span style="font-size:10px;color:var(--muted);display:block">Paid to Date</span><strong style="font-size:16px">' + fm(Su.paid_to_date) + '</strong></div>'
+                                                          + '<div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center"><span style="font-size:10px;color:var(--muted);display:block">Incurred to Date</span><strong style="font-size:16px">' + fm(Su.incurred_to_date) + '</strong></div>'
+                                                          + '<div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center"><span style="font-size:10px;color:var(--muted);display:block">Past Due</span><strong style="font-size:16px;color:#c0392b">' + fm(Su.past_due) + '</strong></div>'
+                                                          + '<div style="background:var(--bg);border-radius:8px;padding:12px;text-align:center"><span style="font-size:10px;color:var(--muted);display:block">Retainage</span><strong style="font-size:16px">' + fm(Su.retainage_held) + '</strong></div>'
+                                                          + '</div>'
 
                             // HARD vs SOFT costs side by side
                             var softTotal = S.design_total + (S.ffe_budget || 0) + (S.freight || 0) + (S.customs_duties || 0) + (S.contingency || 0);
@@ -2072,7 +2075,8 @@ function init() {
 
   // ── L.U.N.A. HERO (default home view) ───────────────────────────────
     function renderHero() {
-      var results = document.getElementById('luna-hero-results');
+          renderBriefing();
+          var results = document.getElementById('luna-hero-results');
       if (results && Object.keys(heroResults).length > 0) {
         var html = '';
         for (var key in heroResults) {
@@ -2286,6 +2290,137 @@ function init() {
       });
     }
 
+
+// ── DAILY BRIEFING ───────────────────────────────────────────────────
+function buildBriefing() {
+  if (!kbLoaded) return '<div style="padding:12px;text-align:center;color:var(--muted);font-size:13px">Loading briefing...</div>';
+  var now = new Date();
+  var day = now.getDate();
+  var month = now.getMonth();
+  var year = now.getFullYear();
+  var monthKey = year + '-' + month;
+
+  // Dismissed state
+  var dismissed = {};
+  try { var d = localStorage.getItem('lu_brief_dismiss'); if (d) dismissed = JSON.parse(d); } catch(e) {}
+  var briefId = 'brief_' + year + '_' + month + '_' + now.getDate();
+  if (dismissed[briefId]) return '';
+
+  // Financial data
+  var fin = window.__MFP_FINANCIALS;
+  var Su = fin && fin.summary ? fin.summary : null;
+
+  // Reminder deadlines (same logic as renderReminders)
+  var drawDue = new Date(year, month, 10);
+  if (day > 10) drawDue.setMonth(month + 1);
+  var drawDays = Math.round((drawDue - now) / 86400000);
+
+  var expDue = new Date(year, month, 5);
+  if (day > 5) expDue.setMonth(month + 1);
+  var expDays = Math.round((expDue - now) / 86400000);
+
+  // Action items
+  var items = [];
+
+  if (Su) {
+    // Project pulse
+    var pulse = Su.days_past_baseline > 0 ? '🔴' : '🟢';
+    items.push({ icon: pulse, label: 'MFP Stadium', detail: Su.days_past_baseline + ' days past baseline, targeting ' + Su.target_completion });
+
+    // Past due
+    if (Su.past_due > 0) {
+      items.push({ icon: '⚠️', label: 'Past Due Invoices', detail: '$' + Math.round(Su.past_due/1000000) + 'M outstanding', urgent: true });
+    }
+
+    // Cost recovery deadline
+    var crDue = new Date(2026, 5, 30);
+    var crDays = Math.round((crDue - now) / 86400000);
+    if (crDays > 0 && crDays <= 30) {
+      items.push({ icon: '🔍', label: 'Cost Recovery Deadline', detail: crDays + ' days until Jun 30 target ($9M+)', urgent: crDays <= 14 });
+    }
+
+    // ARQ hold
+    items.push({ icon: '🔴', label: 'ARQ Payment Hold', detail: '~$1.5M Feb-Apr invoices on hold', urgent: true });
+
+    // Lemartec indirects
+    if (Su.lemartec_indirects_outstanding > 0) {
+      items.push({ icon: '💰', label: 'Lemartec Indirects Gap', detail: '$' + Math.round(Su.lemartec_indirects_outstanding/1000000) + 'M unpaid' });
+    }
+  }
+
+  // Draw package
+  if (drawDays <= 7) {
+    items.push({ icon: '📄', label: 'Monthly Draw Package', detail: 'Due in ' + drawDays + ' day' + (drawDays !== 1 ? 's' : ''), urgent: drawDays <= 3 });
+  }
+
+  // Expense report
+  if (expDays <= 5) {
+    items.push({ icon: '🧾', label: 'Monthly Expense Report', detail: 'Due in ' + expDays + ' day' + (expDays !== 1 ? 's' : ''), warn: expDays <= 3 });
+  }
+
+  // HVAC
+  items.push({ icon: '🔧', label: 'HVAC Service Agreement', detail: 'Hill York — pending signature', urgent: true });
+
+  // Build HTML
+  var greeting = 'Good ' + (now.getHours() < 12 ? 'morning' : now.getHours() < 18 ? 'afternoon' : 'evening');
+  var dateStr = now.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+
+  var html = '<div class="briefing-card" id="briefing-card">'
+    + '<div class="briefing-header">'
+    + '<div>'
+    + '<div class="briefing-greeting">' + greeting + ', Whitney</div>'
+    + '<div class="briefing-date">' + dateStr + '</div>'
+    + '</div>'
+    + '<button class="briefing-close" onclick="dismissBriefing()" title="Dismiss for today">×</button>'
+    + '</div>'
+    + '<div class="briefing-section-label">Today\'s Action Items</div>'
+    + '<div class="briefing-items">';
+
+  items.forEach(function(item) {
+    var bg = item.urgent ? '#fce8e8' : item.warn ? '#fef4e0' : 'var(--bg)';
+    var border = item.urgent ? '#e74c3c' : item.warn ? '#e67e22' : 'var(--border)';
+    html += '<div class="briefing-item" style="background:' + bg + ';border-left:3px solid ' + border + '">'
+      + '<span class="briefing-item-icon">' + item.icon + '</span>'
+      + '<div class="briefing-item-text">'
+      + '<div class="briefing-item-label">' + item.label + '</div>'
+      + '<div class="briefing-item-detail">' + item.detail + '</div>'
+      + '</div>'
+      + '</div>';
+  });
+
+  html += '</div>';
+
+  // Budget snapshot
+  if (Su) {
+    html += '<div class="briefing-section-label">Budget Snapshot</div>'
+      + '<div class="briefing-budget">'
+      + '<div class="briefing-budget-item"><span>Total Budget</span><strong>$' + Math.round(Su.total_budget/1000000) + 'M</strong></div>'
+      + '<div class="briefing-budget-item"><span>Paid to Date</span><strong>$' + Math.round(Su.paid_to_date/1000000) + 'M</strong></div>'
+      + '<div class="briefing-budget-item"><span>Past Due</span><strong style="color:#c0392b">$' + Math.round(Su.past_due/1000000) + 'M</strong></div>'
+      + '<div class="briefing-budget-item"><span>Retainage</span><strong>$' + Math.round(Su.retainage_held/1000000) + 'M</strong></div>'
+      + '</div>';
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function renderBriefing() {
+  var el = document.getElementById('luna-briefing');
+  if (!el) return;
+  el.innerHTML = buildBriefing();
+}
+
+function dismissBriefing() {
+  var now = new Date();
+  var briefId = 'brief_' + now.getFullYear() + '_' + now.getMonth() + '_' + now.getDate();
+  var dismissed = {};
+  try { var d = localStorage.getItem('lu_brief_dismiss'); if (d) dismissed = JSON.parse(d); } catch(e) {}
+  dismissed[briefId] = true;
+  try { localStorage.setItem('lu_brief_dismiss', JSON.stringify(dismissed)); } catch(e) {}
+  var el = document.getElementById('luna-briefing');
+  if (el) el.innerHTML = '';
+}
 
 // ── PASSWORD GATE ───────────────────────────────────────────────────
 // Immediate visual feedback handler — fires before verifyPassword

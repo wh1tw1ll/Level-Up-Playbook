@@ -12,7 +12,7 @@
 })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260608-13">
+<link rel="stylesheet" href="styles.css?v=20260608-14">
 </head>
 <body>
 
@@ -70,7 +70,8 @@
             </div>
                   <div class="luna-hero-subtitle">Level Up Network Agent</div>
     <div id="luna-reminders" class="luna-reminders"></div>
-    <div class="luna-hero-search-row">
+        <div id="luna-briefing" class="luna-briefing"></div>
+        <div class="luna-hero-search-row">
       <input id="luna-hero-input" class="luna-hero-input" type="text" placeholder="Ask anything about the playbook, projects, budget, punch list, change orders..." autocomplete="off" onkeydown="if(event.key==='Enter')heroSearch()" oninput="heroSearchType(this.value)">
       <button class="luna-hero-btn" onclick="heroSearch()">Ask</button>
     </div>
@@ -293,6 +294,6 @@
       <script src="data/mfp_financials.js?v=20260608"></script>
       <script src="data/kb.js?v=20260608"></script>
       <script src="data/inline_fix.js?v=20260608-7"></script>
-      <script defer src="app.js?v=20260608-13"></script>
+      <script defer src="app.js?v=20260608-14"></script>
 </body>
 </html>
