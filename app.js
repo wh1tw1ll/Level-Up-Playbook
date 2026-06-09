@@ -1186,7 +1186,10 @@ function previewTemplate(key) {
     + '<button style="flex:1;padding:10px 20px;font-size:14px;background:var(--cool);color:var(--charcoal);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600" onclick="closeModal(\'modal-template-preview\')">Close</button>'
     + '</div>'
     + '</div></div>';
-  // ── ACTION ITEMS ────────────────────────────────────────────────────
+      showModal('modal-template-preview', html);
+    }
+
+    // ── ACTION ITEMS ────────────────────────────────────────────────────
   var aiSort = 'created';
   var aiFilter = 'all';
   var aiEditId = null;
