@@ -12,7 +12,7 @@
 })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260608-10">
+<link rel="stylesheet" href="styles.css?v=20260608-11">
 </head>
 <body>
 
@@ -251,8 +251,8 @@
     <div class="password-modal-title">L.U.N.A. — Level Up Network Agent</div>
     <div class="password-modal-desc">Enter the team password to access the playbook, project intelligence, and L.U.N.A. search.</div>
     <div class="password-input-row">
-      <input id="password-input" class="password-input" type="password" placeholder="Enter team password..." autocomplete="off" onkeydown="if(event.key==='Enter')verifyPassword()">
-      <button id="password-btn" class="password-btn" onclick="verifyPassword()">Unlock</button>
+      <input id="password-input" class="password-input" type="password" placeholder="Enter team password..." autocomplete="off" onkeydown="if(event.key==='Enter')handlePasswordClick()">
+      <button id="password-btn" class="password-btn" onclick="handlePasswordClick()">Unlock</button>
     </div>
     <div id="password-error" class="password-error" style="display:none"></div>
       </div>
@@ -271,11 +271,10 @@
   </div>
 
   <!-- ===== DATA SCRIPTS ===== -->
-  <script src="data/templates.js?v=20260608"></script>
-<script src="data/mfp_context.js?v=20260608"></script>
-<script src="data/mfp_financials.js?v=20260608"></script>
-<link rel="stylesheet" href="styles.css?v=20260608-10">
-<script src="data/inline_fix.js?v=20260608-7"></script>
-<script defer src="app.js?v=20260608-10"></script>
+    <script src="data/templates.js?v=20260608"></script>
+  <script src="data/mfp_context.js?v=20260608"></script>
+  <script src="data/mfp_financials.js?v=20260608"></script>
+  <script src="data/inline_fix.js?v=20260608-7"></script>
+  <script defer src="app.js?v=20260608-11"></script>
 </body>
 </html>

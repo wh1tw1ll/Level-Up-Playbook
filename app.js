@@ -1608,6 +1608,10 @@ function openDecisionTree() {
 function renderDecisionTree() {
   var body = document.getElementById('dt-body');
   if (!body) return;
+  if (typeof DT_TREE === 'undefined') {
+    body.innerHTML = '<div style="padding:20px;color:var(--muted)">Decision tree not loaded.</div>';
+    return;
+  }
   var cur = DT_TREE[dtPath[dtPath.length-1]];
   if (!cur) {
     body.innerHTML = '<div style="padding:20px;color:var(--muted)">No more questions.</div>';
@@ -2150,6 +2154,16 @@ function init() {
 
 
 // ── PASSWORD GATE ───────────────────────────────────────────────────
+// Immediate visual feedback handler — fires before verifyPassword
+function handlePasswordClick() {
+  var btn = document.getElementById('password-btn');
+  if (btn) { btn.style.transform = 'scale(0.96)'; btn.style.opacity = '0.8'; }
+  setTimeout(function() {
+    if (btn) { btn.style.transform = ''; btn.style.opacity = ''; }
+    verifyPassword();
+  }, 100);
+}
+
 function verifyPassword() {
   var inp = document.getElementById('password-input');
   var btn = document.getElementById('password-btn');
@@ -2193,9 +2207,15 @@ function verifyPassword() {
     if (data.authed) {
       overlay.classList.remove('open');
       overlay.style.display = 'none';
+    } else {
+      // Not authed — focus the password input for immediate typing
+      var inp = document.getElementById('password-input');
+      if (inp) setTimeout(function() { inp.focus(); }, 300);
     }
   }).catch(function() {
-    // Overlay stays visible by default
+    // Overlay stays visible by default — focus password input
+    var inp = document.getElementById('password-input');
+    if (inp) setTimeout(function() { inp.focus(); }, 300);
   });
 })();
 
