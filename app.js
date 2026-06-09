@@ -1,5 +1,5 @@
 // ── LEVEL UP PLAYBOOK ─ APP.JS ──────────────────────────────────────
-// Clean rewrite. All state, data, and behavior in this file. v20260609
+// Clean rewrite. All state, data, and behavior in this file. v20260609-2
 
 // ── STATE ─────────────────────────────────────────────────────────
 var luUser = null;
