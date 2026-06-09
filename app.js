@@ -18,6 +18,13 @@ var projectContext = null;
 var heroResults = {};
 
 var PHASES = ['Pre-Construction','Design','Construction','Closeout','Post-Opening','All Phases'];
+
+// Status helper — backward-compatible: done:true = 'completed'
+function getItemStatus(item) {
+  if (item.status === 'in_progress') return 'in_progress';
+  if (item.status === 'completed' || item.done === true) return 'completed';
+  return 'open';
+}
 var GROUPS = {
   '1':  {label:'GROUP 1 — FOUNDATION', desc:'Purpose, philosophy, roles, governance'},
   '6':  {label:'GROUP 2 — PROJECT SETUP', desc:'Mobilization, tools, communications'},
@@ -119,67 +126,48 @@ async function tryRefresh() {
 
 function updateAuthUI() {
   var signInBtn = document.getElementById('auth-signin-btn');
-  var userInfo = document.getElementById('auth-user-info');
-  var userName = document.getElementById('auth-user-name');
-  var emailMeta = document.getElementById('email-card-meta');
-  var calMeta = document.getElementById('cal-card-meta');
-  var spMeta = document.getElementById('sp-card-meta');
+    var userInfo = document.getElementById('auth-user-info');
+    var userName = document.getElementById('auth-user-name');
+    var calMeta = document.getElementById('cal-card-meta');
+    var spMeta = document.getElementById('sp-card-meta');
 
-  if (luUser && luUser.authenticated) {
-    if (signInBtn) signInBtn.style.display = 'none';
-    if (userInfo) userInfo.style.display = 'flex';
-    if (userName) userName.textContent = luUser.name || luUser.email;
+    if (luUser && luUser.authenticated) {
+      if (signInBtn) signInBtn.style.display = 'none';
+      if (userInfo) userInfo.style.display = 'flex';
+      if (userName) userName.textContent = luUser.name || luUser.email;
 
-    // Show immediate connected status, then try to fetch live previews
-    if (emailMeta) emailMeta.textContent = '✓ Connected';
-    if (calMeta) calMeta.textContent = '✓ Connected';
-    if (spMeta) spMeta.textContent = '✓ Connected';
+      // Show immediate connected status, then try to fetch live previews
+      if (calMeta) calMeta.textContent = '✓ Connected';
+      if (spMeta) spMeta.textContent = '✓ Connected';
 
-    // Fetch live calendar preview
-    if (calMeta && !calMeta._fetching) {
-      calMeta._fetching = true;
-      calMeta.textContent = 'Loading...';
-      fetch('/api/outlook/calendar?days=14', { credentials: 'include' })
-        .then(function(r) { if (!r.ok) throw new Error('' + r.status); return r.json(); })
-        .then(function(data) {
-          var evs = data.value || [];
-          var upcoming = evs.filter(function(e) {
-            var s = new Date(e.start.dateTime || e.start.date);
-            return s > new Date();
-          });
-          if (upcoming.length === 0) { calMeta.textContent = 'No upcoming events'; return; }
-          var next = new Date(upcoming[0].start.dateTime || upcoming[0].start.date);
-          var timeStr = next.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-          var countStr = upcoming.length > 1 ? ' +' + (upcoming.length - 1) + ' more' : '';
-          calMeta.textContent = 'Next: ' + timeStr + countStr;
-        })
-        .catch(function() { calMeta.textContent = '✓ Calendar'; })
-        .then(function() { calMeta._fetching = false; });
+      // Fetch live calendar preview
+      if (calMeta && !calMeta._fetching) {
+        calMeta._fetching = true;
+        calMeta.textContent = 'Loading...';
+        fetch('/api/outlook/calendar?days=14', { credentials: 'include' })
+          .then(function(r) { if (!r.ok) throw new Error('' + r.status); return r.json(); })
+          .then(function(data) {
+            var evs = data.value || [];
+            var upcoming = evs.filter(function(e) {
+              var s = new Date(e.start.dateTime || e.start.date);
+              return s > new Date();
+            });
+            if (upcoming.length === 0) { calMeta.textContent = 'No upcoming events'; return; }
+            var next = new Date(upcoming[0].start.dateTime || upcoming[0].start.date);
+            var timeStr = next.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+            var countStr = upcoming.length > 1 ? ' +' + (upcoming.length - 1) + ' more' : '';
+            calMeta.textContent = 'Next: ' + timeStr + countStr;
+          })
+          .catch(function() { calMeta.textContent = '✓ Calendar'; })
+          .then(function() { calMeta._fetching = false; });
+      }
+    } else {
+      if (signInBtn) signInBtn.style.display = 'flex';
+      if (userInfo) userInfo.style.display = 'none';
+      if (calMeta) calMeta.textContent = 'Sign in to enable';
+      if (spMeta) spMeta.textContent = 'Sign in to enable';
     }
-
-    // Fetch live email preview
-    if (emailMeta && !emailMeta._fetching) {
-      emailMeta._fetching = true;
-      emailMeta.textContent = 'Loading...';
-      fetch('/api/outlook/email?limit=5', { credentials: 'include' })
-        .then(function(r) { if (!r.ok) throw new Error('' + r.status); return r.json(); })
-        .then(function(data) {
-          var msgs = data.value || [];
-          var unread = msgs.filter(function(m) { return !m.isRead; });
-          var count = unread.length;
-          emailMeta.textContent = count + ' unread';
-        })
-        .catch(function() { emailMeta.textContent = '✓ ' + (luUser.email || 'Connected'); })
-        .then(function() { emailMeta._fetching = false; });
-    }
-  } else {
-    if (signInBtn) signInBtn.style.display = 'flex';
-    if (userInfo) userInfo.style.display = 'none';
-    if (emailMeta) emailMeta.textContent = 'Sign in to enable';
-    if (calMeta) calMeta.textContent = 'Sign in to enable';
-    if (spMeta) spMeta.textContent = 'Sign in to enable';
   }
-}
 
 function signInWithMicrosoft() {
   try { localStorage.setItem('lu_return_view', currentView || 'home'); } catch(e) {}
@@ -277,10 +265,9 @@ function setView(view) {
     if (view === 'luna') { renderHero(); }
     else if (view === 'playbook') renderPbView();
     else if (view === 'projects') renderProjects();
-    else if (view === 'actions') renderActions();
-    else if (view === 'sharepoint') renderSharePoint();
-    else if (view === 'email') renderEmail();
-    else if (view === 'calendar') renderCalendar();
+        else if (view === 'actions') renderActions();
+        else if (view === 'sharepoint') renderSharePoint();
+        else if (view === 'calendar') renderCalendar();
     else if (view === 'mfp') renderMFP();
     else if (target) {
       // Unknown view with existing div — show it empty (legacy routes)
@@ -1358,10 +1345,11 @@ function previewTemplate(key) {
     var items = loadActions(tab);
     var author = (luUser && luUser.name) ? (luUser.name.split(' ')[0]) : '';
     items.unshift({
-      id: Date.now() + '_' + Math.random().toString(36).slice(2,6),
-      text: text.value.trim(),
-      done: false,
-      ts: Date.now(),
+          id: Date.now() + '_' + Math.random().toString(36).slice(2,6),
+          text: text.value.trim(),
+          done: false,
+          status: 'open',
+          ts: Date.now(),
       author: author,
       priority: document.getElementById('ai-new-priority').value,
       category: document.getElementById('ai-new-category').value,
@@ -1434,7 +1422,12 @@ function previewTemplate(key) {
   function toggleAction(i) {
     var tab = window.aiTab || 'team';
     var items = loadActions(tab);
-    if (items[i]) items[i].done = !items[i].done;
+    if (items[i]) {
+      // Cycle: open → in_progress → completed → open
+      var st = getItemStatus(items[i]);
+      items[i].status = st === 'completed' ? 'open' : st === 'in_progress' ? 'completed' : 'in_progress';
+      items[i].done = items[i].status === 'completed';
+    }
     saveActions(items, tab);
     renderActions();
   }
@@ -1449,7 +1442,6 @@ function previewTemplate(key) {
 
 // ── SHAREPOINT ─────────────────────────────────────────────────────
 function openSharePoint() { setView('sharepoint'); }
-function openEmail()      { setView('email'); }
 function openCalendar()   { setView('calendar'); }
 
 function renderSharePoint() {
@@ -1545,64 +1537,7 @@ function signInEmptyState(icon, title, desc) {
     + 'Sign in with Microsoft</button></div>';
 }
 
-// ── EMAIL ──────────────────────────────────────────────────────────
-function renderEmail() {
-  var el = document.getElementById('email-content');
-  if (!el) return;
-  if (!luUser || !luUser.authenticated) {
-    el.innerHTML = signInEmptyState('📧','Connect Outlook','Sign in with your Microsoft account to view recent emails.');
-    return;
-  }
-  el.innerHTML = '<div id="email-list"><div style="color:var(--muted);padding:20px 0">Loading...</div></div>';
-  fetch('/api/outlook/email?limit=25', { credentials: 'include' })
-    .then(function(r) { if (!r.ok) throw new Error('status ' + r.status); return r.json(); })
-    .then(function(data) {
-      var list = document.getElementById('email-list');
-      var emails = data.value || [];
-      if (!emails.length) {
-        list.innerHTML = '<div style="padding:24px;color:var(--muted)">No emails found.</div>';
-        return;
-      }
-      list._emails = emails;
-      list.innerHTML = emails.map(function(e, i) {
-        var from = (e.from && e.from.emailAddress) ? (e.from.emailAddress.name || e.from.emailAddress.address) : 'Unknown';
-        var date = new Date(e.receivedDateTime).toLocaleDateString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
-        return '<div class="email-row" onclick="openEmailIdx(' + i + ')">'
-          + '<div class="email-row-head">'
-          + '<span class="email-subject' + (e.isRead ? '' : ' unread') + '">' + escapeHtml(e.subject || '(no subject)') + '</span>'
-          + '<span class="email-date">' + date + '</span>'
-          + '</div>'
-          + '<div class="email-from">' + escapeHtml(from) + '</div>'
-          + '<div class="email-preview">' + escapeHtml((e.bodyPreview || '').slice(0, 140)) + '</div>'
-          + '</div>';
-      }).join('');
-    })
-    .catch(function(err) {
-      var msg = err.message || '';
-      if (msg.indexOf('401') >= 0) {
-        // Try silent refresh before giving up
-        tryRefresh().then(function(ok) {
-          if (ok) { renderEmail(); }
-          else {
-            document.cookie = 'lu_session=; Path=/; Max-Age=0';
-            luUser = null; updateAuthUI();
-            document.getElementById('email-content').innerHTML = signInEmptyState('📧','Sign in to view email','Connect your Microsoft account to see your Outlook inbox.');
-          }
-        });
-      } else {
-        document.getElementById('email-list').innerHTML = '<div style="padding:24px;color:#c0392b">Error loading emails: ' + escapeHtml(msg) + '</div>';
-      }
-    });
-}
-
-function openEmailIdx(i) {
-  var list = document.getElementById('email-list');
-  if (list && list._emails && list._emails[i] && list._emails[i].webLink) {
-    window.open(list._emails[i].webLink, '_blank');
-  }
-}
-
-// ── CALENDAR ───────────────────────────────────────────────────────
+// ── CALENDAR ──────────────────────────────────────────────────────────
 function renderCalendar() {
   var el = document.getElementById('calendar-content');
   if (!el) return;
