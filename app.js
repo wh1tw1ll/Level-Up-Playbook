@@ -1199,11 +1199,40 @@ function previewTemplate(key) {
     try { return JSON.parse(localStorage.getItem('lu_actions_' + tab) || '[]'); }
     catch(e) { return []; }
   }
+  function fetchLunaChecklist() {
+    var tab = window.aiTab || 'team';
+    fetch('data/checklist.json?' + Date.now())
+      .then(function(r) { if (!r.ok) throw new Error('No checklist'); return r.json(); })
+      .then(function(data) {
+        var items = data.items || [];
+        if (!items.length) return;
+        var local = loadActions(tab);
+        var localIds = {};
+        local.forEach(function(i) { if (i.id) localIds[i.id] = true; });
+        var merged = local.slice();
+        var added = 0;
+        items.forEach(function(item) {
+          if (!localIds[item.id]) {
+            merged.push(item);
+            localIds[item.id] = true;
+            added++;
+          }
+        });
+        saveActions(merged, tab);
+        if (added) renderActions();
+      })
+      .catch(function() {});
+  }
   function saveActions(items, tab) {
     tab = tab || window.aiTab || 'team';
     try { localStorage.setItem('lu_actions_' + tab, JSON.stringify(items)); } catch(e) {}
   }
 
+  // Auto-fetch LUNA checklist from server on first load
+  if (!window._lunaChecklistFetched) {
+    window._lunaChecklistFetched = true;
+    setTimeout(fetchLunaChecklist, 500);
+  }
   function renderActions() {
     var el = document.getElementById('actions-content');
     if (!el) return;
