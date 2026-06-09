@@ -271,14 +271,69 @@
     <div class="password-modal-title">L.U.N.A. — Level Up Network Agent</div>
     <div class="password-modal-desc">Enter the team password to access the playbook, project intelligence, and L.U.N.A. search.</div>
     <div class="password-input-row">
-      <input id="password-input" class="password-input" type="password" placeholder="Enter team password..." autocomplete="off" onkeydown="if(event.key==='Enter')handlePasswordClick()">
-      <button id="password-btn" class="password-btn" onclick="handlePasswordClick()">Unlock</button>
-    </div>
-    <div id="password-error" class="password-error" style="display:none"></div>
-      </div>
-    </div>
+          <input id="password-input" class="password-input" type="password" placeholder="Enter team password..." autocomplete="off">
+          <button id="password-btn" class="password-btn">Unlock</button>
+        </div>
+        <div id="password-error" class="password-error" style="display:none"></div>
+          </div>
+        </div>
 
-    <!-- ===== FOOTER ===== -->
+<script>
+(function(){
+  'use strict';
+  var btn = document.getElementById('password-btn');
+  var inp = document.getElementById('password-input');
+  var err = document.getElementById('password-error');
+  var overlay = document.getElementById('password-overlay');
+  if (!btn || !inp) return;
+  
+  function verify() {
+    var pw = inp.value.trim();
+    if (!pw) { err.textContent = 'Please enter a password.'; err.style.display = 'block'; return; }
+    btn.disabled = true;
+    btn.textContent = 'Checking...';
+    err.style.display = 'none';
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/verify-password', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.withCredentials = true;
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        var data = JSON.parse(xhr.responseText);
+        if (data.valid) {
+          overlay.classList.remove('open');
+          overlay.style.display = 'none';
+        }
+      } else if (xhr.status === 401) {
+        err.textContent = 'Incorrect password';
+        err.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Unlock';
+        inp.value = '';
+        inp.focus();
+      } else {
+        err.textContent = 'Server error (' + xhr.status + ')';
+        err.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Unlock';
+      }
+    };
+    xhr.onerror = function() {
+      err.textContent = 'Network error — could not reach server.';
+      err.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Unlock';
+    };
+    xhr.send(JSON.stringify({ password: pw }));
+  }
+  
+  btn.addEventListener('click', verify);
+  inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') verify(); });
+  inp.focus();
+})();
+</script>
+
+        <!-- ===== FOOTER ===== -->
 <div class="site-footer">
   <span>© 2026 Level Up Project Development — L.U.N.A. Playbook</span>
   <span class="footer-status">
