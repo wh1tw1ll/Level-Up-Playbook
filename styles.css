@@ -586,23 +586,22 @@ mark.search-highlight{background:#fff3a8;padding:1px 2px;border-radius:2px;color
   flex-shrink: 0;
 }
 
-/* Toggle button (right edge) */
+/* Toggle button (top-right area) */
 .reminder-toggle {
   position: fixed;
   right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 60px;
   z-index: 999;
   background: var(--teal);
   color: #fff;
   border: none;
   border-radius: 8px 0 0 8px;
-  padding: 12px 8px;
+  padding: 10px 8px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   transition: right .3s ease, box-shadow .15s;
   box-shadow: -2px 0 8px rgba(0,0,0,.1);
   font-family: inherit;

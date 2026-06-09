@@ -2144,7 +2144,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ── REMINDER SIDE PANEL ────────────────────────────────────────────
 var reminderPanelOpen = false;
-var reminderEmailItems = [];
 var reminderLastFetch = 0;
 
 function isWhitney() {
@@ -2158,23 +2157,17 @@ function isWhitney() {
 function showReminderToggle() {
   var t = document.getElementById('reminder-toggle');
   if (!t) return;
-  if (luUser && luUser.authenticated) {
-    t.style.display = 'flex';
-  } else {
-    t.style.display = 'none';
-  }
+  t.style.display = (luUser && luUser.authenticated) ? 'flex' : 'none';
 }
 
 function initDailyBriefing() {
   showReminderToggle();
-  // If Whitney is signed in, auto-fetch and show panel
   if (isWhitney()) {
     refreshReminderData();
-    // Auto-open panel on first load of the day
+    // Auto-open on first load of the day
     var lastOpen = 0;
     try { lastOpen = parseInt(localStorage.getItem('lu_reminder_panel_last') || '0'); } catch(e) {}
-    var today = new Date().toDateString();
-    if (!lastOpen || new Date(lastOpen).toDateString() !== today) {
+    if (!lastOpen || new Date(lastOpen).toDateString() !== new Date().toDateString()) {
       setTimeout(openReminderPanel, 800);
       try { localStorage.setItem('lu_reminder_panel_last', Date.now()); } catch(e) {}
     }
@@ -2219,20 +2212,19 @@ function switchReminderTab(tab) {
 }
 
 function renderReminderPanel() {
-  // Default to Actions tab
   switchReminderTab('actions');
   renderReminderActions();
-  // Start fetching meetings in background
   setTimeout(renderReminderMeetings, 200);
 }
 
+// ── PANEL: ACTION ITEMS WITH CHECKBOXES ───────────────────────────
 function renderReminderActions() {
   var el = document.getElementById('reminder-panel-actions');
   if (!el) return;
   var footer = document.getElementById('reminder-panel-footer-text');
   if (footer) footer.textContent = 'Updating...';
 
-  // Get action items from localStorage (both team and personal)
+  // Load directly from the Action Items system's localStorage
   var teamItems = [];
   var personalItems = [];
   try {
@@ -2240,117 +2232,121 @@ function renderReminderActions() {
     personalItems = JSON.parse(localStorage.getItem('lu_actions_personal') || '[]');
   } catch(e) {}
 
-  // Get email-derived items
-  var emailItems = [];
-  try { emailItems = JSON.parse(localStorage.getItem('lu_mfp_email_items') || '[]'); } catch(e) {}
+  // Separate MFP vs Level Up items using keyword check
+  var mfpKeywords = ['mfp','freedom park','stadium','lemartec','punch','change order','cost recovery','arq','miller','baker','hvac','scoreboard','commissioning','closeout','pco','invoice','draw','pay app','retainage','tco','permitting','boldyn','das','seating','concession'];
 
-  // Today's items (due today or overdue)
-  var now = new Date();
-  var todayStr = now.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+  var mfpItems = [];    // Team = MFP
+  var levelUpItems = []; // Personal = Level Up (everything else)
 
-  // UPCOMING ITEMS from action items
-  var upcoming = [];
-  // Also collect MFP email items
-  var mfpUpcoming = [];
-
-  // Team action items - filter to active, MFP-relevant only for Whitney view
-  var mfpKeywords = ['mfp','freedom park','stadium','lemartec','punch','change order','cost recovery','arq','miller','baker','hvac','scoreboard','commissioning','closeout','pco','invoice','draw','pay app','retainage','tco','permitting'];
-  teamItems.forEach(function(item) {
+  teamItems.forEach(function(item, idx) {
     if (item.done) return;
     var txt = (item.text || '').toLowerCase();
     var isMFP = mfpKeywords.some(function(kw) { return txt.indexOf(kw) >= 0; });
-    if (isWhitney() && !isMFP) {
-      // For Whitney: only MFP-related team items go to panel
-      // Non-MFP team items stay in the full Action Items view
-      return;
+    if (isMFP || isWhitney()) {
+      // For everyone: Team items matching MFP keywords = MFP items
+      // For Whitney: ALL team items qualify
+      (isMFP ? mfpItems : levelUpItems).push({
+        item: item, idx: idx, tab: 'team', source: 'team'
+      });
+    } else {
+      levelUpItems.push({
+        item: item, idx: idx, tab: 'team', source: 'team'
+      });
     }
-    upcoming.push({
-      text: item.text,
-      priority: item.priority || 'medium',
-      source: item.author || 'Team',
-      due: item.dueDate || null,
-      category: item.category || ''
-    });
   });
 
-  // Personal items - all go to panel
-  personalItems.forEach(function(item) {
+  personalItems.forEach(function(item, idx) {
     if (item.done) return;
     var txt = (item.text || '').toLowerCase();
-    upcoming.push({
-      text: item.text,
-      priority: item.priority || 'medium',
-      source: item.author || 'Personal',
-      due: item.dueDate || null,
-      category: item.category || ''
+    var isMFP = mfpKeywords.some(function(kw) { return txt.indexOf(kw) >= 0; });
+    (isMFP ? mfpItems : levelUpItems).push({
+      item: item, idx: idx, tab: 'personal', source: 'personal'
     });
   });
 
-  // MFP email-derived items
-  emailItems.forEach(function(item) {
-    mfpUpcoming.push({
-      text: item.text,
-      priority: item.priority || 'medium',
-      source: '📧 ' + (item.from || 'Email'),
-      due: item.dueDate || null,
-      assigned: item.assignedTo || ''
+  // Sort each group: urgent first, then by recency
+  function sortGroup(arr) {
+    arr.sort(function(a,b) {
+      var rank = { urgent:0, high:1, medium:2, low:3 };
+      var ar = rank[a.item.priority]||2, br = rank[b.item.priority]||2;
+      if (ar !== br) return ar - br;
+      return (b.item.ts || 0) - (a.item.ts || 0);
     });
-  });
-
-  // Sort: urgent first, then by due date
-  upcoming.sort(function(a,b) {
-    var rank = { urgent:0, high:1, medium:2, low:3 };
-    var ar = rank[a.priority]||2, br = rank[b.priority]||2;
-    if (ar !== br) return ar - br;
-    if (a.due && b.due) return a.due.localeCompare(b.due);
-    if (a.due) return -1; if (b.due) return 1;
-    return 0;
-  });
+  }
+  sortGroup(mfpItems);
+  sortGroup(levelUpItems);
 
   var html = '';
   var toggleIcon = document.getElementById('reminder-toggle-count');
+  var totalOpen = mfpItems.length + levelUpItems.length;
 
-  // --- MFP EMAIL ITEMS SECTION (Whitney only) ---
-  if (isWhitney() && mfpUpcoming.length > 0) {
-    html += '<div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px">📧 From MFP Emails</div>';
-    mfpUpcoming.slice(0, 8).forEach(function(item) {
-      var priClass = item.priority === 'urgent' || item.priority === 'high' ? 'urgent' : 'medium';
-      html += '<div class="rp-item">'
-        + '<span class="rp-item-icon">📧</span>'
-        + '<div class="rp-item-text">' + escapeHtml(item.text)
-        + '<div class="rp-item-source">' + escapeHtml(item.source) + (item.assigned ? ' · Assigned: ' + escapeHtml(item.assigned) : '') + '</div>'
+  // --- MFP SECTION ---
+  if (mfpItems.length > 0) {
+    html += '<div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px">🔴 MFP / Team (' + mfpItems.length + ')</div>';
+    mfpItems.slice(0, 25).forEach(function(entry) {
+      var item = entry.item;
+      var priColor = item.priority === 'urgent' ? '#c0392b' : item.priority === 'high' ? '#e67e22' : '#95a5a6';
+      var date = item.ts ? new Date(item.ts).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
+      html += '<div class="rp-item" style="opacity:' + (item.done ? '.55' : '1') + '">'
+        + '<input type="checkbox" class="rp-item-checkbox" ' + (item.done ? 'checked' : '') + ' onchange="panelToggleAction(\'' + entry.tab + '\',' + entry.idx + ')" style="margin-top:2px;width:14px;height:14px;flex-shrink:0;cursor:pointer">'
+        + '<div class="rp-item-text" style="flex:1;min-width:0">'
+        + '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:2px">'
+        + '<span style="background:' + priColor + ';color:#fff;font-size:9px;font-weight:700;padding:0 6px;border-radius:8px;text-transform:uppercase">' + (item.priority || 'medium') + '</span>'
+        + (item.dueDate ? '<span style="font-size:10px;color:' + (new Date(item.dueDate+'T12:00:00') < new Date() ? '#c0392b' : 'var(--muted)') + '">' + item.dueDate + '</span>' : '')
         + '</div>'
-        + '<span class="rp-item-pri ' + priClass + '">' + item.priority + '</span>'
+        + '<div style="font-size:13px;color:var(--charcoal);line-height:1.4">' + (item.done ? '<s style="opacity:.6">' : '') + escapeHtml(item.text) + (item.done ? '</s>' : '') + '</div>'
+        + '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + date + (item.author ? ' by ' + escapeHtml(item.author) : '') + '</div>'
+        + '</div>'
         + '</div>';
     });
   }
 
-  // --- ACTION ITEMS SECTION ---
-  if (upcoming.length > 0 || mfpUpcoming.length > 0) {
-    if (upcoming.length > 0) {
-      html += '<div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px' + (html ? '' : '') + '">✅ Open Action Items</div>';
-      upcoming.slice(0, 10).forEach(function(item) {
-        var priClass = item.priority === 'urgent' || item.priority === 'high' ? 'urgent' : 'medium';
-        html += '<div class="rp-item">'
-          + '<span class="rp-item-icon">' + (item.priority === 'urgent' ? '🔴' : item.priority === 'high' ? '🟠' : '🟢') + '</span>'
-          + '<div class="rp-item-text">' + escapeHtml(item.text)
-          + '<div class="rp-item-source">' + escapeHtml(item.source) + (item.due ? ' · Due: ' + item.due : '') + '</div>'
-          + '</div>'
-          + '<span class="rp-item-pri ' + priClass + '">' + item.priority + '</span>'
-          + '</div>';
-      });
-    }
-
-    // Update toggle badge count
-    var totalOpen = upcoming.length + mfpUpcoming.length;
-    if (toggleIcon) toggleIcon.textContent = totalOpen > 9 ? '9+' : totalOpen;
-  } else {
-    html += '<div class="rp-empty"><div class="rp-empty-icon">✅</div>No open action items. Everything is up to date.</div>';
-    if (toggleIcon) toggleIcon.textContent = '0';
+  // --- LEVEL UP SECTION ---
+  if (levelUpItems.length > 0) {
+    html += '<div style="font-size:11px;font-weight:700;color:#4a90d9;text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px;margin-top:4px">📋 Level Up / Personal (' + levelUpItems.length + ')</div>';
+    levelUpItems.slice(0, 15).forEach(function(entry) {
+      var item = entry.item;
+      var priColor = item.priority === 'urgent' ? '#c0392b' : item.priority === 'high' ? '#e67e22' : '#95a5a6';
+      var date = item.ts ? new Date(item.ts).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
+      html += '<div class="rp-item" style="opacity:' + (item.done ? '.55' : '1') + '">'
+        + '<input type="checkbox" class="rp-item-checkbox" ' + (item.done ? 'checked' : '') + ' onchange="panelToggleAction(\'' + entry.tab + '\',' + entry.idx + ')" style="margin-top:2px;width:14px;height:14px;flex-shrink:0;cursor:pointer">'
+        + '<div class="rp-item-text" style="flex:1;min-width:0">'
+        + '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:2px">'
+        + '<span style="background:' + priColor + ';color:#fff;font-size:9px;font-weight:700;padding:0 6px;border-radius:8px;text-transform:uppercase">' + (item.priority || 'medium') + '</span>'
+        + (item.dueDate ? '<span style="font-size:10px;color:' + (new Date(item.dueDate+'T12:00:00') < new Date() ? '#c0392b' : 'var(--muted)') + '">' + item.dueDate + '</span>' : '')
+        + '</div>'
+        + '<div style="font-size:13px;color:var(--charcoal);line-height:1.4">' + (item.done ? '<s style="opacity:.6">' : '') + escapeHtml(item.text) + (item.done ? '</s>' : '') + '</div>'
+        + '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + date + (item.author ? ' by ' + escapeHtml(item.author) : '') + '</div>'
+        + '</div>'
+        + '</div>';
+    });
   }
 
-  el.innerHTML = html || '<div class="rp-empty"><div class="rp-empty-icon">📭</div>No items yet.</div>';
-  if (footer) footer.textContent = 'Updated ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  // Empty state
+  if (!html) {
+    html = '<div class="rp-empty"><div class="rp-empty-icon">✅</div>All caught up! No open action items.</div>';
+  }
+
+  // Update badge count on toggle button
+  if (toggleIcon) toggleIcon.textContent = totalOpen > 9 ? '9+' : totalOpen;
+
+  el.innerHTML = html;
+  if (footer) footer.textContent = totalOpen + ' open item' + (totalOpen !== 1 ? 's' : '') + ' · Updated ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+}
+
+// Panel checkbox handler - toggles done/undone in the Action Items system
+function panelToggleAction(tab, idx) {
+  var items = [];
+  try { items = JSON.parse(localStorage.getItem('lu_actions_' + tab) || '[]'); } catch(e) {}
+  if (items[idx]) {
+    items[idx].done = !items[idx].done;
+    try { localStorage.setItem('lu_actions_' + tab, JSON.stringify(items)); } catch(e) {}
+  }
+  // Re-render panel AND the main Action Items view if visible
+  renderReminderActions();
+  if (document.getElementById('view-actions').classList.contains('active')) {
+    renderActions();
+  }
 }
 
 function renderReminderMeetings() {
@@ -2372,21 +2368,16 @@ function renderReminderMeetings() {
       var events = data.value || [];
       var now = new Date();
       var endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-
-      // Filter to today's events
       var todayEvents = events.filter(function(e) {
         var start = new Date(e.start.dateTime || e.start.date);
         return start >= new Date(now.getFullYear(), now.getMonth(), now.getDate()) && start <= endOfDay;
       });
-
-      // Sort by start time
       todayEvents.sort(function(a,b) {
         return new Date(a.start.dateTime || a.start.date) - new Date(b.start.dateTime || b.start.date);
       });
 
       var html = '';
       if (todayEvents.length === 0) {
-        // Check if there are upcoming events this week
         var upcomingThisWeek = events.filter(function(e) {
           var start = new Date(e.start.dateTime || e.start.date);
           var weekEnd = new Date(now);
@@ -2394,50 +2385,36 @@ function renderReminderMeetings() {
           weekEnd.setHours(23, 59, 59, 0);
           return start > now && start <= weekEnd;
         }).slice(0, 5);
-
         if (upcomingThisWeek.length > 0) {
           html += '<div style="font-size:11px;font-weight:700;color:var(--muted);padding:4px 0 6px">📅 Upcoming This Week</div>';
           upcomingThisWeek.forEach(function(e) {
             var start = new Date(e.start.dateTime || e.start.date);
             var timeStr = start.toLocaleTimeString([], { weekday:'short', hour:'2-digit', minute:'2-digit' });
-            html += '<div class="rp-meeting">'
-              + '<span class="rp-meeting-time">' + timeStr + '</span>'
-              + '<div class="rp-meeting-detail">'
-              + '<div class="rp-meeting-subject">' + escapeHtml(e.subject || '(No title)') + '</div>'
-              + (e.location && e.location.displayName ? '<div class="rp-meeting-loc">📍 ' + escapeHtml(e.location.displayName) + '</div>' : '')
-              + '</div></div>';
+            html += '<div class="rp-meeting"><span class="rp-meeting-time">' + timeStr + '</span><div class="rp-meeting-detail"><div class="rp-meeting-subject">' + escapeHtml(e.subject || '(No title)') + '</div>' + (e.location && e.location.displayName ? '<div class="rp-meeting-loc"> ' + escapeHtml(e.location.displayName) + '</div>' : '') + '</div></div>';
           });
         } else {
           html = '<div class="rp-empty"><div class="rp-empty-icon">📅</div>No meetings today.</div>';
         }
       } else {
-        html += '<div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px">📅 Today\'s Meetings</div>';
+        html += '<div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px"> Today\'s Meetings</div>';
         todayEvents.forEach(function(e) {
           var start = new Date(e.start.dateTime || e.start.date);
           var end = new Date(e.end.dateTime || e.end.date);
-          var timeStr = start.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })
-            + '-' + end.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+          var timeStr = start.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) + '-' + end.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
           var isNow = now >= start && now <= end;
-          html += '<div class="rp-meeting" style="' + (isNow ? 'border-left-color:#e74c3c;background:#fce8e8' : '') + '">'
-            + '<span class="rp-meeting-time">' + timeStr + '</span>'
-            + '<div class="rp-meeting-detail">'
-            + '<div class="rp-meeting-subject">' + escapeHtml(e.subject || '(No title)') + '</div>'
-            + (e.location && e.location.displayName ? '<div class="rp-meeting-loc">📍 ' + escapeHtml(e.location.displayName) + '</div>' : '')
-            + (isNow ? '<div style="font-size:11px;color:#c0392b;font-weight:600;margin-top:2px">🔴 In progress</div>' : '')
-            + '</div></div>';
+          html += '<div class="rp-meeting" style="' + (isNow ? 'border-left-color:#e74c3c;background:#fce8e8' : '') + '"><span class="rp-meeting-time">' + timeStr + '</span><div class="rp-meeting-detail"><div class="rp-meeting-subject">' + escapeHtml(e.subject || '(No title)') + '</div>' + (e.location && e.location.displayName ? '<div class="rp-meeting-loc"> ' + escapeHtml(e.location.displayName) + '</div>' : '') + (isNow ? '<div style="font-size:11px;color:#c0392b;font-weight:600;margin-top:2px"> In progress</div>' : '') + '</div></div>';
         });
       }
       el.innerHTML = html;
     })
-    .catch(function(err) {
-      el.innerHTML = '<div class="rp-empty"><div class="rp-empty-icon">⚠️</div>Could not load calendar. ' + escapeHtml(err.message || '') + '</div>';
+    .catch(function() {
+      el.innerHTML = '<div class="rp-empty"><div class="rp-empty-icon">⚠️</div>Could not load calendar.</div>';
     });
 }
 
-// ── MFP EMAIL ACTION ITEMS SCANNER ────────────────────────────────
+// ── EMAIL SCANNER — saves directly into Action Items system ───────
 function refreshReminderData() {
   if (!luUser || !luUser.authenticated) return;
-  // Only refresh if more than 15 minutes since last fetch
   if (Date.now() - reminderLastFetch < 15 * 60 * 1000) return;
   reminderLastFetch = Date.now();
   scanMFPEmails();
@@ -2461,11 +2438,7 @@ function scanMFPEmails() {
 }
 
 function extractActionItemsFromEmails(emails) {
-  // Target names
   var targets = ['whitney', 'justin williams', 'jordan ward', 'wwilliams', 'justin.williams', 'jordan.ward'];
-  var today = new Date();
-
-  // MFP-related keywords
   var mfpKW = [
     'mfp','freedom park','stadium','lemartec','punch','change order','cost recovery',
     'arq','miller','baker','hvac','scoreboard','commissioning','closeout','pco','invoice',
@@ -2474,8 +2447,10 @@ function extractActionItemsFromEmails(emails) {
     'schedule','delay','accelerat','owner','graham','devon','victor'
   ];
 
-  var items = [];
-  var seen = {};
+  var mfpItems = [];
+  var luItems = [];
+  var seenMFP = {};
+  var seenLU = {};
 
   emails.forEach(function(email) {
     var subject = (email.subject || '').toLowerCase();
@@ -2483,14 +2458,12 @@ function extractActionItemsFromEmails(emails) {
     var from = (email.from && email.from.emailAddress) ? (email.from.emailAddress.name || email.from.emailAddress.address) : '';
     var combined = subject + ' ' + preview;
 
-    // Check if this email is MFP-related
+    // Check if MFP-related
     var isMFP = mfpKW.some(function(kw) { return combined.indexOf(kw) >= 0; });
-    if (!isMFP) return;
 
-    // Check if it mentions a target person
+    // Check if it mentions a target person or is TO Whitney
     var mentionsTarget = targets.some(function(t) { return combined.indexOf(t) >= 0; });
     if (!mentionsTarget) {
-      // Check if it's TO Whitney (from address)
       var toMe = (email.toRecipients || []).some(function(r) {
         var addr = (r.emailAddress && r.emailAddress.address || '').toLowerCase();
         return addr.indexOf('wwilliams@levelup') >= 0 || addr.indexOf('whitney') >= 0;
@@ -2498,61 +2471,86 @@ function extractActionItemsFromEmails(emails) {
       if (!toMe) return;
     }
 
-    // Extract a concise action description from subject + preview
-    var actionText = email.subject || '';
-    if (actionText.length < 10 && preview) {
-      actionText = preview.slice(0, 120);
-    }
-    // Clean up
+    // Extract action text from subject
+    var actionText = email.subject || preview.slice(0, 120);
     actionText = actionText.replace(/^(re:|fwd:)\s*/i, '').trim();
     if (actionText.length > 140) actionText = actionText.slice(0, 140) + '...';
     if (!actionText) return;
 
-    // Deduplicate
+    // Dedup key
     var key = actionText.toLowerCase().slice(0, 40);
-    if (seen[key]) return;
-    seen[key] = true;
+    var dedupMap = isMFP ? seenMFP : seenLU;
+    if (dedupMap[key]) return;
+    dedupMap[key] = true;
 
-    // Determine priority based on keywords
+    // Priority based on keywords
     var priority = 'medium';
     var urgentKW = ['urgent','asap','due today','overdue','critical','blocking','stop work','cure notice','deadline'];
     var highKW = ['action required','please review','needs approval','pending','open item','request'];
     if (urgentKW.some(function(k) { return combined.indexOf(k) >= 0; })) priority = 'urgent';
     else if (highKW.some(function(k) { return combined.indexOf(k) >= 0; })) priority = 'high';
 
-    // Determine who it's assigned to
+    // Determine assignment
     var assignedTo = '';
     if (combined.indexOf('jordan') >= 0) assignedTo = 'Jordan Ward';
     else if (combined.indexOf('justin') >= 0) assignedTo = 'Justin Williams';
     else if (combined.indexOf('whitney') >= 0 || combined.indexOf('wwilliams') >= 0) assignedTo = 'Whitney Williams';
 
     var date = new Date(email.receivedDateTime);
-    items.push({
-      text: actionText,
-      priority: priority,
-      from: from || email.from?.emailAddress?.address || 'Email',
-      assignedTo: assignedTo,
+    var actionItem = {
+      id: 'email_' + email.receivedDateTime + '_' + Math.random().toString(36).slice(2,6),
+      text: (isMFP ? '' : '[LU] ') + actionText,
+      done: false,
       ts: date.getTime(),
-      date: date.toLocaleDateString('en-US', { month:'short', day:'numeric' })
-    });
+      author: 'L.U.N.A. (Email)',
+      priority: priority,
+      category: isMFP ? 'meeting' : 'other',
+      dueDate: null,
+      emailFrom: from,
+      assignedTo: assignedTo
+    };
+
+    if (isMFP) {
+      mfpItems.push(actionItem);
+    } else {
+      luItems.push(actionItem);
+    }
   });
 
-  // Sort by priority then recency
-  items.sort(function(a,b) {
-    var rank = { urgent:0, high:1, medium:2, low:3 };
-    var ar = rank[a.priority]||2, br = rank[b.priority]||2;
-    if (ar !== br) return ar - br;
-    return b.ts - a.ts;
-  });
+  // Save MFP items to Team action items (merge with existing)
+  mergeEmailItems('team', mfpItems);
+  // Save non-MFP items to Personal action items
+  mergeEmailItems('personal', luItems);
 
-  // Save to localStorage with timestamp
-  try {
-    localStorage.setItem('lu_mfp_email_items', JSON.stringify(items));
-    localStorage.setItem('lu_mfp_email_fetch', Date.now());
-  } catch(e) {}
-
-  // If panel is open, re-render
+  // Re-render panel if open
   if (reminderPanelOpen) renderReminderActions();
+}
+
+function mergeEmailItems(tab, newItems) {
+  if (!newItems.length) return;
+  var existing = [];
+  try { existing = JSON.parse(localStorage.getItem('lu_actions_' + tab) || '[]'); } catch(e) {}
+  
+  // Build dedup set from existing items
+  var existingKeys = {};
+  existing.forEach(function(item) {
+    if (item.id) existingKeys[item.id] = true;
+    // Also dedup by text
+    if (item.text) existingKeys['txt_' + item.text.toLowerCase().slice(0, 40)] = true;
+  });
+
+  var added = 0;
+  newItems.forEach(function(item) {
+    if (existingKeys[item.id]) return;
+    if (existingKeys['txt_' + (item.text || '').toLowerCase().slice(0, 40)]) return;
+    existing.unshift(item);
+    existingKeys[item.id] = true;
+    added++;
+  });
+
+  if (added > 0) {
+    try { localStorage.setItem('lu_actions_' + tab, JSON.stringify(existing)); } catch(e) {}
+  }
 }
 
 // ── UPDATED PLAYBOOK SEARCH WITH DROPDOWN ────────────────────────────
