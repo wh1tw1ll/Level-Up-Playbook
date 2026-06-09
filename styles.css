@@ -461,7 +461,3 @@ mark.search-highlight{background:#fff3a8;padding:1px 2px;border-radius:2px;color
 .briefing-budget-item span{color:var(--muted)}
 .briefing-budget-item strong{font-size:14px;color:var(--charcoal)}
 @media (max-width:600px){.briefing-budget{grid-template-columns:1fr}}
-/* Theme button — CSS pseudo-element prevents flash before JS runs */
-#theme-btn { font-size:18px;line-height:1 }
-html[data-btn-theme="dark"] #theme-btn::after { content:"☽" }
-html[data-btn-theme="light"] #theme-btn::after { content:"☀" }

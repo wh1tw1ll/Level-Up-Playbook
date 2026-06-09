@@ -154,6 +154,8 @@ function signOut() {
 function applyTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
   document.documentElement.setAttribute('data-btn-theme', t === 'dark' ? '☽' : '☀');
+  var btn = document.getElementById('theme-btn');
+  if (btn) { btn.textContent = t === 'dark' ? '☽' : '☀'; btn.style.opacity = '1'; }
 }
 
 function toggleTheme() {
