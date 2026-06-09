@@ -54,7 +54,7 @@ export default async function handler(req, res) {
   const end  = new Date(Date.now() + days*86400000).toISOString();
   try {
       const r = await fetch(
-        `https://graph.microsoft.com/v1.0/me/calendarview?startdatetime=${start}&enddatetime=${end}&$select=subject,start,end,location,isOnlineMeeting,onlineMeetingUrl&$top=50&$orderby=start/dateTime`,
+              `https://graph.microsoft.com/v1.0/me/calendarview?startdatetime=${now}&enddatetime=${end}&$select=subject,start,end,location,isOnlineMeeting,onlineMeetingUrl&$top=50&$orderby=start/dateTime`,
         { headers: { Authorization: `Bearer ${refreshed.access_token}` } }
       );
       if (!r.ok) {
