@@ -109,6 +109,7 @@ async function tryRefresh() {
       if (data.authenticated) {
         luUser = { authenticated: true, name: data.name, email: data.email };
         updateAuthUI();
+        initDailyBriefing();
         return true;
       }
     }
@@ -687,10 +688,10 @@ function renderMFP() {
       + '<div style="font-size:14px;color:var(--charcoal);line-height:1.6">Home opener April 4, 2026 completed. Targeting final completion ' + (S ? S.target_completion : 'July 31, 2026') + '. Active workstreams: punch list closeout, cost recovery audit (delivery June 30), Lemartec contract closeout, HVAC service agreement transfer, Day 2 owner requests log.</div>'
     + '</div>'
     + '<div class="mfp-grid">'
-    + '<div class="mfp-card" onclick="openMFPModal(\'issues\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDD34</span><span class="mfp-card-title">Live Issues</span><span class="mfp-badge red">4 HIGH</span></div><div class="mfp-card-summary">ARQ payment hold (~$1.5M Feb-Apr invoices), cost recovery audit deadline, Lemartec punch list disputes, HVAC contractor departure risk, Lemartec indirect cost gap.</div><div class="mfp-expand-content"></div></div>'
+    + '<div class="mfp-card" onclick="openMFPModal(\'issues\')"><div class="mfp-card-head"><span class="mfp-icon">🔴</span><span class="mfp-card-title">Live Issues</span><span class="mfp-badge red">5 HIGH</span></div><div class="mfp-card-summary">ARQ payment hold (~$1.5M), cost recovery audit deadline (Jun 30), Lemartec punch list disputes, HVAC contractor departure risk, Lemartec indirect cost gap ($39.5M).</div><div class="mfp-expand-content"></div></div>'
         + '<div class="mfp-card" onclick="openMFPModal(\'financials\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDCB0</span><span class="mfp-card-title">Financials</span></div><div class="mfp-card-summary">Total budget: ' + budgetVal + '. Stadium: ' + stadiumVal + ' revised, ' + pctComplete + ' complete. Miller Electric outstanding: ' + millerOut + '. Retainage: ' + retainVal + '.</div><div class="mfp-expand-content"></div></div>'
         + '<div class="mfp-card" onclick="openMFPModal(\'punchlist\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDCCB</span><span class="mfp-card-title">Punch List</span><span class="mfp-badge warn">Active</span></div><div class="mfp-card-summary">Tile installation deficiency and surface-mounted electrical conduit (spec required concealed) are active disputes with Lemartec. Position: correction, not credit.</div><div class="mfp-expand-content"></div></div>'
-        + '<div class="mfp-card" onclick="openMFPModal(\'day2\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83C\uDFD7</span><span class="mfp-card-title">Day 2 Items</span><span class="mfp-badge warn">60+</span></div><div class="mfp-card-summary">Owner-directed post-opening scope. Each requires scope definition, cost estimate, owner authorization. Distinct from punch list.</div><div class="mfp-expand-content"></div></div>'
+        + '<div class="mfp-card" onclick="showMFPDetail(\'day2\')"><div class="mfp-card-head"><span class="mfp-icon">🏗</span><span class="mfp-card-title">Day 2 Items</span><span class="mfp-badge warn">60+</span></div><div class="mfp-card-summary">Owner-directed post-opening scope. 10 tracked in closeout meetings — concourse signage, team store, club finishing, broadcast platforms, plaza landscaping, security screening, parking, F&B upgrades, AV system, suite FF&E. Each requires scope definition, cost estimate, owner authorization.</div><div class="mfp-expand-content"></div></div>'
         + '<div class="mfp-card" onclick="openMFPModal(\'stakeholders\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDC65</span><span class="mfp-card-title">Stakeholders</span></div><div class="mfp-card-summary">Owner: Graham Oxley (day-to-day), Devon McCorkle &amp; Victor Oliver (approvers). CM/GC: Lemartec. AOR: ARQ.</div><div class="mfp-expand-content"></div></div>'
     + '</div>'
     + '<div style="margin-top:24px"><button class="btn-primary" onclick="toggleChat()">Ask L.U.N.A. about MFP \u2192</button></div>';
@@ -716,21 +717,24 @@ function renderMFP() {
         function showMFPDetail(view) {
                           var details = {
                 issues: {
-                  icon: '🔴', title: 'Live Issues',
-                  body: '<div style="margin-bottom:16px"><strong style="font-size:15px;color:var(--charcoal)">4 High Priority Issues</strong></div>'
-                    + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
-                    + '<strong>1. ARQ Payment Hold</strong><br>~$1.5M in Feb-Apr invoices on hold. Disputed work quality and incomplete deliverables.<br>'
-                    + '<span style="font-size:11px;color:var(--muted)">Owner: Graham Oxley | Status: Open</span></div>'
-                    + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
-                    + '<strong>2. Punch List: Tile Installation Deficiency</strong><br>Surface-mounted electrical conduit violates spec requiring concealed. Position: correction, not credit.<br>'
-                    + '<span style="font-size:11px;color:var(--muted)">Disputed with Lemartec | Status: Open</span></div>'
-                    + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
-                    + '<strong>3. HVAC Service Agreement — Hill York</strong><br>Contractor departure risk. Urgent — pending signature.<br>'
-                    + '<span style="font-size:11px;color:var(--muted)">Status: Urgent / Pending Signature</span></div>'
-                    + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
-                    + '<strong>4. Lemartec Indirect Costs</strong><br>$39.5M indirect cost payment gap. General requirements, general conditions, CM fee, and insurance unpaid.<br>'
-                    + '<span style="font-size:11px;color:var(--muted)">Status: Open</span></div>'
-                },
+                                  icon: '🔴', title: 'Live Issues',
+                                  body: '<div style="margin-bottom:16px"><strong style="font-size:15px;color:var(--charcoal)">5 High Priority Issues</strong></div>'
+                                    + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+                                    + '<strong>1. ARQ Payment Hold</strong><br>~$1.5M in Feb-Apr invoices on hold. Disputed work quality and incomplete deliverables. Escalated to owner for resolution.<br>'
+                                    + '<span style="font-size:11px;color:var(--muted)">Owner: Graham Oxley | Priority: High | Target: Jun 2026</span></div>'
+                                    + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+                                    + '<strong>2. Cost Recovery Audit — Final Delivery</strong><br>Forensic audit of Kroll COs and Lemartec indirect costs. June 30, 2026 deadline. $21.5M potential savings identified across 13 Kroll PDFs. Key findings: Miller Electric ($84.9M), Baker Concrete ($61.8M), Right Way Plumbing ($20.2M).<br>'
+                                    + '<span style="font-size:11px;color:var(--muted)">Lead: Whitney | Priority: Critical | Deadline: Jun 30, 2026</span></div>'
+                                    + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+                                    + '<strong>3. Punch List: Tile Installation Deficiency</strong><br>Surface-mounted electrical conduit violates spec requiring concealed. Position: correction, not credit. Active dispute with Lemartec — not a change order, a quality/compliance issue.<br>'
+                                    + '<span style="font-size:11px;color:var(--muted)">Disputed with Lemartec | Priority: High | Status: Open</span></div>'
+                                    + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+                                    + '<strong>4. HVAC Service Agreement — Hill York</strong><br>Contractor departure risk. Service agreement for post-opening HVAC maintenance pending signature. Urgent — need executed agreement before Hill York demobilizes.<br>'
+                                    + '<span style="font-size:11px;color:var(--muted)">Priority: Urgent | Status: Pending Signature</span></div>'
+                                    + '<div style="background:#fce8e8;border:1px solid #e74c3c;border-radius:8px;padding:12px 14px;margin-bottom:10px">'
+                                    + '<strong>5. Lemartec Indirect Costs</strong><br>$39.5M indirect cost payment gap. General requirements, general conditions, CM fee, and insurance unpaid. Cost recovery audit includes review of these line items.<br>'
+                                    + '<span style="font-size:11px;color:var(--muted)">Status: Open | Part of Cost Recovery Audit</span></div>'
+                                },
                 financials: {
                           icon: '💰', title: 'Financials',
                           body: (function(){
@@ -2138,6 +2142,518 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
+// ── REMINDER SIDE PANEL ────────────────────────────────────────────
+var reminderPanelOpen = false;
+var reminderEmailItems = [];
+var reminderLastFetch = 0;
+
+function isWhitney() {
+  return luUser && luUser.authenticated && (
+    (luUser.email && luUser.email.toLowerCase().indexOf('wwilliams@levelup') >= 0) ||
+    (luUser.email && luUser.email.toLowerCase().indexOf('whitney') >= 0) ||
+    (luUser.name && luUser.name.toLowerCase().indexOf('whitney') >= 0)
+  );
+}
+
+function showReminderToggle() {
+  var t = document.getElementById('reminder-toggle');
+  if (!t) return;
+  if (luUser && luUser.authenticated) {
+    t.style.display = 'flex';
+  } else {
+    t.style.display = 'none';
+  }
+}
+
+function initDailyBriefing() {
+  showReminderToggle();
+  // If Whitney is signed in, auto-fetch and show panel
+  if (isWhitney()) {
+    refreshReminderData();
+    // Auto-open panel on first load of the day
+    var lastOpen = 0;
+    try { lastOpen = parseInt(localStorage.getItem('lu_reminder_panel_last') || '0'); } catch(e) {}
+    var today = new Date().toDateString();
+    if (!lastOpen || new Date(lastOpen).toDateString() !== today) {
+      setTimeout(openReminderPanel, 800);
+      try { localStorage.setItem('lu_reminder_panel_last', Date.now()); } catch(e) {}
+    }
+  }
+}
+
+function openReminderPanel() {
+  var panel = document.getElementById('reminder-panel');
+  var toggle = document.getElementById('reminder-toggle');
+  if (panel) {
+    panel.style.display = 'flex';
+    setTimeout(function() { panel.classList.remove('closed'); }, 10);
+  }
+  if (toggle) toggle.style.display = 'none';
+  reminderPanelOpen = true;
+  renderReminderPanel();
+}
+
+function closeReminderPanel() {
+  var panel = document.getElementById('reminder-panel');
+  var toggle = document.getElementById('reminder-toggle');
+  if (panel) {
+    panel.classList.add('closed');
+    setTimeout(function() {
+      panel.style.display = 'none';
+      if (toggle && luUser && luUser.authenticated) toggle.style.display = 'flex';
+    }, 300);
+  }
+  reminderPanelOpen = false;
+}
+
+function switchReminderTab(tab) {
+  document.querySelectorAll('.reminder-tab').forEach(function(t) {
+    t.classList.toggle('active', t.getAttribute('data-rtab') === tab);
+  });
+  var a = document.getElementById('reminder-panel-actions');
+  var m = document.getElementById('reminder-panel-meetings');
+  if (a) a.style.display = tab === 'actions' ? 'block' : 'none';
+  if (m) m.style.display = tab === 'meetings' ? 'block' : 'none';
+  if (tab === 'meetings') renderReminderMeetings();
+  else renderReminderActions();
+}
+
+function renderReminderPanel() {
+  // Default to Actions tab
+  switchReminderTab('actions');
+  renderReminderActions();
+  // Start fetching meetings in background
+  setTimeout(renderReminderMeetings, 200);
+}
+
+function renderReminderActions() {
+  var el = document.getElementById('reminder-panel-actions');
+  if (!el) return;
+  var footer = document.getElementById('reminder-panel-footer-text');
+  if (footer) footer.textContent = 'Updating...';
+
+  // Get action items from localStorage (both team and personal)
+  var teamItems = [];
+  var personalItems = [];
+  try {
+    teamItems = JSON.parse(localStorage.getItem('lu_actions_team') || '[]');
+    personalItems = JSON.parse(localStorage.getItem('lu_actions_personal') || '[]');
+  } catch(e) {}
+
+  // Get email-derived items
+  var emailItems = [];
+  try { emailItems = JSON.parse(localStorage.getItem('lu_mfp_email_items') || '[]'); } catch(e) {}
+
+  // Today's items (due today or overdue)
+  var now = new Date();
+  var todayStr = now.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+
+  // UPCOMING ITEMS from action items
+  var upcoming = [];
+  // Also collect MFP email items
+  var mfpUpcoming = [];
+
+  // Team action items - filter to active, MFP-relevant only for Whitney view
+  var mfpKeywords = ['mfp','freedom park','stadium','lemartec','punch','change order','cost recovery','arq','miller','baker','hvac','scoreboard','commissioning','closeout','pco','invoice','draw','pay app','retainage','tco','permitting'];
+  teamItems.forEach(function(item) {
+    if (item.done) return;
+    var txt = (item.text || '').toLowerCase();
+    var isMFP = mfpKeywords.some(function(kw) { return txt.indexOf(kw) >= 0; });
+    if (isWhitney() && !isMFP) {
+      // For Whitney: only MFP-related team items go to panel
+      // Non-MFP team items stay in the full Action Items view
+      return;
+    }
+    upcoming.push({
+      text: item.text,
+      priority: item.priority || 'medium',
+      source: item.author || 'Team',
+      due: item.dueDate || null,
+      category: item.category || ''
+    });
+  });
+
+  // Personal items - all go to panel
+  personalItems.forEach(function(item) {
+    if (item.done) return;
+    var txt = (item.text || '').toLowerCase();
+    upcoming.push({
+      text: item.text,
+      priority: item.priority || 'medium',
+      source: item.author || 'Personal',
+      due: item.dueDate || null,
+      category: item.category || ''
+    });
+  });
+
+  // MFP email-derived items
+  emailItems.forEach(function(item) {
+    mfpUpcoming.push({
+      text: item.text,
+      priority: item.priority || 'medium',
+      source: '📧 ' + (item.from || 'Email'),
+      due: item.dueDate || null,
+      assigned: item.assignedTo || ''
+    });
+  });
+
+  // Sort: urgent first, then by due date
+  upcoming.sort(function(a,b) {
+    var rank = { urgent:0, high:1, medium:2, low:3 };
+    var ar = rank[a.priority]||2, br = rank[b.priority]||2;
+    if (ar !== br) return ar - br;
+    if (a.due && b.due) return a.due.localeCompare(b.due);
+    if (a.due) return -1; if (b.due) return 1;
+    return 0;
+  });
+
+  var html = '';
+  var toggleIcon = document.getElementById('reminder-toggle-count');
+
+  // --- MFP EMAIL ITEMS SECTION (Whitney only) ---
+  if (isWhitney() && mfpUpcoming.length > 0) {
+    html += '<div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px">📧 From MFP Emails</div>';
+    mfpUpcoming.slice(0, 8).forEach(function(item) {
+      var priClass = item.priority === 'urgent' || item.priority === 'high' ? 'urgent' : 'medium';
+      html += '<div class="rp-item">'
+        + '<span class="rp-item-icon">📧</span>'
+        + '<div class="rp-item-text">' + escapeHtml(item.text)
+        + '<div class="rp-item-source">' + escapeHtml(item.source) + (item.assigned ? ' · Assigned: ' + escapeHtml(item.assigned) : '') + '</div>'
+        + '</div>'
+        + '<span class="rp-item-pri ' + priClass + '">' + item.priority + '</span>'
+        + '</div>';
+    });
+  }
+
+  // --- ACTION ITEMS SECTION ---
+  if (upcoming.length > 0 || mfpUpcoming.length > 0) {
+    if (upcoming.length > 0) {
+      html += '<div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px' + (html ? '' : '') + '">✅ Open Action Items</div>';
+      upcoming.slice(0, 10).forEach(function(item) {
+        var priClass = item.priority === 'urgent' || item.priority === 'high' ? 'urgent' : 'medium';
+        html += '<div class="rp-item">'
+          + '<span class="rp-item-icon">' + (item.priority === 'urgent' ? '🔴' : item.priority === 'high' ? '🟠' : '🟢') + '</span>'
+          + '<div class="rp-item-text">' + escapeHtml(item.text)
+          + '<div class="rp-item-source">' + escapeHtml(item.source) + (item.due ? ' · Due: ' + item.due : '') + '</div>'
+          + '</div>'
+          + '<span class="rp-item-pri ' + priClass + '">' + item.priority + '</span>'
+          + '</div>';
+      });
+    }
+
+    // Update toggle badge count
+    var totalOpen = upcoming.length + mfpUpcoming.length;
+    if (toggleIcon) toggleIcon.textContent = totalOpen > 9 ? '9+' : totalOpen;
+  } else {
+    html += '<div class="rp-empty"><div class="rp-empty-icon">✅</div>No open action items. Everything is up to date.</div>';
+    if (toggleIcon) toggleIcon.textContent = '0';
+  }
+
+  el.innerHTML = html || '<div class="rp-empty"><div class="rp-empty-icon">📭</div>No items yet.</div>';
+  if (footer) footer.textContent = 'Updated ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+}
+
+function renderReminderMeetings() {
+  var el = document.getElementById('reminder-panel-meetings');
+  if (!el) return;
+  if (!luUser || !luUser.authenticated) {
+    el.innerHTML = '<div class="rp-empty"><div class="rp-empty-icon">🔒</div>Sign in to see your calendar.</div>';
+    return;
+  }
+
+  el.innerHTML = '<div class="reminder-loader">Loading meetings...</div>';
+
+  fetch('/api/outlook/calendar?days=1', { credentials: 'include' })
+    .then(function(r) {
+      if (!r.ok) throw new Error('Calendar fetch failed');
+      return r.json();
+    })
+    .then(function(data) {
+      var events = data.value || [];
+      var now = new Date();
+      var endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+
+      // Filter to today's events
+      var todayEvents = events.filter(function(e) {
+        var start = new Date(e.start.dateTime || e.start.date);
+        return start >= new Date(now.getFullYear(), now.getMonth(), now.getDate()) && start <= endOfDay;
+      });
+
+      // Sort by start time
+      todayEvents.sort(function(a,b) {
+        return new Date(a.start.dateTime || a.start.date) - new Date(b.start.dateTime || b.start.date);
+      });
+
+      var html = '';
+      if (todayEvents.length === 0) {
+        // Check if there are upcoming events this week
+        var upcomingThisWeek = events.filter(function(e) {
+          var start = new Date(e.start.dateTime || e.start.date);
+          var weekEnd = new Date(now);
+          weekEnd.setDate(weekEnd.getDate() + (7 - weekEnd.getDay()));
+          weekEnd.setHours(23, 59, 59, 0);
+          return start > now && start <= weekEnd;
+        }).slice(0, 5);
+
+        if (upcomingThisWeek.length > 0) {
+          html += '<div style="font-size:11px;font-weight:700;color:var(--muted);padding:4px 0 6px">📅 Upcoming This Week</div>';
+          upcomingThisWeek.forEach(function(e) {
+            var start = new Date(e.start.dateTime || e.start.date);
+            var timeStr = start.toLocaleTimeString([], { weekday:'short', hour:'2-digit', minute:'2-digit' });
+            html += '<div class="rp-meeting">'
+              + '<span class="rp-meeting-time">' + timeStr + '</span>'
+              + '<div class="rp-meeting-detail">'
+              + '<div class="rp-meeting-subject">' + escapeHtml(e.subject || '(No title)') + '</div>'
+              + (e.location && e.location.displayName ? '<div class="rp-meeting-loc">📍 ' + escapeHtml(e.location.displayName) + '</div>' : '')
+              + '</div></div>';
+          });
+        } else {
+          html = '<div class="rp-empty"><div class="rp-empty-icon">📅</div>No meetings today.</div>';
+        }
+      } else {
+        html += '<div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px">📅 Today\'s Meetings</div>';
+        todayEvents.forEach(function(e) {
+          var start = new Date(e.start.dateTime || e.start.date);
+          var end = new Date(e.end.dateTime || e.end.date);
+          var timeStr = start.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })
+            + '-' + end.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+          var isNow = now >= start && now <= end;
+          html += '<div class="rp-meeting" style="' + (isNow ? 'border-left-color:#e74c3c;background:#fce8e8' : '') + '">'
+            + '<span class="rp-meeting-time">' + timeStr + '</span>'
+            + '<div class="rp-meeting-detail">'
+            + '<div class="rp-meeting-subject">' + escapeHtml(e.subject || '(No title)') + '</div>'
+            + (e.location && e.location.displayName ? '<div class="rp-meeting-loc">📍 ' + escapeHtml(e.location.displayName) + '</div>' : '')
+            + (isNow ? '<div style="font-size:11px;color:#c0392b;font-weight:600;margin-top:2px">🔴 In progress</div>' : '')
+            + '</div></div>';
+        });
+      }
+      el.innerHTML = html;
+    })
+    .catch(function(err) {
+      el.innerHTML = '<div class="rp-empty"><div class="rp-empty-icon">⚠️</div>Could not load calendar. ' + escapeHtml(err.message || '') + '</div>';
+    });
+}
+
+// ── MFP EMAIL ACTION ITEMS SCANNER ────────────────────────────────
+function refreshReminderData() {
+  if (!luUser || !luUser.authenticated) return;
+  // Only refresh if more than 15 minutes since last fetch
+  if (Date.now() - reminderLastFetch < 15 * 60 * 1000) return;
+  reminderLastFetch = Date.now();
+  scanMFPEmails();
+}
+
+function scanMFPEmails() {
+  if (!isWhitney()) return;
+  fetch('/api/outlook/action-items?limit=150&days=21', { credentials: 'include' })
+    .then(function(r) {
+      if (!r.ok) throw new Error('Failed (' + r.status + ')');
+      return r.json();
+    })
+    .then(function(data) {
+      var emails = data.value || [];
+      if (!emails.length) return;
+      extractActionItemsFromEmails(emails);
+    })
+    .catch(function(err) {
+      console.log('MFP email scan:', err.message);
+    });
+}
+
+function extractActionItemsFromEmails(emails) {
+  // Target names
+  var targets = ['whitney', 'justin williams', 'jordan ward', 'wwilliams', 'justin.williams', 'jordan.ward'];
+  var today = new Date();
+
+  // MFP-related keywords
+  var mfpKW = [
+    'mfp','freedom park','stadium','lemartec','punch','change order','cost recovery',
+    'arq','miller','baker','hvac','scoreboard','commissioning','closeout','pco','invoice',
+    'draw','pay app','retainage','tco','permitting','boldyn','das','seating','concession',
+    'ff&e','punch list','deficiency','scope','contract','submittal','rfp','rfi',
+    'schedule','delay','accelerat','owner','graham','devon','victor'
+  ];
+
+  var items = [];
+  var seen = {};
+
+  emails.forEach(function(email) {
+    var subject = (email.subject || '').toLowerCase();
+    var preview = (email.bodyPreview || '').toLowerCase();
+    var from = (email.from && email.from.emailAddress) ? (email.from.emailAddress.name || email.from.emailAddress.address) : '';
+    var combined = subject + ' ' + preview;
+
+    // Check if this email is MFP-related
+    var isMFP = mfpKW.some(function(kw) { return combined.indexOf(kw) >= 0; });
+    if (!isMFP) return;
+
+    // Check if it mentions a target person
+    var mentionsTarget = targets.some(function(t) { return combined.indexOf(t) >= 0; });
+    if (!mentionsTarget) {
+      // Check if it's TO Whitney (from address)
+      var toMe = (email.toRecipients || []).some(function(r) {
+        var addr = (r.emailAddress && r.emailAddress.address || '').toLowerCase();
+        return addr.indexOf('wwilliams@levelup') >= 0 || addr.indexOf('whitney') >= 0;
+      });
+      if (!toMe) return;
+    }
+
+    // Extract a concise action description from subject + preview
+    var actionText = email.subject || '';
+    if (actionText.length < 10 && preview) {
+      actionText = preview.slice(0, 120);
+    }
+    // Clean up
+    actionText = actionText.replace(/^(re:|fwd:)\s*/i, '').trim();
+    if (actionText.length > 140) actionText = actionText.slice(0, 140) + '...';
+    if (!actionText) return;
+
+    // Deduplicate
+    var key = actionText.toLowerCase().slice(0, 40);
+    if (seen[key]) return;
+    seen[key] = true;
+
+    // Determine priority based on keywords
+    var priority = 'medium';
+    var urgentKW = ['urgent','asap','due today','overdue','critical','blocking','stop work','cure notice','deadline'];
+    var highKW = ['action required','please review','needs approval','pending','open item','request'];
+    if (urgentKW.some(function(k) { return combined.indexOf(k) >= 0; })) priority = 'urgent';
+    else if (highKW.some(function(k) { return combined.indexOf(k) >= 0; })) priority = 'high';
+
+    // Determine who it's assigned to
+    var assignedTo = '';
+    if (combined.indexOf('jordan') >= 0) assignedTo = 'Jordan Ward';
+    else if (combined.indexOf('justin') >= 0) assignedTo = 'Justin Williams';
+    else if (combined.indexOf('whitney') >= 0 || combined.indexOf('wwilliams') >= 0) assignedTo = 'Whitney Williams';
+
+    var date = new Date(email.receivedDateTime);
+    items.push({
+      text: actionText,
+      priority: priority,
+      from: from || email.from?.emailAddress?.address || 'Email',
+      assignedTo: assignedTo,
+      ts: date.getTime(),
+      date: date.toLocaleDateString('en-US', { month:'short', day:'numeric' })
+    });
+  });
+
+  // Sort by priority then recency
+  items.sort(function(a,b) {
+    var rank = { urgent:0, high:1, medium:2, low:3 };
+    var ar = rank[a.priority]||2, br = rank[b.priority]||2;
+    if (ar !== br) return ar - br;
+    return b.ts - a.ts;
+  });
+
+  // Save to localStorage with timestamp
+  try {
+    localStorage.setItem('lu_mfp_email_items', JSON.stringify(items));
+    localStorage.setItem('lu_mfp_email_fetch', Date.now());
+  } catch(e) {}
+
+  // If panel is open, re-render
+  if (reminderPanelOpen) renderReminderActions();
+}
+
+// ── UPDATED PLAYBOOK SEARCH WITH DROPDOWN ────────────────────────────
+function pbSearchType(val) {
+  activeSearch = val.trim();
+  renderPlaybook();
+  var count = document.getElementById('pb-search-count');
+  if (count) {
+    var filtered = getFiltered();
+    count.textContent = activeSearch ? filtered.length + ' results' : '';
+  }
+
+  // Show dropdown matching Luna search style
+  var dd = document.getElementById('pb-hero-dropdown');
+  if (!dd) return;
+  var q = val.trim();
+  if (!q) { dd.classList.remove('show'); dd.innerHTML = ''; return; }
+  var ql = q.toLowerCase();
+
+  var results = [];
+
+  // Search KB
+  KB.forEach(function(s) {
+    var hay = [s.title, s.num].concat(s.topics || []).concat(s.h2 || []).concat(s.content || []).concat(s.bullets || []).join(' ').toLowerCase();
+    if (hay.indexOf(ql) >= 0) {
+      var preview = '';
+      var contents = s.content || [];
+      var bullets = s.bullets || [];
+      for (var ci = 0; ci < contents.length; ci++) {
+        if (contents[ci].toLowerCase().indexOf(ql) >= 0) {
+          preview = contents[ci].substring(0, 160);
+          break;
+        }
+      }
+      if (!preview) {
+        for (var bi = 0; bi < bullets.length; bi++) {
+          if (bullets[bi].toLowerCase().indexOf(ql) >= 0) {
+            preview = bullets[bi].substring(0, 160);
+            break;
+          }
+        }
+      }
+      if (!preview && s.h2 && s.h2.length) preview = s.h2[0].substring(0, 120);
+      if (!preview) preview = (s.content || []).slice(0, 2).join(' ').substring(0, 120);
+      results.push({ type:'section', label:'S' + s.num + ': ' + (s.title || ''), id:s.num, preview:preview });
+    }
+  });
+
+  // Search templates
+  for (var key in TEMPLATES) {
+    var t = TEMPLATES[key];
+    if ((t.name && t.name.toLowerCase().indexOf(ql) >= 0) || (t.desc && t.desc.toLowerCase().indexOf(ql) >= 0)) {
+      results.push({ type:'template', label:'Template: ' + (t.name||key), id:key, preview:(t.desc||'').substring(0,120) });
+    }
+  }
+
+  // Search topics
+  ALL_TOPICS.forEach(function(tp) {
+    if (tp.toLowerCase().indexOf(ql) >= 0) {
+      results.push({ type:'topic', label:'Topic: ' + tp, id:tp, preview:'' });
+    }
+  });
+
+  if (results.length === 0) { dd.classList.remove('show'); dd.innerHTML = ''; return; }
+
+  function hl(text) {
+    if (!text) return '';
+    var re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+    return text.replace(re, '<mark>$1</mark>');
+  }
+
+  var icons = { section:'📚', template:'📑', topic:'🏷️' };
+  var html = '<div class="luna-hero-dropdown-inner">';
+  html += '<div style="padding:6px 14px 8px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)">' + results.length + ' result' + (results.length>1?'s':'') + ' for "' + escapeHtml(q) + '"</div>';
+  results.slice(0, 15).forEach(function(r) {
+    var icon = icons[r.type]||'📄';
+    var onClick = "var dd=document.getElementById('pb-hero-dropdown');if(dd){dd.classList.remove('show');dd.innerHTML=''}document.getElementById('pb-search-input').value='';";
+    if (r.type === 'section') onClick += "setView('playbook');setPlaybookView('sections');jumpTo('" + r.id + "');";
+    else if (r.type === 'template') onClick += "setView('playbook');setPlaybookView('templates');";
+    else if (r.type === 'topic') onClick += "pbSearchType('" + r.id.replace(/'/g,"\\'") + "');";
+    html += '<div class="pb-hero-dd-item" onclick="' + onClick + '">'
+      + '<span class="pb-hero-dd-icon">' + icon + '</span>'
+      + '<div style="flex:1;min-width:0">'
+      + '<div class="pb-hero-dd-text">' + hl(r.label) + '</div>'
+      + (r.preview ? '<div class="pb-hero-dd-desc">' + hl(r.preview.substring(0, 160)) + '</div>' : '')
+      + '</div><span class="pb-hero-dd-src">' + r.type + '</span></div>';
+  });
+  html += '</div>';
+  dd.innerHTML = html;
+  dd.classList.add('show');
+
+  // Click outside to close
+  var closeHandler = function(e) {
+    if (!dd.contains(e.target) && e.target.id !== 'pb-search-input') {
+      dd.classList.remove('show');
+      document.removeEventListener('click', closeHandler);
+    }
+  };
+  setTimeout(function() { document.removeEventListener('click', closeHandler); document.addEventListener('click', closeHandler); }, 10);
+}
+
 // ── INIT ───────────────────────────────────────────────────────────
 function init() {
   // Set initial footer status
@@ -2152,8 +2668,10 @@ function init() {
   } catch(e) {}
 
   // Auth
-  checkAuthFromCookie();
-  updateAuthUI();
+    checkAuthFromCookie();
+    updateAuthUI();
+    // Initialize daily briefing/side panel
+    initDailyBriefing();
 
   // Update footer status
   if (footer) {

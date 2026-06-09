@@ -118,7 +118,10 @@
 <div id="view-playbook" class="view">
   <div id="pb-sections-view" class="pb-subview active">
       <div class="pb-search-row">
-        <input id="pb-search-input" class="pb-search-input" type="text" placeholder="Search playbook sections, topics, templates..." autocomplete="off" onkeydown="if(event.key==='Enter')pbSearch()" oninput="pbSearchType(this.value)">
+        <div class="pb-search-wrap">
+          <input id="pb-search-input" class="pb-search-input" type="text" placeholder="Search playbook sections, topics, templates..." autocomplete="off" onkeydown="if(event.key==='Enter')pbSearch()" oninput="pbSearchType(this.value)">
+          <div id="pb-hero-dropdown" class="pb-hero-dropdown"></div>
+        </div>
         <button class="pb-search-btn" onclick="pbSearch()">Search</button>
         <span id="pb-search-count" class="pb-search-count"></span>
       </div>
@@ -262,7 +265,28 @@
     <div class="chat-resize-handle" id="chat-resize-handle"></div>
   </div>
 
-<!-- ===== PASSWORD GATE ===== -->
+  <!-- ===== REMINDERS SIDE PANEL ===== -->
+  <div id="reminder-panel" class="reminder-panel" style="display:none">
+    <div class="reminder-panel-header">
+      <span class="reminder-panel-title">Today's Briefing</span>
+      <button class="chat-close" onclick="closeReminderPanel()" title="Close panel">×</button>
+    </div>
+    <div class="reminder-panel-tabs">
+      <button class="reminder-tab active" data-rtab="actions" onclick="switchReminderTab('actions')">Actions</button>
+      <button class="reminder-tab" data-rtab="meetings" onclick="switchReminderTab('meetings')">Meetings</button>
+    </div>
+    <div id="reminder-panel-actions" class="reminder-panel-body"></div>
+    <div id="reminder-panel-meetings" class="reminder-panel-body" style="display:none"></div>
+    <div class="reminder-panel-footer">
+      <span id="reminder-panel-footer-text">Loading...</span>
+    </div>
+  </div>
+  <div id="reminder-toggle" class="reminder-toggle" onclick="openReminderPanel()" title="Open daily briefing" style="display:none">
+    <span id="reminder-toggle-count" class="reminder-toggle-count">!</span>
+    <span class="reminder-toggle-text">Briefing</span>
+  </div>
+
+  <!-- ===== PASSWORD GATE ===== -->
 <div id="password-overlay" class="password-overlay open">
   <div class="password-modal">
     <div class="password-modal-logo">
