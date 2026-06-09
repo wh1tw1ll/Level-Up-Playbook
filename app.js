@@ -128,9 +128,49 @@ function updateAuthUI() {
     if (signInBtn) signInBtn.style.display = 'none';
     if (userInfo) userInfo.style.display = 'flex';
     if (userName) userName.textContent = luUser.name || luUser.email;
-    if (emailMeta) emailMeta.textContent = '✓ ' + (luUser.email || 'Connected');
+
+    // Show immediate connected status, then try to fetch live previews
+    if (emailMeta) emailMeta.textContent = '✓ Connected';
     if (calMeta) calMeta.textContent = '✓ Connected';
     if (spMeta) spMeta.textContent = '✓ Connected';
+
+    // Fetch live calendar preview
+    if (calMeta && !calMeta._fetching) {
+      calMeta._fetching = true;
+      calMeta.textContent = 'Loading...';
+      fetch('/api/outlook/calendar?days=14', { credentials: 'include' })
+        .then(function(r) { if (!r.ok) throw new Error('' + r.status); return r.json(); })
+        .then(function(data) {
+          var evs = data.value || [];
+          var upcoming = evs.filter(function(e) {
+            var s = new Date(e.start.dateTime || e.start.date);
+            return s > new Date();
+          });
+          if (upcoming.length === 0) { calMeta.textContent = 'No upcoming events'; return; }
+          var next = new Date(upcoming[0].start.dateTime || upcoming[0].start.date);
+          var timeStr = next.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+          var countStr = upcoming.length > 1 ? ' +' + (upcoming.length - 1) + ' more' : '';
+          calMeta.textContent = 'Next: ' + timeStr + countStr;
+        })
+        .catch(function() { calMeta.textContent = '✓ Calendar'; })
+        .then(function() { calMeta._fetching = false; });
+    }
+
+    // Fetch live email preview
+    if (emailMeta && !emailMeta._fetching) {
+      emailMeta._fetching = true;
+      emailMeta.textContent = 'Loading...';
+      fetch('/api/outlook/email?limit=5', { credentials: 'include' })
+        .then(function(r) { if (!r.ok) throw new Error('' + r.status); return r.json(); })
+        .then(function(data) {
+          var msgs = data.value || [];
+          var unread = msgs.filter(function(m) { return !m.isRead; });
+          var count = unread.length;
+          emailMeta.textContent = count + ' unread';
+        })
+        .catch(function() { emailMeta.textContent = '✓ ' + (luUser.email || 'Connected'); })
+        .then(function() { emailMeta._fetching = false; });
+    }
   } else {
     if (signInBtn) signInBtn.style.display = 'flex';
     if (userInfo) userInfo.style.display = 'none';
@@ -1146,86 +1186,230 @@ function previewTemplate(key) {
     + '<button style="flex:1;padding:10px 20px;font-size:14px;background:var(--cool);color:var(--charcoal);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600" onclick="closeModal(\'modal-template-preview\')">Close</button>'
     + '</div>'
     + '</div></div>';
-  showModal('modal-template-preview', html);
-}
-function loadActions(tab) {
-  tab = tab || window.aiTab || 'team';
-  try { return JSON.parse(localStorage.getItem('lu_actions_' + tab) || '[]'); }
-  catch(e) { return []; }
-}
-function saveActions(items, tab) {
-  tab = tab || window.aiTab || 'team';
-  try { localStorage.setItem('lu_actions_' + tab, JSON.stringify(items)); } catch(e) {}
-}
+  // ── ACTION ITEMS ────────────────────────────────────────────────────
+  var aiSort = 'created';
+  var aiFilter = 'all';
+  var aiEditId = null;
 
-function renderActions() {
-  var el = document.getElementById('actions-content');
-  if (!el) return;
-  var tab = window.aiTab || 'team';
-  var items = loadActions(tab);
+  function loadActions(tab) {
+    tab = tab || window.aiTab || 'team';
+    try { return JSON.parse(localStorage.getItem('lu_actions_' + tab) || '[]'); }
+    catch(e) { return []; }
+  }
+  function saveActions(items, tab) {
+    tab = tab || window.aiTab || 'team';
+    try { localStorage.setItem('lu_actions_' + tab, JSON.stringify(items)); } catch(e) {}
+  }
 
-  el.innerHTML = '<div style="display:flex;gap:0;margin-bottom:18px;border-bottom:1px solid var(--border)">'
-    + '<button onclick="switchActionTab(\'team\')" style="background:none;border:none;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:' + (tab==='team'?'var(--teal)':'var(--muted)') + ';border-bottom:2px solid ' + (tab==='team'?'var(--teal)':'transparent') + '">Team</button>'
-    + '<button onclick="switchActionTab(\'personal\')" style="background:none;border:none;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:' + (tab==='personal'?'var(--teal)':'var(--muted)') + ';border-bottom:2px solid ' + (tab==='personal'?'var(--teal)':'transparent') + '">Personal</button>'
-    + '</div>'
-    + '<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px">'
-    + '<div style="display:flex;gap:8px">'
-    + '<input id="action-input" placeholder="Add a ' + tab + ' action item..." style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;background:var(--bg);color:var(--charcoal);outline:none">'
-    + '<button class="btn-primary" onclick="addAction()">Add</button>'
-    + '</div></div>';
+  function renderActions() {
+    var el = document.getElementById('actions-content');
+    if (!el) return;
+    var tab = window.aiTab || 'team';
+    var items = loadActions(tab);
 
-  if (items.length === 0) {
-    el.innerHTML += '<div class="empty-state">'
-      + '<div class="empty-state-icon">' + (tab==='team' ? '👥' : '✅') + '</div>'
-      + '<div class="empty-state-title">No ' + tab + ' action items yet</div>'
-      + '<div class="empty-state-desc">Add your first ' + (tab==='team'?'team':'personal') + ' action item above. ' + (tab==='team' ? 'Team items are shared visibility across Level Up.' : 'Personal items are just for you.') + '</div></div>';
-  } else {
-    el.innerHTML += '<div>' + items.map(function(item, i) {
+    // Tab bar + filters row
+    el.innerHTML = '<div class="ai-bar">'
+      + '<div class="ai-tabs">'
+      + '<button onclick="switchActionTab(\'team\')" style="' + (tab==='team'?'font-weight:700;color:var(--teal);border-bottom:2px solid var(--teal)':'color:var(--muted)') + '">Team</button>'
+      + '<button onclick="switchActionTab(\'personal\')" style="' + (tab==='personal'?'font-weight:700;color:var(--teal);border-bottom:2px solid var(--teal)':'color:var(--muted)') + '">Personal</button>'
+      + '</div>'
+      + '<div class="ai-controls">'
+      + '<select onchange="aiFilter=this.value;renderActions()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--charcoal);font-size:12px;font-family:inherit">'
+      + '<option value="all"' + (aiFilter==='all'?' selected':'') + '>All</option>'
+      + '<option value="active"' + (aiFilter==='active'?' selected':'') + '>Active</option>'
+      + '<option value="done"' + (aiFilter==='done'?' selected':'') + '>Done</option>'
+      + '</select>'
+      + '<select onchange="aiSort=this.value;renderActions()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--charcoal);font-size:12px;font-family:inherit">'
+      + '<option value="created"' + (aiSort==='created'?' selected':'') + '>Newest</option>'
+      + '<option value="due"' + (aiSort==='due'?' selected':'') + '>Due date</option>'
+      + '<option value="priority"' + (aiSort==='priority'?' selected':'') + '>Priority</option>'
+      + '</select>'
+      + '</div>'
+      + '</div>'
+      + '<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px">'
+      + '<button class="btn-primary" onclick="showAddActionModal()" style="width:100%;justify-content:center;padding:10px">+ New Action Item</button>'
+      + '</div>';
+
+    // Filter + sort
+    var filtered = items.filter(function(item) {
+      if (aiFilter === 'active') return !item.done;
+      if (aiFilter === 'done') return item.done;
+      return true;
+    });
+    var sorted = filtered.slice().sort(function(a,b) {
+      if (aiSort === 'due') {
+        if (!a.dueDate && !b.dueDate) return b.ts - a.ts;
+        if (!a.dueDate) return 1; if (!b.dueDate) return -1;
+        return a.dueDate.localeCompare(b.dueDate);
+      }
+      if (aiSort === 'priority') {
+        var rank = { urgent:0, high:1, medium:2, low:3 };
+        var ar = rank[a.priority||'medium']||2, br = rank[b.priority||'medium']||2;
+        if (ar !== br) return ar - br;
+        return b.ts - a.ts;
+      }
+      return b.ts - a.ts;
+    });
+
+    if (sorted.length === 0) {
+      el.innerHTML += '<div class="empty-state">'
+        + '<div class="empty-state-icon">' + (tab==='team'?'👥':'✅') + '</div>'
+        + '<div class="empty-state-title">No ' + (aiFilter !== 'all' ? aiFilter + ' ' : '') + tab + ' action items</div>'
+        + '<div class="empty-state-desc">' + (items.length === 0 ? 'Add your first item above.' : 'No items match the current filter.') + '</div></div>';
+      return;
+    }
+
+    el.innerHTML += '<div class="ai-list">' + sorted.map(function(item, i) {
+      var origIdx = items.indexOf(item);
       var date = item.ts ? new Date(item.ts).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
-      return '<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px">'
-        + '<input type="checkbox" ' + (item.done ? 'checked' : '') + ' onchange="toggleAction(' + i + ')" style="cursor:pointer;width:16px;height:16px">'
-        + '<div style="flex:1">'
-        + '<div style="font-size:14px;color:var(--charcoal)' + (item.done ? ';text-decoration:line-through;opacity:.5' : '') + '">' + escapeHtml(item.text) + '</div>'
-        + (date ? '<div style="font-size:11px;color:var(--muted);margin-top:2px">Added ' + date + (item.author ? ' by ' + escapeHtml(item.author) : '') + '</div>' : '')
+      var dueStr = item.dueDate ? (function(d){var t=new Date(d+'T12:00:00'),n=new Date(),diff=Math.ceil((t-n)/86400000);return diff<0?diff===0?'Due today':'Overdue by '+Math.abs(diff)+'d':diff===0?'Due today':'Due in '+diff+'d'})(item.dueDate) : '';
+      var dueWarn = item.dueDate && new Date(item.dueDate+'T12:00:00') < new Date();
+      var priColor = item.priority === 'urgent' ? '#c0392b' : item.priority === 'high' ? '#e67e22' : item.priority === 'medium' ? '#f1c40f' : '#95a5a6';
+      var priLabel = item.priority || 'medium';
+      var catColors = { meeting:'#3498db', financial:'#27ae60', field:'#e67e22', design:'#9b59b6', closeout:'#1abc9c', other:'#95a5a6' };
+      var catColor = catColors[item.category] || '#95a5a6';
+
+      return '<div class="ai-item" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:6px;display:flex;align-items:flex-start;gap:10px;transition:opacity .2s' + (item.done ? ';opacity:.55' : '') + '">'
+        + '<input type="checkbox" ' + (item.done ? 'checked' : '') + ' onchange="toggleAction(' + origIdx + ')" style="margin-top:2px;cursor:pointer;width:16px;height:16px;flex-shrink:0">'
+        + '<div style="flex:1;min-width:0">'
+        + '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">'
+        + '<span class="ai-pri-badge" style="background:' + priColor + ';color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;text-transform:uppercase">' + priLabel + '</span>'
+        + (item.category ? '<span style="background:' + catColor + '20;color:' + catColor + ';font-size:10px;font-weight:600;padding:1px 7px;border-radius:10px">' + item.category + '</span>' : '')
+        + (item.dueDate ? '<span style="font-size:11px;color:' + (dueWarn?'#c0392b':'var(--muted)') + ';font-weight:' + (dueWarn?'700':'400') + '">' + dueStr + '</span>' : '')
         + '</div>'
-        + '<button class="back-btn" onclick="removeAction(' + i + ')" style="color:#c0392b;font-size:12px">Remove</button>'
+        + '<div class="ai-text" style="font-size:14px;color:var(--charcoal);line-height:1.4;cursor:pointer" onclick="editAction(' + origIdx + ')" title="Click to edit">' + (item.done ? '<s style="opacity:.6">' : '') + escapeHtml(item.text) + (item.done ? '</s>' : '') + '</div>'
+        + '<div style="font-size:11px;color:var(--muted);margin-top:3px">Added ' + date + (item.author ? ' by ' + escapeHtml(item.author) : '') + '</div>'
+        + '</div>'
+        + '<button onclick="removeAction(' + origIdx + ')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px;line-height:1;flex-shrink:0" title="Remove">×</button>'
         + '</div>';
     }).join('') + '</div>';
   }
-  var inp = document.getElementById('action-input');
-  if (inp) inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') addAction(); });
-}
 
-function switchActionTab(t) {
-  window.aiTab = t;
-  renderActions();
-}
-function addAction() {
-  var inp = document.getElementById('action-input');
-  if (!inp || !inp.value.trim()) return;
-  var tab = window.aiTab || 'team';
-  var items = loadActions(tab);
-  var author = (luUser && luUser.name) ? (luUser.name.split(' ')[0]) : '';
-  items.unshift({ text: inp.value.trim(), done: false, ts: Date.now(), author: author });
-  saveActions(items, tab);
-  renderActions();
-}
+  function switchActionTab(t) {
+    window.aiTab = t;
+    renderActions();
+  }
 
-function toggleAction(i) {
-  var tab = window.aiTab || 'team';
-  var items = loadActions(tab);
-  if (items[i]) items[i].done = !items[i].done;
-  saveActions(items, tab);
-  renderActions();
-}
+  function showAddActionModal() {
+    var html = '<div class="modal-dialog" style="max-width:480px">'
+      + '<div class="modal-header"><div class="modal-title">+ New Action Item</div>'
+      + '<button class="chat-close" onclick="closeModal(\'modal-action-edit\')">×</button></div>'
+      + '<div class="modal-body">'
+      + '<label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px">What needs to be done?</label>'
+      + '<input id="ai-new-text" placeholder="Describe the action item..." style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;background:var(--bg);color:var(--charcoal);outline:none;margin-bottom:12px">'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">'
+      + '<div><label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px">Priority</label>'
+      + '<select id="ai-new-priority" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--charcoal);font-family:inherit;font-size:13px">'
+      + '<option value="urgent">🔴 Urgent</option><option value="high" selected>🟠 High</option><option value="medium">🟡 Medium</option><option value="low">⚪ Low</option>'
+      + '</select></div>'
+      + '<div><label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px">Category</label>'
+      + '<select id="ai-new-category" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--charcoal);font-family:inherit;font-size:13px">'
+      + '<option value="">None</option><option value="meeting">Meeting</option><option value="financial">Financial</option><option value="field">Field</option><option value="design">Design</option><option value="closeout">Closeout</option><option value="other">Other</option>'
+      + '</select></div>'
+      + '</div>'
+      + '<div style="margin-bottom:12px"><label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px">Due date (optional)</label>'
+      + '<input id="ai-new-due" type="date" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--charcoal);font-family:inherit;font-size:13px">'
+      + '</div>'
+      + '<button class="btn-primary" onclick="commitAddAction()" style="width:100%;justify-content:center;padding:10px">Add Item</button>'
+      + '</div></div>';
+    showModal('modal-action-edit', html);
+  }
 
-function removeAction(i) {
-  var tab = window.aiTab || 'team';
-  var items = loadActions(tab);
-  items.splice(i, 1);
-  saveActions(items, tab);
-  renderActions();
-}
+  function commitAddAction() {
+    var text = document.getElementById('ai-new-text');
+    if (!text || !text.value.trim()) return;
+    var tab = window.aiTab || 'team';
+    var items = loadActions(tab);
+    var author = (luUser && luUser.name) ? (luUser.name.split(' ')[0]) : '';
+    items.unshift({
+      id: Date.now() + '_' + Math.random().toString(36).slice(2,6),
+      text: text.value.trim(),
+      done: false,
+      ts: Date.now(),
+      author: author,
+      priority: document.getElementById('ai-new-priority').value,
+      category: document.getElementById('ai-new-category').value,
+      dueDate: document.getElementById('ai-new-due').value || null
+    });
+    saveActions(items, tab);
+    closeModal('modal-action-edit');
+    renderActions();
+  }
+
+  function editAction(idx) {
+    var tab = window.aiTab || 'team';
+    var items = loadActions(tab);
+    var item = items[idx];
+    if (!item) return;
+    var tab2 = tab; // capture tab for commitEditAction
+    var html = '<div class="modal-dialog" style="max-width:480px">'
+      + '<div class="modal-header"><div class="modal-title">✏️ Edit Action Item</div>'
+      + '<button class="chat-close" onclick="closeModal(\'modal-action-edit\')">×</button></div>'
+      + '<div class="modal-body">'
+      + '<label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px">Description</label>'
+      + '<input id="ai-edit-text" value="' + escapeHtml(item.text).replace(/"/g,'&quot;') + '" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;background:var(--bg);color:var(--charcoal);outline:none;margin-bottom:12px">'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">'
+      + '<div><label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px">Priority</label>'
+      + '<select id="ai-edit-priority" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--charcoal);font-family:inherit;font-size:13px">'
+      + '<option value="urgent"' + (item.priority==='urgent'?' selected':'') + '>🔴 Urgent</option>'
+      + '<option value="high"' + (item.priority==='high'?' selected':'') + '>🟠 High</option>'
+      + '<option value="medium"' + (!item.priority || item.priority==='medium'?' selected':'') + '>🟡 Medium</option>'
+      + '<option value="low"' + (item.priority==='low'?' selected':'') + '>⚪ Low</option>'
+      + '</select></div>'
+      + '<div><label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px">Category</label>'
+      + '<select id="ai-edit-category" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--charcoal);font-family:inherit;font-size:13px">'
+      + '<option value=""' + (!item.category?' selected':'') + '>None</option>'
+      + '<option value="meeting"' + (item.category==='meeting'?' selected':'') + '>Meeting</option>'
+      + '<option value="financial"' + (item.category==='financial'?' selected':'') + '>Financial</option>'
+      + '<option value="field"' + (item.category==='field'?' selected':'') + '>Field</option>'
+      + '<option value="design"' + (item.category==='design'?' selected':'') + '>Design</option>'
+      + '<option value="closeout"' + (item.category==='closeout'?' selected':'') + '>Closeout</option>'
+      + '<option value="other"' + (item.category==='other'?' selected':'') + '>Other</option>'
+      + '</select></div>'
+      + '</div>'
+      + '<div style="margin-bottom:12px"><label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px">Due date (optional)</label>'
+      + '<input id="ai-edit-due" type="date" value="' + (item.dueDate || '') + '" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--charcoal);font-family:inherit;font-size:13px">'
+      + '</div>'
+      + '<div style="display:flex;gap:8px">'
+      + '<button class="btn-primary" onclick="commitEditAction(' + idx + ')" style="flex:1;justify-content:center;padding:10px">Save</button>'
+      + '<button class="back-btn" onclick="closeModal(\'modal-action-edit\')" style="flex:1;justify-content:center;padding:10px">Cancel</button>'
+      + '</div>'
+      + '</div></div>';
+    window._aiEditTab = tab;
+    showModal('modal-action-edit', html);
+  }
+
+  function commitEditAction(idx) {
+    var tab = window._aiEditTab || window.aiTab || 'team';
+    var items = loadActions(tab);
+    var item = items[idx];
+    if (!item) return;
+    var textEl = document.getElementById('ai-edit-text');
+    if (!textEl || !textEl.value.trim()) return;
+    item.text = textEl.value.trim();
+    item.priority = document.getElementById('ai-edit-priority').value;
+    item.category = document.getElementById('ai-edit-category').value;
+    item.dueDate = document.getElementById('ai-edit-due').value || null;
+    saveActions(items, tab);
+    closeModal('modal-action-edit');
+    renderActions();
+  }
+
+  function toggleAction(i) {
+    var tab = window.aiTab || 'team';
+    var items = loadActions(tab);
+    if (items[i]) items[i].done = !items[i].done;
+    saveActions(items, tab);
+    renderActions();
+  }
+
+  function removeAction(i) {
+    var tab = window.aiTab || 'team';
+    var items = loadActions(tab);
+    items.splice(i, 1);
+    saveActions(items, tab);
+    renderActions();
+  }
 
 // ── SHAREPOINT ─────────────────────────────────────────────────────
 function openSharePoint() { setView('sharepoint'); }

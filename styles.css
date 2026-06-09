@@ -461,3 +461,50 @@ mark.search-highlight{background:#fff3a8;padding:1px 2px;border-radius:2px;color
 .briefing-budget-item span{color:var(--muted)}
 .briefing-budget-item strong{font-size:14px;color:var(--charcoal)}
 @media (max-width:600px){.briefing-budget{grid-template-columns:1fr}}
+
+/* ── ACTION ITEMS ──────────────────────────────────────────────────── */
+.ai-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:0;flex-wrap:wrap;gap:8px}
+.ai-tabs{display:flex;gap:0}
+.ai-tabs button{background:none;border:none;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:color .15s}
+.ai-controls{display:flex;gap:6px}
+.ai-list{display:flex;flex-direction:column}
+
+/* ── MOBILE 480PX ──────────────────────────────────────────────────── */
+@media (max-width:480px){
+  .topbar{padding:6px 12px;gap:8px}
+  .topbar-logo{height:24px}
+  .topbar-tagline{display:none}
+  .nav{padding:0 8px;gap:0;overflow-x:auto}
+  .nav-tab{padding:8px 10px;font-size:10px;white-space:nowrap}
+  .subnav{padding:0 8px}
+  .subnav-tab{padding:7px 10px;font-size:10px;white-space:nowrap}
+  .luna-hero{padding:24px 14px}
+  .luna-hero-wordmark-svg{height:28px}
+  .luna-hero-subtitle{font-size:12px}
+  .luna-hero-input{padding:9px 12px;font-size:13px}
+  .luna-hero-quicks{gap:4px}
+  .luna-hero-quick{padding:5px 8px;font-size:10px}
+  .luna-quick-tools{gap:6px}
+  .luna-tool-card{padding:10px}
+  .luna-tool-icon{font-size:16px}
+  .luna-tool-label{font-size:10px}
+  .luna-tool-status{font-size:9px}
+  .luna-status-bar{font-size:10px;padding:8px 14px;flex-direction:column;text-align:center;gap:4px}
+  .luna-hero-footer{font-size:10px;padding:12px 14px}
+  .view-header{padding:14px!important}
+  .view-title{font-size:16px}
+  .password-modal{max-width:90%;padding:20px}
+  .password-modal-title{font-size:16px}
+  .shell{grid-template-columns:1fr!important}
+  .content-area{padding:0 10px}
+  .sidebar{position:relative;width:100%;max-height:none;padding:8px 10px}
+  .mfp-grid,.briefing-budget{grid-template-columns:1fr!important}
+  .modal-dialog{width:92%;margin:5% auto}
+  .chat-drawer{width:100%;right:0;border-radius:0}
+  .chat-drawer.open{width:100%}
+  .site-footer{font-size:10px;padding:10px 14px;flex-direction:column;text-align:center;gap:4px}
+  .ai-bar{flex-direction:column;align-items:stretch}
+  .ai-controls{justify-content:flex-end}
+  .ai-item{padding:10px!important;gap:8px!important}
+  .ai-item .ai-text{font-size:13px!important}
+}
