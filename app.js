@@ -2359,7 +2359,21 @@ function buildBriefing() {
   }
 
   // HVAC
-  items.push({ icon: '🔧', label: 'HVAC Service Agreement', detail: 'Hill York — pending signature', urgent: true });
+    items.push({ icon: '🔧', label: 'HVAC Service Agreement', detail: 'Hill York — pending signature', urgent: true });
+
+    // CO Watchdog findings — top 3 high severity
+    var wd = window.__CO_WATCHDOG;
+    if (wd && wd.findings) {
+      var topFindings = wd.findings.filter(function(f) { return f.severity === 'high'; }).slice(0, 3);
+      topFindings.forEach(function(f) {
+        items.push({
+          icon: '🔍',
+          label: f.category + ': ' + f.sub,
+          detail: f.detail.slice(0, 100) + '...',
+          urgent: true
+        });
+      });
+    }
 
   // Build HTML
   var greeting = 'Good ' + (now.getHours() < 12 ? 'morning' : now.getHours() < 18 ? 'afternoon' : 'evening');
