@@ -287,6 +287,12 @@
   var overlay = document.getElementById('password-overlay');
   if (!btn || !inp) return;
   
+  function hideOverlay() {
+    overlay.classList.remove('open');
+    overlay.style.display = 'none';
+  }
+  
+  // ── Password verification ──────────────────────────────────────────
   function verify() {
     var pw = inp.value.trim();
     if (!pw) { err.textContent = 'Please enter a password.'; err.style.display = 'block'; return; }
@@ -300,10 +306,7 @@
     xhr.onload = function() {
       if (xhr.status === 200) {
         var data = JSON.parse(xhr.responseText);
-        if (data.valid) {
-          overlay.classList.remove('open');
-          overlay.style.display = 'none';
-        }
+        if (data.valid) { hideOverlay(); }
       } else if (xhr.status === 401) {
         err.textContent = 'Incorrect password';
         err.style.display = 'block';
@@ -319,7 +322,7 @@
       }
     };
     xhr.onerror = function() {
-      err.textContent = 'Network error — could not reach server.';
+      err.textContent = 'Network error';
       err.style.display = 'block';
       btn.disabled = false;
       btn.textContent = 'Unlock';
@@ -330,6 +333,24 @@
   btn.addEventListener('click', verify);
   inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') verify(); });
   inp.focus();
+  
+  // ── Auth check on page load (handles Microsoft sign-in redirect) ───
+  var authXhr = new XMLHttpRequest();
+  authXhr.open('GET', '/api/auth/me', true);
+  authXhr.withCredentials = true;
+  authXhr.onload = function() {
+    if (authXhr.status === 200) {
+      var data = JSON.parse(authXhr.responseText);
+      if (data.authenticated) { hideOverlay(); }
+    }
+  };
+  authXhr.send();
+  
+  // ── Close modal fallback (in case app.js hasn't loaded) ────────────
+  window.closeModal = window.closeModal || function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('open');
+  };
 })();
 </script>
 
