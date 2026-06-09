@@ -1420,17 +1420,19 @@ function previewTemplate(key) {
   }
 
   function toggleAction(i) {
-    var tab = window.aiTab || 'team';
-    var items = loadActions(tab);
-    if (items[i]) {
-      // Cycle: open → in_progress → completed → open
-      var st = getItemStatus(items[i]);
-      items[i].status = st === 'completed' ? 'open' : st === 'in_progress' ? 'completed' : 'in_progress';
-      items[i].done = items[i].status === 'completed';
+      var tab = window.aiTab || 'team';
+      var items = loadActions(tab);
+      if (items[i]) {
+        // Cycle: open → in_progress → completed → open
+        var st = getItemStatus(items[i]);
+        items[i].status = st === 'completed' ? 'open' : st === 'in_progress' ? 'completed' : 'in_progress';
+        items[i].done = items[i].status === 'completed';
+      }
+      saveActions(items, tab);
+      renderActions();
+      // Also refresh panel if it's open
+      if (reminderPanelOpen) renderReminderActions();
     }
-    saveActions(items, tab);
-    renderActions();
-  }
 
   function removeAction(i) {
     var tab = window.aiTab || 'team';
@@ -1488,13 +1490,17 @@ function doSharePointSearch() {
     .then(function(r) {
       if (!r.ok) {
         if (r.status === 401) {
-          document.cookie = 'lu_session=; Path=/; Max-Age=0';
-          luUser = null; updateAuthUI();
-          results.innerHTML = '<div style="padding:24px;background:var(--card);border:1px solid var(--border);border-radius:8px">Session expired. <button class="signin-btn" onclick="signInWithMicrosoft()" style="margin-top:8px">Sign in again</button></div>';
-        } else {
-          results.innerHTML = '<div style="padding:24px;color:#c0392b">Search error (' + r.status + '). Please try again.</div>';
+          // Try silent token refresh before giving up
+          return tryRefresh().then(function(refreshed) {
+            if (refreshed) {
+              // Retry the search
+              return fetch('/api/sharepoint/search?query=' + encodeURIComponent(query) + '&limit=20', { credentials: 'include' })
+                .then(function(r2) { if (!r2.ok) throw new Error('status ' + r2.status); return r2.json(); });
+            }
+            throw new Error('Session expired');
+          });
         }
-        throw new Error('search failed');
+        throw new Error('status ' + r.status);
       }
       return r.json();
     })
@@ -1524,7 +1530,9 @@ function doSharePointSearch() {
       });
       results.innerHTML = html;
     })
-    .catch(function(){});
+    .catch(function(err) {
+      results.innerHTML = '<div style="padding:24px;background:var(--card);border:1px solid var(--border);border-radius:8px;text-align:center;color:var(--muted)">' + escapeHtml(err.message || 'Search failed') + '. <button class="signin-btn" onclick="signInWithMicrosoft()" style="margin-top:8px">Sign in again</button></div>';
+    });
 }
 
 function signInEmptyState(icon, title, desc) {
@@ -2220,16 +2228,19 @@ function renderReminderActions() {
     html += '<div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px">🔴 MFP / Team (' + mfpItems.length + ')</div>';
     mfpItems.slice(0, 25).forEach(function(entry) {
       var item = entry.item;
+      var st = getItemStatus(item);
+      var statusIcon = st === 'completed' ? '✓' : st === 'in_progress' ? '◐' : '○';
       var priColor = item.priority === 'urgent' ? '#c0392b' : item.priority === 'high' ? '#e67e22' : '#95a5a6';
       var date = item.ts ? new Date(item.ts).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
-      html += '<div class="rp-item" style="opacity:' + (item.done ? '.55' : '1') + '">'
-        + '<input type="checkbox" class="rp-item-checkbox" ' + (item.done ? 'checked' : '') + ' onchange="panelToggleAction(\'' + entry.tab + '\',' + entry.idx + ')" style="margin-top:2px;width:14px;height:14px;flex-shrink:0;cursor:pointer">'
+      html += '<div class="rp-item status-' + st + '">'
+        + '<button class="rp-status-btn ' + st + '" onclick="panelToggleAction(\'' + entry.tab + '\',' + entry.idx + ')" title="Click to cycle status">' + statusIcon + '</button>'
         + '<div class="rp-item-text" style="flex:1;min-width:0">'
         + '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:2px">'
         + '<span style="background:' + priColor + ';color:#fff;font-size:9px;font-weight:700;padding:0 6px;border-radius:8px;text-transform:uppercase">' + (item.priority || 'medium') + '</span>'
+        + '<span style="font-size:9px;color:' + (st === 'in_progress' ? '#e67e22' : st === 'completed' ? '#27ae60' : 'var(--muted)') + ';font-weight:600">' + st.replace('_',' ') + '</span>'
         + (item.dueDate ? '<span style="font-size:10px;color:' + (new Date(item.dueDate+'T12:00:00') < new Date() ? '#c0392b' : 'var(--muted)') + '">' + item.dueDate + '</span>' : '')
         + '</div>'
-        + '<div style="font-size:13px;color:var(--charcoal);line-height:1.4">' + (item.done ? '<s style="opacity:.6">' : '') + escapeHtml(item.text) + (item.done ? '</s>' : '') + '</div>'
+        + '<div style="font-size:13px;color:var(--charcoal);line-height:1.4">' + (st === 'completed' ? '<s style="opacity:.6">' : '') + escapeHtml(item.text) + (st === 'completed' ? '</s>' : '') + '</div>'
         + '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + date + (item.author ? ' by ' + escapeHtml(item.author) : '') + '</div>'
         + '</div>'
         + '</div>';
@@ -2241,16 +2252,19 @@ function renderReminderActions() {
     html += '<div style="font-size:11px;font-weight:700;color:#4a90d9;text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px;margin-top:4px">📋 Level Up / Personal (' + levelUpItems.length + ')</div>';
     levelUpItems.slice(0, 15).forEach(function(entry) {
       var item = entry.item;
+      var st = getItemStatus(item);
+      var statusIcon = st === 'completed' ? '✓' : st === 'in_progress' ? '◐' : '○';
       var priColor = item.priority === 'urgent' ? '#c0392b' : item.priority === 'high' ? '#e67e22' : '#95a5a6';
       var date = item.ts ? new Date(item.ts).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
-      html += '<div class="rp-item" style="opacity:' + (item.done ? '.55' : '1') + '">'
-        + '<input type="checkbox" class="rp-item-checkbox" ' + (item.done ? 'checked' : '') + ' onchange="panelToggleAction(\'' + entry.tab + '\',' + entry.idx + ')" style="margin-top:2px;width:14px;height:14px;flex-shrink:0;cursor:pointer">'
+      html += '<div class="rp-item status-' + st + '">'
+        + '<button class="rp-status-btn ' + st + '" onclick="panelToggleAction(\'' + entry.tab + '\',' + entry.idx + ')" title="Click to cycle status">' + statusIcon + '</button>'
         + '<div class="rp-item-text" style="flex:1;min-width:0">'
         + '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:2px">'
         + '<span style="background:' + priColor + ';color:#fff;font-size:9px;font-weight:700;padding:0 6px;border-radius:8px;text-transform:uppercase">' + (item.priority || 'medium') + '</span>'
+        + '<span style="font-size:9px;color:' + (st === 'in_progress' ? '#e67e22' : st === 'completed' ? '#27ae60' : 'var(--muted)') + ';font-weight:600">' + st.replace('_',' ') + '</span>'
         + (item.dueDate ? '<span style="font-size:10px;color:' + (new Date(item.dueDate+'T12:00:00') < new Date() ? '#c0392b' : 'var(--muted)') + '">' + item.dueDate + '</span>' : '')
         + '</div>'
-        + '<div style="font-size:13px;color:var(--charcoal);line-height:1.4">' + (item.done ? '<s style="opacity:.6">' : '') + escapeHtml(item.text) + (item.done ? '</s>' : '') + '</div>'
+        + '<div style="font-size:13px;color:var(--charcoal);line-height:1.4">' + (st === 'completed' ? '<s style="opacity:.6">' : '') + escapeHtml(item.text) + (st === 'completed' ? '</s>' : '') + '</div>'
         + '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + date + (item.author ? ' by ' + escapeHtml(item.author) : '') + '</div>'
         + '</div>'
         + '</div>';
@@ -2269,15 +2283,16 @@ function renderReminderActions() {
   if (footer) footer.textContent = totalOpen + ' open item' + (totalOpen !== 1 ? 's' : '') + ' · Updated ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 }
 
-// Panel checkbox handler - toggles done/undone in the Action Items system
+// Panel click handler - cycles: open → in_progress → completed → open
 function panelToggleAction(tab, idx) {
   var items = [];
   try { items = JSON.parse(localStorage.getItem('lu_actions_' + tab) || '[]'); } catch(e) {}
   if (items[idx]) {
-    items[idx].done = !items[idx].done;
+    var st = getItemStatus(items[idx]);
+    items[idx].status = st === 'completed' ? 'open' : st === 'in_progress' ? 'completed' : 'in_progress';
+    items[idx].done = items[idx].status === 'completed';
     try { localStorage.setItem('lu_actions_' + tab, JSON.stringify(items)); } catch(e) {}
   }
-  // Re-render panel AND the main Action Items view if visible
   renderReminderActions();
   if (document.getElementById('view-actions').classList.contains('active')) {
     renderActions();

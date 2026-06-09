@@ -586,46 +586,49 @@ mark.search-highlight{background:#fff3a8;padding:1px 2px;border-radius:2px;color
   flex-shrink: 0;
 }
 
-/* Toggle button (top-right area) */
+/* Toggle button (top-right area) — bigger when collapsed */
 .reminder-toggle {
   position: fixed;
   right: 0;
-  top: 60px;
+  top: 80px;
   z-index: 999;
   background: var(--teal);
   color: #fff;
   border: none;
-  border-radius: 8px 0 0 8px;
-  padding: 10px 8px;
+  border-radius: 10px 0 0 10px;
+  padding: 16px 10px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 5px;
   transition: right .3s ease, box-shadow .15s;
-  box-shadow: -2px 0 8px rgba(0,0,0,.1);
+  box-shadow: -2px 0 10px rgba(0,0,0,.12);
   font-family: inherit;
+  min-width: 38px;
 }
 .reminder-toggle:hover {
-  box-shadow: -2px 0 12px rgba(0,0,0,.2);
+  box-shadow: -2px 0 14px rgba(0,0,0,.2);
+  background: var(--teal-mid);
 }
 .reminder-toggle-count {
   background: var(--sage);
   color: var(--charcoal);
-  font-size: 10px;
-  font-weight: 800;
-  width: 20px;
-  height: 20px;
+  font-size: 13px;
+  font-weight: 900;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,.15);
 }
 .reminder-toggle-text {
-  font-size: 9px;
-  font-weight: 700;
+  font-size: 10px;
+  font-weight: 800;
   writing-mode: vertical-rl;
-  letter-spacing: .05em;
+  letter-spacing: .08em;
   text-transform: uppercase;
 }
 
@@ -833,4 +836,62 @@ mark.search-highlight{background:#fff3a8;padding:1px 2px;border-radius:2px;color
   font-size: 13px;
   color: var(--charcoal);
   line-height: 1.4;
+}
+
+/* ===== STATUS INDICATOR IN PANEL ITEMS ===== */
+.rp-status-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  cursor: pointer;
+  border: 2px solid var(--border);
+  background: var(--card);
+  font-size: 11px;
+  font-weight: 700;
+  transition: all .15s;
+  margin-top: 1px;
+  font-family: inherit;
+  padding: 0;
+  line-height: 1;
+}
+.rp-status-btn:hover {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(24,70,85,.1);
+}
+.rp-status-btn.open {
+  border-color: var(--muted);
+  background: var(--card);
+  color: transparent;
+}
+.rp-status-btn.open:hover {
+  border-color: #e67e22;
+  background: #fef4e0;
+  color: #e67e22;
+}
+.rp-status-btn.in_progress {
+  border-color: #e67e22;
+  background: #fef4e0;
+  color: #e67e22;
+}
+.rp-status-btn.completed {
+  border-color: #27ae60;
+  background: #eafaf1;
+  color: #27ae60;
+}
+
+/* Panel item status border */
+.rp-item.status-open {
+  border-left: 3px solid var(--muted) !important;
+}
+.rp-item.status-in_progress {
+  border-left: 3px solid #e67e22 !important;
+  background: #fefaf0 !important;
+}
+.rp-item.status-completed {
+  border-left: 3px solid #27ae60 !important;
+  opacity: .65;
 }
