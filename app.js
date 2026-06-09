@@ -30,36 +30,30 @@ window.aiTab = window.aiTab || 'team';
 
 // ── DATA LOADED FROM EXTERNAL FILES ───────────────────────────────
 var MFP_CONTEXT = window.__MFP_CONTEXT || '';
-var KB = [];  // Loaded async from data/kb.json
+var KB = window.__KB || [];  // Preloaded from data/kb.js
 var TEMPLATES = window.__TEMPLATES || {};
 var GLOSSARY = window.__GLOSSARY || {};
 var ALL_TOPICS = [];
 
-// Async KB loader
+// Synchronous KB init — runs immediately since data is preloaded
 var kbLoaded = false;
-async function loadKB() {
-  if (kbLoaded) return;
-  try {
-    var r = await fetch('data/kb.json?v=20260607');
-    KB = await r.json();
-    var set = {};
-    KB.forEach(function(s) { (s.topics || []).forEach(function(t) { set[t] = true; }); });
-    ALL_TOPICS = Object.keys(set).sort();
-    kbLoaded = true;
-    // If playbook view is active, re-render
-        if (currentView === 'playbook') renderPlaybook();
-        // Update diag bar with actual KB count
-        var footerEl = document.getElementById('footer-status-text');
-            if (footerEl) {
-              var status = luUser && luUser.authenticated ? 'Signed in: ' + luUser.email : 'Not signed in';
-              footerEl.textContent = 'JS OK · ' + status + ' · KB=' + KB.length;
-            }
-  } catch(e) {
-    console.error('Failed to load KB:', e);
+function initKB() {
+  if (kbLoaded || !KB.length) return;
+  var set = {};
+  KB.forEach(function(s) { (s.topics || []).forEach(function(t) { set[t] = true; }); });
+  ALL_TOPICS = Object.keys(set).sort();
+  kbLoaded = true;
+  // If playbook view is active, re-render
+  if (currentView === 'playbook') renderPlaybook();
+  // Update footer with KB count
+  var footerEl = document.getElementById('footer-status-text');
+  if (footerEl) {
+    var status = luUser && luUser.authenticated ? 'Signed in: ' + luUser.email : 'Not signed in';
+    footerEl.textContent = 'JS OK · ' + status + ' · KB=' + KB.length;
   }
 }
-// Start loading KB immediately
-loadKB();
+// Run immediately
+initKB();
 
 function grpKey(n) {
   var num = Number(n);
@@ -71,6 +65,11 @@ function grpKey(n) {
 function escapeHtml(s) {
   if (s == null) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function fmtNum(n) {
+  if (n == null || isNaN(n)) return '0';
+  return Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
 
 function jsCallArg(v) {
@@ -1551,39 +1550,55 @@ function renderCalendar() {
     });
 }
 
-// ── PHASE GUIDE MODAL ──────────────────────────────────────────────
-function openPhaseGuide() {
-  var body = document.getElementById('pg-body');
-  if (!body) return;
-  if (typeof PHASE_GUIDE === 'undefined') {
-    body.innerHTML = '<div style="padding:20px;color:var(--muted)">Phase Guide data not loaded.</div>';
-    document.getElementById('modal-phase-guide').classList.add('open');
-    return;
-  }
+// ── PHASE GUIDE MODAL ───────────────────────────────────────────────
+// Auto-generated from KB data — always in sync with playbook content
+var PHASE_ORDER = ['Pre-Development','Schematic Design','Design Development','CDs & Bid','Construction','Closeout','Opening'];
+var PHASE_ICONS = {'Pre-Development':'🔍','Schematic Design':'✏️','Design Development':'📐','CDs & Bid':'📋','Construction':'🏗️','Closeout':'✅','Opening':'🎉'};
+
+function buildPhaseGuideHTML() {
+  if (!kbLoaded || !KB.length) return '<div style="padding:20px;color:var(--muted)">Playbook not loaded yet.</div>';
   var html = '';
-  var phases = Object.keys(PHASE_GUIDE);
-  phases.forEach(function(phase, idx) {
+  PHASE_ORDER.forEach(function(phase, idx) {
     var pid = 'pg-phase-' + idx;
-    var data = PHASE_GUIDE[phase];
+    // Find sections for this phase
+    var phaseSections = KB.filter(function(s) {
+      return s.phases && s.phases.indexOf(phase) >= 0;
+    });
+    // Also include "All Phases" sections that aren't already listed
+    var allPhaseSections = KB.filter(function(s) {
+      return s.phases && s.phases.indexOf('All Phases') >= 0 && s.phases.indexOf(phase) < 0;
+    });
+    var icon = PHASE_ICONS[phase] || '📖';
     html += '<div class="pg-phase">'
-      + '<div class="pg-phase-header" onclick="togglePgPhase(' + jsCallArg(pid) + ')">'
+      + '<button class="pg-phase-header" onclick="togglePgPhase(' + jsCallArg(pid) + ')">'
       + '<span class="pg-phase-chevron" id="' + pid + '-chev">▶</span>'
-      + '<span>' + (data.icon || '📖') + ' ' + escapeHtml(phase) + '</span>'
-      + '</div>'
+      + '<span>' + icon + ' ' + escapeHtml(phase) + '</span>'
+      + '<span style="margin-left:auto;font-size:11px;color:var(--muted)">' + phaseSections.length + ' sections</span>'
+      + '</button>'
       + '<div class="pg-phase-body" id="' + pid + '" style="display:none">';
-    if (data.desc) {
-      html += '<p style="margin-bottom:12px;font-size:14px">' + escapeHtml(data.desc) + '</p>';
+    if (phaseSections.length) {
+      html += '<h4>Phase-Specific Sections</h4><ul>';
+      phaseSections.forEach(function(s) {
+        html += '<li><strong>Section ' + s.num + '</strong> — ' + escapeHtml(s.title.replace('SECTION ' + s.num + ': ','')) + '</li>';
+      });
+      html += '</ul>';
     }
-    if (data.sections && data.sections.length) {
-      html += '<h4>Key sections for this phase</h4><ul>';
-      data.sections.forEach(function(s) {
-        html += '<li><strong>Section ' + s.num + '</strong> &mdash; ' + escapeHtml(s.why) + '</li>';
+    if (allPhaseSections.length) {
+      html += '<h4>Foundation (Applies to All Phases)</h4><ul>';
+      allPhaseSections.forEach(function(s) {
+        html += '<li><strong>Section ' + s.num + '</strong> — ' + escapeHtml(s.title.replace('SECTION ' + s.num + ': ','')) + '</li>';
       });
       html += '</ul>';
     }
     html += '</div></div>';
   });
-  body.innerHTML = html;
+  return html;
+}
+
+function openPhaseGuide() {
+  var body = document.getElementById('pg-body');
+  if (!body) return;
+  body.innerHTML = buildPhaseGuideHTML();
   document.getElementById('modal-phase-guide').classList.add('open');
 }
 
@@ -1595,6 +1610,119 @@ function togglePgPhase(pid) {
   body.style.display = isHidden ? 'block' : 'none';
   if (chev) chev.textContent = isHidden ? '▼' : '▶';
 }
+
+// ── DECISION TREE DATA ──────────────────────────────────────────────
+var DT_TREE = {
+  root: {
+    q: 'What do you need help with?',
+    opts: [
+      { label: '💰 I received a change order', next: 'co_received' },
+      { label: '📅 The project schedule is slipping', next: 'schedule_slip' },
+      { label: '✅ Punch list dispute with the GC', next: 'punch_dispute' },
+      { label: '🏗️ I need to set up a new project', next: 'new_project' },
+      { label: '📊 Budget concern / cost overrun', next: 'budget_concern' },
+      { label: '📝 Contract or legal issue', next: 'contract_issue' },
+      { label: '🔒 Closeout preparation', next: 'closeout_prep' },
+      { label: '⚠️ Risk identified on the project', next: 'risk_id' }
+    ]
+  },
+  co_received: {
+    q: 'Is the change order within the original scope of work?',
+    opts: [
+      { label: '✅ Yes, it is within scope', next: 'co_scope_yes' },
+      { label: '❌ No, it is out of scope', next: 'co_scope_no' },
+      { label: '🤷 Not sure yet', next: 'co_unsure' }
+    ]
+  },
+  co_scope_yes: {
+    answer: 'Since the work is within scope, focus on pricing validation:\n\n1. **Review the pricing** — Is the markup reasonable? Check labor, materials, equipment, and subcontractor costs against your estimate.\n2. **Verify quantities** — Do the quantities match field measurements?\n3. **Check for duplication** — Has any of this work already been covered in the base contract or a previous CO?\n4. **Negotiate if needed** — Challenge line items that seem high.\n5. **Document your review** — Use the CO review checklist (Section 16).\n6. **Route for approval** — Follow the governance structure in Section 4.\n\n**Key sections:** Section 16 (Change Management), Section 14 (Budget Management), Section 4 (Governance)',
+    sections: ['16', '14', '4']
+  },
+  co_scope_no: {
+    answer: 'Out-of-scope change orders require careful handling:\n\n1. **Document the scope gap** — Clearly show why this is outside the original contract scope.\n2. **Get multiple quotes** — If possible, get competitive pricing.\n3. **Prepare a challenge package** — Include contract references, scope documents, and your analysis.\n4. **Escalate if needed** — Follow the dispute resolution process in the contract.\n5. **Track as a potential recovery item** — If the GC is pushing scope that should be theirs, flag for cost recovery.\n\n**Key sections:** Section 16 (Change Management), Section 30 (Cost Recovery), Section 42 (Common Problems)',
+    sections: ['16', '30', '42']
+  },
+  co_unsure: {
+    answer: 'If you\'re unsure whether the work is in scope:\n\n1. **Pull the contract scope documents** — Review the original scope of work, drawings, and specifications.\n2. **Compare to the CO description** — Line by line, does the CO describe work already required?\n3. **Consult the design team** — Ask the AOR if the work was implied by the design intent.\n4. **Check previous COs** — Has similar work been approved before?\n5. **If still unclear, flag it** — Better to challenge and be wrong than pay for something twice.\n\n**Key sections:** Section 16 (Change Management), Section 18 (Contract Negotiation), Section 22 (Design Management)',
+    sections: ['16', '18', '22']
+  },
+  schedule_slip: {
+    q: 'Is the slip on the critical path?',
+    opts: [
+      { label: '🔴 Yes, it affects the critical path', next: 'sched_critical' },
+      { label: '🟡 No, it is non-critical', next: 'sched_noncritical' },
+      { label: '🤷 I need to determine this', next: 'sched_analyze' }
+    ]
+  },
+  sched_critical: {
+    answer: 'A critical path slip requires immediate action:\n\n1. **Quantify the impact** — How many days? What is the new completion date?\n2. **Identify root cause** — Is it the GC, a sub, design, owner-directed change, or force majeure?\n3. **Develop a recovery schedule** — Compression, acceleration, resequencing, or added shifts.\n4. **Assess cost impact** — Acceleration costs, delay damages, liquidated damages exposure.\n5. **Communicate to stakeholders** — Owner, lender, design team, and key subs.\n6. **Document everything** — Daily reports, meeting minutes, correspondence.\n\n**Key sections:** Section 15 (Schedule Management), Section 16 (Change Management), Section 24 (Field Oversight)',
+    sections: ['15', '16', '24']
+  },
+  sched_noncritical: {
+    answer: 'Non-critical path slips are manageable but should not be ignored:\n\n1. **Monitor the float** — How much total float does this activity have?\n2. **Track the trend** — Is this a one-time slip or a pattern?\n3. **Notify the responsible party** — Make sure they know they\'re burning float.\n4. **Update the schedule** — Reflect the current reality in the master schedule.\n5. **Report in weekly meetings** — Keep stakeholders informed.\n\n**Key sections:** Section 15 (Schedule Management), Section 11 (Meeting Cadence)',
+    sections: ['15', '11']
+  },
+  sched_analyze: {
+    answer: 'To determine if an activity is on the critical path:\n\n1. **Look at the master schedule** — Find the activity in the CPM schedule.\n2. **Check total float** — If total float is 0 or negative, it\'s on the critical path.\n3. **Trace the longest path** — The critical path is the longest sequence of dependent activities.\n4. **Ask the scheduler** — The GC\'s scheduler can confirm.\n5. **Use a simple rule** — If this activity is delayed by one day, does the project completion date move? If yes, it\'s critical.\n\n**Key sections:** Section 15 (Schedule Management)',
+    sections: ['15']
+  },
+  punch_dispute: {
+    q: 'What type of punch list issue are you dealing with?',
+    opts: [
+      { label: '🔨 Trade workmanship defect', next: 'punch_trade' },
+      { label: '📐 Design / specification issue', next: 'punch_design' },
+      { label: '💰 GC wants to issue credit instead of correcting', next: 'punch_credit' }
+    ]
+  },
+  punch_trade: {
+    answer: 'Trade workmanship defects should be corrected, not credited:\n\n1. **Document thoroughly** — Photos, videos, measurements, and specification references.\n2. **Reference the spec** — Show exactly where the work deviates from the contract documents.\n3. **Demand correction** — The trade contractor is responsible for meeting the spec.\n4. **Escalate to the GC** — If the trade refuses, the GC is responsible for enforcing the subcontract.\n5. **Track in the punch list system** — Use Procore or your tracking log.\n6. **Position: correction, not credit** — You paid for a specified result, not a discount.\n\n**Key sections:** Section 35 (Punch List), Section 24 (Field Oversight), Section 42 (Common Problems)',
+    sections: ['35', '24', '42']
+  },
+  punch_design: {
+    answer: 'Design-related punch items need coordination with the design team:\n\n1. **Review the contract documents** — Is the issue a design error or a construction deviation?\n2. **Engage the AOR** — Arquitectonica (ARQ) should clarify design intent.\n3. **Determine responsibility** — Design error = AOR\'s issue. Construction deviation = trade\'s issue.\n4. **Document the decision** — Get the AOR\'s written direction.\n5. **Track separately** — Design-related items may need a different resolution path than trade defects.\n\n**Key sections:** Section 35 (Punch List), Section 22 (Design Management), Section 34 (Commissioning)',
+    sections: ['35', '22', '34']
+  },
+  punch_credit: {
+    answer: 'When the GC offers a credit instead of correction:\n\n1. **Hold your position** — The standard is correction, not credit. You paid for a specified result.\n2. **Ask why they can\'t correct** — Is it a schedule constraint? Material availability? Trade refusal?\n3. **Evaluate the credit offer** — Is it fair market value for the defect? Usually not.\n4. **Consider the long-term impact** — Will this affect operations, maintenance, or fan experience?\n5. **Escalate if needed** — This is a common GC tactic during closeout. Stay firm.\n\n**Key sections:** Section 35 (Punch List), Section 30 (Cost Recovery), Section 42 (Common Problems)',
+    sections: ['35', '30', '42']
+  },
+  new_project: {
+    answer: 'Setting up a new project requires systematic mobilization:\n\n1. **Day 1 Mobilization** — Use Section 8 checklist: team roster, communication plan, document control, financial setup.\n2. **Establish governance** — Decision-making authority, approval thresholds, meeting cadence (Section 4).\n3. **Set up tools and systems** — Procore, accounting, document management, schedule platform (Section 9).\n4. **Define roles** — Owner, CM, design team, subs — who does what (Section 3).\n5. **Create communication protocols** — Reporting, meeting schedule, escalation paths (Section 10).\n6. **Establish budget and schedule baselines** — Sections 14 and 15.\n7. **Set up risk register** — Section 17.\n\n**Key sections:** Section 8 (Mobilization), Section 4 (Governance), Section 9 (Tools), Section 3 (Roles), Section 10 (Communications)',
+    sections: ['8', '4', '9', '3', '10']
+  },
+  budget_concern: {
+    q: 'What type of budget issue are you seeing?',
+    opts: [
+      { label: '📈 Costs are running over budget', next: 'budget_over' },
+      { label: '❓ I need to verify current budget status', next: 'budget_status' },
+      { label: '🔍 I want to find cost recovery opportunities', next: 'budget_recovery' }
+    ]
+  },
+  budget_over: {
+    answer: 'Cost overruns require immediate analysis:\n\n1. **Identify the variance** — Which line items are over? By how much?\n2. **Determine the cause** — Scope change, pricing error, quantity overrun, inefficiency?\n3. **Check for offsets** — Are there under-runs elsewhere that can absorb the overrun?\n4. **Review change orders** — Have approved COs already covered this?\n5. **Assess contingency** — How much contingency remains? Is this a valid use?\n6. **Report to stakeholders** — Transparent communication about the variance and recovery plan.\n7. **Implement controls** — Tighter review of new COs, weekly forecast updates.\n\n**Key sections:** Section 14 (Budget Management), Section 16 (Change Management), Section 13 (Project Controls)',
+    sections: ['14', '16', '13']
+  },
+  budget_status: {
+    answer: 'To check current budget status:\n\n1. **Pull the latest budget report** — From Procore or the CM\'s monthly draw.\n2. **Compare original vs revised budget** — How much has changed through COs?\n3. **Check paid-to-date vs incurred** — Are there significant gaps?\n4. **Review retainage** — How much is being held?\n5. **Forecast final costs** — Based on current trends, what\'s the projected final cost?\n6. **Update the owner** — Monthly budget summary with variance explanations.\n\n**Key sections:** Section 14 (Budget Management), Section 12 (Reporting Framework)',
+    sections: ['14', '12']
+  },
+  budget_recovery: {
+    answer: 'Cost recovery is a systematic process:\n\n1. **Review all change orders** — Look for duplicate charges, scope overlaps, pricing errors.\n2. **Check for VE credits** — Were value engineering savings passed to the owner?\n3. **Audit quantities** — Are billed quantities matching field measurements?\n4. **Review OCIP credits** — Has the owner received insurance premium credits?\n5. **Look for defective work** — Work that needs redoing should not be paid at full price.\n6. **Engage the cost recovery analyst** — MFP has an independent analyst targeting $9M+ recovery by June 30.\n\n**Key sections:** Section 30 (Cost Recovery), Section 14 (Budget Management), Section 16 (Change Management)',
+    sections: ['30', '14', '16']
+  },
+  contract_issue: {
+    answer: 'Contract issues require careful, documented handling:\n\n1. **Review the contract terms** — Pull the specific clause that applies.\n2. **Document everything** — Correspondence, meeting notes, approvals, and denials.\n3. **Identify the breach or dispute** — What exactly is the issue?\n4. **Follow the dispute resolution process** — Most contracts have a step-by-step process.\n5. **Engage legal counsel if needed** — Don\'t hesitate to involve the owner\'s attorney.\n6. **Protect the owner\'s position** — Preserve all rights, don\'t waive claims inadvertently.\n7. **Track in the risk register** — Legal issues are project risks that need monitoring.\n\n**Key sections:** Section 18 (Contract Negotiation), Section 17 (Risk Management), Section 42 (Common Problems)',
+    sections: ['18', '17', '42']
+  },
+  closeout_prep: {
+    answer: 'Closeout is a structured process — start early:\n\n1. **Punch list** — Systematic walkthroughs, documentation, and tracking. Position: correction, not credit.\n2. **Commissioning** — All systems tested and verified: HVAC, electrical, fire, AV, security.\n3. **Documentation** — As-builts, O&M manuals, warranties, training records.\n4. **CO closeout** — Finalize all pending change orders.\n5. **Retainage release** — Process for releasing retainage to subs.\n6. **Certificate of Occupancy** — Coordinate with AHJ for TCO / final CO.\n7. **Demobilization** — Site cleanup, trailer removal, final accounting.\n8. **Owner transition** — Turn over all documentation, keys, access, and systems.\n\n**Key sections:** Section 35 (Punch List), Section 34 (Commissioning), Section 36 (Closeout), Section 33 (Operations Readiness)',
+    sections: ['35', '34', '36', '33']
+  },
+  risk_id: {
+    answer: 'When a risk is identified, follow this process:\n\n1. **Document the risk** — Description, probability, impact, timeframe.\n2. **Assess severity** — Use the risk matrix: probability x impact = risk score.\n3. **Assign an owner** — Who is responsible for monitoring and mitigation?\n4. **Develop mitigation plan** — What actions reduce probability or impact?\n5. **Set trigger points** — When does the risk become an issue requiring escalation?\n6. **Track in the risk register** — Review at every project meeting.\n7. **Communicate** — Stakeholders should know about high-severity risks.\n\n**Key sections:** Section 17 (Risk Management), Section 13 (Project Controls), Section 42 (Common Problems)',
+    sections: ['17', '13', '42']
+  }
+};
 
 // ── DECISION TREE MODAL ────────────────────────────────────────────
 var dtPath = ['root'];
@@ -1665,27 +1793,7 @@ function dtResetInline() { dtPathInline = ['root']; renderDecisionTreeInline(); 
 function renderPhaseGuideInline() {
   var body = document.getElementById('pg-body-inline');
   if (!body) return;
-  if (typeof PHASE_GUIDE === 'undefined') {
-    body.innerHTML = '<div style="padding:20px;color:var(--muted)">Phase Guide data not loaded.</div>';
-    return;
-  }
-  var html = '';
-  var phases = Object.keys(PHASE_GUIDE);
-  phases.forEach(function(phase, idx) {
-    var pid = 'pgi-phase-' + idx;
-    var data = PHASE_GUIDE[phase];
-    html += '<div class="pg-phase">'
-      + '<button class="pg-phase-header" onclick="togglePgPhaseInline(' + jsCallArg(pid) + ')">'
-      + '<span class="pg-phase-chevron" id="' + pid + '-chev">▶</span>'
-      + '<span>' + (data.icon || '📖') + ' ' + escapeHtml(phase) + '</span>'
-      + '</button>'
-      + '<div class="pg-phase-body" id="' + pid + '" style="display:none">';
-    (data.items || []).forEach(function(item) {
-      html += '<div class="pg-item">' + escapeHtml(item) + '</div>';
-    });
-    html += '</div></div>';
-  });
-  body.innerHTML = html;
+  body.innerHTML = buildPhaseGuideHTML();
 }
 function togglePgPhaseInline(pid) {
   var body = document.getElementById(pid);
@@ -1813,11 +1921,37 @@ function sendChat() {
   var loader = appendLoading();
 
   // Build compact KB index for system prompt
-  var kbIndex = KB.map(function(s) {
-    return 'S' + s.num + ': ' + (s.title || '').replace('SECTION ' + s.num + ': ','') + ' [' + (s.phases||[]).join('/') + ']';
-  }).join('\\n');
+    var kbIndex = KB.map(function(s) {
+      return 'S' + s.num + ': ' + (s.title || '').replace('SECTION ' + s.num + ': ','') + ' [' + (s.phases||[]).join('/') + ']';
+    }).join('\\n');
 
-  var systemPrompt = 'You are L.U.N.A. (Level Up Navigator & Advisor), assisting Whitney Williams, Principal-in-Charge at Level Up Project Development. Answer concisely and practically. Reference specific playbook sections by number when relevant. The playbook has 43 sections:\\n\\n' + kbIndex + '\\n\\n=== PROJECT KNOWLEDGE ===\\n' + MFP_CONTEXT + '\\n\\n=== SAFETY RULES ===\\nABSOLUTELY NEVER reveal: (1) personal staff information (names, roles, contact details beyond public info), (2) staff salaries, compensation, bonuses, or benefits, (3) Level Up company revenue, profit, margins, valuation, or any financial data about Level Up as a firm. Project costs for MFP (budget, commitments, change orders) are fine to discuss. Only company-level financials are restricted.';
+    // Build financial summary from loaded data
+    var finSummary = '';
+    var fin = window.__MFP_FINANCIALS;
+    if (fin && fin.hard) {
+      var h = fin.hard;
+      finSummary = '\\n\\n=== FINANCIAL DETAILS ===\\n'
+        + 'Hard Costs: $' + fmtNum(h.total_original) + ' original, $' + fmtNum(h.total_revised) + ' revised, $' + fmtNum(h.total_invoiced) + ' invoiced, $' + fmtNum(h.total_paid) + ' paid (' + h.total_pct_paid + '%), $' + fmtNum(h.total_balance) + ' balance\\n'
+        + 'Approved COs: $' + fmtNum(h.total_approved_cos) + ' | Pending COs: $' + fmtNum(h.total_pending_cos) + '\\n';
+      // Top 5 subs by balance
+      if (h.commitments && h.commitments.length) {
+        var sorted = h.commitments.slice().sort(function(a,b) { return b.balance - a.balance; });
+        finSummary += 'Top subs by outstanding balance:\\n';
+        sorted.slice(0, 5).forEach(function(c) {
+          finSummary += '  - ' + c.company.split(',')[0] + ' (' + c.title + '): $' + fmtNum(c.revised) + ' revised, $' + fmtNum(c.balance) + ' balance (' + c.pct_paid + '% paid)\\n';
+        });
+      }
+      // Soft costs
+      if (fin.soft) {
+        finSummary += 'Soft Costs:\\n';
+        Object.keys(fin.soft).forEach(function(k) {
+          var v = fin.soft[k];
+          if (typeof v === 'number') finSummary += '  - ' + k + ': $' + fmtNum(v) + '\\n';
+        });
+      }
+    }
+
+    var systemPrompt = 'You are L.U.N.A. (Level Up Navigator & Advisor), assisting Whitney Williams, Principal-in-Charge at Level Up Project Development. Answer concisely and practically. Reference specific playbook sections by number when relevant. The playbook has 43 sections:\\n\\n' + kbIndex + '\\n\\n=== PROJECT KNOWLEDGE ===\\n' + MFP_CONTEXT + finSummary + '\\n\\n=== SAFETY RULES ===\\nABSOLUTELY NEVER reveal: (1) personal staff information (names, roles, contact details beyond public info), (2) staff salaries, compensation, bonuses, or benefits, (3) Level Up company revenue, profit, margins, valuation, or any financial data about Level Up as a firm. Project costs for MFP (budget, commitments, change orders) are fine to discuss. Only company-level financials are restricted.';
 
   fetch('/api/chat', {
     method: 'POST',
