@@ -245,19 +245,6 @@ function setView(view) {
     }
 }
 
-function updateHomeGreeting() {
-  var el = document.getElementById('home-greeting');
-  if (!el) return;
-  var h = new Date().getHours();
-  var g = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
-  if (luUser && luUser.authenticated && luUser.name) {
-    var firstName = (luUser.name || '').split(' ')[0];
-    if (firstName) g += ', ' + firstName;
-  }
-  el.textContent = g;
-    renderReminders();
-  }
-
 // ── PLAYBOOK SEARCH ────────────────────────────────────────────────
 function pbSearchType(val) {
   activeSearch = val.trim();
@@ -280,27 +267,6 @@ function toggleSidebar() {
 }
 
 // ── STATS BAR ───────────────────────────────────────────────────────
-function renderStats() {
-  var el = document.getElementById('home-greeting');
-  if (!el) return;
-  // Remove existing stats bar if present
-  var existing = document.getElementById('stats-bar');
-  if (existing) existing.remove();
-  // Build stats
-  var stats = [
-    { icon: '📚', label: 'Sections', value: KB.length || '—' },
-    { icon: '📑', label: 'Templates', value: Object.keys(TEMPLATES).length || '—' },
-    { icon: '🔴', label: 'Active Issues', value: '5' },
-    { icon: '🔍', label: 'Cost Recovery', value: 'Jun 30' },
-  ];
-  var html = '<div id="stats-bar" class="stats-bar">';
-  stats.forEach(function(s) {
-    html += '<div class="stat-item"><span class="stat-item-icon">' + s.icon + '</span><div><div class="stat-item-label">' + s.label + '</div><div class="stat-item-value">' + s.value + '</div></div></div>';
-  });
-  html += '</div>';
-  el.insertAdjacentHTML('afterend', html);
-}
-
 // ── REMINDERS ──────────────────────────────────────────────────────
 function renderReminders() {
   var el = document.getElementById('luna-reminders');
@@ -571,94 +537,6 @@ function setTopic(t) {
   renderPlaybook();
 }
 
-var searchTimer = null;
-function applySearch(q) {
-  if (searchTimer) clearTimeout(searchTimer);
-  var searchWrap = document.querySelector('.search-wrap');
-  var existing = document.getElementById('search-results-dropdown');
-  if (existing) existing.remove();
-  searchTimer = setTimeout(function() {
-    activeSearch = (q || '').trim();
-    if (!activeSearch) {
-      // Clear search results dropdown
-      var dd = document.getElementById('search-results-dropdown');
-      if (dd) dd.remove();
-      if (currentView === 'playbook') renderSections();
-      return;
-    }
-    var ql = activeSearch.toLowerCase();
-    var results = [];
-
-    // Search playbook sections
-    if (window.__KNOWLEDGE_BASE) {
-      window.__KNOWLEDGE_BASE.forEach(function(s) {
-        var match = (s.title && s.title.toLowerCase().indexOf(ql) >= 0) || (s.body && s.body.toLowerCase().indexOf(ql) >= 0);
-        if (match) results.push({type: 'playbook', label: 'Section ' + s.id + ': ' + s.title, id: s.id, preview: (s.body || '').substring(0, 120)});
-      });
-    }
-
-    // Search templates
-    if (window.__TEMPLATES) {
-      Object.keys(window.__TEMPLATES).forEach(function(k) {
-        var t = window.__TEMPLATES[k];
-        var match = (t.name && t.name.toLowerCase().indexOf(ql) >= 0) || (t.desc && t.desc.toLowerCase().indexOf(ql) >= 0) || (k && k.toLowerCase().indexOf(ql) >= 0);
-        if (match) results.push({type: 'template', label: 'Template: ' + t.name, id: k, preview: (t.desc || '').substring(0, 120)});
-      });
-    }
-
-    // Search projects/mfp
-    var projectKeywords = ['mfp', 'freedom park', 'stadium', 'lemartec', 'arq', 'punch', 'financial', 'budget', 'change order', 'closeout', 'miller', 'day 2', 'issue'];
-    if (ql && projectKeywords.some(function(kw) { return kw.indexOf(ql) >= 0 || ql.indexOf(kw) >= 0; })) {
-      results.push({type: 'project', label: 'Project: Miami Freedom Park Stadium', id: 'mfp', preview: 'Post-opening closeout. Home opener April 4, 2026. Active workstreams: punch list closeout, cost recovery audit, Lemartec contract closeout.'});
-    }
-
-    // Highlight function
-    function highlightText(text, query) {
-      if (!query || !text) return text;
-      var re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
-      return text.replace(re, '<mark style="background:#fff3a8;padding:1px 2px;border-radius:2px">$1</mark>');
-    }
-
-    // Render dropdown
-    if (results.length) {
-      var searchRect = searchWrap ? searchWrap.getBoundingClientRect() : {left: 0, top: 0, width: 0};
-      var dd = document.createElement('div');
-      dd.id = 'search-results-dropdown';
-      dd.style.cssText = 'position:fixed;top:' + (searchRect.bottom + 4) + 'px;left:' + searchRect.left + 'px;width:' + Math.max(searchRect.width, 300) + 'px;max-height:400px;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:1000;padding:8px 0';
-      dd.innerHTML = '<div style="padding:6px 14px 8px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)">' + results.length + ' result' + (results.length > 1 ? 's' : '') + ' for "' + activeSearch + '"</div>';
-      results.forEach(function(r) {
-        var icon = r.type === 'playbook' ? '\uD83D\uDCD6' : r.type === 'template' ? '\uD83D\uDCC1' : '\uD83C\uDFDF';
-        var onClick = "var dd=document.getElementById('search-results-dropdown');if(dd)dd.remove();document.getElementById('search-input').value='';activeSearch='';";
-        if (r.type === 'playbook') onClick += "setView('playbook');jumpTo('" + r.id + "');";
-        else if (r.type === 'template') onClick += "setView('templates');";
-        else if (r.type === 'project') onClick += "setView('mfp');";
-        dd.innerHTML += '<div class="search-result-item" style="padding:10px 14px;cursor:pointer;transition:background .1s;border-bottom:1px solid var(--border)" onmouseover="this.style.background=\'var(--teal-light)\'" onmouseout="this.style.background=\'\'" onclick="' + onClick + '">'
-          + '<div style="display:flex;align-items:center;gap:8px">'
-          + '<span>' + icon + '</span>'
-          + '<span style="font-size:13px;font-weight:600;color:var(--charcoal);flex:1">' + highlightText(r.label, activeSearch) + '</span>'
-          + (r.id ? '<span style="font-size:10px;color:var(--muted);background:var(--cool);padding:2px 6px;border-radius:4px">' + r.type + '</span>' : '')
-          + '</div>'
-          + (r.preview ? '<div style="font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4">' + highlightText(r.preview, activeSearch) + '</div>' : '')
-          + '</div>';
-      });
-      document.body.appendChild(dd);
-
-      // Click outside to close
-      var closeHandler = function(e) {
-        if (!dd.contains(e.target) && e.target.id !== 'search-input') {
-          dd.remove();
-          document.removeEventListener('click', closeHandler);
-        }
-      };
-      setTimeout(function() { document.addEventListener('click', closeHandler); }, 10);
-    }
-
-    // Also render playbook with results if on that view
-    if (activeSearch) collapsedGroups = {};
-    if (currentView === 'playbook') renderSections();
-  }, 250);
-}
-
 function clearFilters() {
   activePhase = null;
   activeTopic = null;
@@ -752,7 +630,7 @@ function renderMFP() {
     var approvedCOs = S ? fm(S.approved_cos_total) : '';
     
     var daysPast = S ? S.days_past_baseline + ' days past baseline' : '153 days past baseline';
-    var millerOut = H ? fm(H.commitments.find(function(c){return c.company.indexOf('MILLER')>=0;}).balance) : '';
+    var millerOut = H && H.commitments ? fm((H.commitments.find(function(c){return c.company && c.company.indexOf('MILLER')>=0;}) || {}).balance) : '';
     el.innerHTML = '<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px">'
       + '<div style="font-size:13px;color:var(--muted);margin-bottom:4px">CURRENT PHASE <span style="color:#c0392b;font-weight:700">| ' + daysPast + '</span></div>'
       + '<div style="font-size:18px;font-weight:700;color:var(--charcoal);margin-bottom:8px">Post-Opening / Active Closeout</div>'
@@ -829,7 +707,7 @@ function renderMFP() {
                                                           + '</div>'
 
                             // HARD vs SOFT costs side by side
-                            var softTotal = S.design_total + (S.ffe_budget || 0) + (S.freight || 0) + (S.customs_duties || 0) + (S.contingency || 0);
+                                                        var softTotal = (S ? S.design_total : 0) + ((S && S.ffe_budget) || 0) + ((S && S.freight) || 0) + ((S && S.customs_duties) || 0) + ((S && S.contingency) || 0);
                             var allHardCosts = H.total_revised;
                             var allSoftCosts = softTotal;
                             var grandTotal = allHardCosts + allSoftCosts;
@@ -858,13 +736,13 @@ function renderMFP() {
                               // Design Team
                               + '<div style="background:#f0f4ff;border:1px solid #4a90d9;border-radius:10px;padding:14px;margin-bottom:10px">'
                               + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
-                              + '<strong>🎨 Design Team (' + S.design_team.length + ' firms)</strong>'
+                              + '<strong>🎨 Design Team (' + (S.design_team ? S.design_team.length : 0) + ' firms)</strong>'
                               + '<strong style="font-size:16px;color:#4a90d9">' + fm(S.design_total) + '</strong>'
                               + '</div>'
                               + '<div style="max-height:300px;overflow-y:auto;margin-top:6px">';
 
                             // Sort design team by fee descending
-                            var sortedDesign = S.design_team.slice().sort(function(a,b){ return b.fee - a.fee; });
+                                                        var sortedDesign = (S.design_team || []).slice().sort(function(a,b){ return b.fee - a.fee; });
                             sortedDesign.forEach(function(d,i){
                               html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px">'
                                 + '<div><strong>' + d.firm + '</strong><br><span style="font-size:11px;color:var(--muted)">' + d.scope + '</span></div>'
@@ -880,7 +758,7 @@ function renderMFP() {
                               + '<strong style="font-size:16px;color:#e6a817">' + fm(S.ffe_budget) + '</strong>'
                               + '</div>';
 
-                            S.ffe_breakdown.forEach(function(f){
+                            (S.ffe_breakdown || []).forEach(function(f){
                               html += '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--charcoal);padding:3px 0;border-bottom:1px solid var(--border)">'
                                 + '<span>' + f.category + '</span>'
                                 + '<span>' + fm(f.amount) + '</span></div>';
@@ -918,8 +796,8 @@ function renderMFP() {
                               + '<th style="padding:10px 8px;text-align:right">Balance</th>'
                               + '</tr></thead><tbody>';
 
-                            var subs = H.commitments;
-                            subs.sort(function(a,b){ return b.revised - a.revised; });
+                            var subs = (H && H.commitments) || [];
+                                                        if (subs.length) subs.sort(function(a,b){ return (b.revised||0) - (a.revised||0); });
                             subs.forEach(function(sub,i){
                               var coClass = sub.co < 0 ? 'color:#c0392b' : '';
                               html += '<tr style="border-top:1px solid var(--border)">'
@@ -1812,6 +1690,11 @@ function closeModal(id) {
   var el = document.getElementById(id);
   if (el) el.classList.remove('open');
 }
+// Called by 78 decision tree answer links
+function closeDecisionTree() {
+  closeModal('modal-decision-tree');
+  closeModal('modal-decision-tree-alt');
+}
 
 function showModal(id, html) {
   var el = document.getElementById(id);
@@ -1833,7 +1716,7 @@ function toggleChat() {
   if (d) d.classList.toggle('open', chatOpen);
   if (chatOpen) {
     if (chatHistory.length === 0) {
-      appendMsg('ai', "Hi Whitney. I'm L.U.N.A. — your Executive Operating Partner. Ask me anything about the playbook or MFP — Day 1 mobilization, change orders, punch list disputes, cost recovery audit, anything.");
+      appendMsg('ai', "Hi " + (luUser && luUser.name ? luUser.name.split(' ')[0] : 'there') + ". I'm L.U.N.A. — your Executive Operating Partner. Ask me anything about the playbook or MFP — Day 1 mobilization, change orders, punch list disputes, cost recovery audit, anything.");
     }
     setTimeout(function() {
       var ci = document.getElementById('chat-input');
@@ -2052,9 +1935,8 @@ function init() {
     footer.textContent = 'JS OK · ' + status + ' · KB=' + KB.length;
   }
 
-  // Render stats on home page
-      renderStats();
-      // Update data sync timestamp
+  // Render home page — currently no fixed stats bar
+        // Update data sync timestamp
       var freqEl = document.querySelector('.luna-status-freq');
       if (freqEl) {
         freqEl.textContent = 'Data: static as of Jun 8';
@@ -2270,15 +2152,15 @@ function init() {
           return;
         }
         var reply = (data.content && data.content[0] && data.content[0].text) || data.error || 'No response.';
-                results.innerHTML = '<div class=\"luna-result-q\"><span class=\"luna-result-q-icon\">Q:</span>' + escapeHtml(q) + '</div>'
-                  + '<div class=\"luna-result-a\">' + reply + '</div>';
-                // Apply chat filter to hero search results too
-                var sn = [
-                  /(?:salary|compensation|pay|wage|bonus)['":]?\s*\$?\d[\d,.]*/gi,
-                  /(?:revenue|profit|margin|earnings|income)['":]?\s*\$?\d[\d,.]*/gi,
-                  /Level Up['"]?\s*(?:revenue|profit|margin|earnings|valuation|income)/gi
-                ];
-                sn.forEach(function(p) { reply = reply.replace(p, '[REDACTED]'); });
+                        // Apply chat filter BEFORE writing to DOM
+                        var sn = [
+                          /(?:salary|compensation|pay|wage|bonus)['\":]?\s*\$?\d[\d,.]*/gi,
+                          /(?:revenue|profit|margin|earnings|income)['\":]?\s*\$?\d[\d,.]*/gi,
+                          /Level Up['\"]?\s*(?:revenue|profit|margin|earnings|valuation|income)/gi
+                        ];
+                        sn.forEach(function(p) { reply = reply.replace(p, '[REDACTED]'); });
+                        results.innerHTML = '<div class=\"luna-result-q\"><span class=\"luna-result-q-icon\">Q:</span>' + escapeHtml(q) + '</div>'
+                          + '<div class=\"luna-result-a\">' + reply + '</div>';
                 heroResults[q] = { q: q, a: reply };
         try { localStorage.setItem(cacheKey, JSON.stringify({ answer: reply, ts: Date.now() })); } catch(e){}
       })
@@ -2362,18 +2244,22 @@ function buildBriefing() {
     items.push({ icon: '🔧', label: 'HVAC Service Agreement', detail: 'Hill York — pending signature', urgent: true });
 
     // CO Watchdog findings — top 3 high severity
-    var wd = window.__CO_WATCHDOG;
-    if (wd && wd.findings) {
-      var topFindings = wd.findings.filter(function(f) { return f.severity === 'high'; }).slice(0, 3);
-      topFindings.forEach(function(f) {
-        items.push({
-          icon: '🔍',
-          label: f.category + ': ' + f.sub,
-          detail: f.detail.slice(0, 100) + '...',
-          urgent: true
-        });
-      });
-    }
+        var wd = window.__CO_WATCHDOG;
+        if (wd && wd.subcontractors) {
+          var topFindings = wd.subcontractors.filter(function(f) {
+            return f.forensic_notes && f.forensic_notes.length > 0;
+          }).sort(function(a,b) {
+            return (b.potential_savings || 0) - (a.potential_savings || 0);
+          }).slice(0, 3);
+          topFindings.forEach(function(f) {
+            items.push({
+              icon: '🔍',
+              label: f.name + ' — $' + fmtNum(f.potential_savings) + ' savings',
+              detail: (f.forensic_notes && f.forensic_notes[0]) || '',
+              urgent: true
+            });
+          });
+        }
 
   // Build HTML
   var greeting = 'Good ' + (now.getHours() < 12 ? 'morning' : now.getHours() < 18 ? 'afternoon' : 'evening');

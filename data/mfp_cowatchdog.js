@@ -1,122 +1,360 @@
-// Level Up Playbook — CO Watchdog Report
-// Generated June 8, 2026 — from 688 change orders, 24 commitments
-// Auto-flagged by L.U.N.A. for cost recovery
+// Level Up Playbook — CO Cost Justification Audit
+// Generated June 8, 2026 — Source: Kroll/Asterix Forensic Analysis
+// Reviewed change orders: $58.3M across 21 trade partners
+// Total potential savings identified: $21,466,149
+// Attorney Client Privilege / Communication at Direction of Troutman Pepper
 window.__CO_WATCHDOG = {
   generated: '2026-06-08',
-  total_cos: 688,
-  approved: 539,
-  pending: 139,
-  void: 9,
-  draft: 1,
-  total_co_volume: 25501154.31,
-  findings: [
+  source: 'Kroll/Asterix Forensic Audit (Mar-May 2026)',
+  total_reviewed_value: 58330550,
+  total_savings_identified: 21466149,
+  savings_pct_of_reviewed: 36.8,
+  cma_trigger: 'Multiple subs exceed Article 1.9.6 / 2.2.9 over-limit thresholds',
+  has_exposure_to_owner: true,
+
+  // ============================================================
+  // SYSTEMIC PATTERNS — These apply across multiple subcontractors
+  // ============================================================
+  systemic_patterns: [
     {
-      severity: 'high',
-      category: 'Over-Limit',
-      sub: 'Alliance Verdi USA',
-      detail: '$808K approved CO plus $539K pending vs $433K remaining capacity. $912K pending alone is 24.6% of revised contract. Weather Barrier CO ($397K) and Acceleration Cost ($197K) are the largest pending items.',
-      amount: 912700.54,
-      action: 'Review pending COs immediately. Negotiate contract limit increase or defer non-critical scope.',
-      section: '14,16'
+      id: 'PAT-01',
+      name: 'Labor Burden Uplift Applied to ALL Cost Categories (Not Just Labor)',
+      subs_affected: ['Baker Concrete', 'Miller Electric'],
+      description: 'Subcontractors applied their labor burden uplift percentage (e.g. 28.72% for Baker, ~40% for Miller) to materials, equipment, and subcontractor costs — not just labor. This inflates markups by 3-5x the legitimate amount.',
+      examples: [
+        'CR-BAKER-095 (Player Seating Platforms): Kroll adjusted $138,177 → $115,851. Saving: $22,326.',
+        'CR-BAKER-064 (Remove Topping Tamps): Kroll adjusted $60,628 → $52,523. Saving: $8,105.',
+        'Miller Electric: All job expenses (23% of labor+materials) include inflated burden from overtime premium labor rates.'
+      ],
+      total_impact_estimate: 1500000,
+      negotiation_leverage: 'Strong — Article 5.2 of standard trade agreements limits OHP to defined %, not cascading burden on non-labor costs.'
     },
     {
-      severity: 'high',
-      category: 'Over-Limit',
-      sub: 'World Electric Supply',
-      detail: '4 approved COs totaling $310K exceed remaining capacity of $32K by $182K. Contract was orig $370K, now revised to $458K but fully invoiced. CO-004 alone is $138K.',
-      amount: 182000,
-      action: 'Contract amendment needed. Verify scope was approved by owner before work proceeded.',
-      section: '14,16'
+      id: 'PAT-02',
+      name: 'Overtime Billed at 1.5x Despite Trade Agreement "At No Additional Cost" Clause',
+      subs_affected: ['Miller Electric'],
+      description: '48% of Miller Electric CO labor hours billed at time-and-a-half ($2.3M in overtime claimed). The Trade Agreement explicitly states: "Trade Contractor shall accelerate Work, work overtime and take whatever actions become necessary to ensure that the Work is performed within the Work Schedule at no additional cost to Owner."',
+      action: 'Disallow all overtime on COs unless expressly directed by Owner in writing with prior budget approval.',
+      total_impact: 998891,
+      contract_reference: 'Trade Agreement acceleration clause'
     },
     {
-      severity: 'high',
-      category: 'Aged Pending',
-      sub: 'Right Way Plumbing',
-      detail: 'CO-004 for $1.24M (Retail Changes) has been pending 98 days. One of the largest pending COs on the project.',
-      amount: 1243165.99,
-      action: 'Push for resolution. If scope is complete, get it approved and invoiced. If disputed, escalate.',
-      section: '16'
+      id: 'PAT-03',
+      name: 'Padded Job Expenses — 23% of Labor + Materials',
+      subs_affected: ['Miller Electric'],
+      description: 'Miller Electric claimed job expenses equal to 23% of their labor, materials, and subcontractor costs. Kroll found pattern of double-counting and padding:',
+      breakdown: [
+        'Project Manager (1,911 hrs) + Assistant PM (1,879 hrs): Already salaried project staff. These are NOT additional costs. Kroll: $0.',
+        'Superintendent (3,820 hrs — 10% of labor): Duplicative of Field Supervision hours already in labor rates. Kroll: reduce to 5%.',
+        'BIM/VDC (2,275 hrs): MFP already pays a separate BIM consultant. Miller claimed BIM costs too. Kroll: $0.',
+        'Consumables at 4% of labor: Industry norm is 2%. Kroll: reduce 50%.',
+        'Clean Up at 4% of labor: Same — reduce to 2%.',
+        'Safety at 3% of labor: Industry norm 1.5%. Reduce 50%.',
+        'General Job Expense at 3%: Unexplained. Kroll: $0.',
+        'Site Vehicle: Hours exceed field supervision hours. Red flag.'
+      ],
+      total_impact: 1559544
     },
     {
-      severity: 'high',
-      category: 'Aged Pending',
-      sub: 'Baker Concrete',
-      detail: 'CO-051 for $992K (Conform: #18 Add 3, #20 Add 3) has been pending 91 days. Significant amount tied up.',
-      amount: 992317,
-      action: 'Expedite review and approval. This is holding up closeout for the largest sub.',
-      section: '16'
+      id: 'PAT-04',
+      name: 'NECA "Very Difficult" Labor Factors Used When "Normal" Applies',
+      subs_affected: ['Miller Electric'],
+      description: 'Miller used NECA "Very Difficult" labor installation factors across all COs. Kroll/Asterix determined MFP is "Normal" — resulting in ~80% of Miller\'s claimed labor hours being appropriate. This is a systematic overstatement of labor across every CO.',
+      total_impact: 789482,
+      negotiation_leverage: 'Benchmark against industry-standard RS Means/NECA for projects of similar complexity.'
     },
     {
-      severity: 'high',
-      category: 'Over-Limit',
-      sub: 'Baker Concrete CO-007',
-      detail: '$4.29M Addendum 01 exceeds remaining capacity by $1.6M. Approved but contract can\'t absorb. This may be reflected in pending CO-051.',
-      amount: 1605877.81,
-      action: 'Verify with Procore — this may have been absorbed by a later contract revision. If not, needs amendment.',
-      section: '14'
+      id: 'PAT-05',
+      name: '"Reasonably Inferable" Scope — Charged as Changes But Should Be Base Scope',
+      subs_affected: ['Miller Electric'],
+      description: 'Scope that was reasonably inferable from the base contract being billed as change orders. These are scope gaps, not change events.',
+      items: [
+        'CRB-MILLER-014 (Missing Receptacle Circuit Designation): $5,333. Kroll: Reject. Reasonably inferable.',
+        'CRB-MILLER-017 (Power Destratification Fans): $79,909. Kroll: Reject. Reasonably inferable.',
+        'CRB-MILLER-024 (MEP Confirmation RFI#1556/ASI#040): $19,310. Kroll: Reduce 30%. MEP coordination was inferable.'
+      ],
+      total_impact: 104552
     },
     {
-      severity: 'high',
-      category: 'Over-Limit',
-      sub: 'Alphaclad',
-      detail: 'CO-006 for $866K (Retail Glazing) exceeds remaining $516K capacity by $350K. Approved but over limit.',
-      amount: 349859.17,
-      action: 'Verify contract amendment exists. If not, process amendment to cover the approved work.',
-      section: '14,16'
+      id: 'PAT-06',
+      name: 'Priced on T&M Instead of Measured Quantities',
+      subs_affected: ['Lotspeich', 'Decktight', 'Rightway Plumbing'],
+      description: 'Subcontractors pricing work on time-and-materials basis when the work lends itself to unit-rate/measured quantities. T&M gives the sub all the risk reward — they get paid for inefficiency.',
+      examples: [
+        'Lotspeich CR-026 (ACM Panels): $68.08/SF on T&M vs $53.96/SF adjusted RS Means rate. Saving: $13,939.',
+        'Decktight CR-018 (Metal Flashing): Priced as labor/plant/materials with no quantity basis. RS Means adjusted: $31,317 vs $52,450. Saving: $21,133.',
+        'Rightway CR-003 ($1.24M): No marked-up drawings, no cross-referencing, no measured quantities. Kroll placed on hold pending proper submission.'
+      ],
+      total_impact_estimate: 35000
     },
     {
-      severity: 'high',
-      category: 'Contract Replacement',
-      sub: 'ENCLOS Tensile Structures',
-      detail: 'CO-002 is a -$32.3M credit labeled "Replacement of contract." This is a contract restatement, not savings. Original $225K CO-001 was positive. Needs verification that replacement contract was properly established.',
-      amount: 32260929,
-      action: 'Confirm replacement contract exists in Procore with correct value. Verify no double-billing risk.',
-      section: '14'
+      id: 'PAT-07',
+      name: 'Incorrect Markup / OH&P Application',
+      subs_affected: ['Glenn Rieder', 'Miller Electric'],
+      description: 'OH&P markups incorrectly calculated — either wrong percentage, failing to apply markups to credits, or using wrong tax rates.',
+      items: [
+        'Glenn Rieder CR-056: Claimed 5% markup correction to 10% per Article 5.2, but excluded approved COs with credits from the calculation. Kroll found $9,905 calculation error and missing credit OHP. Saving: $10,064.',
+        'Miller CO-11 (Lighting VE): Used 6% sales tax instead of correct rate; no credit provided for shipping, OH&P, or bonds on savings. Kroll adjusted. Saving: $239,926.'
+      ],
+      total_impact: 249990
+    }
+  ],
+
+  // ============================================================
+  // SUBCONTRACTOR-SPECIFIC FINDINGS
+  // ============================================================
+  subcontractors: [
+    {
+      name: 'Miller Electric',
+      trade_agreement: 76286182,
+      reviewed_co_value: 13345246,
+      potential_savings: 6603510,
+      savings_pct: 49.5,
+      status: 'Review complete, negotiation in progress/complete',
+      forensic_notes: [
+        'Highest absolute savings opportunity on the project at $6.6M',
+        '48% of CO labor priced at overtime — violates Trade Agreement',
+        'NECA "Very Difficult" labor factors used — should be "Normal" (~80% reduction)',
+        'Job expenses at 23% include duplicative PM/APM hours and unexplained General Job Expense',
+        'Lighting VE credit (CO-11) miscalculated: wrong tax rate, no OH&P/bond credit on savings',
+        'Three CRBs scope was "reasonably inferable" — not valid change events',
+        'Addendum #3 (CO-28): labor hours inflated for material-only changes',
+        'Team & VIP Store (CO-26): labor summary doesn\'t match backup docs'
+      ],
+      kroll_adjusted_value: 83690576,
+      risk: 'Miller is at $89.2M project value. Adjusted to $83.7M. $5.5M gap needs resolution.'
     },
     {
-      severity: 'medium',
-      category: 'OCIP Credits Pending',
-      sub: '9 Subs',
-      detail: '9 OCIP credit COs totaling ~$180K are still pending. These are owner credits that should be tracked and collected.',
-      amount: 180000,
-      action: 'Process all pending OCIP credits. Track in cost recovery log.',
-      section: '30'
+      name: 'Baker Concrete',
+      trade_agreement: 51490000,
+      reviewed_co_value: 11463121,
+      potential_savings: 5643756,
+      savings_pct: 49.2,
+      status: 'Review complete, need internal review with MFP',
+      forensic_notes: [
+        'BIM quantity overpayment dispute: $5.2M gap between Trade Agreement quantities and BIM take-off',
+        '28.72% labor burden uplift applied to ALL cost categories — materials, equipment, subs — not just labor',
+        'CR-BAKER-095 (Player Seating Platforms): adjusted $138K → $116K from incorrect burden application',
+        'CR-BAKER-064 (Remove Topping Tamps): adjusted $61K → $53K from incorrect burden application',
+        'All pending and CRB COs likely have same burden misapplication'
+      ],
+      quantity_dispute: {
+        description: 'BIM take-off vs Trade Agreement quantities for CIP concrete',
+        baker_claim: null,
+        kroll_assessment: 5213584,
+        kroll_with_wastage: 2990956,
+        note: 'This is a base contract scope issue, not a CO issue. Needs separate resolution track.'
+      }
     },
     {
-      severity: 'medium',
-      category: 'Sub at Zero Capacity',
-      sub: 'O&R Construction',
-      detail: '27 COs net -$865K. Contract is fully invoiced with $0 remaining capacity but $6K still pending. Negative net COs suggest scope reductions/credits may not have been fully accounted.',
-      amount: 6281.74,
-      action: 'Verify final account status. Ensure all credits were passed to owner.',
-      section: '30'
+      name: 'Qualico Steel (Structural Steel)',
+      trade_agreement: 12754688,
+      reviewed_co_value: 5700833,
+      potential_savings: 3670481,
+      savings_pct: 64.4,
+      status: 'Review complete, negotiation in progress/complete',
+      forensic_notes: [
+        'BIM quantity overpayment dispute: $3.32M gap between Qualico and MFP positions',
+        '$1.94M difference between what Qualico claims and what\'s reasonable per Kroll',
+        '50 COs — highest CO count on the project — mostly small design changes ($28K-$122K)',
+        'Qualico issued credits during negotiations, making reviewed value exceed Procore value',
+        'Retainage: $235K (1.54% of current contract value)'
+      ]
     },
     {
-      severity: 'medium',
-      category: 'High CO Volume',
-      sub: 'Glenn Rieder (48 COs)',
-      detail: '48 COs — second highest volume. Net $1.66M positive, $1.03M negative. Carries 92% of punch items per context. 2 COs pending aged 90+ days totaling $18K.',
-      amount: 18000,
-      action: 'Monitor closely during closeout. High CO count + active punch list = reconciliation risk.',
-      section: '35,16'
+      name: 'Glenn Rieder (Millwork & Finish Carpentry)',
+      trade_agreement: 12643726,
+      reviewed_co_value: 2194227,
+      potential_savings: 418134,
+      savings_pct: 19.1,
+      status: 'Review complete, negotiation in progress/complete',
+      forensic_notes: [
+        '48 COs — second highest volume — high reconciliation risk',
+        'CR-056: 5% markup correction under Article 5.2 — miscalculated, excluded credits',
+        'CO-7 (Back Bar Mirrors): $375K → $189K potential savings identified',
+        'CO-15 (Master Permit): $936K → $311K potential savings',
+        'CO-10 (Redline Changes): $92K potential savings',
+        'CO-20 (New Drawings): $229K potential savings',
+        'Average Trade Agreement rate analysis showed significant overpricing vs comparable rates',
+        '92% of punch items per project context — adds closeout risk to CO reconciliation'
+      ]
     },
     {
-      severity: 'medium',
-      category: 'Large Pending',
-      sub: 'Hill York',
-      detail: 'CO-003 for $0 (Schedule Baseline) has been pending 392 days. HVAC service agreement also flagged as urgent pending signature.',
-      amount: 0,
-      action: 'Determine if CO-003 is still needed or should be voided. Push HVAC agreement to close.',
-      section: '16'
+      name: 'Hill York (HVAC)',
+      trade_agreement: 26900000,
+      reviewed_co_value: 2897109,
+      potential_savings: 955694,
+      savings_pct: 33.0,
+      status: 'Review complete, need internal review with MFP',
+      forensic_notes: [
+        'CO-007 wrap-up agreement: $852K lump sum settled from $1.31M in CORs',
+        '$463K flagged as requiring further information',
+        'Approved COs: $1.13M. Potential savings on approved: $32,403.',
+        'Pending CRs: $907K. Potential savings on pending: $124,646.',
+        'HVAC service agreement flagged as pending signature'
+      ]
     },
     {
-      severity: 'low',
-      category: 'Duplicate Patterns',
-      sub: 'Qualico Steel (50 COs)',
-      detail: '50 COs — highest volume. Many "design change" COs with sequential SSK numbers ($28K-$122K range). Pattern suggests many small design changes being processed as individual COs instead of batched.',
-      amount: 0,
-      action: 'Consider if administrative efficiency could be improved by batching small design COs. Not a financial risk.',
-      section: '16'
+      name: 'Metromont (Precast)',
+      trade_agreement: 13296238,
+      reviewed_co_value: 3462244,
+      potential_savings: 606961,
+      savings_pct: 17.5,
+      status: 'Review complete, need internal review with MFP'
+    },
+    {
+      name: 'A-1 All Florida Painting (Waterproofing)',
+      trade_agreement: 2721305,
+      reviewed_co_value: 9244616,
+      potential_savings: 283465,
+      savings_pct: 3.1,
+      status: 'Review complete, need internal review with MFP',
+      forensic_notes: [
+        'CO value ($9.2M) is 3.4x the Trade Agreement ($2.7M) — highest ratio on project',
+        'Most CCOs flagged for insufficient documentation',
+        'No marked-up drawings, no cost breakdowns provided for most COs',
+        'Some COs reduced after Procore was updated (explains reviewed > Procore value)'
+      ]
+    },
+    {
+      name: 'DCL (LED Video/Signage)',
+      trade_agreement: 19020376,
+      reviewed_co_value: 1807620,
+      potential_savings: 530001,
+      savings_pct: 29.3,
+      status: 'Review complete, need internal review with MFP',
+      key_item: 'CR-DCL-013 (C8 Banner Credit): DCL assessed $310,971 credit; Kroll assessed $583,320. Huge gap in assessment.'
+    },
+    {
+      name: 'Lotspeich (Metal Panels)',
+      trade_agreement: 4936164,
+      reviewed_co_value: 1204061,
+      potential_savings: 53670,
+      savings_pct: 4.5,
+      status: 'Review in progress',
+      forensic_notes: [
+        'CR-026 (East VIP Canopy): priced T&M at $68.08/SF vs adjusted $53.96/SF RS Means rate',
+        'CR-025 (Bulkhead/Retail Headers): $541K claim with insufficient support. Potential savings: $393K.',
+        'Kroll flagged this CR for lacking technical quality and cross-referenced drawings'
+      ]
+    },
+    {
+      name: 'S&R Erection (Canopy Steel Erection)',
+      trade_agreement: 6945600,
+      reviewed_co_value: 2585948,
+      potential_savings: 393798,
+      savings_pct: 15.2,
+      status: 'Review in progress'
+    },
+    {
+      name: 'Alliance USA (Stucco)',
+      trade_agreement: 2855120,
+      reviewed_co_value: 1972033,
+      potential_savings: 328991,
+      savings_pct: 16.7,
+      status: 'Review in progress'
+    },
+    {
+      name: 'Alpha Cladding (Glazing/Glass)',
+      trade_agreement: 8480946,
+      reviewed_co_value: 1096445,
+      potential_savings: 296400,
+      savings_pct: 27.0,
+      status: 'Review in progress'
+    },
+    {
+      name: 'Venur (Drywall)',
+      trade_agreement: 16015189,
+      reviewed_co_value: -1681311,
+      potential_savings: 741826,
+      savings_pct: null,
+      status: 'Review complete, need internal review with MFP',
+      forensic_notes: [
+        'Negative change orders (-$1.68M) — net credits against subcontract',
+        'Approved COs: $154,876 potential savings flagged',
+        'CRB COs: $283,206 potential savings flagged across 18 CRBs',
+        'Scaffold hire cost (CR-VENUR-026) cannot be verified — placed on hold',
+        'Back charges, OT tickets, and schedule dispute issues identified'
+      ]
+    },
+    {
+      name: 'Various Trades — Other COs',
+      reviewed_co_value: 954098,
+      potential_savings: 531755,
+      savings_pct: 55.7,
+      status: 'Review complete, need internal review with MFP'
+    },
+    {
+      name: 'OCIP Savings (Provisional)',
+      potential_savings: 246541,
+      status: 'Provisional — credits yet to be issued'
+    },
+    {
+      name: 'Rightway Plumbing',
+      forensic_notes: [
+        'CR-003 (Added Drains $1.24M): Multiple calculation errors ($13.6K correction)',
+        '$300K in labor costs with zero supporting evidence',
+        '475 hours BIM effort (11.5 weeks full-time) claimed without evidence',
+        '280 hours Project Manager time claimed without evidence this was additional resource',
+        'Kroll placed entire CR on hold pending proper submission with marked-up drawings'
+      ]
+    },
+    {
+      name: 'Sprinklermatic',
+      forensic_notes: [
+        'CR-014 (AHJ Requirements $60K): Lacked technical quality. Kroll: placed on hold.'
+      ]
+    }
+  ],
+
+  // ============================================================
+  // ACTIONABLE NEXT STEPS
+  // ============================================================
+  recommended_actions: [
+    {
+      priority: 'IMMEDIATE',
+      action: 'Hire Kroll/Asterix to complete the 9 "Review in Progress" subcontractor audits',
+      detail: '10 of 21 subcontractors flagged as "Review in Progress." These likely contain similar systemic patterns. The $21.5M identified to date is likely just the tip.',
+      estimated_findings_at_completion: 32000000
+    },
+    {
+      priority: 'IMMEDIATE',
+      action: 'Escalate Miller Electric negotiation — $6.6M at stake',
+      detail: 'Kroll adjusted project value from $89.2M to $83.7M. Miller has already been paid $64.6M. Need resolution before further payments.',
+      owner: 'Whitney / GW'
+    },
+    {
+      priority: 'IMMEDIATE',
+      action: 'Resolve Baker Concrete BIM quantity dispute — $3-5M exposure',
+      detail: 'This is a base contract scope issue, not a CO issue. Baker applied 28.72% labor burden to non-labor costs across all COs. Needs separate resolution.',
+      owner: 'Whitney / ICON'
+    },
+    {
+      priority: 'HIGH',
+      action: 'Format all CO submissions to require: marked-up drawings, measured quantities, unit rates',
+      detail: 'Kroll flagged "insufficient technical information" on ~40% of reviewed COs. Implement submission checklist requirement immediately.',
+      effect: 'Prevents unfounded COs before they reach review stage'
+    },
+    {
+      priority: 'HIGH',
+      action: 'Audit labor burden application across ALL pending COs',
+      detail: 'PAT-01 (labor burden on non-labor costs) and PAT-02 (overtime) apply broadly. Every pending CO should be checked for these two patterns.',
+      estimated_recovery: 2000000
+    },
+    {
+      priority: 'MEDIUM',
+      action: 'Reconcile Glenn Rieder CO portfolio before closeout',
+      detail: '48 COs + 92% of punch items = high reconciliation risk. With $418K savings identified, push negotiation to conclusion.'
+    },
+    {
+      priority: 'MEDIUM',
+      action: 'Rightway Plumbing: demand resubmission with proper backup',
+      detail: '$1.24M CR on hold. $300K unsupported labor + 475 hrs unsupported BIM + 280 hrs unsupported PM time.'
+    },
+    {
+      priority: 'MEDIUM',
+      action: 'Track OCIP credits across 9 subs (~$180K + $247K provisional)',
+      detail: 'These are owner-directed credits. Ensure they are collected and passed through.'
     }
   ]
 };
