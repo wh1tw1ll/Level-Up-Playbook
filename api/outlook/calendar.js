@@ -50,17 +50,25 @@ export default async function handler(req, res) {
   if (refreshed !== tokenData) writeRefreshCookies(res, refreshed);
 
   const days = parseInt(req.query.days||'14');
-  const now  = new Date().toISOString();
-  const end  = new Date(Date.now() + days*86400000).toISOString();
-  try {
-      const r = await fetch(
-              `https://graph.microsoft.com/v1.0/me/calendarview?startdatetime=${now}&enddatetime=${end}&$select=subject,start,end,location,isOnlineMeeting,onlineMeetingUrl&$top=50&$orderby=start/dateTime`,
+    const now  = new Date().toISOString();
+    const end  = new Date(Date.now() + days*86400000).toISOString();
+    try {
+      // Use camelCase params, drop online meeting fields that may not exist on all calendars
+      const graphUrl = `https://graph.microsoft.com/v1.0/me/calendarview?startDateTime=${encodeURIComponent(now)}&endDateTime=${encodeURIComponent(end)}&$select=subject,start,end,location&$top=50`;
+      console.log('Calendar API: fetching', graphUrl.slice(0, 150));
+      const r = await fetch(graphUrl,
         { headers: { Authorization: `Bearer ${refreshed.access_token}` } }
       );
       if (!r.ok) {
         const errText = await r.text().catch(() => 'Unknown error');
-        return res.status(r.status).json({ error: `Graph API error: ${r.status}`, detail: errText.slice(0, 500) });
+        console.error('Calendar API error', r.status, errText.slice(0, 300));
+        return res.status(r.status).json({ error: `Graph API: ${r.status}`, detail: errText.slice(0, 500) });
       }
-      res.json(await r.json());
-    } catch(e) { res.status(500).json({ error: e.message }); }
+      const data = await r.json();
+      console.log('Calendar API: got', (data.value||[]).length, 'events');
+      res.json(data);
+    } catch(e) {
+      console.error('Calendar API exception:', e.message);
+      res.status(500).json({ error: e.message });
+    }
 }

@@ -2309,11 +2309,13 @@ function renderReminderMeetings() {
 
   el.innerHTML = '<div class="reminder-loader">Loading meetings...</div>';
 
-  fetch('/api/outlook/calendar?days=1', { credentials: 'include' })
-    .then(function(r) {
-      if (!r.ok) throw new Error('Calendar fetch failed');
-      return r.json();
-    })
+    var fetchUrl = '/api/outlook/calendar?days=1';
+    // Also try the client's native calendar fetch via the browser
+    fetch(fetchUrl, { credentials: 'include' })
+      .then(function(r) {
+        if (!r.ok) { return r.text().then(function(t) { throw new Error('HTTP ' + r.status + ': ' + t.slice(0, 200)); }); }
+        return r.json();
+      })
     .then(function(data) {
       var events = data.value || [];
       var now = new Date();
@@ -2357,9 +2359,9 @@ function renderReminderMeetings() {
       }
       el.innerHTML = html;
     })
-    .catch(function() {
-      el.innerHTML = '<div class="rp-empty"><div class="rp-empty-icon">⚠️</div>Could not load calendar.</div>';
-    });
+    .catch(function(err) {
+          el.innerHTML = '<div class="rp-empty"><div class="rp-empty-icon">⚠️</div>' + escapeHtml(err.message || 'Could not load calendar.') + '</div>';
+        });
 }
 
 // ── EMAIL SCANNER — saves directly into Action Items system ───────
@@ -2388,7 +2390,8 @@ function scanMFPEmails() {
 }
 
 function extractActionItemsFromEmails(emails) {
-  var targets = ['whitney', 'justin williams', 'jordan ward', 'wwilliams', 'justin.williams', 'jordan.ward'];
+  var targets = ['whitney williams', 'justin williams', 'jordan ward', 'wwilliams', 'justin.williams', 'jordan.ward'];
+  var targetShort = ['whitney', 'justin', 'jordan'];
   var mfpKW = [
     'mfp','freedom park','stadium','lemartec','punch','change order','cost recovery',
     'arq','miller','baker','hvac','scoreboard','commissioning','closeout','pco','invoice',
@@ -2396,6 +2399,53 @@ function extractActionItemsFromEmails(emails) {
     'ff&e','punch list','deficiency','scope','contract','submittal','rfp','rfi',
     'schedule','delay','accelerat','owner','graham','devon','victor'
   ];
+
+  // Action signal phrases — stronger signals mean higher likelihood this is a real action
+  var actionSignals = [
+    { words: ['please', 'can you', 'could you', 'need you to', 'action required', 'action item'], weight: 2 },
+    { words: ['by end of', 'due by', 'deadline', 'asap', 'urgent', 'eod', 'eow'], weight: 2 },
+    { words: ['review', 'approve', 'submit', 'provide', 'send', 'confirm', 'update', 'complete', 'finish'], weight: 1.5 },
+    { words: ['assigned', 'ownership', 'task', 'to-do', 'todo', 'follow up', 'follow-up'], weight: 2 },
+    { words: ['question', 'request', 'proposal', 'for review', 'needs your'], weight: 1 },
+    { words: ['invoice', 'payment', 'pco', 'change order', 'draw', 'pay app'], weight: 1.5 },
+    { words: ['meeting', 'call', 'agenda', 'schedule', 'calendar'], weight: 0.5 }
+  ];
+
+  function getDirectAssignment(combined, subject, from) {
+    // Check if email body directly assigns to a target
+    var assignments = [];
+    targetShort.forEach(function(t, i) {
+      var full = targets[i];
+      // Direct assignment patterns: "Whitney - please", "Whitney: can you", "Justin, please", etc.
+      var assignPatterns = [
+        t + '\\s*[-:]\\s*please', t + '\\s*[-:]\\s*can you', t + '\\s*[-:]\\s*need',
+        t + '\\s*[-:]\\s*review', t + '\\s*[-:]\\s*submit', t + '\\s*[-:]\\s*provide',
+        'action.*' + t, t + '.*assigned', 'assigned to ' + t,
+        t + '.*task', t + '.*to-do', t + '.*follow up'
+      ];
+      var matched = assignPatterns.some(function(p) {
+        return new RegExp(p, 'i').test(combined);
+      });
+      if (matched) assignments.push(full);
+    });
+    // Also check if sent TO a specific person
+    if (from && from.toLowerCase().indexOf('wwilliams@levelup') >= 0) {
+      assignments.push('Whitney Williams');
+    }
+    return assignments;
+  }
+
+  function calculateActionScore(combined) {
+    var score = 1.0; // baseline
+    actionSignals.forEach(function(signal) {
+      var matchCount = 0;
+      signal.words.forEach(function(w) {
+        if (combined.indexOf(w) >= 0) matchCount++;
+      });
+      if (matchCount > 0) score += signal.weight * matchCount;
+    });
+    return score;
+  }
 
   var mfpItems = [];
   var luItems = [];
@@ -2408,55 +2458,111 @@ function extractActionItemsFromEmails(emails) {
     var from = (email.from && email.from.emailAddress) ? (email.from.emailAddress.name || email.from.emailAddress.address) : '';
     var combined = subject + ' ' + preview;
 
-    // Check if MFP-related
+    // Check MFP relevance
     var isMFP = mfpKW.some(function(kw) { return combined.indexOf(kw) >= 0; });
 
-    // Check if it mentions a target person or is TO Whitney
+    // Check if sent TO Whitney directly (primary recipient)
+    var isDirectToMe = (email.toRecipients || []).some(function(r) {
+      var addr = (r.emailAddress && r.emailAddress.address || '').toLowerCase();
+      return addr.indexOf('wwilliams@levelup') >= 0 || addr.indexOf('whitney.williams') >= 0 || addr.indexOf('whitney@') >= 0;
+    });
+
+    // Check if Whitney is in TO or CC
+    var isToOrCC = isDirectToMe || (email.ccRecipients || []).some(function(r) {
+      var addr = (r.emailAddress && r.emailAddress.address || '').toLowerCase();
+      return addr.indexOf('wwilliams@levelup') >= 0;
+    });
+
+    // Check if mentions target team members
     var mentionsTarget = targets.some(function(t) { return combined.indexOf(t) >= 0; });
-    if (!mentionsTarget) {
-      var toMe = (email.toRecipients || []).some(function(r) {
-        var addr = (r.emailAddress && r.emailAddress.address || '').toLowerCase();
-        return addr.indexOf('wwilliams@levelup') >= 0 || addr.indexOf('whitney') >= 0;
-      });
-      if (!toMe) return;
+
+    // Calculate action score
+    var actionScore = calculateActionScore(combined);
+
+    // Get direct assignments
+    var assignments = getDirectAssignment(combined, subject, from);
+
+    // DECISION: Is this a real action for the team?
+    // Must have BOTH: (direct to me OR mentions target) AND (action score >= threshold)
+    var isRealAction = false;
+    var why = '';
+
+    if (isDirectToMe && actionScore >= 2.0) {
+      isRealAction = true;
+      why = 'direct to me';
+    } else if (assignments.length > 0) {
+      isRealAction = true;
+      why = 'assigned to: ' + assignments.join(', ');
+    } else if (mentionsTarget && actionScore >= 2.5) {
+      isRealAction = true;
+      why = 'mentions team + action signals';
+    } else if (isToOrCC && actionScore >= 3.0) {
+      isRealAction = true;
+      why = 'cc\'d with strong action signals';
+    } else if (mentionsTarget && actionScore >= 1.5 && combined.indexOf('action') >= 0) {
+      isRealAction = true;
+      why = 'explicit action keyword';
     }
 
-    // Extract action text from subject
-    var actionText = email.subject || preview.slice(0, 120);
-    actionText = actionText.replace(/^(re:|fwd:)\s*/i, '').trim();
-    if (actionText.length > 140) actionText = actionText.slice(0, 140) + '...';
-    if (!actionText) return;
+    if (!isRealAction) return;
 
-    // Dedup key
-    var key = actionText.toLowerCase().slice(0, 40);
+    // Build a concise action text — prefer subject, but if subject is just "Re: X" use body snippet
+    var actionText = email.subject || '';
+    // If subject is too generic like "Re: meeting" or "Fwd: info", look for the action in the preview
+    if (!actionText || actionText.length < 10 || /^(re:|fwd:)\s*(meeting|update|info|question|fyi|note)/i.test(actionText)) {
+      // Try to extract action sentence from preview
+      var sentences = preview.split(/[.!?]\s*/);
+      var actionSentence = '';
+      sentences.forEach(function(s) {
+        var testS = s.toLowerCase();
+        if (actionSignals.some(function(sig) { return sig.words.some(function(w) { return testS.indexOf(w) >= 0; }); })) {
+          if (testS.length > 15 && testS.length < 200) {
+            actionSentence = s;
+          }
+        }
+      });
+      if (actionSentence) {
+        actionText = actionSentence.charAt(0).toUpperCase() + actionSentence.slice(1);
+      } else {
+        actionText = preview.slice(0, 140);
+      }
+    } else {
+      actionText = actionText.replace(/^(re:|fwd:)\s*/i, '').trim();
+    }
+
+    if (actionText.length > 150) actionText = actionText.slice(0, 150) + '...';
+    if (!actionText || actionText.length < 10) return;
+
+    // Dedup by text
+    var key = actionText.toLowerCase().slice(0, 50);
     var dedupMap = isMFP ? seenMFP : seenLU;
     if (dedupMap[key]) return;
     dedupMap[key] = true;
 
-    // Priority based on keywords
+    // Priority based on signal strength
     var priority = 'medium';
-    var urgentKW = ['urgent','asap','due today','overdue','critical','blocking','stop work','cure notice','deadline'];
-    var highKW = ['action required','please review','needs approval','pending','open item','request'];
-    if (urgentKW.some(function(k) { return combined.indexOf(k) >= 0; })) priority = 'urgent';
-    else if (highKW.some(function(k) { return combined.indexOf(k) >= 0; })) priority = 'high';
+    if (actionScore >= 4.0) priority = 'urgent';
+    else if (actionScore >= 2.5) priority = 'high';
 
-    // Determine assignment
-    var assignedTo = '';
-    if (combined.indexOf('jordan') >= 0) assignedTo = 'Jordan Ward';
-    else if (combined.indexOf('justin') >= 0) assignedTo = 'Justin Williams';
-    else if (combined.indexOf('whitney') >= 0 || combined.indexOf('wwilliams') >= 0) assignedTo = 'Whitney Williams';
+    // Determine who it's assigned to (prefer direct assignment detection)
+    var assignedTo = assignments.length > 0 ? assignments[0] : '';
+    if (!assignedTo) {
+      if (combined.indexOf('jordan') >= 0) assignedTo = 'Jordan Ward';
+      else if (combined.indexOf('justin') >= 0) assignedTo = 'Justin Williams';
+      else if (combined.indexOf('whitney') >= 0) assignedTo = 'Whitney Williams';
+    }
 
     var date = new Date(email.receivedDateTime);
     var actionItem = {
       id: 'email_' + email.receivedDateTime + '_' + Math.random().toString(36).slice(2,6),
-      text: (isMFP ? '' : '[LU] ') + actionText,
+      text: actionText + (assignments.length > 0 ? ' [' + assignments.join(', ') + ']' : ''),
       done: false,
+      status: 'open',
       ts: date.getTime(),
-      author: 'L.U.N.A. (Email)',
+      author: from || 'L.U.N.A.',
       priority: priority,
       category: isMFP ? 'meeting' : 'other',
       dueDate: null,
-      emailFrom: from,
       assignedTo: assignedTo
     };
 
@@ -2467,12 +2573,10 @@ function extractActionItemsFromEmails(emails) {
     }
   });
 
-  // Save MFP items to Team action items (merge with existing)
+  // Save MFP items to Team, non-MFP to Personal
   mergeEmailItems('team', mfpItems);
-  // Save non-MFP items to Personal action items
   mergeEmailItems('personal', luItems);
 
-  // Re-render panel if open
   if (reminderPanelOpen) renderReminderActions();
 }
 
