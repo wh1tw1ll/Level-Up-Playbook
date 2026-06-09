@@ -736,10 +736,22 @@ window.__KB =
      "Owner decisions that are overdue and creating project team uncertainty or idle time"
     ]
    },
-   {
-    "heading": "First 30 Days: Systems and Baseline",
-    "content": [
-     "Within 30 days of engagement, Level Up must have a validated understanding of the true project budget position. This requires:"
+      {
+       "heading": "First 5 Days as a New Team Member",
+       "content": [
+        "Joining an operational sports construction project as a new Level Up team member can be overwhelming. The pace is fast, the terminology is unfamiliar, and the consequences of mistakes are real. The first five days are not about proving how much you know. They are about learning how the project works, who the key players are, and where you can be most useful. The following checklist is designed for junior team members joining an active project.",
+        "Who to Meet and In What Order: Day 1 -- your Level Up project lead or mentor, who will orient you to the project structure and your role. Day 2 -- the project owner's representative and the CM/GC project manager, who are your primary operational counterparts. Day 3 -- the design team's project manager and key discipline leads (architect, MEP, structural). Day 4 -- the Level Up field representative, the contractor's superintendent, and the project scheduler. Day 5 -- the owner's finance/accounting contact and the project assistant who handles document control. Schedule these introductory meetings yourself. Do not wait to be scheduled.",
+        "What to Read First: the project's executed contract (especially scope of work and deliverables), the current project schedule with critical path and milestones, the most recent OAC meeting minutes and action item log, the approved project budget, the current RFI and submittal logs sorted by status, the project directory, and the Level Up playbook sections relevant to your assigned role.",
+        "What to Shadow: your Level Up lead during an internal team huddle or standup (to understand internal communication flow), a weekly OAC meeting (to observe meeting format, participant dynamics, and the action item cycle), a pay application review or budget walkthrough with your lead (to understand financial controls), and the Level Up field rep during a site walk (to connect the documents to the physical work).",
+        "What NOT to Do in Your First Week: do not make promises or commitments to the owner, contractor, or design team without checking with your lead first. Do not issue correspondence, sign off on anything, or circulate documents outside the Level Up team. Do not make substantive edits to logs, budgets, or schedules until you understand how they are structured and who uses them. Do not criticize prior decisions or project conditions to external parties. Do not assume that the way one project runs is the standard -- every project has its own culture and norms. When in doubt, ask your lead before acting.",
+        "How to Take Useful Notes: keep a running daily log with date, time, person met, key points discussed, and any action items assigned to you. Use a single notebook or digital document -- do not scatter notes across sticky pads, random emails, and phone apps. Capture terminology you do not understand and look it up or ask at the end of the day. After each meeting or conversation, write a two-sentence summary: what was decided and what you need to do next. At the end of each day, review your notes and identify the three things you need to follow up on the next day. Share your daily log with your lead for the first two weeks -- they will help you filter signal from noise and correct any misunderstandings before they become habits."
+       ],
+       "bullets": []
+      },
+      {
+       "heading": "First 30 Days: Systems and Baseline",
+       "content": [
+        "Within 30 days of engagement, Level Up must have a validated understanding of the true project budget position. This requires:"
     ],
     "bullets": [
      "Operations team that has not yet been engaged or does not have an agreed readiness timeline",
@@ -1173,15 +1185,33 @@ window.__KB =
    "Action items that are past due are highlighted in the weekly project report distributed to the owner. The report does not editorialize -- it simply lists the item, the responsible party, the original due date, and the number of days past due. Visibility creates accountability.",
    "At each meeting, the prior meeting's action items are the first agenda item. Every item is reviewed for status. The meeting does not move past this review until every open item has been accounted for. This is the moment where the accountability culture is either built or eroded. If action items consistently roll without consequence, the team learns that deadlines are suggestions. If they are consistently reviewed and enforced, the team learns that commitments made in this room are real commitments.",
    "An action item is not closed until the responsible party has confirmed in writing -- either in the meeting record, by email, or in Smartsheet -- that the specific deliverable has been produced. 'I'm working on it' does not close an action item. Delivery of the thing that was assigned closes the action item."
-  ],
-  "related": [
-   "9",
-   "10",
-   "12"
-  ]
- },
- {
-  "num": "12",
+     ],
+     "subsections": [
+      {
+       "heading": "Running Your First OAC Meeting",
+       "content": [
+        "Running your first OAC (Owner-Architect-Contractor) meeting as the Level Up chair is a milestone. The OAC is the highest-frequency operational meeting on the project, and the chair sets the tone for accountability, pace, and professionalism. Follow this sequence every time until it becomes instinctive.",
+        "Preparation (Day Before): review the prior meeting's action items and confirm which are closed. Update the agenda with current RFI, submittal, and change order counts. Confirm the meeting location, attendee list, and quorum. Distribute the agenda and any pre-read materials at least 24 hours in advance. Confirm the note-taker assignment -- the chair does not take notes.",
+        "Opening (0-2 min): start on time. Welcome attendees, state the meeting purpose, and note any key parties absent. Remind everyone that decisions made here are binding and minutes will be issued within 24 hours. Do not wait for latecomers beyond two minutes.",
+        "Action Item Review (2-12 min): this is the most important accountability tool in the meeting. Read every open action item from the prior meeting, one by one. For each item, the responsible party reports status: closed, in progress with expected completion date, or blocked with explanation. If blocked, assign a new due date and escalation path. Do not move on until every item is accounted for. This review establishes that commitments made in this room are real commitments.",
+        "Schedule Update (12-32 min): hand to the CM/GC scheduler. Review the 3-week look-ahead, critical path activities, current float on the event date milestone, and any emerging delays. If the schedule has slipped, ask the contractor what the recovery plan is and assign a follow-up action item with a due date. Level Up does not accept 'we will make it up later' as a plan without a written recovery schedule.",
+        "RFI and Submittal Review (32-52 min): hand to the relevant team member or lead yourself. Review new RFIs issued since the last meeting, RFIs past due for response, and RFIs approaching their response deadline. Flag overdue responses and escalate to the responsible party's leadership if needed. Do the same for submittals: what is due, what is past due, and what is in review. The goal is zero overdue RFIs and submittals at all times. This is achievable with consistent weekly follow-up.",
+        "Change Order Review (52-62 min): review new change events, pending change orders awaiting owner approval, and any change directives issued. For each pending CO, confirm: what is the amount, who is reviewing it, and when does the owner need to make a decision. Flag any change events that have not yet been submitted as formal change orders. The owner needs to know about cost exposure before it becomes a surprise.",
+        "Owner Items / Decisions Required (62-72 min): this agenda slot is reserved for the owner's representative. Present any items requiring owner decision with options, recommendations, and consequences of delay. Owners who understand the cost and schedule impact of a delayed decision are more likely to decide promptly. If the owner does not decide in the meeting, assign a new due date for the decision and note any cost or schedule impact of the delay in the minutes.",
+        "Closing (73-75 min): recap all new action items assigned during the meeting -- read each one aloud with the responsible party and due date. Confirm the next meeting date and time. Ask if anyone has any final items. End on time. A meeting that consistently runs over signals structural problems with the agenda or the chair's time management.",
+        "Post-Meeting (within 2 hours): send meeting notes to the note-taker for formatting. Enter all new action items into the master action item log in Smartsheet. Within 24 hours, review and approve the minutes for distribution. The faster the minutes go out, the faster the team acts on their assignments. A chair who closes a meeting but does not follow through on minutes and action item entry has only done half the job."
+       ],
+       "bullets": []
+      }
+     ],
+     "related": [
+      "9",
+      "10",
+      "12"
+     ]
+    },
+    {
+     "num": "12",
   "title": "SECTION 12: REPORTING FRAMEWORK",
   "phases": [
    "All Phases"
@@ -1603,14 +1633,33 @@ window.__KB =
      "Percentage complete as assessed by Level Up",
      "Certification statement: 'Based on Level Up's observations of the work and review of the contractor's Application for Payment, Level Up certifies that the work has progressed to the point indicated above and the quality of the work is in accordance with the Contract Documents.'",
      "Level Up Project Director signature and date"
-    ]
-   }
-  ],
-  "related": [
-   "13",
-   "16",
-   "30",
-   "41"
+         ]
+        },
+        {
+         "heading": "Budget Spreadsheet Walkthrough for New Project Managers",
+         "content": [
+          "The Level Up budget workbook is the single source of truth for all project financial information. For new project managers, reading the workbook correctly is a skill that takes practice. This walkthrough explains each column, what to look for, and how to use the workbook as a proactive management tool rather than a historical record.",
+          "Column by Column Reading Guide:",
+          "Line Item: each row represents a distinct scope element or contract. Line items are organized by cost category (hard costs, soft costs, owner-direct) and include the contract number and a short description. If a line item has no contract assigned yet, it is either an owner estimate or an unfunded scope item that needs attention.",
+          "Original Budget: the amount approved for this line item at project inception or at the time the project budget was formally established. This number does not change unless the project budget is formally rebaselined. It is the anchor against which all financial movement is measured.",
+          "Approved COs: the cumulative value of all approved change orders affecting this line item. Positive numbers mean scope or cost has been added. Negative numbers mean scope or cost has been deducted through a credit change order. A line item with a high volume of change orders is a flag that the original scope definition was incomplete, the design was immature at the time of GMP, or the contractor is managing risk through change orders.",
+          "Revised Contract Value: Original Budget plus Approved COs. This is the current authorized spend for this line item. This is the number that matters for day-to-day budget management. When someone asks 'what is the current budget for this line item', this is the answer.",
+          "Amount Paid: the cumulative amount certified and paid to date. This includes all approved pay applications for this line item. Comparing Amount Paid to the Schedule of Values on the contractor's pay application is a cross-check against overpayment. If Amount Paid exceeds the percentage of work actually complete, the line item is being front-loaded, which increases owner risk if the contractor defaults.",
+          "Retainage: the amount held back from payments as retainage, typically 5 or 10 percent of Amount Paid per the contract terms. Retainage is released upon substantial completion. The retainage column should be checked monthly to confirm the contractor is calculating it correctly. Errors in retainage calculation are common and are usually to the contractor's advantage.",
+          "Remaining Balance: Revised Contract Value minus Amount Paid. This is the money left to spend on this line item. A low Remaining Balance relative to the remaining scope means a cost overrun is coming unless it is already covered by an approved change order. A high Remaining Balance early in the project relative to schedule progress may indicate the contractor is under-billing (which delays cash flow to subcontractors) or that the budget is overstated.",
+          "% Complete: the percentage of the line item's scope that Level Up has assessed as complete, based on field observation and the contractor's reported progress. This is not the same as the contractor's % claimed. Level Up's % Complete is the independent assessment used for forecasting. A significant gap between Level Up's % Complete and the contractor's % claimed is a red flag that requires investigation before the next pay application is certified.",
+          "Estimate at Completion (EAC): the forecasted final cost for this line item based on current commitments, pending changes, and the Level Up team's best estimate of remaining cost to complete. EAC is the most important number in the workbook because it tells you where the project is heading, not where it has been. An EAC that exceeds Revised Contract Value means an overrun is projected. An EAC below Revised Contract Value means a potential savings, but do not count savings until the line item is closed out.",
+          "Reading Tips for New PMs: start with the % Complete and EAC columns. These tell you where the project is today and where it is going. Then scan Approved COs for any line items with high change order activity. Then check Remaining Balance against remaining scope. Then review Amount Paid against % Complete to flag potential front-loading. Finally, compare EAC to Original Budget across all line items to see if the overall project is trending green, yellow, or red.",
+          "The workbook is not a historical ledger -- it is a management tool. Every column tells a story. The story may be that the project is on track. It may be that a line item is drifting. It may be that the forecast needs updating. Your job as the project manager is not just to keep the workbook accurate, but to read the story it is telling and act on it before the owner has to ask."
+         ],
+         "bullets": []
+        }
+       ],
+       "related": [
+        "13",
+        "16",
+        "30",
+        "41"
   ]
  },
  {
