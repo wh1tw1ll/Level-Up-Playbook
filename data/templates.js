@@ -176,7 +176,7 @@ const PHASE_GUIDE = {
   }
 };
 
-const DT_TREE = {
+var DT_TREE = {
   root: {
     q: "What's the situation?",
     opts: [
