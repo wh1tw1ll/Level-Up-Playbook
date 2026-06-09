@@ -431,3 +431,12 @@ mark.search-highlight{background:#fff3a8;padding:1px 2px;border-radius:2px;color
 .modal-dialog.resizing{transition:none!important}
 .modal-dialog.dragging{transition:none!important}
 @keyframes modalFadeIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+
+/* ===== QUICK TOOL CARDS (calendar, email, files) ===== */
+.luna-quick-tools{display:flex;gap:12px;width:100%;max-width:680px;margin-bottom:20px}
+.luna-tool-card{flex:1;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;text-align:center;font-family:inherit;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:6px}
+.luna-tool-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--teal)}
+.luna-tool-icon{font-size:22px}
+.luna-tool-label{font-size:13px;font-weight:600;color:var(--charcoal)}
+.luna-tool-status{font-size:10px;color:var(--muted);font-weight:500}
+@media (max-width:600px){.luna-quick-tools{flex-direction:column;gap:8px}.luna-tool-card{flex-direction:row;padding:12px 16px;text-align:left;gap:10px}}

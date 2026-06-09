@@ -12,7 +12,7 @@
 })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260608-12">
+<link rel="stylesheet" href="styles.css?v=20260608-13">
 </head>
 <body>
 
@@ -86,6 +86,23 @@
           <button class="luna-hero-quick" onclick="heroQuick('What documents do I need at each project phase?')">📁 Documents by phase</button>
         </div>
     <div id="luna-hero-results" class="luna-hero-results"></div>
+    <div class="luna-quick-tools">
+      <button class="luna-tool-card" onclick="setView('calendar')" title="Upcoming meetings">
+        <span class="luna-tool-icon">📅</span>
+        <span class="luna-tool-label">Calendar</span>
+        <span class="luna-tool-status" id="cal-card-meta">Sign in to enable</span>
+      </button>
+      <button class="luna-tool-card" onclick="setView('email')" title="Recent emails">
+        <span class="luna-tool-icon">📧</span>
+        <span class="luna-tool-label">Email</span>
+        <span class="luna-tool-status" id="email-card-meta">Sign in to enable</span>
+      </button>
+      <button class="luna-tool-card" onclick="setView('sharepoint')" title="Project files">
+        <span class="luna-tool-icon">📁</span>
+        <span class="luna-tool-label">Files</span>
+        <span class="luna-tool-status" id="sp-card-meta">Sign in to enable</span>
+      </button>
+    </div>
     <div class="luna-status-bar">
       <span>Search playbook, projects, budget, templates, and more</span>
       <span class="luna-status-freq">Data: static as of Jun 8</span>
@@ -276,6 +293,6 @@
       <script src="data/mfp_financials.js?v=20260608"></script>
       <script src="data/kb.js?v=20260608"></script>
       <script src="data/inline_fix.js?v=20260608-7"></script>
-      <script defer src="app.js?v=20260608-12"></script>
+      <script defer src="app.js?v=20260608-13"></script>
 </body>
 </html>
