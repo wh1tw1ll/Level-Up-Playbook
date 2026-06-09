@@ -34,6 +34,13 @@ function writeRefreshCookies(res, data) {
   ]);
 }
 
+function clearAuthCookies(res) {
+  res.setHeader('Set-Cookie', [
+    `lu_auth=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`,
+    `lu_session=; Path=/; Secure; SameSite=Lax; Max-Age=0`
+  ]);
+}
+
 export default async function handler(req, res) {
   const raw = req.headers['cookie'] || '';
   const cookies = {};
@@ -46,8 +53,11 @@ export default async function handler(req, res) {
   catch { return res.status(401).json({ error: 'Invalid cookie' }); }
 
   const refreshed = await refreshIfNeeded(tokenData);
-  if (!refreshed) return res.status(401).json({ error: 'Session expired' });
-  if (refreshed !== tokenData) writeRefreshCookies(res, refreshed);
+    if (!refreshed) {
+      clearAuthCookies(res);
+      return res.status(401).json({ error: 'Session expired' });
+    }
+    if (refreshed !== tokenData) writeRefreshCookies(res, refreshed);
 
   const query = req.query.q || req.query.query || '';
   if (!query) return res.status(400).json({ error: 'query required' });

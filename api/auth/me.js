@@ -12,8 +12,11 @@ export default function handler(req, res) {
 
   try {
     const data = JSON.parse(decodeURIComponent(enc));
-    if (Date.now() > data.expires_at) {
-      return res.status(401).json({ authenticated: false, reason: 'expired' });
+    // Only check that the cookie is parseable and has user info.
+    // Token expiry is handled per-endpoint via refresh.
+    // The cookie Max-Age (7 days) is the real session lifetime.
+    if (!data.name || !data.refresh_token) {
+      return res.status(401).json({ authenticated: false, reason: 'incomplete' });
     }
     return res.json({ authenticated: true, name: data.name, email: data.email });
   } catch(e) {

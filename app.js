@@ -1592,16 +1592,22 @@ function renderCalendar() {
       }).join('');
     })
     .catch(function(err) {
-      var msg = err.message || '';
-      if (msg.indexOf('401') >= 0) {
-        // Token expired - clear lu_session and prompt re-signin
-        document.cookie = 'lu_session=; Path=/; Max-Age=0';
-        luUser = null; updateAuthUI();
-        document.getElementById('calendar-content').innerHTML = signInEmptyState('📅','Session expired','Your Microsoft sign-in expired. Sign in again to view your calendar.');
-      } else {
-        document.getElementById('cal-list').innerHTML = '<div style="padding:24px;color:#c0392b">Error loading calendar: ' + escapeHtml(msg) + '</div>';
-      }
-    });
+          var msg = err.message || '';
+          if (msg.indexOf('401') >= 0) {
+            // Token expired — try silent refresh first
+            tryRefresh().then(function(ok) {
+              if (ok) {
+                renderCalendar(); // retry after refresh
+              } else {
+                document.cookie = 'lu_session=; Path=/; Max-Age=0';
+                luUser = null; updateAuthUI();
+                document.getElementById('calendar-content').innerHTML = signInEmptyState('📅','Session expired','Your Microsoft sign-in expired. Sign in again to view your calendar.');
+              }
+            });
+          } else {
+            document.getElementById('cal-list').innerHTML = '<div style="padding:24px;color:#c0392b">Error loading calendar: ' + escapeHtml(msg) + '</div>';
+          }
+        });
 }
 
 // ── PHASE GUIDE MODAL ───────────────────────────────────────────────
@@ -2220,8 +2226,14 @@ function renderReminderActions() {
   sortGroup(levelUpItems);
 
   var html = '';
-  var toggleIcon = document.getElementById('reminder-toggle-count');
-  var totalOpen = mfpItems.length + levelUpItems.length;
+    var toggleIcon = document.getElementById('reminder-toggle-count');
+    var totalOpen = mfpItems.length + levelUpItems.length;
+
+    // Instruction note
+    html += '<div style="font-size:11px;color:var(--muted);padding:6px 2px 8px;border-bottom:1px solid var(--border);margin-bottom:6px;display:flex;align-items:center;gap:6px">'
+      + '<span style="font-size:16px">🔄</span>'
+      + '<span>Click the <strong>circle</strong> on each item to cycle: Open → In Progress → Complete</span>'
+      + '</div>';
 
   // --- MFP SECTION ---
   if (mfpItems.length > 0) {

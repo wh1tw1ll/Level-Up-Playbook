@@ -25,6 +25,13 @@ async function refreshIfNeeded(tokenData) {
   };
 }
 
+function clearAuthCookies(res) {
+  res.setHeader('Set-Cookie', [
+    `lu_auth=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`,
+    `lu_session=; Path=/; Secure; SameSite=Lax; Max-Age=0`
+  ]);
+}
+
 export default async function handler(req, res) {
   const raw = req.headers['cookie'] || '';
   const cookies = {};
@@ -37,7 +44,10 @@ export default async function handler(req, res) {
   catch { return res.status(401).json({ error: 'Invalid cookie' }); }
 
   const refreshed = await refreshIfNeeded(tokenData);
-  if (!refreshed) return res.status(401).json({ error: 'Session expired' });
+  if (!refreshed) {
+    clearAuthCookies(res);
+    return res.status(401).json({ error: 'Session expired' });
+  }
   if (refreshed !== tokenData) {
     const authPayload = JSON.stringify(refreshed);
     const sessionPayload = JSON.stringify({ name: refreshed.name, email: refreshed.email, expires_at: refreshed.expires_at });
