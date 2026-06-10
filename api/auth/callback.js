@@ -1,4 +1,9 @@
-// api/auth/callback.js — stores ONLY refresh_token (tiny cookie, no 3KB JWT)
+// api/auth/callback.js
+// BUG FIX: Returns a 200 HTML page instead of a 302 redirect.
+// Vercel's edge network does NOT reliably forward Set-Cookie headers on 30x
+// responses. By returning a 200 with Set-Cookie (reliable on non-redirect)
+// AND setting the JS-readable lu_session via document.cookie in the HTML,
+// the cookies always arrive in the browser.
 export default async function handler(req, res) {
   const { code, error } = req.query;
   if (error) return res.redirect('/?auth_error=' + encodeURIComponent(error));
@@ -22,13 +27,12 @@ export default async function handler(req, res) {
       }
     );
     const tokens = await tokenRes.json();
-        if (tokens.error) {
-          console.error('Token exchange error:', tokens);
-          const desc = tokens.error_description || tokens.error || 'Unknown error';
-          // Log the full details for debugging
-          console.error('Full token response:', JSON.stringify(tokens));
-          return res.redirect('/?auth_error=' + encodeURIComponent(desc.substring(0, 300)));
-        }
+    if (tokens.error) {
+      console.error('Token exchange error:', tokens);
+      const desc = tokens.error_description || tokens.error || 'Unknown error';
+      console.error('Full token response:', JSON.stringify(tokens));
+      return res.redirect('/?auth_error=' + encodeURIComponent(desc.substring(0, 300)));
+    }
 
     const meRes = await fetch('https://graph.microsoft.com/v1.0/me', {
       headers: { Authorization: `Bearer ${tokens.access_token}` },
@@ -36,23 +40,41 @@ export default async function handler(req, res) {
     const me = await meRes.json();
     const name = me.displayName || me.userPrincipalName || 'User';
     const email = me.mail || me.userPrincipalName || '';
-    const expiresAt = Date.now() + 7*24*3600*1000; // 7-day session
+    const expiresAt = Date.now() + 7 * 24 * 3600 * 1000; // 7-day session
 
-    // Auth cookie: ONLY refresh_token + user info (tiny — ~200 bytes)
+    // Auth cookie (HttpOnly — for /auth/me and Graph API calls)
     const authPayload = JSON.stringify({
       refresh_token: tokens.refresh_token || '',
       name, email, expires_at: expiresAt
     });
 
-    // Session cookie: readable by JS for auth state detection
-    const sessionPayload = JSON.stringify({ name, email, authenticated: true });
+    // Session cookie payload (JS-readable — for checkAuthFromCookie)
+    // BUG FIX: Include expires_at so checkAuthFromCookie() validates it
+    const sessionPayload = JSON.stringify({
+      name, email, authenticated: true,
+      expires_at: expiresAt
+    });
 
+    // Set the HttpOnly lu_auth cookie via Set-Cookie on a 200 response.
+    // On a 200 (not 302), Vercel edge reliably forwards Set-Cookie headers.
     res.setHeader('Set-Cookie', [
-      `lu_auth=${encodeURIComponent(authPayload)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${7*24*3600}`,
-      `lu_session=${encodeURIComponent(sessionPayload)}; Path=/; Secure; SameSite=Lax; Max-Age=${7*24*3600}`
+      `lu_auth=${encodeURIComponent(authPayload)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${7*24*3600}`
     ]);
-    res.redirect('/?auth=success');
-  } catch(err) {
+
+    // Return an HTML page that sets the JS-readable cookie and then redirects
+    const sessionCookie = encodeURIComponent(sessionPayload);
+    const redirectTarget = '/?auth=success';
+
+    res.status(200).send(`<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Signing in...</title>
+<script>
+  // BUG FIX: Set lu_session via JavaScript (immune to Vercel edge cookie stripping)
+  document.cookie = "lu_session=${sessionCookie}; Path=/; Secure; SameSite=Lax; Max-Age=${7*24*3600}";
+  window.location.replace("${redirectTarget}");
+</script></head>
+<body><p>Signing you in...</p></body>
+</html>`);
+  } catch (err) {
     console.error('Callback error:', err);
     res.redirect('/?auth_error=server_error');
   }

@@ -2780,10 +2780,14 @@ function init() {
   } catch(e) {}
 
   // Auth
-    checkAuthFromCookie();
-    updateAuthUI();
-    // Initialize daily briefing/side panel
-    initDailyBriefing();
+      checkAuthFromCookie();
+      updateAuthUI();
+      // Async fallback: if cookie check failed, try /auth/me (reads HttpOnly lu_auth)
+      if (!luUser || !luUser.authenticated) {
+        tryRefresh();
+      }
+      // Initialize daily briefing/side panel
+      initDailyBriefing();
 
   // Update footer status
   if (footer) {
