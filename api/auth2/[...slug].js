@@ -76,7 +76,8 @@ async function handleCallback(req, res) {
 
     // HTML page sets lu_session via JS (immune to edge stripping), then redirects
     var sessionCookie = encodeURIComponent(sessionPayload);
-    res.status(200).send('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Signing in...</title><script>document.cookie="lu_session=' + sessionCookie + '; Path=/; Secure; SameSite=Lax; Max-Age=' + (7*24*3600) + '";window.location.replace("/?auth=success");</script></head><body><p>Signing you in...</p></body></html>');
+    // Invisible HTML: sets cookie via JS then redirects instantly — no flash page
+    res.status(200).send('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>...</title><style>body{background:#0e1419;min-height:100vh}</style><script>document.cookie="lu_session=' + sessionCookie + '; Path=/; Secure; SameSite=Lax; Max-Age=' + (7*24*3600) + '";window.location.replace("/?auth=success");</script></head><body></body></html>');
   } catch(err) {
     console.error('Callback error:', err);
     res.redirect('/?auth_error=server_error');
