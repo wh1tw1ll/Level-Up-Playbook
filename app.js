@@ -2321,7 +2321,7 @@ function renderReminderMeetings() {
 
   el.innerHTML = '<div class="reminder-loader">Loading meetings...</div>';
 
-    var fetchUrl = '/api/outlook/calendar?days=1';
+    var fetchUrl = '/api/outlook/calendar?days=7';
     // Also try the client's native calendar fetch via the browser
     fetch(fetchUrl, { credentials: 'include' })
       .then(function(r) {
@@ -2341,7 +2341,17 @@ function renderReminderMeetings() {
       });
 
       var html = '';
-      if (todayEvents.length === 0) {
+            // Separate MFP vs Level Up meetings
+            var mfpKeywords = ['miami','freedom','park','mfp','stadium','lemartec','closeout','punch','cost recovery','arq','commissioning','owner meeting'];
+            var mfpToday = [];
+            var levelUpToday = [];
+            todayEvents.forEach(function(e) {
+              var txt = ((e.subject||'') + ' ' + (e._calendarName||'')).toLowerCase();
+              var isMFP = mfpKeywords.some(function(kw) { return txt.indexOf(kw) >= 0; });
+              (isMFP ? mfpToday : levelUpToday).push(e);
+            });
+
+            if (todayEvents.length === 0) {
         var upcomingThisWeek = events.filter(function(e) {
           var start = new Date(e.start.dateTime || e.start.date);
           var weekEnd = new Date(now);
@@ -2350,25 +2360,46 @@ function renderReminderMeetings() {
           return start > now && start <= weekEnd;
         }).slice(0, 5);
         if (upcomingThisWeek.length > 0) {
-          html += '<div style="font-size:11px;font-weight:700;color:var(--muted);padding:4px 0 6px">📅 Upcoming This Week</div>';
-          upcomingThisWeek.forEach(function(e) {
-            var start = new Date(e.start.dateTime || e.start.date);
-            var timeStr = start.toLocaleTimeString([], { weekday:'short', hour:'2-digit', minute:'2-digit' });
-            html += '<div class="rp-meeting"><span class="rp-meeting-time">' + timeStr + '</span><div class="rp-meeting-detail"><div class="rp-meeting-subject">' + escapeHtml(e.subject || '(No title)') + '</div>' + (e.location && e.location.displayName ? '<div class="rp-meeting-loc"> ' + escapeHtml(e.location.displayName) + '</div>' : '') + '</div></div>';
-          });
+                  html += '<div style="font-size:11px;font-weight:700;color:var(--muted);padding:4px 0 6px">📅 Upcoming This Week</div>';
+                  upcomingThisWeek.forEach(function(e) {
+                    var start = new Date(e.start.dateTime || e.start.date);
+                    var timeStr = start.toLocaleTimeString([], { weekday:'short', hour:'2-digit', minute:'2-digit' });
+                    var calName = e._calendarName;
+                    html += '<div class="rp-meeting"><span class="rp-meeting-time">' + timeStr + '</span><div class="rp-meeting-detail"><div class="rp-meeting-subject">' + escapeHtml(e.subject || '(No title)') + '</div>'
+                      + (calName ? '<div style="font-size:10px;color:var(--teal);font-weight:500;margin-top:1px">📁 ' + escapeHtml(calName) + '</div>' : '')
+                      + (e.location && e.location.displayName ? '<div class="rp-meeting-loc"> ' + escapeHtml(e.location.displayName) + '</div>' : '') + '</div></div>';
+                  });
         } else {
           html = '<div class="rp-empty"><div class="rp-empty-icon">📅</div>No meetings today.</div>';
         }
       } else {
-        html += '<div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px"> Today\'s Meetings</div>';
-        todayEvents.forEach(function(e) {
-          var start = new Date(e.start.dateTime || e.start.date);
-          var end = new Date(e.end.dateTime || e.end.date);
-          var timeStr = start.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) + '-' + end.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
-          var isNow = now >= start && now <= end;
-          html += '<div class="rp-meeting" style="' + (isNow ? 'border-left-color:#e74c3c;background:#fce8e8' : '') + '"><span class="rp-meeting-time">' + timeStr + '</span><div class="rp-meeting-detail"><div class="rp-meeting-subject">' + escapeHtml(e.subject || '(No title)') + '</div>' + (e.location && e.location.displayName ? '<div class="rp-meeting-loc"> ' + escapeHtml(e.location.displayName) + '</div>' : '') + (isNow ? '<div style="font-size:11px;color:#c0392b;font-weight:600;margin-top:2px"> In progress</div>' : '') + '</div></div>';
-        });
-      }
+              // MFP meetings section
+              if (mfpToday.length > 0) {
+                html += '<div style="font-size:11px;font-weight:700;color:#c0392b;text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px;display:flex;align-items:center;gap:6px"><span>🏟</span> MFP / Shared Calendars <span style="background:#c0392b;color:#fff;font-size:9px;padding:1px 7px;border-radius:8px">' + mfpToday.length + '</span></div>';
+                mfpToday.forEach(function(e) {
+                  var start = new Date(e.start.dateTime || e.start.date);
+                  var end = new Date(e.end.dateTime || e.end.date);
+                  var timeStr = start.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) + '-' + end.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+                  var isNow = now >= start && now <= end;
+                  var calName = e._calendarName;
+                  html += '<div class="rp-meeting" style="' + (isNow ? 'border-left-color:#e74c3c;background:#fce8e8' : '') + '"><span class="rp-meeting-time">' + timeStr + '</span><div class="rp-meeting-detail"><div class="rp-meeting-subject">' + escapeHtml(e.subject || '(No title)') + '</div>'
+                    + (calName ? '<div style="font-size:10px;color:#c0392b;font-weight:500;margin-top:1px">📁 ' + escapeHtml(calName) + '</div>' : '')
+                    + (e.location && e.location.displayName ? '<div class="rp-meeting-loc"> ' + escapeHtml(e.location.displayName) + '</div>' : '')
+                    + (isNow ? '<div style="font-size:11px;color:#c0392b;font-weight:600;margin-top:2px"> In progress</div>' : '') + '</div></div>';
+                });
+              }
+              // Level Up meetings section
+              if (levelUpToday.length > 0) {
+                html += '<div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px;margin-top:6px;display:flex;align-items:center;gap:6px"><span>📅</span> Level Up Calendar <span style="background:var(--teal);color:#fff;font-size:9px;padding:1px 7px;border-radius:8px">' + levelUpToday.length + '</span></div>';
+                levelUpToday.forEach(function(e) {
+                  var start = new Date(e.start.dateTime || e.start.date);
+                  var end = new Date(e.end.dateTime || e.end.date);
+                  var timeStr = start.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) + '-' + end.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+                  var isNow = now >= start && now <= end;
+                  html += '<div class="rp-meeting" style="' + (isNow ? 'border-left-color:#e74c3c;background:#fce8e8' : '') + '"><span class="rp-meeting-time">' + timeStr + '</span><div class="rp-meeting-detail"><div class="rp-meeting-subject">' + escapeHtml(e.subject || '(No title)') + '</div>' + (e.location && e.location.displayName ? '<div class="rp-meeting-loc"> ' + escapeHtml(e.location.displayName) + '</div>' : '') + (isNow ? '<div style="font-size:11px;color:#c0392b;font-weight:600;margin-top:2px"> In progress</div>' : '') + '</div></div>';
+                });
+              }
+            }
       el.innerHTML = html;
     })
     .catch(function(err) {

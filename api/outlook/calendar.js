@@ -1,4 +1,5 @@
 // api/outlook/calendar.js — fetches calendar events using refresh-only cookie
+// Also checks shared calendars (MFP, project calendars) for cross-tenant meetings
 async function getAccessToken(tokenData) {
   if (!tokenData || !tokenData.refresh_token) return null;
   const TENANT_ID = process.env.LU_TENANT_ID;
@@ -10,7 +11,7 @@ async function getAccessToken(tokenData) {
       client_secret: process.env.LU_CLIENT_SECRET,
       refresh_token: tokenData.refresh_token,
       grant_type: 'refresh_token',
-      scope: 'openid profile email offline_access Files.Read.All Sites.Read.All Mail.Read Calendars.Read User.Read'
+      scope: 'openid profile email offline_access Files.Read.All Sites.Read.All Mail.Read Calendars.Read Calendars.Read.Shared User.Read'
     })
   });
   const tokens = await r.json();
@@ -41,7 +42,6 @@ function clearAuthCookies(res) {
 }
 
 function writeRefreshCookies(res, data) {
-  // Only store refresh_token + user info (no 3KB JWT access_token)
   const authPayload = JSON.stringify({
     refresh_token: data.refresh_token,
     name: data.name,
@@ -70,26 +70,86 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Session expired' });
   }
 
-  // Refresh cookie in case Microsoft rotated the refresh_token
   writeRefreshCookies(res, fresh);
 
   const days = parseInt(req.query.days||'14');
   const now  = new Date().toISOString();
   const end  = new Date(Date.now() + days*86400000).toISOString();
+
   try {
-    const graphUrl = `https://graph.microsoft.com/v1.0/me/calendarview?startDateTime=${encodeURIComponent(now)}&endDateTime=${encodeURIComponent(end)}&$select=subject,start,end,location&$top=50`;
-    console.log('Calendar API: fetching', graphUrl.slice(0, 150));
-    const r = await fetch(graphUrl,
-      { headers: { Authorization: `Bearer ${fresh.access_token}` } }
-    );
-    if (!r.ok) {
-      const errText = await r.text().catch(() => 'Unknown error');
-      console.error('Calendar API error', r.status, errText.slice(0, 300));
-      return res.status(r.status).json({ error: `Graph API: ${r.status}`, detail: errText.slice(0, 500) });
+    // 1. Fetch primary calendar events
+    const primaryUrl = `https://graph.microsoft.com/v1.0/me/calendarview?startDateTime=${encodeURIComponent(now)}&endDateTime=${encodeURIComponent(end)}&$select=subject,start,end,location,isAllDay&$top=50`;
+    const primaryRes = await fetch(primaryUrl, {
+      headers: { Authorization: `Bearer ${fresh.access_token}` }
+    });
+
+    let allEvents = [];
+    if (primaryRes.ok) {
+      const primaryData = await primaryRes.json();
+      allEvents = primaryData.value || [];
+    } else {
+      const errText = await primaryRes.text().catch(() => '');
+      console.error('Primary calendar error', primaryRes.status, errText.slice(0, 200));
     }
-    const data = await r.json();
-    console.log('Calendar API: got', (data.value||[]).length, 'events');
-    res.json(data);
+
+    // 2. Check for shared/accessible calendars (MFP, project calendars, etc.)
+    try {
+      const calListUrl = 'https://graph.microsoft.com/v1.0/me/calendars?$select=id,name,owner&$top=50';
+      const calListRes = await fetch(calListUrl, {
+        headers: { Authorization: `Bearer ${fresh.access_token}` }
+      });
+
+      if (calListRes.ok) {
+        const calListData = await calListRes.json();
+        const calendars = calListData.value || [];
+
+        // Filter to non-primary calendars that look MFP-related or could have project meetings
+        const mfpKeywords = ['miami', 'freedom', 'park', 'mfp', 'stadium', 'project', 'closeout', 'construction', 'owner', 'site'];
+        const sharedCals = calendars.filter(c => {
+          if (c.id === fresh.email ? c.id : false) return false; // skip primary
+          const name = (c.name || '').toLowerCase();
+          return mfpKeywords.some(kw => name.includes(kw));
+        });
+
+        // Fetch events from each shared calendar
+        for (const cal of sharedCals) {
+          try {
+            const calUrl = `https://graph.microsoft.com/v1.0/me/calendars/${cal.id}/calendarview?startDateTime=${encodeURIComponent(now)}&endDateTime=${encodeURIComponent(end)}&$select=subject,start,end,location,isAllDay&$top=50`;
+            const calRes = await fetch(calUrl, {
+              headers: { Authorization: `Bearer ${fresh.access_token}` }
+            });
+            if (calRes.ok) {
+              const calData = await calRes.json();
+              const calEvents = (calData.value || []).map(e => ({
+                ...e,
+                _calendarName: cal.name
+              }));
+              // Merge, dedup by subject + start time
+              const existingKeys = {};
+              allEvents.forEach(e => { existingKeys[e.subject + '|' + (e.start?.dateTime||'')] = true; });
+              calEvents.forEach(e => {
+                const key = e.subject + '|' + (e.start?.dateTime||'');
+                if (!existingKeys[key]) {
+                  existingKeys[key] = true;
+                  allEvents.push(e);
+                }
+              });
+            }
+          } catch(calErr) {
+            console.error('Shared calendar fetch error:', cal.id, calErr.message);
+          }
+        }
+      }
+    } catch(calListErr) {
+      console.error('Calendar list error:', calListErr.message);
+    }
+
+    // 3. Sort all events by start time
+    allEvents.sort((a, b) => {
+      return new Date(a.start?.dateTime || a.start?.date || 0) - new Date(b.start?.dateTime || b.start?.date || 0);
+    });
+
+    res.json({ value: allEvents });
   } catch(e) {
     console.error('Calendar API exception:', e.message);
     res.status(500).json({ error: e.message });
