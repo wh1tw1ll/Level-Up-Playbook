@@ -252,7 +252,7 @@ function setView(view) {
   if (target) target.classList.add('active');
 
   // Nav tab highlight — only 3 main tabs now
-  var navMap = { playbook:'nav-playbook', projects:'nav-projects', actions:'nav-actions', mfp:'nav-projects', luna:'nav-luna' };
+  var navMap = { playbook:'nav-playbook', projects:'nav-projects', actions:'nav-actions', mfp:'nav-projects', luna:'nav-luna', briefing:'nav-briefing' };
   document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
   var tabId = navMap[view];
   if (tabId) {
@@ -272,7 +272,12 @@ function setView(view) {
     else if (view === 'projects') renderProjects();
         else if (view === 'actions') renderActions();
             else if (view === 'mfp') renderMFP();
-    else if (target) {
+                else if (view === 'briefing') {
+                  // Go home and show the briefing panel
+                  goHome();
+                  openReminderPanel();
+                }
+                else if (target) {
       // Unknown view with existing div — show it empty (legacy routes)
     } else {
       // View doesn't exist at all — redirect to luna
@@ -1805,6 +1810,59 @@ function scheduleClippySuggestion() {
       clippyTab();
     });
   }
+  // ── Draggable Clippy ──────────────────────────────────────────
+  (function makeDraggable() {
+    var el = document.getElementById('luna-clippy');
+    if (!el) return;
+    var startX, startY, origX, origY, dragging = false;
+    function onStart(e) {
+      if (e.button !== 0) return; // left-click only
+      dragging = true;
+      var pos = getComputedStyle(el);
+      origX = parseInt(pos.left) || 0;
+      origY = parseInt(pos.top) || 0;
+      var pt = e.touches ? e.touches[0] : e;
+      startX = pt.clientX;
+      startY = pt.clientY;
+      el.style.cursor = 'grabbing';
+      el.style.transition = 'none';
+      // Prevent text selection during drag
+      document.body.style.userSelect = 'none';
+    }
+    function onMove(e) {
+      if (!dragging) return;
+      e.preventDefault();
+      var pt = e.touches ? e.touches[0] : e;
+      var dx = pt.clientX - startX;
+      var dy = pt.clientY - startY;
+      el.style.left = (origX + dx) + 'px';
+      el.style.top = (origY + dy) + 'px';
+      // Remove fixed positioning when dragged
+      if (!el.classList.contains('dragged')) {
+        el.classList.add('dragged');
+        var rect = el.getBoundingClientRect();
+        el.style.left = rect.left + 'px';
+        el.style.top = rect.top + 'px';
+        el.style.bottom = 'auto';
+        el.style.right = 'auto';
+      }
+    }
+    function onEnd() {
+      if (!dragging) return;
+      dragging = false;
+      el.style.cursor = 'grab';
+      el.style.transition = '';
+      document.body.style.userSelect = '';
+    }
+    el.addEventListener('mousedown', onStart);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onEnd);
+    // Touch support
+    el.addEventListener('touchstart', function(e) { onStart(e); }, {passive:true});
+    document.addEventListener('touchmove', onMove, {passive:false});
+    document.addEventListener('touchend', onEnd);
+    el.style.cursor = 'grab';
+  })();
 })();
 
 // ── CHAT ───────────────────────────────────────────────────────────
