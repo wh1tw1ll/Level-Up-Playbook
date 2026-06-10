@@ -19,7 +19,9 @@
     { "src": "/api/sharepoint/read", "dest": "/api/sharepoint/read.js" },
     { "src": "/api/outlook/email", "dest": "/api/outlook/email.js" },
     { "src": "/api/outlook/calendar", "dest": "/api/outlook/calendar.js" },
-        { "src": "/procore/(.*)", "dest": "/api/procore/[...slug].js" },
+        { "src": "/procore/login", "dest": "/api/procore/login" },
+        { "src": "/procore/callback", "dest": "/api/procore/callback" },
+        { "src": "/procore/data", "dest": "/api/procore/data" },
         { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
