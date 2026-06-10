@@ -108,24 +108,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
 .section-card-body li{margin-bottom:4px}
 .section-card-body h3{font-size:14px;font-weight:700;color:var(--charcoal);margin:16px 0 8px}
 
-/* SHAREPOINT / EMAIL / CALENDAR PANELS */
-.sp-search-row{display:flex;gap:8px;margin-bottom:16px}
-.sp-search-input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:var(--card);color:var(--charcoal);outline:none}
-.sp-search-input:focus{border-color:var(--teal)}
+/* EMAIL PANELS */
 .btn-primary{background:var(--teal);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
 .btn-primary:hover{background:var(--teal-mid)}
-.sp-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;align-items:center}
-.sp-chips-label{font-size:11px;color:var(--muted);font-weight:600;margin-right:4px}
-.sp-chip{background:var(--card);border:1px solid var(--border);color:var(--charcoal);padding:5px 11px;border-radius:14px;font-size:12px;cursor:pointer;font-family:inherit;transition:all .15s}
-.sp-chip:hover{background:var(--teal-light);border-color:var(--teal);color:var(--teal)}
-.file-result{display:block;padding:14px 16px;margin-bottom:8px;background:var(--card);border:1px solid var(--border);border-radius:8px;text-decoration:none;color:inherit;transition:box-shadow .15s}
-.file-result:hover{box-shadow:var(--shadow)}
 .empty-state{padding:40px 24px;text-align:center;max-width:480px;margin:0 auto}
 .empty-state-icon{font-size:36px;margin-bottom:12px}
 .empty-state-title{font-size:18px;font-weight:700;color:var(--charcoal);margin-bottom:8px}
 .empty-state-desc{font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.5}
-.signin-btn{background:#184655;color:#fff;border:none;border-radius:8px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:8px}
-.signin-btn:hover{background:var(--teal-mid)}
 .email-row{display:flex;flex-direction:column;padding:14px 16px;margin-bottom:6px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:box-shadow .15s}
 .email-row:hover{box-shadow:var(--shadow)}
 .email-row-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px}
@@ -134,13 +123,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
 .email-date{font-size:11px;color:var(--muted);flex-shrink:0}
 .email-from{font-size:12px;color:var(--muted);margin-bottom:4px}
 .email-preview{font-size:12px;color:var(--muted);line-height:1.4}
-.cal-date-header{font-size:13px;font-weight:700;color:var(--charcoal);margin:20px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--border)}
-.cal-date-header.today{color:var(--teal);border-bottom-color:var(--teal)}
-.cal-event{display:flex;gap:14px;padding:12px 14px;margin-bottom:6px;background:var(--card);border:1px solid var(--border);border-radius:8px;align-items:flex-start}
-.cal-event.today{background:var(--teal-light)}
-.cal-event-time{min-width:84px;font-size:12px;color:var(--muted);font-weight:600;padding-top:2px}
-.cal-event-title{font-weight:600;font-size:14px;color:var(--charcoal);margin-bottom:3px}
-.cal-event-loc{font-size:12px;color:var(--muted)}
 
 /* AI CHAT FAB + DRAWER */
 /* FAB removed — replaced by LUNA Clippy */

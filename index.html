@@ -14,7 +14,7 @@
 })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260610-clippy">
+<link rel="stylesheet" href="styles.css?v=20260610-cleanup">
 </head>
 <body>
 
@@ -83,19 +83,7 @@
           <button class="luna-hero-quick" onclick="heroQuick('What documents do I need at each project phase?')">📁 Documents by phase</button>
         </div>
     <div id="luna-hero-results" class="luna-hero-results"></div>
-    <div class="luna-quick-tools">
-      <button class="luna-tool-card" onclick="setView('calendar')" title="Upcoming meetings">
-        <span class="luna-tool-icon">📅</span>
-        <span class="luna-tool-label">Calendar</span>
-        <span class="luna-tool-status" id="cal-card-meta">Sign in to enable</span>
-      </button>
-      <button class="luna-tool-card" onclick="setView('sharepoint')" title="Project files">
-        <span class="luna-tool-icon">📁</span>
-        <span class="luna-tool-label">Files</span>
-        <span class="luna-tool-status" id="sp-card-meta">Sign in to enable</span>
-      </button>
-    </div>
-    <div class="luna-status-bar">
+        <div class="luna-status-bar">
       <span>Search playbook, projects, budget, templates, and more</span>
       <span class="luna-status-freq">Data: static as of Jun 8</span>
     </div>
@@ -180,20 +168,6 @@
     <div class="view-title"><span>🏟</span> Miami Freedom Park Stadium</div>
   </div>
   <div id="mfp-content"></div>
-</div>
-
-<div id="view-sharepoint" class="view">
-  <div class="view-header">
-    <div class="view-title"><span>📁</span> SharePoint Files</div>
-  </div>
-  <div id="sp-content"></div>
-</div>
-
-<div id="view-calendar" class="view">
-  <div class="view-header">
-    <div class="view-title"><span>📅</span> Upcoming Calendar</div>
-  </div>
-  <div id="calendar-content"></div>
 </div>
 
 <!-- ===== LEGACY VIEWS (for shares/links) ===== -->
@@ -391,6 +365,6 @@
       <script src="data/mfp_financials.js?v=20260610-clippy"></script>
       <script src="data/mfp_cowatchdog.js?v=20260610-clippy"></script>
       <script src="data/kb.js?v=20260610-clippy"></script>
-      <script src="app.js?v=20260610-clippy"></script>
+      <script src="app.js?v=20260610-cleanup"></script>
 </body>
 </html>
