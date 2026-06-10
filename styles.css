@@ -289,7 +289,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
 .luna-hero-wordmark-svg{width:100%;height:auto;display:block}
 .luna-hero-wordmark-wrap img.luna-hero-wordmark-svg{filter:none}
 [data-theme="dark"] .luna-hero-wordmark-wrap img.luna-hero-wordmark-svg{filter:brightness(0) invert(1)}
-.luna-hero-subtitle{font-size:15px;color:var(--charcoal);margin-bottom:12px;font-weight:500;font-style:italic;letter-spacing:.15em;text-transform:uppercase;display:inline-block;padding:4px 12px}
+.luna-hero-subtitle{font-size:16px;color:var(--charcoal);margin-bottom:12px;font-weight:800;font-style:italic;letter-spacing:.12em;text-transform:uppercase;display:inline-block;padding:6px 16px}
 .luna-reminders{margin-bottom:12px;width:100%;max-width:680px}
 .luna-hero-search-row{display:flex;gap:10px;width:100%;max-width:680px;position:relative;margin-bottom:28px}
 .luna-hero-input{flex:1;padding:16px 22px;border:2px solid var(--border);border-radius:14px;font-size:16px;font-family:inherit;background:var(--card);color:var(--charcoal);outline:none;transition:border-color .15s,box-shadow .15s}

@@ -13,7 +13,7 @@
   document.documentElement.setAttribute('data-btn-theme', t === 'dark' ? '☾' : '☀');
 })();
 </script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css?v=20260610-v3">
 </head>
 <body>
@@ -24,7 +24,7 @@
   <a class="topbar-logo-link" href="#" onclick="goHome();return false" title="Level Up Home">
       <img class="topbar-logo" src="assets/lockup-black.svg?v=1" alt="Level Up Project Development">
     </a>
-  <span class="topbar-tagline">Level Up Project Search &amp; Intelligence</span>
+  <span class="topbar-tagline">Level Up's Internal &amp; Project Intelligence Engine</span>
   <button id="theme-btn" class="topbar-btn" onclick="toggleTheme()" title="Toggle theme" style="opacity:0"></button>
   <div id="auth-user-info" class="topbar-user" style="display:none">
     <span id="auth-user-name"></span>
@@ -44,7 +44,6 @@
   <button class="nav-tab" id="nav-playbook" onclick="setView('playbook')">Playbook</button>
   <button class="nav-tab" id="nav-projects" onclick="setView('projects')">Projects</button>
     <button class="nav-tab" id="nav-actions" onclick="setView('actions')">Action Items</button>
-    <button class="nav-tab" id="nav-briefing" onclick="setView('briefing')">Briefing</button>
 </nav>
 
 <!-- ===== PLAYBOOK SUB-NAV ===== -->
@@ -242,16 +241,18 @@
       <button class="chat-close" onclick="closeReminderPanel()" title="Close panel">×</button>
     </div>
     <div class="reminder-panel-tabs">
-      <button class="reminder-tab active" data-rtab="actions" onclick="switchReminderTab('actions')">Actions</button>
-      <button class="reminder-tab" data-rtab="meetings" onclick="switchReminderTab('meetings')">Meetings</button>
-    </div>
-    <div id="reminder-panel-actions" class="reminder-panel-body"></div>
-    <div id="reminder-panel-meetings" class="reminder-panel-body" style="display:none"></div>
+        <button class="reminder-tab active" data-rtab="actions" onclick="switchReminderTab('actions')">Actions</button>
+        <button class="reminder-tab" data-rtab="meetings" onclick="switchReminderTab('meetings')">Meetings</button>
+        <button class="reminder-tab" data-rtab="reminders" onclick="switchReminderTab('reminders')">Reminders</button>
+      </div>
+      <div id="reminder-panel-actions" class="reminder-panel-body"></div>
+      <div id="reminder-panel-meetings" class="reminder-panel-body" style="display:none"></div>
+      <div id="reminder-panel-reminders" class="reminder-panel-body" style="display:none"></div>
     <div class="reminder-panel-footer">
       <span id="reminder-panel-footer-text">Loading...</span>
     </div>
   </div>
-  <div id="reminder-toggle" class="reminder-toggle" onclick="openReminderPanel()" title="Open daily briefing" style="display:none">
+  <div id="reminder-toggle" class="reminder-toggle" onclick="openReminderPanel()" title="Open daily briefing">
     <span id="reminder-toggle-count" class="reminder-toggle-count">!</span>
     <span class="reminder-toggle-text">Briefing</span>
   </div>
@@ -329,16 +330,31 @@
   inp.focus();
   
   // ── Auth check on page load (handles Microsoft sign-in redirect) ───
-    var authXhr = new XMLHttpRequest();
-    authXhr.open('GET', '/api/auth/me', true);
-    authXhr.withCredentials = true;
-    authXhr.onload = function() {
-      if (authXhr.status === 200) {
-        var data = JSON.parse(authXhr.responseText);
-        if (data.authenticated) { hideOverlay(); }
-      }
-    };
-    authXhr.send();
+      // Try the Vercel route first, then fall back to direct API path
+      var authXhr = new XMLHttpRequest();
+      var authPath = '/auth/me';
+      authXhr.open('GET', authPath, true);
+      authXhr.withCredentials = true;
+      authXhr.onload = function() {
+        if (authXhr.status === 200) {
+          var data = JSON.parse(authXhr.responseText);
+          if (data.authenticated) { hideOverlay(); }
+        }
+      };
+      authXhr.onerror = function() {
+        // Fallback: try /api/auth/me directly
+        var fallback = new XMLHttpRequest();
+        fallback.open('GET', '/api/auth/me', true);
+        fallback.withCredentials = true;
+        fallback.onload = function() {
+          if (fallback.status === 200) {
+            var fd = JSON.parse(fallback.responseText);
+            if (fd.authenticated) { hideOverlay(); }
+          }
+        };
+        fallback.send();
+      };
+      authXhr.send();
 
     // ── Show auth error from URL (Microsoft sign-in failure) ───
     var urlParams = new URLSearchParams(window.location.search);

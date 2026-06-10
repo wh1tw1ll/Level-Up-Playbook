@@ -176,6 +176,7 @@ function signInWithMicrosoft() {
 
 function signOut() {
   document.cookie = 'lu_session=; Path=/; Max-Age=0';
+  document.cookie = 'lu_auth=; Path=/; Max-Age=0';
   window.location.href = '/auth/logout';
 }
 
@@ -251,8 +252,8 @@ function setView(view) {
   var target = document.getElementById('view-' + view);
   if (target) target.classList.add('active');
 
-  // Nav tab highlight — only 3 main tabs now
-  var navMap = { playbook:'nav-playbook', projects:'nav-projects', actions:'nav-actions', mfp:'nav-projects', luna:'nav-luna', briefing:'nav-briefing' };
+  // Nav tab highlight
+    var navMap = { playbook:'nav-playbook', projects:'nav-projects', actions:'nav-actions', mfp:'nav-projects', luna:'nav-luna' };
   document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
   var tabId = navMap[view];
   if (tabId) {
@@ -272,11 +273,6 @@ function setView(view) {
     else if (view === 'projects') renderProjects();
         else if (view === 'actions') renderActions();
             else if (view === 'mfp') renderMFP();
-                else if (view === 'briefing') {
-                  // Go home and show the briefing panel
-                  goHome();
-                  openReminderPanel();
-                }
                 else if (target) {
       // Unknown view with existing div — show it empty (legacy routes)
     } else {
@@ -2107,7 +2103,7 @@ function isWhitney() {
 function showReminderToggle() {
   var t = document.getElementById('reminder-toggle');
   if (!t) return;
-  t.style.display = (luUser && luUser.authenticated) ? 'flex' : 'none';
+  t.style.display = 'flex';
 }
 
 function initDailyBriefing() {
@@ -2143,7 +2139,7 @@ function closeReminderPanel() {
     panel.classList.add('closed');
     setTimeout(function() {
       panel.style.display = 'none';
-      if (toggle && luUser && luUser.authenticated) toggle.style.display = 'flex';
+      if (toggle) toggle.style.display = 'flex';
     }, 300);
   }
   reminderPanelOpen = false;
@@ -2155,9 +2151,12 @@ function switchReminderTab(tab) {
   });
   var a = document.getElementById('reminder-panel-actions');
   var m = document.getElementById('reminder-panel-meetings');
+  var r = document.getElementById('reminder-panel-reminders');
   if (a) a.style.display = tab === 'actions' ? 'block' : 'none';
   if (m) m.style.display = tab === 'meetings' ? 'block' : 'none';
+  if (r) r.style.display = tab === 'reminders' ? 'block' : 'none';
   if (tab === 'meetings') renderReminderMeetings();
+  else if (tab === 'reminders') renderReminderReminders();
   else renderReminderActions();
 }
 
@@ -2375,10 +2374,58 @@ function renderReminderMeetings() {
     .catch(function(err) {
           el.innerHTML = '<div class="rp-empty"><div class="rp-empty-icon">⚠️</div>' + escapeHtml(err.message || 'Could not load calendar.') + '</div>';
         });
-}
+        }
 
-// ── EMAIL SCANNER — saves directly into Action Items system ───────
-function refreshReminderData() {
+        // ── PANEL: REMINDERS TAB ──
+        function renderReminderReminders() {
+          var el = document.getElementById('reminder-panel-reminders');
+          if (!el) return;
+          var now = new Date();
+          var day = now.getDate();
+          var month = now.getMonth();
+          var year = now.getFullYear();
+          var dismissed = {};
+          try { var d = localStorage.getItem('lu_remind_dismiss'); if (d) dismissed = JSON.parse(d); } catch(e) {}
+          var reminders = [];
+          var drawDue = new Date(year, month, 10);
+          if (day > 10) drawDue.setMonth(month + 1);
+          var drawDays = Math.round((drawDue - now) / 86400000);
+          var drawId = 'draw_' + year + '-' + month;
+          if (!dismissed[drawId]) reminders.push({ id: drawId, icon: '💰', title: 'Monthly Draw Package', desc: 'Due in ' + drawDays + ' day' + (drawDays !== 1 ? 's' : ''), urgent: drawDays <= 3, warn: drawDays <= 7 && drawDays > 3 });
+          var expDue = new Date(year, month, 5);
+          if (day > 5) expDue.setMonth(month + 1);
+          var expDays = Math.round((expDue - now) / 86400000);
+          var expId = 'expense_' + year + '-' + month;
+          if (!dismissed[expId]) reminders.push({ id: expId, icon: '🧾', title: 'Monthly Expense Report', desc: 'Due in ' + expDays + ' day' + (expDays !== 1 ? 's' : ''), urgent: expDays <= 3, warn: expDays <= 7 && expDays > 3 });
+          var friday = new Date(now);
+          friday.setDate(now.getDate() + (5 - now.getDay() + 7) % 7);
+          if (now.getDay() > 5) friday.setDate(friday.getDate() + 7);
+          if (now.getDay() === 5 && now.getHours() >= 17) friday.setDate(friday.getDate() + 7);
+          var calDays = Math.round((friday - now) / 86400000);
+          var calId = 'cal_' + friday.getFullYear() + '_' + friday.getMonth() + '_' + friday.getDate();
+          if (!dismissed[calId]) reminders.push({ id: calId, icon: '📅', title: 'Weekly Events Calendar', desc: calDays === 0 ? 'Due today' : 'Due in ' + calDays + ' day' + (calDays !== 1 ? 's' : ''), urgent: calDays <= 1, warn: calDays <= 2 && calDays > 1 });
+          var html = '';
+          reminders.forEach(function(r) {
+            var bg = r.urgent ? '#fce8e8' : r.warn ? '#fef4e0' : 'var(--card)';
+            var border = r.urgent ? '#e74c3c' : r.warn ? '#e67e22' : 'var(--border)';
+            var txtColor = r.urgent ? '#c0392b' : r.warn ? '#a05c00' : 'var(--muted)';
+            html += '<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:' + bg + ';border:1px solid ' + border + ';border-radius:8px;margin-bottom:6px">'
+              + '<span style="font-size:18px">' + r.icon + '</span>'
+              + '<div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--charcoal)">' + escapeHtml(r.title) + '</div>'
+              + '<div style="font-size:12px;color:' + txtColor + '">' + escapeHtml(r.desc) + '</div></div>'
+              + (r.urgent ? '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#e74c3c;background:rgba(231,76,60,.12);padding:3px 8px;border-radius:6px">Due Soon</span>' : '')
+              + (r.warn ? '<span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#e67e22">Coming Up</span>' : '')
+              + '<button onclick="dismissReminder(' + jsCallArg(r.id) + ')" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:4px" title="Dismiss">&times;</button>'
+              + '</div>';
+          });
+          if (!html) html = '<div class="rp-empty"><div class="rp-empty-icon">✅</div>No reminders.</div>';
+          el.innerHTML = html;
+          var footer = document.getElementById('reminder-panel-footer-text');
+          if (footer) footer.textContent = reminders.length + ' reminder' + (reminders.length !== 1 ? 's' : '') + ' · Updated ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+        }
+
+        // ── EMAIL SCANNER — saves directly into Action Items system ───────
+        function refreshReminderData() {
   if (!luUser || !luUser.authenticated) return;
   if (Date.now() - reminderLastFetch < 15 * 60 * 1000) return;
   reminderLastFetch = Date.now();
