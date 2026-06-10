@@ -185,6 +185,11 @@ function applyTheme(t) {
   document.documentElement.setAttribute('data-btn-theme', t === 'dark' ? '☽' : '☀');
   var btn = document.getElementById('theme-btn');
   if (btn) { btn.textContent = t === 'dark' ? '☽' : '☀'; btn.style.opacity = '1'; }
+  // Theme-switch LUNA logos
+  var lockup = document.querySelector('.luna-hero-lockup');
+  if (lockup) lockup.src = lockup.getAttribute('data-' + t);
+  var clippy = document.getElementById('luna-clippy-icon');
+  if (clippy) clippy.src = clippy.getAttribute('data-' + t);
 }
 
 function toggleTheme() {
@@ -1888,11 +1893,100 @@ function showModal(id, html) {
   setTimeout(function() { el.classList.add('open'); }, 10);
   }
 
+// ── LUNA CLIPPY ────────────────────────────────────────────────────
+var clippyState = 'full'; // 'full' | 'tab' | 'chat_open'
+var clippySuggestions = [
+  "Need to review a change order?",
+  "Ask me about the project budget.",
+  "Looking for a subcontractor?",
+  "Check the latest MFP status.",
+  "Need a template for a meeting?",
+  "Ask me about punch list closeout."
+];
+var clippySuggestionTimer = null;
+
+function clippyClick() {
+  // If clippy is in tab mode, expand first
+  if (clippyState === 'tab') {
+    clippyExpand();
+    return;
+  }
+  // Hide any suggestion
+  hideClippySuggestion();
+  // Open chat
+  toggleChat();
+}
+
+function clippyExpand() {
+  clippyState = 'full';
+  var clippy = document.getElementById('luna-clippy');
+  var tab = document.getElementById('clippy-tab-standalone');
+  if (clippy) { clippy.style.display = 'block'; clippy.classList.remove('tab-mode'); }
+  if (tab) tab.style.display = 'none';
+  // Reset suggestion timer
+  scheduleClippySuggestion();
+}
+
+function clippyTab() {
+  clippyState = 'tab';
+  var clippy = document.getElementById('luna-clippy');
+  var tab = document.getElementById('clippy-tab-standalone');
+  if (clippy) { clippy.style.display = 'none'; }
+  if (tab) tab.style.display = 'flex';
+  hideClippySuggestion();
+}
+
+function showClippySuggestion(text) {
+  var bubble = document.getElementById('clippy-suggestion');
+  var txt = document.getElementById('clippy-suggestion-text');
+  if (!bubble || !txt) return;
+  txt.textContent = text || clippySuggestions[Math.floor(Math.random() * clippySuggestions.length)];
+  bubble.style.display = 'block';
+  // Auto hide after 8 seconds
+  clearTimeout(clippySuggestionTimer);
+  clippySuggestionTimer = setTimeout(hideClippySuggestion, 8000);
+}
+
+function hideClippySuggestion() {
+  var bubble = document.getElementById('clippy-suggestion');
+  if (bubble) bubble.style.display = 'none';
+  clearTimeout(clippySuggestionTimer);
+}
+
+function scheduleClippySuggestion() {
+  clearTimeout(clippySuggestionTimer);
+  // Show a suggestion after 30s of inactivity (only if clippy is visible and chat isn't open)
+  clippySuggestionTimer = setTimeout(function() {
+    if (clippyState === 'full' && !chatOpen) {
+      showClippySuggestion();
+    }
+  }, 30000);
+}
+
+// Initialize clippy on page load
+(function() {
+  // Start suggestion timer after page load
+  setTimeout(scheduleClippySuggestion, 5000);
+  // Allow right-click / long-press to dismiss clippy to tab
+  var clippy = document.getElementById('luna-clippy');
+  if (clippy) {
+    clippy.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      clippyTab();
+    });
+  }
+})();
+
 // ── CHAT ───────────────────────────────────────────────────────────
 function toggleChat() {
   chatOpen = !chatOpen;
   var d = document.getElementById('chat-drawer');
   if (d) d.classList.toggle('open', chatOpen);
+  // Hide/show clippy
+  var clippy = document.getElementById('luna-clippy');
+  var tab = document.getElementById('clippy-tab-standalone');
+  if (clippy) clippy.classList.toggle('chat-open', chatOpen);
+  if (tab) tab.classList.toggle('chat-open', chatOpen);
   if (chatOpen) {
     if (chatHistory.length === 0) {
       appendMsg('ai', "Hi " + (luUser && luUser.name ? luUser.name.split(' ')[0] : 'there') + ". I'm L.U.N.A. — your Executive Operating Partner. Ask me anything about the playbook or MFP — Day 1 mobilization, change orders, punch list disputes, cost recovery audit, anything.");

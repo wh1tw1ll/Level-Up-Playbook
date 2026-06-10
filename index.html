@@ -14,7 +14,7 @@
 })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260609-2">
+<link rel="stylesheet" href="styles.css?v=20260610-clippy">
 </head>
 <body>
 
@@ -59,18 +59,12 @@
 <div id="view-luna" class="view active">
   <div class="luna-hero">
       <div class="luna-hero-wordmark-wrap">
-              <svg class="luna-hero-wordmark-svg" viewBox="0 0 4763 820" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-                <g transform="translate(60 60)"><path d="M0 0 H228 V512 H640 V550 A150 150 0 0 1 490 700 H0 Z" fill="currentColor" fill-rule="nonzero"/></g>
-                <g transform="translate(758 60)"><path d="M62 495 H143 A62 62 0 0 1 205 557 V638 A62 62 0 0 1 143 700 H62 A62 62 0 0 1 0 638 V557 A62 62 0 0 1 62 495 Z" fill="currentColor" fill-rule="nonzero"/></g>
-                <g transform="translate(1083 60)"><path d="M0 0 H822 V400 A300 300 0 0 1 522 700 H300 A300 300 0 0 1 0 400 Z M228 0 H594 V358 A150 150 0 0 1 444 508 H378 A150 150 0 0 1 228 358 Z" fill="currentColor" fill-rule="evenodd"/></g>
-                <g transform="translate(1963 60)"><path d="M62 495 H143 A62 62 0 0 1 205 557 V638 A62 62 0 0 1 143 700 H62 A62 62 0 0 1 0 638 V557 A62 62 0 0 1 62 495 Z" fill="currentColor" fill-rule="nonzero"/></g>
-                <g transform="translate(2288 60)"><path d="M0 0 H228 V700 H0 Z M622 0 H850 V700 H622 Z M0 0 H285 L850 700 H565 Z" fill="currentColor" fill-rule="nonzero"/></g>
-                <g transform="translate(3196 60)"><path d="M62 495 H143 A62 62 0 0 1 205 557 V638 A62 62 0 0 1 143 700 H62 A62 62 0 0 1 0 638 V557 A62 62 0 0 1 62 495 Z" fill="currentColor" fill-rule="nonzero"/></g>
-                <g transform="translate(3521 60)"><path d="M326.4 0 L568.4 0 L242 700 L0 700 Z M350.6 0 L592.6 0 L919 700 L677 700 Z M360.9 372 L558.1 372 L645.7 560 L273.3 560 Z" fill="currentColor" fill-rule="nonzero"/></g>
-                <g transform="translate(4498 60)"><path d="M62 495 H143 A62 62 0 0 1 205 557 V638 A62 62 0 0 1 143 700 H62 A62 62 0 0 1 0 638 V557 A62 62 0 0 1 62 495 Z" fill="currentColor" fill-rule="nonzero"/></g>
-              </svg>
-            </div>
-                  <div class="luna-hero-subtitle">Level Up Network Agent</div>
+        <img class="luna-hero-lockup" src="assets/LUNA_lockup_horizontal_ink.svg"
+             data-light="assets/LUNA_lockup_horizontal_ink.svg"
+             data-dark="assets/LUNA_lockup_horizontal_cream.svg"
+             alt="L.U.N.A.">
+      </div>
+      <div class="luna-hero-subtitle">Level Up Network Agent</div>
     <div id="luna-reminders" class="luna-reminders"></div>
         <div id="luna-briefing" class="luna-briefing"></div>
         <div class="luna-hero-search-row">
@@ -229,8 +223,21 @@
 
 <div id="modal-template-preview" class="modal-overlay"></div>
 
-<!-- ===== AI CHAT ===== -->
-<button id="fab" onclick="toggleChat()" title="Open L.U.N.A. Chat">✦ L.U.N.A. Chat</button>
+<!-- ===== LUNA CLIPPY ===== -->
+<div id="luna-clippy" class="luna-clippy" onclick="clippyClick()" title="Ask L.U.N.A.">
+  <div id="clippy-suggestion" class="clippy-suggestion" style="display:none">
+    <span id="clippy-suggestion-text" class="clippy-suggestion-text"></span>
+  </div>
+  <img id="luna-clippy-icon" class="luna-clippy-icon"
+       src="assets/LUNA_face_ink.svg"
+       data-light="assets/LUNA_face_ink.svg"
+       data-dark="assets/LUNA_face_cream.svg"
+       alt="LUNA" draggable="false">
+  <div class="clippy-tab" id="clippy-tab" style="display:none"></div>
+</div>
+<div id="clippy-tab-standalone" class="clippy-tab-standalone" onclick="clippyExpand()" title="Open L.U.N.A." style="display:none">
+  <span class="clippy-tab-eye">👁</span>
+</div>
 <div id="chat-drawer" class="chat-drawer">
   <div class="chat-header" id="chat-header-drag">
     <div class="chat-header-title">L.U.N.A. — Project Intelligence</div>
@@ -379,11 +386,11 @@
   </div>
 
   <!-- ===== DATA SCRIPTS ===== -->
-    <script src="data/templates.js?v=20260609-2"></script>
-          <script src="data/mfp_context.js?v=20260609-2"></script>
-                <script src="data/mfp_financials.js?v=20260609-2"></script>
-                <script src="data/mfp_cowatchdog.js?v=20260609-2"></script>
-                <script src="data/kb.js?v=20260609-2"></script>
-          <script src="app.js?v=20260609-2"></script>
+      <script src="data/templates.js?v=20260610-clippy"></script>
+      <script src="data/mfp_context.js?v=20260610-clippy"></script>
+      <script src="data/mfp_financials.js?v=20260610-clippy"></script>
+      <script src="data/mfp_cowatchdog.js?v=20260610-clippy"></script>
+      <script src="data/kb.js?v=20260610-clippy"></script>
+      <script src="app.js?v=20260610-clippy"></script>
 </body>
 </html>

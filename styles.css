@@ -143,8 +143,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
 .cal-event-loc{font-size:12px;color:var(--muted)}
 
 /* AI CHAT FAB + DRAWER */
-#fab{position:fixed;bottom:24px;right:24px;z-index:1001;background:var(--teal);color:#fff;border:none;border-radius:24px;padding:13px 22px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.2);font-family:inherit;display:flex;align-items:center;gap:8px;transition:all .15s}
-#fab:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.25)}
+/* FAB removed — replaced by LUNA Clippy */
 .chat-drawer{position:fixed;bottom:88px;right:24px;width:400px;max-height:65vh;background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.2);z-index:1001;display:none;flex-direction:column;overflow:hidden;resize:both;min-width:300px;min-height:200px}
 .chat-drawer.open{display:flex}
 .chat-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--teal-light);cursor:grab;user-select:none}
@@ -894,4 +893,125 @@ mark.search-highlight{background:#fff3a8;padding:1px 2px;border-radius:2px;color
 .rp-item.status-completed {
   border-left: 3px solid #27ae60 !important;
   opacity: .65;
+}
+
+/* ===== LUNA CLIPPY ===== */
+.luna-clippy {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10000;
+  cursor: pointer;
+  user-select: none;
+  transition: transform .2s ease, opacity .2s ease;
+  animation: clippy-float 3s ease-in-out infinite;
+}
+.luna-clippy:hover {
+  transform: scale(1.08);
+  animation: none;
+}
+.luna-clippy:active {
+  transform: scale(0.95);
+}
+.luna-clippy-icon {
+  width: 64px;
+  height: 64px;
+  display: block;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,.15));
+  transition: filter .2s;
+}
+.luna-clippy-icon:hover {
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,.25));
+}
+/* Pulsing glow on idle */
+@keyframes clippy-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+/* Clippy minimized to tab on bottom edge */
+.luna-clippy.tab-mode {
+  transform: translateY(calc(100% - 16px));
+  opacity: .7;
+  animation: none;
+}
+.luna-clippy.tab-mode:hover {
+  transform: translateY(calc(100% - 16px)) scale(1.04);
+  opacity: 1;
+}
+.luna-clippy.tab-mode .luna-clippy-icon {
+  width: 48px;
+  height: 48px;
+}
+/* Standalone tab when clippy is hidden */
+.clippy-tab-standalone {
+  position: fixed;
+  bottom: 0;
+  right: 24px;
+  z-index: 9999;
+  cursor: pointer;
+  background: var(--teal);
+  color: #fff;
+  padding: 4px 16px 2px;
+  border-radius: 10px 10px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all .2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 -2px 8px rgba(0,0,0,.1);
+}
+.clippy-tab-standalone:hover {
+  background: var(--teal-mid);
+  padding-bottom: 6px;
+}
+.clippy-tab-eye {
+  font-size: 16px;
+}
+/* Suggestion bubble */
+.clippy-suggestion {
+  position: absolute;
+  bottom: 72px;
+  right: 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  max-width: 240px;
+  box-shadow: var(--shadow);
+  font-size: 12px;
+  color: var(--charcoal);
+  line-height: 1.4;
+  animation: clippy-popup .3s ease-out;
+  white-space: normal;
+  word-wrap: break-word;
+}
+.clippy-suggestion::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  right: 24px;
+  width: 12px;
+  height: 12px;
+  background: var(--card);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  transform: rotate(45deg);
+}
+@keyframes clippy-popup {
+  from { opacity: 0; transform: translateY(10px) scale(.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* Clippy hidden when chat is open — via JS class toggle */
+.luna-clippy.chat-open,
+.clippy-tab-standalone.chat-open {
+  opacity: 0;
+  pointer-events: none;
+}
+/* Hero lockup sizing */
+.luna-hero-lockup {
+  max-height: 64px;
+  width: auto;
+  display: block;
+  margin: 0 auto;
 }
