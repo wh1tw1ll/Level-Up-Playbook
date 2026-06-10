@@ -14,7 +14,7 @@
 })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260610-cleanup">
+<link rel="stylesheet" href="styles.css?v=20260610-v2">
 </head>
 <body>
 
@@ -329,16 +329,29 @@
   inp.focus();
   
   // ── Auth check on page load (handles Microsoft sign-in redirect) ───
-  var authXhr = new XMLHttpRequest();
-  authXhr.open('GET', '/api/auth/me', true);
-  authXhr.withCredentials = true;
-  authXhr.onload = function() {
-    if (authXhr.status === 200) {
-      var data = JSON.parse(authXhr.responseText);
-      if (data.authenticated) { hideOverlay(); }
+    var authXhr = new XMLHttpRequest();
+    authXhr.open('GET', '/api/auth/me', true);
+    authXhr.withCredentials = true;
+    authXhr.onload = function() {
+      if (authXhr.status === 200) {
+        var data = JSON.parse(authXhr.responseText);
+        if (data.authenticated) { hideOverlay(); }
+      }
+    };
+    authXhr.send();
+
+    // ── Show auth error from URL (Microsoft sign-in failure) ───
+    var urlParams = new URLSearchParams(window.location.search);
+    var authErr = urlParams.get('auth_error');
+    if (authErr) {
+      var passwordErr = document.getElementById('password-error');
+      if (passwordErr) {
+        passwordErr.textContent = 'Sign-in failed: ' + decodeURIComponent(authErr).substring(0, 200);
+        passwordErr.style.display = 'block';
+      }
+      // Clean the URL without reloading
+      window.history.replaceState({}, '', window.location.pathname);
     }
-  };
-  authXhr.send();
   
   // ── Close modal fallback (in case app.js hasn't loaded) ────────────
   window.closeModal = window.closeModal || function(id) {

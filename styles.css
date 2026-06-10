@@ -990,9 +990,8 @@ mark.search-highlight{background:#fff3a8;padding:1px 2px;border-radius:2px;color
   opacity: 0;
   pointer-events: none;
 }
-/* Dragged state — free position, no animations */
+/* Dragged state — free position, no hover/transition glitch */
 .luna-clippy.dragged {
-  animation: none !important;
   transition: none !important;
 }
 .luna-clippy.dragged:hover {

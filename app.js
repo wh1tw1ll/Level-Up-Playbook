@@ -1743,11 +1743,21 @@ var clippySuggestionTimer = null;
 function clippyClick() {
   // If clippy is in tab mode, expand first
   if (clippyState === 'tab') {
-    clippyExpand();
-    return;
+    clippyExpand(); return;
   }
   // Hide any suggestion
   hideClippySuggestion();
+  // Position chat drawer near clippy before opening
+  var clippy = document.getElementById('luna-clippy');
+  var drawer = document.getElementById('chat-drawer');
+  if (clippy && drawer && clippy.classList.contains('dragged')) {
+    var cr = clippy.getBoundingClientRect();
+    // Open the drawer above and slightly left of the icon
+    drawer.style.left = Math.max(16, cr.left - 200) + 'px';
+    drawer.style.top = Math.max(16, cr.top - 450) + 'px';
+    drawer.style.right = 'auto';
+    drawer.style.bottom = 'auto';
+  }
   // Open chat
   toggleChat();
 }
@@ -1826,7 +1836,8 @@ function scheduleClippySuggestion() {
       startY = pt.clientY;
       el.style.cursor = 'grabbing';
       el.style.transition = 'none';
-      // Prevent text selection during drag
+            el.style.animation = 'none';  // Suppress float during drag
+            // Prevent text selection during drag
       document.body.style.userSelect = 'none';
     }
     function onMove(e) {
@@ -1848,12 +1859,13 @@ function scheduleClippySuggestion() {
       }
     }
     function onEnd() {
-      if (!dragging) return;
-      dragging = false;
-      el.style.cursor = 'grab';
-      el.style.transition = '';
-      document.body.style.userSelect = '';
-    }
+          if (!dragging) return;
+          dragging = false;
+          el.style.cursor = 'grab';
+          el.style.transition = '';
+          el.style.animation = '';  // Restore float animation
+          document.body.style.userSelect = '';
+        }
     el.addEventListener('mousedown', onStart);
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onEnd);

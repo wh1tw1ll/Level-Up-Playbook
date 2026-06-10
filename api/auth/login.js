@@ -5,10 +5,8 @@ export default function handler(req, res) {
   const REDIRECT   = process.env.LU_REDIRECT_URI || 'https://level-up-playbook.vercel.app/auth/callback';
 
   const scopes = [
-    'openid','profile','email','offline_access',
-    'Files.Read.All','Sites.Read.All',
-    'Mail.Read','Calendars.Read','User.Read'
-  ].join(' ');
+      'openid','profile','email','offline_access','User.Read'
+    ].join(' ');
 
   const url = `https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/authorize`
     + `?client_id=${CLIENT_ID}`
