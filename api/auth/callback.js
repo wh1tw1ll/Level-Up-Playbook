@@ -22,10 +22,13 @@ export default async function handler(req, res) {
       }
     );
     const tokens = await tokenRes.json();
-    if (tokens.error) {
-      console.error('Token error:', tokens);
-      return res.redirect('/?auth_error=' + encodeURIComponent(tokens.error_description || tokens.error));
-    }
+        if (tokens.error) {
+          console.error('Token exchange error:', tokens);
+          const desc = tokens.error_description || tokens.error || 'Unknown error';
+          // Log the full details for debugging
+          console.error('Full token response:', JSON.stringify(tokens));
+          return res.redirect('/?auth_error=' + encodeURIComponent(desc.substring(0, 300)));
+        }
 
     const meRes = await fetch('https://graph.microsoft.com/v1.0/me', {
       headers: { Authorization: `Bearer ${tokens.access_token}` },

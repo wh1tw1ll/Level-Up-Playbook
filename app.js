@@ -1745,6 +1745,10 @@ function clippyClick() {
   if (clippyState === 'tab') {
     clippyExpand(); return;
   }
+  // If the user just dragged the icon, don't open chat
+  if (window.__clippyDragDist && window.__clippyDragDist() > 8) {
+    return;
+  }
   // Hide any suggestion
   hideClippySuggestion();
   // Position chat drawer near clippy before opening
@@ -1821,60 +1825,61 @@ function scheduleClippySuggestion() {
     });
   }
   // ── Draggable Clippy ──────────────────────────────────────────
-  (function makeDraggable() {
-    var el = document.getElementById('luna-clippy');
-    if (!el) return;
-    var startX, startY, origX, origY, dragging = false;
-    function onStart(e) {
-      if (e.button !== 0) return; // left-click only
-      dragging = true;
-      var pos = getComputedStyle(el);
-      origX = parseInt(pos.left) || 0;
-      origY = parseInt(pos.top) || 0;
-      var pt = e.touches ? e.touches[0] : e;
-      startX = pt.clientX;
-      startY = pt.clientY;
-      el.style.cursor = 'grabbing';
-      el.style.transition = 'none';
-            el.style.animation = 'none';  // Suppress float during drag
-            // Prevent text selection during drag
-      document.body.style.userSelect = 'none';
-    }
-    function onMove(e) {
-      if (!dragging) return;
-      e.preventDefault();
-      var pt = e.touches ? e.touches[0] : e;
-      var dx = pt.clientX - startX;
-      var dy = pt.clientY - startY;
-      el.style.left = (origX + dx) + 'px';
-      el.style.top = (origY + dy) + 'px';
-      // Remove fixed positioning when dragged
-      if (!el.classList.contains('dragged')) {
-        el.classList.add('dragged');
-        var rect = el.getBoundingClientRect();
-        el.style.left = rect.left + 'px';
-        el.style.top = rect.top + 'px';
-        el.style.bottom = 'auto';
-        el.style.right = 'auto';
+    (function makeDraggable() {
+      var el = document.getElementById('luna-clippy');
+      if (!el) return;
+      var startX, startY, origX, origY, dragging = false, dragDist = 0;
+      function onStart(e) {
+        if (e.button !== 0) return; // left-click only
+        dragging = true;
+        dragDist = 0;
+        var pos = getComputedStyle(el);
+        origX = parseInt(pos.left) || 0;
+        origY = parseInt(pos.top) || 0;
+        var pt = e.touches ? e.touches[0] : e;
+        startX = pt.clientX;
+        startY = pt.clientY;
+        el.style.cursor = 'grabbing';
+        el.style.transition = 'none';
+        el.style.animation = 'none';
+        document.body.style.userSelect = 'none';
       }
-    }
-    function onEnd() {
-          if (!dragging) return;
-          dragging = false;
-          el.style.cursor = 'grab';
-          el.style.transition = '';
-          el.style.animation = '';  // Restore float animation
-          document.body.style.userSelect = '';
+      function onMove(e) {
+        if (!dragging) return;
+        e.preventDefault();
+        var pt = e.touches ? e.touches[0] : e;
+        var dx = pt.clientX - startX;
+        var dy = pt.clientY - startY;
+        dragDist = Math.max(dragDist, Math.abs(dx), Math.abs(dy));
+        el.style.left = (origX + dx) + 'px';
+        el.style.top = (origY + dy) + 'px';
+        if (!el.classList.contains('dragged')) {
+          el.classList.add('dragged');
+          var rect = el.getBoundingClientRect();
+          el.style.left = rect.left + 'px';
+          el.style.top = rect.top + 'px';
+          el.style.bottom = 'auto';
+          el.style.right = 'auto';
         }
-    el.addEventListener('mousedown', onStart);
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onEnd);
-    // Touch support
-    el.addEventListener('touchstart', function(e) { onStart(e); }, {passive:true});
-    document.addEventListener('touchmove', onMove, {passive:false});
-    document.addEventListener('touchend', onEnd);
-    el.style.cursor = 'grab';
-  })();
+      }
+      function onEnd() {
+        if (!dragging) return;
+        dragging = false;
+        el.style.cursor = 'grab';
+        el.style.transition = '';
+        el.style.animation = '';
+        document.body.style.userSelect = '';
+      }
+      el.addEventListener('mousedown', onStart);
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onEnd);
+      el.addEventListener('touchstart', function(e) { onStart(e); }, {passive:true});
+      document.addEventListener('touchmove', onMove, {passive:false});
+      document.addEventListener('touchend', onEnd);
+      el.style.cursor = 'grab';
+      // Expose dragDist so clippyClick can check it
+      window.__clippyDragDist = function() { return dragDist; };
+    })();
 })();
 
 // ── CHAT ───────────────────────────────────────────────────────────
@@ -1888,9 +1893,11 @@ function toggleChat() {
   if (clippy) clippy.classList.toggle('chat-open', chatOpen);
   if (tab) tab.classList.toggle('chat-open', chatOpen);
   if (chatOpen) {
-    if (chatHistory.length === 0) {
-      appendMsg('ai', "Hi " + (luUser && luUser.name ? luUser.name.split(' ')[0] : 'there') + ". I'm L.U.N.A. — your Executive Operating Partner. Ask me anything about the playbook or MFP — Day 1 mobilization, change orders, punch list disputes, cost recovery audit, anything.");
-    }
+      if (chatHistory.length === 0) {
+        var introText = "Hi " + (luUser && luUser.name ? luUser.name.split(' ')[0] : 'there') + ". I'm L.U.N.A., your Executive Operating Partner. Ask me anything about the playbook or MFP. Day 1 mobilization, change orders, punch list disputes, cost recovery audit, anything.";
+        appendMsg('ai', introText);
+        chatHistory.push({ role: 'assistant', content: introText });
+      }
     setTimeout(function() {
       var ci = document.getElementById('chat-input');
       if (ci) ci.focus();
