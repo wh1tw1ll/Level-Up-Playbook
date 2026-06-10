@@ -10,11 +10,11 @@
     }
   },
   "routes": [
-    { "src": "/auth/login", "dest": "/api/auth/login.js" },
-    { "src": "/auth/callback", "dest": "/api/auth/callback.js" },
-    { "src": "/auth/me", "dest": "/api/auth/me.js" },
-    { "src": "/auth/logout", "dest": "/api/auth/logout.js" },
-    { "src": "/api/chat", "dest": "/api/chat.js" },
+      { "src": "/auth/login", "dest": "/api/auth2/login" },
+      { "src": "/auth/callback", "dest": "/api/auth2/callback" },
+      { "src": "/auth/me", "dest": "/api/auth2/me" },
+      { "src": "/auth/logout", "dest": "/api/auth2/logout" },
+      { "src": "/api/chat", "dest": "/api/chat.js" },
     { "src": "/api/sharepoint/search", "dest": "/api/sharepoint/search.js" },
     { "src": "/api/sharepoint/read", "dest": "/api/sharepoint/read.js" },
     { "src": "/api/outlook/email", "dest": "/api/outlook/email.js" },
