@@ -1,4 +1,4 @@
-// api/auth/callback.js
+// api/auth/callback.js — stores ONLY refresh_token (tiny cookie, no 3KB JWT)
 export default async function handler(req, res) {
   const { code, error } = req.query;
   if (error) return res.redirect('/?auth_error=' + encodeURIComponent(error));
@@ -31,21 +31,18 @@ export default async function handler(req, res) {
       headers: { Authorization: `Bearer ${tokens.access_token}` },
     });
     const me = await meRes.json();
-
-    const expiresAt = Date.now() + ((tokens.expires_in || 3600) * 1000);
     const name = me.displayName || me.userPrincipalName || 'User';
     const email = me.mail || me.userPrincipalName || '';
+    const expiresAt = Date.now() + 7*24*3600*1000; // 7-day session
 
-    // Store full auth payload (with token) in HttpOnly cookie for server API calls
+    // Auth cookie: ONLY refresh_token + user info (tiny — ~200 bytes)
     const authPayload = JSON.stringify({
-      access_token:  tokens.access_token,
       refresh_token: tokens.refresh_token || '',
-      expires_at:    expiresAt,
-      name, email,
+      name, email, expires_at: expiresAt
     });
 
-    // Store readable session info in second cookie for JS to detect auth state
-    const sessionPayload = JSON.stringify({ name, email, expires_at: Date.now() + 7*24*3600*1000 }); // 7 days
+    // Session cookie: readable by JS for auth state detection
+    const sessionPayload = JSON.stringify({ name, email, authenticated: true });
 
     res.setHeader('Set-Cookie', [
       `lu_auth=${encodeURIComponent(authPayload)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${7*24*3600}`,

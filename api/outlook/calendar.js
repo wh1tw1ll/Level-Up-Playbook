@@ -1,7 +1,6 @@
-// api/outlook/calendar.js — with auto refresh
-async function refreshIfNeeded(tokenData) {
-  if (tokenData.expires_at > Date.now() + 5*60*1000) return tokenData;
-  if (!tokenData.refresh_token) return null;
+// api/outlook/calendar.js — fetches calendar events using refresh-only cookie
+async function getAccessToken(tokenData) {
+  if (!tokenData || !tokenData.refresh_token) return null;
   const TENANT_ID = process.env.LU_TENANT_ID;
   const r = await fetch(`https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token`, {
     method: 'POST',
@@ -15,23 +14,23 @@ async function refreshIfNeeded(tokenData) {
     })
   });
   const tokens = await r.json();
-  if (tokens.error || !tokens.access_token) return null;
+  if (tokens.error || !tokens.access_token) {
+    console.error('Token refresh failed:', tokens.error);
+    return null;
+  }
   return {
     access_token: tokens.access_token,
     refresh_token: tokens.refresh_token || tokenData.refresh_token,
-    expires_at: Date.now() + ((tokens.expires_in || 3600) * 1000),
     name: tokenData.name,
     email: tokenData.email
   };
 }
 
-function writeRefreshCookies(res, data) {
-  const authPayload = JSON.stringify(data);
-  const sessionPayload = JSON.stringify({ name: data.name, email: data.email, expires_at: data.expires_at });
-  res.setHeader('Set-Cookie', [
-    `lu_auth=${encodeURIComponent(authPayload)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${7*24*3600}`,
-    `lu_session=${encodeURIComponent(sessionPayload)}; Path=/; Secure; SameSite=Lax; Max-Age=${7*24*3600}`
-  ]);
+function parseCookies(req) {
+  const raw = req.headers['cookie'] || '';
+  const cookies = {};
+  raw.split(';').forEach(p => { const [k,...v]=p.trim().split('='); if(k) cookies[k.trim()]=v.join('=').trim(); });
+  return cookies;
 }
 
 function clearAuthCookies(res) {
@@ -41,10 +40,23 @@ function clearAuthCookies(res) {
   ]);
 }
 
+function writeRefreshCookies(res, data) {
+  // Only store refresh_token + user info (no 3KB JWT access_token)
+  const authPayload = JSON.stringify({
+    refresh_token: data.refresh_token,
+    name: data.name,
+    email: data.email,
+    expires_at: Date.now() + 7*24*3600*1000
+  });
+  const sessionPayload = JSON.stringify({ name: data.name, email: data.email, authenticated: true });
+  res.setHeader('Set-Cookie', [
+    `lu_auth=${encodeURIComponent(authPayload)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${7*24*3600}`,
+    `lu_session=${encodeURIComponent(sessionPayload)}; Path=/; Secure; SameSite=Lax; Max-Age=${7*24*3600}`
+  ]);
+}
+
 export default async function handler(req, res) {
-  const raw = req.headers['cookie'] || '';
-  const cookies = {};
-  raw.split(';').forEach(p => { const [k,...v]=p.trim().split('='); if(k) cookies[k.trim()]=v.join('=').trim(); });
+  const cookies = parseCookies(req);
   const enc = cookies['lu_auth'];
   if (!enc) return res.status(401).json({ error: 'Not authenticated' });
 
@@ -52,33 +64,34 @@ export default async function handler(req, res) {
   try { tokenData = JSON.parse(decodeURIComponent(enc)); }
   catch { return res.status(401).json({ error: 'Invalid cookie' }); }
 
-  const refreshed = await refreshIfNeeded(tokenData);
-    if (!refreshed) {
-      clearAuthCookies(res);
-      return res.status(401).json({ error: 'Session expired' });
-    }
-    if (refreshed !== tokenData) writeRefreshCookies(res, refreshed);
+  const fresh = await getAccessToken(tokenData);
+  if (!fresh) {
+    clearAuthCookies(res);
+    return res.status(401).json({ error: 'Session expired' });
+  }
+
+  // Refresh cookie in case Microsoft rotated the refresh_token
+  writeRefreshCookies(res, fresh);
 
   const days = parseInt(req.query.days||'14');
-    const now  = new Date().toISOString();
-    const end  = new Date(Date.now() + days*86400000).toISOString();
-    try {
-      // Use camelCase params, drop online meeting fields that may not exist on all calendars
-      const graphUrl = `https://graph.microsoft.com/v1.0/me/calendarview?startDateTime=${encodeURIComponent(now)}&endDateTime=${encodeURIComponent(end)}&$select=subject,start,end,location&$top=50`;
-      console.log('Calendar API: fetching', graphUrl.slice(0, 150));
-      const r = await fetch(graphUrl,
-        { headers: { Authorization: `Bearer ${refreshed.access_token}` } }
-      );
-      if (!r.ok) {
-        const errText = await r.text().catch(() => 'Unknown error');
-        console.error('Calendar API error', r.status, errText.slice(0, 300));
-        return res.status(r.status).json({ error: `Graph API: ${r.status}`, detail: errText.slice(0, 500) });
-      }
-      const data = await r.json();
-      console.log('Calendar API: got', (data.value||[]).length, 'events');
-      res.json(data);
-    } catch(e) {
-      console.error('Calendar API exception:', e.message);
-      res.status(500).json({ error: e.message });
+  const now  = new Date().toISOString();
+  const end  = new Date(Date.now() + days*86400000).toISOString();
+  try {
+    const graphUrl = `https://graph.microsoft.com/v1.0/me/calendarview?startDateTime=${encodeURIComponent(now)}&endDateTime=${encodeURIComponent(end)}&$select=subject,start,end,location&$top=50`;
+    console.log('Calendar API: fetching', graphUrl.slice(0, 150));
+    const r = await fetch(graphUrl,
+      { headers: { Authorization: `Bearer ${fresh.access_token}` } }
+    );
+    if (!r.ok) {
+      const errText = await r.text().catch(() => 'Unknown error');
+      console.error('Calendar API error', r.status, errText.slice(0, 300));
+      return res.status(r.status).json({ error: `Graph API: ${r.status}`, detail: errText.slice(0, 500) });
     }
+    const data = await r.json();
+    console.log('Calendar API: got', (data.value||[]).length, 'events');
+    res.json(data);
+  } catch(e) {
+    console.error('Calendar API exception:', e.message);
+    res.status(500).json({ error: e.message });
+  }
 }

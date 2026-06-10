@@ -1,7 +1,6 @@
-// api/sharepoint/search.js — with auto refresh
-async function refreshIfNeeded(tokenData) {
-  if (tokenData.expires_at > Date.now() + 5*60*1000) return tokenData;
-  if (!tokenData.refresh_token) return null;
+// api/sharepoint/search.js — search SharePoint via Graph API using refresh-only cookie
+async function getAccessToken(tokenData) {
+  if (!tokenData || !tokenData.refresh_token) return null;
   const TENANT_ID = process.env.LU_TENANT_ID;
   const r = await fetch(`https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token`, {
     method: 'POST',
@@ -19,19 +18,16 @@ async function refreshIfNeeded(tokenData) {
   return {
     access_token: tokens.access_token,
     refresh_token: tokens.refresh_token || tokenData.refresh_token,
-    expires_at: Date.now() + ((tokens.expires_in || 3600) * 1000),
     name: tokenData.name,
     email: tokenData.email
   };
 }
 
-function writeRefreshCookies(res, data) {
-  const authPayload = JSON.stringify(data);
-  const sessionPayload = JSON.stringify({ name: data.name, email: data.email, expires_at: data.expires_at });
-  res.setHeader('Set-Cookie', [
-    `lu_auth=${encodeURIComponent(authPayload)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${7*24*3600}`,
-    `lu_session=${encodeURIComponent(sessionPayload)}; Path=/; Secure; SameSite=Lax; Max-Age=${7*24*3600}`
-  ]);
+function parseCookies(req) {
+  const raw = req.headers['cookie'] || '';
+  const cookies = {};
+  raw.split(';').forEach(p => { const [k,...v]=p.trim().split('='); if(k) cookies[k.trim()]=v.join('=').trim(); });
+  return cookies;
 }
 
 function clearAuthCookies(res) {
@@ -41,10 +37,22 @@ function clearAuthCookies(res) {
   ]);
 }
 
+function writeRefreshCookies(res, data) {
+  const authPayload = JSON.stringify({
+    refresh_token: data.refresh_token,
+    name: data.name,
+    email: data.email,
+    expires_at: Date.now() + 7*24*3600*1000
+  });
+  const sessionPayload = JSON.stringify({ name: data.name, email: data.email, authenticated: true });
+  res.setHeader('Set-Cookie', [
+    `lu_auth=${encodeURIComponent(authPayload)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${7*24*3600}`,
+    `lu_session=${encodeURIComponent(sessionPayload)}; Path=/; Secure; SameSite=Lax; Max-Age=${7*24*3600}`
+  ]);
+}
+
 export default async function handler(req, res) {
-  const raw = req.headers['cookie'] || '';
-  const cookies = {};
-  raw.split(';').forEach(p => { const [k,...v]=p.trim().split('='); if(k) cookies[k.trim()]=v.join('=').trim(); });
+  const cookies = parseCookies(req);
   const enc = cookies['lu_auth'];
   if (!enc) return res.status(401).json({ error: 'Not authenticated' });
 
@@ -52,26 +60,26 @@ export default async function handler(req, res) {
   try { tokenData = JSON.parse(decodeURIComponent(enc)); }
   catch { return res.status(401).json({ error: 'Invalid cookie' }); }
 
-  const refreshed = await refreshIfNeeded(tokenData);
-    if (!refreshed) {
-      clearAuthCookies(res);
-      return res.status(401).json({ error: 'Session expired' });
-    }
-    if (refreshed !== tokenData) writeRefreshCookies(res, refreshed);
+  const fresh = await getAccessToken(tokenData);
+  if (!fresh) {
+    clearAuthCookies(res);
+    return res.status(401).json({ error: 'Session expired' });
+  }
+  writeRefreshCookies(res, fresh);
 
   const query = req.query.q || req.query.query || '';
   if (!query) return res.status(400).json({ error: 'query required' });
 
   try {
-      const r = await fetch('https://graph.microsoft.com/v1.0/search/query', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${refreshed.access_token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requests: [{ entityTypes:['driveItem'], query:{queryString:query}, from:0, size:20 }] }),
-      });
-      if (!r.ok) {
-        const errText = await r.text().catch(() => 'Unknown error');
-        return res.status(r.status).json({ error: `Graph API error: ${r.status}`, detail: errText.slice(0, 500) });
-      }
-      res.json(await r.json());
-    } catch(e) { res.status(500).json({ error: e.message }); }
+    const r = await fetch('https://graph.microsoft.com/v1.0/search/query', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${fresh.access_token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requests: [{ entityTypes:['driveItem'], query:{queryString:query}, from:0, size:20 }] }),
+    });
+    if (!r.ok) {
+      const errText = await r.text().catch(() => 'Unknown error');
+      return res.status(r.status).json({ error: `Graph API error: ${r.status}`, detail: errText.slice(0, 500) });
+    }
+    res.json(await r.json());
+  } catch(e) { res.status(500).json({ error: e.message }); }
 }

@@ -1,7 +1,8 @@
-// api/outlook/action-items.js — Fetch last 21 days of emails for MFP action item scanning
-async function refreshIfNeeded(tokenData) {
-  if (tokenData.expires_at > Date.now() + 5*60*1000) return tokenData;
-  if (!tokenData.refresh_token) return null;
+// api/outlook/action-items.js — Fetch last 21 days of emails
+// Uses refresh-only cookie (no 3KB JWT in cookie)
+
+async function getAccessToken(tokenData) {
+  if (!tokenData || !tokenData.refresh_token) return null;
   const TENANT_ID = process.env.LU_TENANT_ID;
   const r = await fetch(`https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token`, {
     method: 'POST',
@@ -19,10 +20,16 @@ async function refreshIfNeeded(tokenData) {
   return {
     access_token: tokens.access_token,
     refresh_token: tokens.refresh_token || tokenData.refresh_token,
-    expires_at: Date.now() + ((tokens.expires_in || 3600) * 1000),
     name: tokenData.name,
     email: tokenData.email
   };
+}
+
+function parseCookies(req) {
+  const raw = req.headers['cookie'] || '';
+  const cookies = {};
+  raw.split(';').forEach(p => { const [k,...v]=p.trim().split('='); if(k) cookies[k.trim()]=v.join('=').trim(); });
+  return cookies;
 }
 
 function clearAuthCookies(res) {
@@ -32,10 +39,22 @@ function clearAuthCookies(res) {
   ]);
 }
 
+function writeRefreshCookies(res, data) {
+  const authPayload = JSON.stringify({
+    refresh_token: data.refresh_token,
+    name: data.name,
+    email: data.email,
+    expires_at: Date.now() + 7*24*3600*1000
+  });
+  const sessionPayload = JSON.stringify({ name: data.name, email: data.email, authenticated: true });
+  res.setHeader('Set-Cookie', [
+    `lu_auth=${encodeURIComponent(authPayload)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${7*24*3600}`,
+    `lu_session=${encodeURIComponent(sessionPayload)}; Path=/; Secure; SameSite=Lax; Max-Age=${7*24*3600}`
+  ]);
+}
+
 export default async function handler(req, res) {
-  const raw = req.headers['cookie'] || '';
-  const cookies = {};
-  raw.split(';').forEach(p => { const [k,...v]=p.trim().split('='); if(k) cookies[k.trim()]=v.join('=').trim(); });
+  const cookies = parseCookies(req);
   const enc = cookies['lu_auth'];
   if (!enc) return res.status(401).json({ error: 'Not authenticated' });
 
@@ -43,19 +62,13 @@ export default async function handler(req, res) {
   try { tokenData = JSON.parse(decodeURIComponent(enc)); }
   catch { return res.status(401).json({ error: 'Invalid cookie' }); }
 
-  const refreshed = await refreshIfNeeded(tokenData);
-  if (!refreshed) {
+  const fresh = await getAccessToken(tokenData);
+  if (!fresh) {
     clearAuthCookies(res);
     return res.status(401).json({ error: 'Session expired' });
   }
-  if (refreshed !== tokenData) {
-    const authPayload = JSON.stringify(refreshed);
-    const sessionPayload = JSON.stringify({ name: refreshed.name, email: refreshed.email, expires_at: refreshed.expires_at });
-    res.setHeader('Set-Cookie', [
-      `lu_auth=${encodeURIComponent(authPayload)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${7*24*3600}`,
-      `lu_session=${encodeURIComponent(sessionPayload)}; Path=/; Secure; SameSite=Lax; Max-Age=${7*24*3600}`
-    ]);
-  }
+
+  writeRefreshCookies(res, fresh);
 
   const limit = Math.min(parseInt(req.query.limit || '100'), 200);
   const days = parseInt(req.query.days || '21');
@@ -64,7 +77,7 @@ export default async function handler(req, res) {
   try {
     const r = await fetch(
       `https://graph.microsoft.com/v1.0/me/messages?$top=${limit}&$select=subject,from,receivedDateTime,bodyPreview,isRead,webLink&$orderby=receivedDateTime desc&$filter=receivedDateTime ge ${sinceDate}`,
-      { headers: { Authorization: `Bearer ${refreshed.access_token}` } }
+      { headers: { Authorization: `Bearer ${fresh.access_token}` } }
     );
     if (!r.ok) {
       const errText = await r.text().catch(() => 'Unknown error');
