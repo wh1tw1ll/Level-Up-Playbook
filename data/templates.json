@@ -1,0 +1,82 @@
+{
+  "01_Risk_Register.xlsx": {
+    "name": "Risk Register",
+    "desc": "Full risk register with probability/impact scoring, mitigation tracking, and status dropdowns. 30 rows, auto-IDs.",
+    "category": "Project Controls",
+    "section": "17",
+    "icon": "⚠️",
+    "data": ""
+  },
+  "02_Action_Item_Log.xlsx": {
+    "name": "Action Item Log",
+    "desc": "Track all open action items by meeting source, owner, due date, and status. Auto-generates AI-XXX IDs.",
+    "category": "Project Controls",
+    "section": "11",
+    "icon": "✅",
+    "data": ""
+  },
+  "03_Change_Order_Log.xlsx": {
+    "name": "Change Order Log",
+    "desc": "Log all change events from identification through execution with running contract value totals.",
+    "category": "Project Controls",
+    "section": "16",
+    "icon": "🔄",
+    "data": ""
+  },
+  "04_Meeting_Agenda_and_Minutes.xlsx": {
+    "name": "Meeting Agenda & Minutes",
+    "desc": "Three-tab workbook: OAC Agenda (12 standard items), Meeting Minutes (decisions/action items/carry-forward), Design Review Agenda.",
+    "category": "Meetings",
+    "section": "11",
+    "icon": "📋",
+    "data": ""
+  },
+  "07_Budget_Tracker.xlsx": {
+    "name": "Budget Tracker + Contingency Log",
+    "desc": "Two-tab: full project budget by category with variance and % complete, plus contingency draw-down log.",
+    "category": "Financial",
+    "section": "14",
+    "icon": "💰",
+    "data": ""
+  },
+  "08_Pay_App_Review_Checklist.xlsx": {
+    "name": "Pay Application Review Checklist",
+    "desc": "SOV, lien waiver, field verification, and draw package checklist for certifying contractor pay applications.",
+    "category": "Financial",
+    "section": "14",
+    "icon": "🧾",
+    "data": ""
+  },
+  "09_Punch_List_Log.xlsx": {
+    "name": "Punch List Log",
+    "desc": "200-row punch list with location, trade, priority, credit tracking, and status dropdowns.",
+    "category": "Field & Construction",
+    "section": "35",
+    "icon": "📌",
+    "data": ""
+  },
+  "10_Weekly_Report_Template.xlsx": {
+    "name": "Weekly Report Template",
+    "desc": "Health summary, schedule milestones, budget overview, top issues, and action items.",
+    "category": "Reporting",
+    "section": "12",
+    "icon": "📊",
+    "data": ""
+  },
+  "11_Vendor_Evaluation_Matrix.xlsx": {
+    "name": "Vendor Evaluation Matrix",
+    "desc": "Weighted scoring matrix for up to 4 vendors across 7 criteria with auto-calculated totals.",
+    "category": "Contracts & Procurement",
+    "section": "20",
+    "icon": "🏆",
+    "data": ""
+  },
+  "12_FFE_Procurement_Tracker.xlsx": {
+    "name": "FF&E / OS&E Procurement Tracker",
+    "desc": "100-row tracker with lead time calculation, delivery tracking, and furnished/installed-by dropdowns.",
+    "category": "Field & Construction",
+    "section": "27",
+    "icon": "🪑",
+    "data": ""
+  }
+}

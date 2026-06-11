@@ -38,16 +38,25 @@ window.aiTab = window.aiTab || 'team';
 // ── DATA LOADED FROM EXTERNAL FILES ───────────────────────────────
 var MFP_CONTEXT = window.__MFP_CONTEXT || '';
 var KB = window.__KB || [];  // Preloaded from data/kb.js
+var CONTRACT_KB = window.__CONTRACT_KB || [];  // Contract knowledge from data/contracts_kb.js
 var TEMPLATES = window.__TEMPLATES || {};
 var GLOSSARY = window.__GLOSSARY || {};
 var ALL_TOPICS = [];
+
+// Merge contract KB into searchable KB
+var FULL_KB = [];
+function buildFullKB() {
+  FULL_KB = KB.concat(CONTRACT_KB);
+}
 
 // Synchronous KB init — runs immediately since data is preloaded
 var kbLoaded = false;
 function initKB() {
   if (kbLoaded || !KB.length) return;
+  buildFullKB();
   var set = {};
   KB.forEach(function(s) { (s.topics || []).forEach(function(t) { set[t] = true; }); });
+  CONTRACT_KB.forEach(function(s) { (s.topics || []).forEach(function(t) { set[t] = true; }); });
   ALL_TOPICS = Object.keys(set).sort();
   kbLoaded = true;
   // If playbook view is active, re-render
@@ -126,48 +135,48 @@ async function tryRefresh() {
 
 function updateAuthUI() {
   var signInBtn = document.getElementById('auth-signin-btn');
-    var userInfo = document.getElementById('auth-user-info');
-    var userName = document.getElementById('auth-user-name');
-    var calMeta = document.getElementById('cal-card-meta');
-    var spMeta = document.getElementById('sp-card-meta');
+  var userInfo = document.getElementById('auth-user-info');
+  var userName = document.getElementById('auth-user-name');
+  var calMeta = document.getElementById('cal-card-meta');
+  var spMeta = document.getElementById('sp-card-meta');
 
-    if (luUser && luUser.authenticated) {
-      if (signInBtn) signInBtn.style.display = 'none';
-      if (userInfo) userInfo.style.display = 'flex';
-      if (userName) userName.textContent = luUser.name || luUser.email;
+  if (luUser && luUser.authenticated) {
+    if (signInBtn) signInBtn.style.display = 'none';
+    if (userInfo) userInfo.style.display = 'flex';
+    if (userName) userName.textContent = luUser.name || luUser.email;
 
-      // Show immediate connected status, then try to fetch live previews
-      if (calMeta) calMeta.textContent = '✓ Connected';
-      if (spMeta) spMeta.textContent = '✓ Connected';
+    // Show immediate connected status, then try to fetch live previews
+    if (calMeta) calMeta.textContent = '✓ Connected';
+    if (spMeta) spMeta.textContent = '✓ Connected';
 
-      // Fetch live calendar preview
-      if (calMeta && !calMeta._fetching) {
-        calMeta._fetching = true;
-        calMeta.textContent = 'Loading...';
-        fetch('/api/outlook/calendar?days=14', { credentials: 'include' })
-          .then(function(r) { if (!r.ok) throw new Error('' + r.status); return r.json(); })
-          .then(function(data) {
-            var evs = data.value || [];
-            var upcoming = evs.filter(function(e) {
-              var s = new Date(e.start.dateTime || e.start.date);
-              return s > new Date();
-            });
-            if (upcoming.length === 0) { calMeta.textContent = 'No upcoming events'; return; }
-            var next = new Date(upcoming[0].start.dateTime || upcoming[0].start.date);
-            var timeStr = next.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-            var countStr = upcoming.length > 1 ? ' +' + (upcoming.length - 1) + ' more' : '';
-            calMeta.textContent = 'Next: ' + timeStr + countStr;
-          })
-          .catch(function() { calMeta.textContent = '✓ Calendar'; })
-          .then(function() { calMeta._fetching = false; });
-      }
-    } else {
+    // Fetch live calendar preview
+    if (calMeta && !calMeta._fetching) {
+      calMeta._fetching = true;
+      calMeta.textContent = 'Loading...';
+      fetch('/api/outlook/calendar?days=14', { credentials: 'include' })
+        .then(function(r) { if (!r.ok) throw new Error('' + r.status); return r.json(); })
+        .then(function(data) {
+          var evs = data.value || [];
+          var upcoming = evs.filter(function(e) {
+            var s = new Date(e.start.dateTime || e.start.date);
+            return s > new Date();
+          });
+          if (upcoming.length === 0) { calMeta.textContent = 'No upcoming events'; return; }
+          var next = new Date(upcoming[0].start.dateTime || upcoming[0].start.date);
+          var timeStr = next.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+          var countStr = upcoming.length > 1 ? ' +' + (upcoming.length - 1) + ' more' : '';
+          calMeta.textContent = 'Next: ' + timeStr + countStr;
+        })
+        .catch(function() { calMeta.textContent = '✓ Calendar'; })
+        .then(function() { calMeta._fetching = false; });
+    }
+  } else {
       if (signInBtn) signInBtn.style.display = 'flex';
       if (userInfo) userInfo.style.display = 'none';
       if (calMeta) calMeta.textContent = 'Sign in to enable';
       if (spMeta) spMeta.textContent = 'Sign in to enable';
     }
-  }
+}
 
 function signInWithMicrosoft() {
   try { localStorage.setItem('lu_return_view', currentView || 'home'); } catch(e) {}
@@ -268,11 +277,10 @@ function setView(view) {
   window.scrollTo(0, 0);
 
   // View-specific render
-    if (view === 'luna') { renderHero(); }
-    else if (view === 'playbook') renderPbView();
-    else if (view === 'projects') renderProjects();
-        else if (view === 'actions') renderActions();
-            else if (view === 'mfp') renderMFP();
+      if (view === 'luna') { renderHero(); }
+      else if (view === 'playbook') renderPbView();
+      else if (view === 'projects') renderProjects();
+              else if (view === 'mfp') renderMFP();
                 else if (target) {
       // Unknown view with existing div — show it empty (legacy routes)
     } else {
@@ -1056,7 +1064,8 @@ function renderTemplates() {
 
   orderedCats.forEach(function(cat) {
     var items = byCategory[cat];
-    var isOpen = catState[cat] === true;
+    // Always start collapsed — ignore saved state
+      var isOpen = false;
     var catIcon = cat === 'Project Controls' ? '📊' : cat === 'Financial' ? '💰' : cat === 'Meetings' ? '📋' : cat === 'Contracts & Procurement' ? '📝' : cat === 'Field & Construction' ? '🔨' : cat === 'Reporting' ? '📈' : '📁';
     html += '<div style="margin-bottom:10px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--card);transition:box-shadow .2s">'
       + '<div class="tmpl-cat-header" onclick="toggleTmplCat(' + jsCallArg(cat) + ')" style="display:flex;align-items:center;gap:12px;padding:16px 20px;cursor:pointer;user-select:none;transition:all .15s">'
@@ -2130,6 +2139,7 @@ function openReminderPanel() {
   if (toggle) toggle.style.display = 'none';
   reminderPanelOpen = true;
   renderReminderPanel();
+  startPanelAutoRefresh();
 }
 
 function closeReminderPanel() {
@@ -2142,7 +2152,8 @@ function closeReminderPanel() {
       if (toggle) toggle.style.display = 'flex';
     }, 300);
   }
-  reminderPanelOpen = false;
+    reminderPanelOpen = false;
+    stopPanelAutoRefresh();
 }
 
 function switchReminderTab(tab) {
@@ -2177,9 +2188,23 @@ function renderReminderActions() {
   var teamItems = [];
   var personalItems = [];
   try {
-    teamItems = JSON.parse(localStorage.getItem('lu_actions_team') || '[]');
-    personalItems = JSON.parse(localStorage.getItem('lu_actions_personal') || '[]');
-  } catch(e) {}
+      teamItems = JSON.parse(localStorage.getItem('lu_actions_team') || '[]');
+      personalItems = JSON.parse(localStorage.getItem('lu_actions_personal') || '[]');
+    } catch(e) {}
+
+    // Fetch flagged emails from backend
+    var flaggedEmails = [];
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', '/api/outlook/flagged', false); // sync XHR for simplicity
+      xhr.withCredentials = true;
+      xhr.send();
+      if (xhr.status === 200) {
+        var fd = JSON.parse(xhr.responseText);
+        flaggedEmails = fd.actions || [];
+      }
+    } catch(e) {}
+    var flaggedCount = flaggedEmails.length;
 
   // Separate MFP vs Level Up items using keyword check
   var mfpKeywords = ['mfp','freedom park','stadium','lemartec','punch','change order','cost recovery','arq','miller','baker','hvac','scoreboard','commissioning','closeout','pco','invoice','draw','pay app','retainage','tco','permitting','boldyn','das','seating','concession'];
@@ -2205,13 +2230,33 @@ function renderReminderActions() {
   });
 
   personalItems.forEach(function(item, idx) {
-    if (item.done) return;
-    var txt = (item.text || '').toLowerCase();
-    var isMFP = mfpKeywords.some(function(kw) { return txt.indexOf(kw) >= 0; });
-    (isMFP ? mfpItems : levelUpItems).push({
-      item: item, idx: idx, tab: 'personal', source: 'personal'
+      if (item.done) return;
+      var txt = (item.text || '').toLowerCase();
+      var isMFP = mfpKeywords.some(function(kw) { return txt.indexOf(kw) >= 0; });
+      (isMFP ? mfpItems : levelUpItems).push({
+        item: item, idx: idx, tab: 'personal', source: 'personal'
+      });
     });
-  });
+
+    // Merge flagged emails into action items
+        flaggedEmails.forEach(function(email) {
+              var accountTag = email.account ? ' [' + email.account.split('@')[0] + ']' : '';
+              // Use the API-generated action text if available, fall back to subject
+              var displayText = email.text || email.subject;
+              var actionItem = {
+                text: '📧 ' + displayText + accountTag,
+                priority: email.priority || 'medium',
+                ts: new Date(email.receivedDate || email.flaggedDate).getTime(),
+                author: email.from || '',
+                source: 'flagged_email',
+                preview: email.preview || ''
+              };
+      var txt = (email.subject || '').toLowerCase() + ' ' + (email.preview || '').toLowerCase();
+      var isMFP = mfpKeywords.some(function(kw) { return txt.indexOf(kw) >= 0; });
+      (isMFP ? mfpItems : levelUpItems).push({
+        item: actionItem, idx: -1, tab: 'flagged', source: 'flagged'
+      });
+    });
 
   // Sort each group: urgent first, then by recency
   function sortGroup(arr) {
@@ -2229,13 +2274,14 @@ function renderReminderActions() {
     var toggleIcon = document.getElementById('reminder-toggle-count');
     var totalOpen = mfpItems.length + levelUpItems.length;
 
-    // Instruction note
-    html += '<div style="font-size:11px;color:var(--muted);padding:6px 2px 8px;border-bottom:1px solid var(--border);margin-bottom:6px;display:flex;align-items:center;gap:6px">'
-      + '<span style="font-size:16px">🔄</span>'
-      + '<span>Click the <strong>circle</strong> on each item to cycle: Open → In Progress → Complete</span>'
-      + '</div>';
+    // Instruction note + refresh button
+        html += '<div style="font-size:11px;color:var(--muted);padding:6px 2px 8px;border-bottom:1px solid var(--border);margin-bottom:6px;display:flex;align-items:center;gap:6px">'
+          + '<span style="font-size:16px">🔄</span>'
+          + '<span style="flex:1">Click the <strong>circle</strong> on each item to cycle: Open → In Progress → Complete</span>'
+          + '<button onclick="refreshPanelActions()" style="background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:11px;padding:3px 8px;color:var(--muted);font-family:inherit" title="Refresh from server">↻ Refresh</button>'
+          + '</div>';
 
-  // --- MFP SECTION ---
+      // --- MFP SECTION ---
   if (mfpItems.length > 0) {
     html += '<div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px">🔴 MFP / Team (' + mfpItems.length + ')</div>';
     mfpItems.slice(0, 25).forEach(function(entry) {
@@ -2253,9 +2299,10 @@ function renderReminderActions() {
         + (item.dueDate ? '<span style="font-size:10px;color:' + (new Date(item.dueDate+'T12:00:00') < new Date() ? '#c0392b' : 'var(--muted)') + '">' + item.dueDate + '</span>' : '')
         + '</div>'
         + '<div style="font-size:13px;color:var(--charcoal);line-height:1.4">' + (st === 'completed' ? '<s style="opacity:.6">' : '') + escapeHtml(item.text) + (st === 'completed' ? '</s>' : '') + '</div>'
-        + '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + date + (item.author ? ' by ' + escapeHtml(item.author) : '') + '</div>'
-        + '</div>'
-        + '</div>';
+                + (item.preview && entry.source === 'flagged' ? '<div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(item.preview.substring(0, 120)) + '</div>' : '')
+                + '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + date + (item.author ? ' by ' + escapeHtml(item.author) : '') + '</div>'
+                + '</div>'
+                + '</div>';
     });
   }
 
@@ -2277,13 +2324,14 @@ function renderReminderActions() {
         + (item.dueDate ? '<span style="font-size:10px;color:' + (new Date(item.dueDate+'T12:00:00') < new Date() ? '#c0392b' : 'var(--muted)') + '">' + item.dueDate + '</span>' : '')
         + '</div>'
         + '<div style="font-size:13px;color:var(--charcoal);line-height:1.4">' + (st === 'completed' ? '<s style="opacity:.6">' : '') + escapeHtml(item.text) + (st === 'completed' ? '</s>' : '') + '</div>'
-        + '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + date + (item.author ? ' by ' + escapeHtml(item.author) : '') + '</div>'
-        + '</div>'
-        + '</div>';
+                + (item.preview && entry.source === 'flagged' ? '<div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(item.preview.substring(0, 120)) + '</div>' : '')
+                + '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + date + (item.author ? ' by ' + escapeHtml(item.author) : '') + '</div>'
+                + '</div>'
+                + '</div>';
     });
-  }
+          }
 
-  // Empty state
+          // Empty state
   if (!html) {
     html = '<div class="rp-empty"><div class="rp-empty-icon">✅</div>All caught up! No open action items.</div>';
   }
@@ -2291,11 +2339,36 @@ function renderReminderActions() {
   // Update badge count on toggle button
   if (toggleIcon) toggleIcon.textContent = totalOpen > 9 ? '9+' : totalOpen;
 
-  el.innerHTML = html;
-  if (footer) footer.textContent = totalOpen + ' open item' + (totalOpen !== 1 ? 's' : '') + ' · Updated ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-}
+    el.innerHTML = html;
+    if (footer) footer.textContent = totalOpen + ' open item' + (totalOpen !== 1 ? 's' : '') + ' · Updated ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  }
 
-// Panel click handler - cycles: open → in_progress → completed → open
+  // Refresh panel actions from server
+  function refreshPanelActions() {
+    var el = document.getElementById('reminder-panel-actions');
+    if (el) el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">⏳ Refreshing...</div>';
+    // Clear flagged email cache by running the fetch again
+    renderReminderActions();
+  }
+
+  // Auto-refresh panel every 30 seconds while open
+  var panelRefreshTimer = null;
+  function startPanelAutoRefresh() {
+    stopPanelAutoRefresh();
+    panelRefreshTimer = setInterval(function() {
+      if (reminderPanelOpen) {
+        renderReminderActions();
+      }
+    }, 30000);
+  }
+  function stopPanelAutoRefresh() {
+    if (panelRefreshTimer) {
+      clearInterval(panelRefreshTimer);
+      panelRefreshTimer = null;
+    }
+  }
+
+  // Panel click handler
 function panelToggleAction(tab, idx) {
   var items = [];
   try { items = JSON.parse(localStorage.getItem('lu_actions_' + tab) || '[]'); } catch(e) {}
@@ -2306,10 +2379,7 @@ function panelToggleAction(tab, idx) {
     try { localStorage.setItem('lu_actions_' + tab, JSON.stringify(items)); } catch(e) {}
   }
   renderReminderActions();
-  if (document.getElementById('view-actions').classList.contains('active')) {
-    renderActions();
   }
-}
 
 function renderReminderMeetings() {
   var el = document.getElementById('reminder-panel-meetings');
@@ -2336,70 +2406,79 @@ function renderReminderMeetings() {
         var start = new Date(e.start.dateTime || e.start.date);
         return start >= new Date(now.getFullYear(), now.getMonth(), now.getDate()) && start <= endOfDay;
       });
+      // --- TODAY'S MEETINGS ---
       todayEvents.sort(function(a,b) {
         return new Date(a.start.dateTime || a.start.date) - new Date(b.start.dateTime || b.start.date);
       });
 
       var html = '';
-            // Separate MFP vs Level Up meetings
-            var mfpKeywords = ['miami','freedom','park','mfp','stadium','lemartec','closeout','punch','cost recovery','arq','commissioning','owner meeting'];
-            var mfpToday = [];
-            var levelUpToday = [];
-            todayEvents.forEach(function(e) {
-              var txt = ((e.subject||'') + ' ' + (e._calendarName||'')).toLowerCase();
-              var isMFP = mfpKeywords.some(function(kw) { return txt.indexOf(kw) >= 0; });
-              (isMFP ? mfpToday : levelUpToday).push(e);
-            });
+      // Separate MFP vs Level Up meetings  
+      var mfpKeywords = ['miami','freedom','park','mfp','stadium','lemartec','closeout','punch','cost recovery','arq','commissioning','owner meeting'];
+      var mfpToday = [];
+      var levelUpToday = [];
+      todayEvents.forEach(function(e) {
+        var txt = ((e.subject||'') + ' ' + (e._calendarName||'')).toLowerCase();
+        var isMFP = mfpKeywords.some(function(kw) { return txt.indexOf(kw) >= 0; });
+        (isMFP ? mfpToday : levelUpToday).push(e);
+      });
 
-            if (todayEvents.length === 0) {
-        var upcomingThisWeek = events.filter(function(e) {
+      // Today's MFP meetings
+      if (mfpToday.length > 0) {
+        html += '<div style="font-size:11px;font-weight:700;color:#c0392b;text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px;display:flex;align-items:center;gap:6px"><span>🏟</span> MFP Today <span style="background:#c0392b;color:#fff;font-size:9px;padding:1px 7px;border-radius:8px">' + mfpToday.length + '</span></div>';
+        mfpToday.forEach(function(e) {
           var start = new Date(e.start.dateTime || e.start.date);
-          var weekEnd = new Date(now);
-          weekEnd.setDate(weekEnd.getDate() + (7 - weekEnd.getDay()));
-          weekEnd.setHours(23, 59, 59, 0);
-          return start > now && start <= weekEnd;
-        }).slice(0, 5);
-        if (upcomingThisWeek.length > 0) {
-                  html += '<div style="font-size:11px;font-weight:700;color:var(--muted);padding:4px 0 6px">📅 Upcoming This Week</div>';
-                  upcomingThisWeek.forEach(function(e) {
-                    var start = new Date(e.start.dateTime || e.start.date);
-                    var timeStr = start.toLocaleTimeString([], { weekday:'short', hour:'2-digit', minute:'2-digit' });
-                    var calName = e._calendarName;
-                    html += '<div class="rp-meeting"><span class="rp-meeting-time">' + timeStr + '</span><div class="rp-meeting-detail"><div class="rp-meeting-subject">' + escapeHtml(e.subject || '(No title)') + '</div>'
-                      + (calName ? '<div style="font-size:10px;color:var(--teal);font-weight:500;margin-top:1px">📁 ' + escapeHtml(calName) + '</div>' : '')
-                      + (e.location && e.location.displayName ? '<div class="rp-meeting-loc"> ' + escapeHtml(e.location.displayName) + '</div>' : '') + '</div></div>';
-                  });
-        } else {
-          html = '<div class="rp-empty"><div class="rp-empty-icon">📅</div>No meetings today.</div>';
-        }
-      } else {
-              // MFP meetings section
-              if (mfpToday.length > 0) {
-                html += '<div style="font-size:11px;font-weight:700;color:#c0392b;text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px;display:flex;align-items:center;gap:6px"><span>🏟</span> MFP / Shared Calendars <span style="background:#c0392b;color:#fff;font-size:9px;padding:1px 7px;border-radius:8px">' + mfpToday.length + '</span></div>';
-                mfpToday.forEach(function(e) {
-                  var start = new Date(e.start.dateTime || e.start.date);
-                  var end = new Date(e.end.dateTime || e.end.date);
-                  var timeStr = start.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) + '-' + end.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
-                  var isNow = now >= start && now <= end;
-                  var calName = e._calendarName;
-                  html += '<div class="rp-meeting" style="' + (isNow ? 'border-left-color:#e74c3c;background:#fce8e8' : '') + '"><span class="rp-meeting-time">' + timeStr + '</span><div class="rp-meeting-detail"><div class="rp-meeting-subject">' + escapeHtml(e.subject || '(No title)') + '</div>'
-                    + (calName ? '<div style="font-size:10px;color:#c0392b;font-weight:500;margin-top:1px">📁 ' + escapeHtml(calName) + '</div>' : '')
-                    + (e.location && e.location.displayName ? '<div class="rp-meeting-loc"> ' + escapeHtml(e.location.displayName) + '</div>' : '')
-                    + (isNow ? '<div style="font-size:11px;color:#c0392b;font-weight:600;margin-top:2px"> In progress</div>' : '') + '</div></div>';
-                });
-              }
-              // Level Up meetings section
-              if (levelUpToday.length > 0) {
-                html += '<div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px;margin-top:6px;display:flex;align-items:center;gap:6px"><span>📅</span> Level Up Calendar <span style="background:var(--teal);color:#fff;font-size:9px;padding:1px 7px;border-radius:8px">' + levelUpToday.length + '</span></div>';
-                levelUpToday.forEach(function(e) {
-                  var start = new Date(e.start.dateTime || e.start.date);
-                  var end = new Date(e.end.dateTime || e.end.date);
-                  var timeStr = start.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) + '-' + end.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
-                  var isNow = now >= start && now <= end;
-                  html += '<div class="rp-meeting" style="' + (isNow ? 'border-left-color:#e74c3c;background:#fce8e8' : '') + '"><span class="rp-meeting-time">' + timeStr + '</span><div class="rp-meeting-detail"><div class="rp-meeting-subject">' + escapeHtml(e.subject || '(No title)') + '</div>' + (e.location && e.location.displayName ? '<div class="rp-meeting-loc"> ' + escapeHtml(e.location.displayName) + '</div>' : '') + (isNow ? '<div style="font-size:11px;color:#c0392b;font-weight:600;margin-top:2px"> In progress</div>' : '') + '</div></div>';
-                });
-              }
+          var end = new Date(e.end.dateTime || e.end.date);
+          var timeStr = start.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) + '-' + end.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+          var isNow = now >= start && now <= end;
+          var calName = e._calendarName;
+          html += '<div class="rp-meeting" style="' + (isNow ? 'border-left-color:#e74c3c;background:#fce8e8' : '') + '"><span class="rp-meeting-time">' + timeStr + '</span><div class="rp-meeting-detail"><div class="rp-meeting-subject">' + escapeHtml(e.subject || '(No title)') + '</div>'
+            + (calName ? '<div style="font-size:10px;color:#c0392b;font-weight:500;margin-top:1px">📁 ' + escapeHtml(calName) + '</div>' : '')
+            + (e.location && e.location.displayName ? '<div class="rp-meeting-loc"> ' + escapeHtml(e.location.displayName) + '</div>' : '')
+            + (isNow ? '<div style="font-size:11px;color:#c0392b;font-weight:600;margin-top:2px">● In progress</div>' : '') + '</div></div>';
+        });
+      }
+
+      // Today's Level Up meetings
+      if (levelUpToday.length > 0) {
+        html += '<div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px;margin-top:' + (mfpToday.length > 0 ? '6px' : '0') + ';display:flex;align-items:center;gap:6px"><span>📅</span> Level Up Today <span style="background:var(--teal);color:#fff;font-size:9px;padding:1px 7px;border-radius:8px">' + levelUpToday.length + '</span></div>';
+        levelUpToday.forEach(function(e) {
+          var start = new Date(e.start.dateTime || e.start.date);
+          var end = new Date(e.end.dateTime || e.end.date);
+          var timeStr = start.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) + '-' + end.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+          var isNow = now >= start && now <= end;
+          html += '<div class="rp-meeting" style="' + (isNow ? 'border-left-color:#e74c3c;background:#fce8e8' : '') + '"><span class="rp-meeting-time">' + timeStr + '</span><div class="rp-meeting-detail"><div class="rp-meeting-subject">' + escapeHtml(e.subject || '(No title)') + '</div>' + (e.location && e.location.displayName ? '<div class="rp-meeting-loc"> ' + escapeHtml(e.location.displayName) + '</div>' : '') + (isNow ? '<div style="font-size:11px;color:#c0392b;font-weight:600;margin-top:2px">● In progress</div>' : '') + '</div></div>';
+        });
+      }
+
+      // --- UPCOMING THIS WEEK ---
+      var upcomingThisWeek = events.filter(function(e) {
+        var start = new Date(e.start.dateTime || e.start.date);
+        var weekEnd = new Date(now);
+        weekEnd.setDate(weekEnd.getDate() + (6 - weekEnd.getDay()));
+        weekEnd.setHours(23, 59, 59, 0);
+        // Skip today's events (already shown above)
+        var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        var todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+        return start > todayEnd && start <= weekEnd;
+      }).slice(0, 10);
+
+      if (upcomingThisWeek.length > 0) {
+              if (html) html += '<div style="border-top:1px solid var(--border);margin:8px 0"></div>';
+              html += '<div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;padding:6px 0 6px">🔔 Later This Week (' + upcomingThisWeek.length + ')</div>';
+              upcomingThisWeek.forEach(function(e) {
+                var start = new Date(e.start.dateTime || e.start.date);
+                var timeStr = start.toLocaleTimeString([], { weekday:'short', hour:'2-digit', minute:'2-digit' });
+                var calName = e._calendarName;
+                html += '<div class="rp-meeting" style="background:var(--teal-light);border-left-color:var(--teal);border-left-width:3px"><span class="rp-meeting-time" style="color:var(--teal);font-weight:600">🔔 ' + timeStr + '</span><div class="rp-meeting-detail"><div class="rp-meeting-subject">' + escapeHtml(e.subject || '(No title)') + '</div>'
+                  + (calName ? '<div style="font-size:10px;color:var(--muted);font-weight:500;margin-top:1px">📁 ' + escapeHtml(calName) + '</div>' : '')
+                  + (e.location && e.location.displayName ? '<div class="rp-meeting-loc"> ' + escapeHtml(e.location.displayName) + '</div>' : '') + '</div></div>';
+              });
             }
+
+      // Empty state
+      if (!html) {
+        html = '<div class="rp-empty"><div class="rp-empty-icon">📅</div>No meetings today or this week.</div>';
+      }
       el.innerHTML = html;
     })
     .catch(function(err) {
@@ -2887,30 +2966,38 @@ function init() {
       var results = [];
 
       // Search KB
-            KB.forEach(function(s) {
+                  KB.forEach(function(s) {
+                    var hay = [s.title, s.num].concat(s.topics || []).concat(s.h2 || []).concat(s.content || []).concat(s.bullets || []).join(' ').toLowerCase();
+                    if (hay.indexOf(ql) >= 0) {
+                      var preview = '';
+                      var contents = s.content || [];
+                      var bullets = s.bullets || [];
+                      for (var ci = 0; ci < contents.length; ci++) {
+                        if (contents[ci].toLowerCase().indexOf(ql) >= 0) {
+                          preview = contents[ci].substring(0, 160);
+                          break;
+                        }
+                      }
+                      if (!preview) {
+                        for (var bi = 0; bi < bullets.length; bi++) {
+                          if (bullets[bi].toLowerCase().indexOf(ql) >= 0) {
+                            preview = bullets[bi].substring(0, 160);
+                            break;
+                          }
+                        }
+                      }
+                      if (!preview && s.h2 && s.h2.length) preview = s.h2[0].substring(0, 120);
+                      if (!preview) preview = (s.content || []).slice(0, 2).join(' ').substring(0, 120);
+                      results.push({type:'playbook', label:'Section ' + s.num + ': ' + (s.title || ''), id:s.num, preview:preview});
+                    }
+                  });
+
+            // Search contracts KB
+            CONTRACT_KB.forEach(function(s) {
               var hay = [s.title, s.num].concat(s.topics || []).concat(s.h2 || []).concat(s.content || []).concat(s.bullets || []).join(' ').toLowerCase();
               if (hay.indexOf(ql) >= 0) {
-                // Build a smarter excerpt: find the matching content chunk
-                var preview = '';
-                var contents = s.content || [];
-                var bullets = s.bullets || [];
-                for (var ci = 0; ci < contents.length; ci++) {
-                  if (contents[ci].toLowerCase().indexOf(ql) >= 0) {
-                    preview = contents[ci].substring(0, 160);
-                    break;
-                  }
-                }
-                if (!preview) {
-                  for (var bi = 0; bi < bullets.length; bi++) {
-                    if (bullets[bi].toLowerCase().indexOf(ql) >= 0) {
-                      preview = bullets[bi].substring(0, 160);
-                      break;
-                    }
-                  }
-                }
-                if (!preview && s.h2 && s.h2.length) preview = s.h2[0].substring(0, 120);
-                if (!preview) preview = (s.content || []).slice(0, 2).join(' ').substring(0, 120);
-                results.push({type:'playbook', label:'Section ' + s.num + ': ' + (s.title || ''), id:s.num, preview:preview});
+                var preview = (s.content || []).slice(0, 2).join(' | ').substring(0, 160) || (s.bullets || []).slice(0, 1).join(' ').substring(0, 120) || s.title;
+                results.push({type:'contract', label:'Contract: ' + (s.title || ''), id:s.num, preview:preview});
               }
             });
 
@@ -2937,9 +3024,9 @@ function init() {
         return text.replace(re, '<mark>$1</mark>');
       }
 
-      var icons = {playbook:'📚', template:'📑', project:'🏟'};
-      var html = '<div class=\"luna-hero-dropdown-inner\">';
-      html += '<div style=\"padding:6px 14px 8px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)\">' + results.length + ' result' + (results.length>1?'s':'') + ' for &quot;' + escapeHtml(q) + '&quot;</div>';
+      var icons = {playbook:'📚', template:'📑', project:'🏟', contract:'📝'};
+            var html = '<div class=\"luna-hero-dropdown-inner\">';
+            html += '<div style=\"padding:6px 14px 8px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)\">' + results.length + ' result' + (results.length>1?'s':'') + ' for &quot;' + escapeHtml(q) + '&quot;</div>';
       results.slice(0, 20).forEach(function(r) {
               var icon = icons[r.type]||'📄';
               var onClick = "var dd=document.getElementById('luna-hero-dropdown');if(dd){dd.classList.remove('show');dd.innerHTML=''}document.getElementById('luna-hero-input').value='';";
@@ -3169,22 +3256,10 @@ function buildBriefing() {
     + '</div>'
     + '<button class="briefing-close" onclick="dismissBriefing()" title="Dismiss for today">×</button>'
     + '</div>'
-    + '<div class="briefing-section-label">Today\'s Action Items</div>'
-    + '<div class="briefing-items">';
+    // Remove the "Today's Action Items" section from middle of page
+    // Action items are only in the Briefing side panel now
 
-  items.forEach(function(item) {
-    var bg = item.urgent ? '#fce8e8' : item.warn ? '#fef4e0' : 'var(--bg)';
-    var border = item.urgent ? '#e74c3c' : item.warn ? '#e67e22' : 'var(--border)';
-    html += '<div class="briefing-item" style="background:' + bg + ';border-left:3px solid ' + border + '">'
-      + '<span class="briefing-item-icon">' + item.icon + '</span>'
-      + '<div class="briefing-item-text">'
-      + '<div class="briefing-item-label">' + item.label + '</div>'
-      + '<div class="briefing-item-detail">' + item.detail + '</div>'
-      + '</div>'
-      + '</div>';
-  });
-
-  html += '</div>';
+    html += '</div>';
 
   // Budget snapshot
   if (Su) {
@@ -3278,10 +3353,15 @@ function verifyPassword() {
       if (inp) setTimeout(function() { inp.focus(); }, 300);
     }
   }).catch(function() {
-    // Overlay stays visible by default — focus password input
-    var inp = document.getElementById('password-input');
-    if (inp) setTimeout(function() { inp.focus(); }, 300);
-  });
+      // Auth check failed — ensure overlay is visible and focused
+      var overlay = document.getElementById('password-overlay');
+      if (overlay) {
+        overlay.classList.add('open');
+        overlay.style.display = '';
+      }
+      var inp = document.getElementById('password-input');
+      if (inp) setTimeout(function() { inp.focus(); }, 300);
+    });
 })();
 
 // ── BOOT ──────────────────────────────────────────────────────────

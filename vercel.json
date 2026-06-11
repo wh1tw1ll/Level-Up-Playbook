@@ -1,28 +1,18 @@
 {
+  "rewrites": [
+    { "source": "/auth/login", "destination": "/api/oauth?provider=microsoft&action=login" },
+    { "source": "/auth/callback", "destination": "/api/oauth?provider=microsoft&action=callback" },
+    { "source": "/auth/me", "destination": "/api/oauth?provider=microsoft&action=me" },
+    { "source": "/auth/logout", "destination": "/api/oauth?provider=microsoft&action=logout" },
+    { "source": "/procore/login", "destination": "/api/oauth?provider=procore&action=login" },
+    { "source": "/procore/callback", "destination": "/api/oauth?provider=procore&action=callback" },
+    { "source": "/procore/data", "destination": "/api/oauth?provider=procore&action=data" },
+    { "source": "/procore/discover", "destination": "/api/oauth?provider=procore&action=discover" },
+    { "source": "/api/(.*)", "destination": "/api/index?path=$1" }
+  ],
   "functions": {
-    "api/chat.js": {
-      "memory": 256,
+    "api/index.js": {
       "maxDuration": 30
-    },
-    "api/**/*.js": {
-      "memory": 256,
-      "maxDuration": 20
     }
-  },
-  "routes": [
-      { "src": "/auth/login", "dest": "/api/auth2/login" },
-      { "src": "/auth/callback", "dest": "/api/auth2/callback" },
-      { "src": "/auth/me", "dest": "/api/auth2/me" },
-      { "src": "/auth/logout", "dest": "/api/auth2/logout" },
-      { "src": "/api/chat", "dest": "/api/chat.js" },
-    { "src": "/api/sharepoint/search", "dest": "/api/sharepoint/search.js" },
-    { "src": "/api/sharepoint/read", "dest": "/api/sharepoint/read.js" },
-    { "src": "/api/outlook/email", "dest": "/api/outlook/email.js" },
-    { "src": "/api/outlook/calendar", "dest": "/api/outlook/calendar.js" },
-        { "src": "/procore/login", "dest": "/api/procore/login" },
-        { "src": "/procore/callback", "dest": "/api/procore/callback" },
-        { "src": "/procore/data", "dest": "/api/procore/data" },
-        { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
-  ]
+  }
 }

@@ -14,7 +14,7 @@
 })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260610-v3">
+<link rel="stylesheet" href="styles.css?v=20260610-v5">
 </head>
 <body>
 
@@ -31,9 +31,9 @@
     <button class="topbar-btn" onclick="signOut()">Sign out</button>
   </div>
   <button id="auth-signin-btn" class="topbar-btn primary" onclick="signInWithMicrosoft()">
-    <svg width="14" height="14" viewBox="0 0 21 21"><rect width="10" height="10" fill="#F25022"/><rect x="11" width="10" height="10" fill="#7FBA00"/><rect y="11" width="10" height="10" fill="#00A4EF"/><rect x="11" y="11" width="10" height="10" fill="#FFB900"/></svg>
-    Sign in
-  </button>
+        <svg width="14" height="14" viewBox="0 0 21 21"><rect width="10" height="10" fill="#F25022"/><rect x="11" width="10" height="10" fill="#7FBA00"/><rect y="11" width="10" height="10" fill="#00A4EF"/><rect x="11" y="11" width="10" height="10" fill="#FFB900"/></svg>
+        Sign in
+      </button>
     <button id="procore-connect-btn" class="topbar-btn" onclick="window.location.href='/procore/login'" title="Connect Procore">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
           Procore
@@ -45,10 +45,10 @@
   <button class="nav-tab nav-luna-tab" id="nav-luna" onclick="goHome()" title="Back to L.U.N.A. Search">
     <span class="nav-luna-icon">✦</span> L.U.N.A.
   </button>
-  <button class="nav-tab" id="nav-playbook" onclick="setView('playbook')">Playbook</button>
-  <button class="nav-tab" id="nav-projects" onclick="setView('projects')">Projects</button>
-    <button class="nav-tab" id="nav-actions" onclick="setView('actions')">Action Items</button>
-</nav>
+  <button class="nav-tab" id="nav-playbook" onclick="setView('playbook')">Playbook<span class="sync-badge" data-for="playbook"></span></button>
+    <button class="nav-tab" id="nav-projects" onclick="setView('projects')">Projects<span class="sync-badge" data-for="projects"></span></button>
+          <button class="nav-tab" id="nav-actions" onclick="openReminderPanel()" title="Open action items in briefing panel">Action Items<span class="sync-badge" data-for="actionItems"></span></button>
+        </nav>
 
 <!-- ===== PLAYBOOK SUB-NAV ===== -->
 <nav class="subnav" id="subnav-playbook" style="display:none">
@@ -157,13 +157,7 @@
   <div class="mfp-grid" id="projects-grid"></div>
 </div>
 
-<!-- ===== ACTION ITEMS VIEW ===== -->
-<div id="view-actions" class="view">
-  <div class="view-header">
-    <div class="view-title"><span>✅</span> Action Items</div>
-  </div>
-  <div id="actions-content"></div>
-</div>
+<!-- ===== ACTION ITEMS VIEW REMOVED — only in Briefing side panel ===== -->
 
 <!-- ===== SECONDARY VIEWS ===== -->
 <div id="view-mfp" class="view">
@@ -397,8 +391,63 @@
       <script src="data/templates.js?v=20260610-clippy"></script>
       <script src="data/mfp_context.js?v=20260610-clippy"></script>
       <script src="data/mfp_financials.js?v=20260610-clippy"></script>
+      <script src="data/contracts_master.js?v=20260610-contract"></script>
+      <script src="data/contract_terms.js?v=20260610-contract"></script>
       <script src="data/mfp_cowatchdog.js?v=20260610-clippy"></script>
-      <script src="data/kb.js?v=20260610-clippy"></script>
-      <script src="app.js?v=20260610-cleanup"></script>
-</body>
+            <script src="data/contracts_kb.js?v=1"></script>
+                        <script src="data/kb.js?v=20260610-clippy"></script>
+                  <script src="app.js?v=20260610-cleanup"></script>
+                  <!-- ES module infrastructure (available as window.LU.store, .api, .cache, .settings) -->
+                  <script type="module">
+                                      import { store } from '/js/core/store.js';
+                                                                              import settings from '/js/core/settings.js';
+                                                                              import api from '/js/core/api.js';
+                                                                              import cache from '/js/core/cache.js';
+                                                                              import { load, getCached, preloadAll, warm, bootLoader } from '/js/core/data.js';
+                                                                              import commandPalette from '/js/core/command-palette.js';
+                                                                              window.LU = { store, settings, api, cache, data: { load, getCached, preloadAll, warm, bootLoader }, commandPalette };
+
+                                                                              // Init command palette
+                                                                              commandPalette.init();
+
+                                      // Sync badge updater — reacts to store 'syncBadges' changes
+                                      store.on('syncBadges', (badges) => {
+                                        document.querySelectorAll('.sync-badge').forEach(el => {
+                                          const key = el.getAttribute('data-for');
+                                          const state = badges[key];
+                                          if (!state) { el.className = 'sync-badge'; return; }
+                                          el.className = 'sync-badge ' + (state.fresh ? 'fresh' : (state.age < 3600000 ? 'stale' : 'error'));
+                                        });
+                                      });
+
+                                      // Touch financials on load so badge is fresh
+                                      Promise.all([load('mfp_financials'), load('mfp_context')]).then(() => {
+                                        if (window.LU) {
+                                          // Initialize cache manager
+                                          import('/js/core/cache-manager.js').then(m => {
+                                            m.default.init();
+                                            m.default.touch('financials');
+                                            m.default.touch('contracts');
+                                          });
+                                        }
+                                      });
+                                    </script>
+
+                                                      <!-- ===== COMMAND PALETTE (Ctrl+K) ===== -->
+                                                      <div id="cmd-palette" class="cp-overlay closed">
+                                                        <div class="cp-modal">
+                                                          <div class="cp-header">
+                                                            <span class="cp-kbd">Ctrl+K</span>
+                                                            <input id="cmd-palette-input" type="text" class="cp-input" placeholder="Search commands, data, people..." autocomplete="off" spellcheck="false" />
+                                                            <button class="cp-close" onclick="window.LU?.commandPalette?.close()" title="Close (Esc)">✕</button>
+                                                          </div>
+                                                          <div id="cmd-palette-results" class="cp-results"></div>
+                                                          <div class="cp-footer">
+                                                            <span>↑↓ Navigate</span>
+                                                            <span>↵ Select</span>
+                                                            <span>Esc Close</span>
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                </body>
 </html>
