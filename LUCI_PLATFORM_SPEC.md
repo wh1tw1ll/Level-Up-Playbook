@@ -1,11 +1,11 @@
-# LUCI — Level Up Command Interface
+# LUCI — Level Up Central Intelligence
 ## Complete Platform Specification
 
 ---
 
 ## 1. IDENTITY & BRAND
 
-**Name:** LUCI (Level Up Command Interface)
+**Name:** LUCI (Level Up Central Intelligence)
 **Tagline:** "Project Intelligence, In Your Pocket"
 **Backend Engine:** LUNA (Level Up Network Agent) — runs on Hermes Agent framework
 **Frontend Brand:** LUCI — what the user sees and interacts with
