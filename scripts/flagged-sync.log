@@ -2012,3 +2012,45 @@ iad1::v8j79-1781252459141-15196c8613d7
 [2026-06-12 14:08:10] Playbook API response: status=ok, count=25
 [2026-06-12 14:08:10] Result: 25 actions synced to Playbook
 [2026-06-12 14:08:10] ============================================================
+[2026-06-12 14:23:56] ============================================================
+[2026-06-12 14:23:56] MFP Flagged Email Sync starting
+[2026-06-12 14:26:29] ============================================================
+[2026-06-12 14:26:29] MFP Flagged Email Sync starting
+[2026-06-12 14:26:57] ERROR: Cannot connect to Outlook. Dispatch: (-2147418111, 'Call was rejected by callee.', None, None). GetActiveObject: (-2147221021, 'Operation unavailable', None, None)
+[2026-06-12 14:26:57] HINT: Outlook COM automation only works from an interactive Windows session
+[2026-06-12 14:26:57] HINT: where the user is logged in and a mail profile is configured.
+[2026-06-12 14:26:57] HINT: Current session: ?, PID: 22592
+[2026-06-12 14:28:13] ============================================================
+[2026-06-12 14:28:13] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 14:29:30] ERROR: Cannot connect to Outlook. Dispatch: (-2147418111, 'Call was rejected by callee.', None, None). GetActiveObject: (-2147221021, 'Operation unavailable', None, None)
+[2026-06-12 14:29:30] HINT: Outlook COM automation only works from an interactive Windows session
+[2026-06-12 14:29:30] HINT: where the user is logged in and a mail profile is configured.
+[2026-06-12 14:29:30] HINT: Current session: ?, PID: 14220
+[2026-06-12 14:31:14] ERROR: Outlook COM dispatch failed: (-2147418111, 'Call was rejected by callee.', None, None)
+[2026-06-12 14:46:52] ============================================================
+[2026-06-12 14:46:52] MFP Flagged Email Sync starting
+[2026-06-12 14:49:53] ERROR: Cannot connect to Outlook. Dispatch: (-2147418111, 'Call was rejected by callee.', None, None). GetActiveObject: (-2147221021, 'Operation unavailable', None, None)
+[2026-06-12 14:49:53] HINT: Outlook COM automation only works from an interactive Windows session
+[2026-06-12 14:49:53] HINT: where the user is logged in and a mail profile is configured.
+[2026-06-12 14:49:53] HINT: Current session: ?, PID: 9416
+[2026-06-12 15:07:53] ============================================================
+[2026-06-12 15:07:53] MFP Flagged Email Sync starting
+[2026-06-12 15:10:16] ============================================================
+[2026-06-12 15:10:16] MFP Flagged Email Sync starting
+[2026-06-12 15:10:54] ERROR: Cannot connect to Outlook. Dispatch: (-2147418111, 'Call was rejected by callee.', None, None). GetActiveObject: (-2147221021, 'Operation unavailable', None, None)
+[2026-06-12 15:10:54] HINT: Outlook COM automation only works from an interactive Windows session
+[2026-06-12 15:10:54] HINT: where the user is logged in and a mail profile is configured.
+[2026-06-12 15:10:54] HINT: Current session: ?, PID: 19808
+[2026-06-12 15:13:17] ERROR: Cannot connect to Outlook. Dispatch: (-2147418111, 'Call was rejected by callee.', None, None). GetActiveObject: (-2147221021, 'Operation unavailable', None, None)
+[2026-06-12 15:13:17] HINT: Outlook COM automation only works from an interactive Windows session
+[2026-06-12 15:13:17] HINT: where the user is logged in and a mail profile is configured.
+[2026-06-12 15:13:17] HINT: Current session: ?, PID: 23348
+[2026-06-12 15:29:06] ============================================================
+[2026-06-12 15:29:06] MFP Flagged Email Sync starting
+[2026-06-12 15:32:07] ERROR: Cannot connect to Outlook. Dispatch: (-2147418111, 'Call was rejected by callee.', None, None). GetActiveObject: (-2147221021, 'Operation unavailable', None, None)
+[2026-06-12 15:32:07] HINT: Outlook COM automation only works from an interactive Windows session
+[2026-06-12 15:32:07] HINT: where the user is logged in and a mail profile is configured.
+[2026-06-12 15:32:07] HINT: Current session: ?, PID: 14208
+[2026-06-12 15:33:48] ============================================================
+[2026-06-12 15:33:48] MFP cron fallback starting
+[2026-06-12 15:33:48] Fallback already ran today (5 actions). Suppressing.
