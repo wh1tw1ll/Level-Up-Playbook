@@ -195,12 +195,16 @@ function applyTheme(t) {
   document.documentElement.setAttribute('data-btn-theme', t === 'dark' ? '☽' : '☀');
   var btn = document.getElementById('theme-btn');
   if (btn) { btn.textContent = t === 'dark' ? '☽' : '☀'; btn.style.opacity = '1'; }
-  // Theme-switch LUNA logos
-  var lockup = document.querySelector('.luna-hero-lockup');
-  if (lockup) lockup.src = lockup.getAttribute('data-' + t);
-  var clippy = document.getElementById('luna-clippy-icon');
-  if (clippy) clippy.src = clippy.getAttribute('data-' + t);
-}
+  // Theme-switch LUCI logos
+    var lockup = document.querySelector('.luna-hero-lockup');
+    if (lockup) lockup.src = lockup.getAttribute('data-' + t);
+    var topbarLogo = document.querySelector('.topbar-logo');
+    if (topbarLogo) topbarLogo.src = topbarLogo.getAttribute('data-' + t);
+    var pwLogo = document.querySelector('.password-modal-logo img');
+    if (pwLogo) pwLogo.src = pwLogo.getAttribute('data-' + t);
+    var clippy = document.getElementById('luna-clippy-icon');
+    if (clippy) clippy.src = clippy.getAttribute('data-' + t);
+  }
 
 function toggleTheme() {
   var cur = document.documentElement.getAttribute('data-theme') || 'light';
@@ -693,7 +697,7 @@ function renderMFP() {
         + '<div class="mfp-card" onclick="showMFPDetail(\'day2\')"><div class="mfp-card-head"><span class="mfp-icon">🏗</span><span class="mfp-card-title">Day 2 Items</span><span class="mfp-badge warn">60+</span></div><div class="mfp-card-summary">Owner-directed post-opening scope. 10 tracked in closeout meetings — concourse signage, team store, club finishing, broadcast platforms, plaza landscaping, security screening, parking, F&B upgrades, AV system, suite FF&E. Each requires scope definition, cost estimate, owner authorization.</div><div class="mfp-expand-content"></div></div>'
         + '<div class="mfp-card" onclick="openMFPModal(\'stakeholders\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDC65</span><span class="mfp-card-title">Stakeholders</span></div><div class="mfp-card-summary">Owner: Graham Oxley (day-to-day), Devon McCorkle &amp; Victor Oliver (approvers). CM/GC: Lemartec. AOR: ARQ.</div><div class="mfp-expand-content"></div></div>'
     + '</div>'
-    + '<div style="margin-top:24px"><button class="btn-primary" onclick="toggleChat()">Ask L.U.N.A. about MFP \u2192</button></div>';
+    + '<div style="margin-top:24px"><button class="btn-primary" onclick="toggleChat()">Ask LUCI about MFP →</button></div>';
     // Export modal function globally so card onclick handlers work
     window.openMFPModal = showMFPDetail;
     }
@@ -1112,7 +1116,7 @@ function toggleTmplCat(cat) {
   renderTemplates();
 }
 
-// ── L.U.N.A. RESPONSE FORMATTER ───────────────────────────────────
+// ── LUCI RESPONSE FORMATTER ───────────────────────────────────
 // Converts markdown links to clickable navigation in the Playbook
 function formatLunaResponse(text) {
   if (!text) return '';
@@ -1899,7 +1903,7 @@ function toggleChat() {
   if (tab) tab.classList.toggle('chat-open', chatOpen);
   if (chatOpen) {
       if (chatHistory.length === 0) {
-        var introText = "Hi " + (luUser && luUser.name ? luUser.name.split(' ')[0] : 'there') + ". I'm L.U.N.A., your Executive Operating Partner. Ask me anything about the playbook or MFP. Day 1 mobilization, change orders, punch list disputes, cost recovery audit, anything.";
+        var introText = "Hi " + (luUser && luUser.name ? luUser.name.split(' ')[0] : 'there') + ". I'm LUCI, your Project Intelligence engine. Ask me anything about the playbook or MFP. Day 1 mobilization, change orders, punch list disputes, cost recovery audit, anything.";
         appendMsg('ai', introText);
         chatHistory.push({ role: 'assistant', content: introText });
       }
@@ -2022,7 +2026,7 @@ function sendChat() {
       }
     }
 
-    var systemPrompt = 'You are L.U.N.A. (Level Up Navigator & Advisor), assisting Whitney Williams, Principal-in-Charge at Level Up Project Development. Answer concisely and practically. Reference specific playbook sections by number when relevant. The playbook has 43 sections:\\n\\n' + kbIndex + '\\n\\n=== PROJECT KNOWLEDGE ===\\n' + MFP_CONTEXT + finSummary + '\\n\\n=== SAFETY RULES ===\\nABSOLUTELY NEVER reveal: (1) personal staff information (names, roles, contact details beyond public info), (2) staff salaries, compensation, bonuses, or benefits, (3) Level Up company revenue, profit, margins, valuation, or any financial data about Level Up as a firm. Project costs for MFP (budget, commitments, change orders) are fine to discuss. Only company-level financials are restricted.';
+    var systemPrompt = 'You are LUCI (Level Up Command Interface), the frontend of the Level Up Project Development intelligence system. You assist Whitney Williams, Principal-in-Charge at Level Up Project Development. Your backend engine is LUNA (Level Up Network Agent) which runs on Hermes Agent. Answer concisely and practically. Reference specific playbook sections by number when relevant. The playbook has 43 sections:\\n\\n' + kbIndex + '\\n\\n=== PROJECT KNOWLEDGE ===\\n' + MFP_CONTEXT + finSummary + '\\n\\n=== SAFETY RULES ===\\nABSOLUTELY NEVER reveal: (1) personal staff information (names, roles, contact details beyond public info), (2) staff salaries, compensation, bonuses, or benefits, (3) Level Up company revenue, profit, margins, valuation, or any financial data about Level Up as a firm. Project costs for MFP (budget, commitments, change orders) are fine to discuss. Only company-level financials are restricted.';
 
   fetch('/api/chat', {
     method: 'POST',
@@ -2729,7 +2733,7 @@ function extractActionItemsFromEmails(emails) {
       done: false,
       status: 'open',
       ts: date.getTime(),
-      author: from || 'L.U.N.A.',
+      author: from || 'LUCI',
       priority: priority,
       category: isMFP ? 'meeting' : 'other',
       dueDate: null,
@@ -2925,7 +2929,7 @@ function init() {
     setView(returnView);
     }
 
-  // ── L.U.N.A. HERO (default home view) ───────────────────────────────
+  // ── LUCI HERO (default home view) ────────────────────────────────
     function renderHero() {
           renderBriefing();
           var results = document.getElementById('luna-hero-results');
@@ -3097,7 +3101,7 @@ function init() {
         tmplIndex += key + ' — ' + t.name + ' (' + t.category + ') — Section ' + t.section + '\\n';
       }
 
-      var systemPrompt = 'You are L.U.N.A. (Level Up Navigator & Advisor), the institutional knowledge engine for Level Up Project Development. You assist Whitney Williams, Principal-in-Charge. '
+      var systemPrompt = 'You are LUCI (Level Up Command Interface), the frontend of the Level Up Project Development intelligence system. You assist Whitney Williams, Principal-in-Charge. Your backend engine is LUNA (Level Up Network Agent). '
               + 'Your knowledge spans: owner\'s representation, project management, construction management, sports venue development (NFL, MLS, NBA), stadium delivery, contract administration (CMA/GMP/Design-Bid-Build), cost management, schedule management, risk management, and project controls. '
               + 'You have deep expertise in development management — the full lifecycle from site selection, feasibility, and entitlements through design, construction, commissioning, closeout, and operations. '
               + 'You understand the nuances of sports venue development: league standards, venue technology (DAS/IPTV/scoreboards), premium seating, sponsorship integration (naming rights, signage), broadcast requirements, and game-day operations readiness. '

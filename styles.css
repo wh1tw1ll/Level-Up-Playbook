@@ -37,8 +37,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
 .nav-tab{display:flex;align-items:center;gap:5px;padding:9px 16px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:none;font-family:inherit;border-bottom:2px solid transparent;transition:all .15s;text-transform:uppercase;letter-spacing:.06em}
 .nav-tab:hover{color:var(--charcoal)}
 .nav-tab.active{color:var(--teal);border-bottom-color:var(--teal)}
-/* L.U.N.A. nav tab — always slightly distinct */
-.nav-luna-tab{color:var(--teal);font-weight:700;gap:4px}
+/* LUCI nav tab — always slightly distinct */
+.nav-luna-tab{color:#8BED1C;font-weight:700;gap:4px}
 .nav-luna-icon{font-size:14px}
 
 /* ===== PLAYBOOK SEARCH ===== */

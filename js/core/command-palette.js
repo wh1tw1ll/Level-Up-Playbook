@@ -14,7 +14,7 @@ function register(item) {
 }
 
 // ─── Built-in navigation items ───
-register({ id: 'nav-home',     category: 'Navigate', label: 'Go Home',            description: 'Return to L.U.N.A. search',          keywords: 'home luna search',      action: () => window.goHome?.(),               icon: '🏠' });
+register({ id: 'nav-home',     category: 'Navigate', label: 'Go Home',            description: 'Return to LUCI search',          keywords: 'home luci search',      action: () => window.goHome?.(),               icon: '🏠' });
 register({ id: 'nav-playbook', category: 'Navigate', label: 'Open Playbook',      description: 'Browse playbook sections',           keywords: 'playbook sections kb',   action: () => window.setView?.('playbook'),     icon: '📖' });
 register({ id: 'nav-projects', category: 'Navigate', label: 'Open Projects',      description: 'View project overview',               keywords: 'projects mfp miami',     action: () => window.setView?.('projects'),     icon: '🏗' });
 register({ id: 'nav-actions',  category: 'Navigate', label: 'Open Action Items',  description: 'View flagged emails and reminders',    keywords: 'actions reminders flagged', action: () => window.openReminderPanel?.(),     icon: '⚡' });
@@ -31,7 +31,7 @@ register({ id: 'data-risks',       category: 'Data', label: 'Top Project Risks',
 }, icon: '⚠' });
 
 // ─── Quick actions ───
-register({ id: 'action-chat',     category: 'Actions', label: 'Ask L.U.N.A.',      description: 'Ask anything about the project',                   keywords: 'chat ask luna question', action: () => document.querySelector('.luna-hero-input')?.focus(), icon: '💬' });
+register({ id: 'action-chat',     category: 'Actions', label: 'Ask LUCI',      description: 'Ask anything about the project',                   keywords: 'chat ask luci question', action: () => document.querySelector('.luna-hero-input')?.focus(), icon: '💬' });
 register({ id: 'action-signin',   category: 'Actions', label: 'Sign in (Microsoft)', description: 'Authenticate with Microsoft 365',                  keywords: 'sign in login microsoft', action: () => window.location.href = '/auth/login', icon: '🔑' });
 register({ id: 'action-procore',  category: 'Actions', label: 'Open Procore Data', description: 'View live Procore subcontract data',                keywords: 'procore subs data sync',  action: () => window.location.href = '/procore/data', icon: '🔄' });
 register({ id: 'action-refresh',  category: 'Actions', label: 'Refresh Data',       description: 'Force refresh all cached data',                    keywords: 'refresh reload sync',     action: () => {

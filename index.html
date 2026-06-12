@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>L.U.N.A. — Level Up Project Development</title>
+<title>LUCI — Level Up Command Interface</title>
 <script>
 (function(){
   var t;try{t=localStorage.getItem('lu_theme')}catch(e){}
@@ -21,10 +21,13 @@
 <!-- ===== TOPBAR ===== -->
 <div class="sticky-header">
 <header class="topbar">
-  <a class="topbar-logo-link" href="#" onclick="goHome();return false" title="Level Up Home">
-      <img class="topbar-logo" src="assets/lockup-black.svg?v=1" alt="Level Up Project Development">
-    </a>
-  <span class="topbar-tagline">Level Up's Internal &amp; Project Intelligence Engine</span>
+  <a class="topbar-logo-link" href="#" onclick="goHome();return false" title="LUCI Home">
+        <img class="topbar-logo" src="assets/LUCI_lockup_ink.svg?v=1"
+             data-light="assets/LUCI_lockup_ink.svg?v=1"
+             data-dark="assets/LUCI_lockup_cream.svg?v=1"
+             alt="LUCI">
+      </a>
+    <span class="topbar-tagline">Project Intelligence, In Your Pocket</span>
   <button id="theme-btn" class="topbar-btn" onclick="toggleTheme()" title="Toggle theme" style="opacity:0"></button>
   <div id="auth-user-info" class="topbar-user" style="display:none">
     <span id="auth-user-name"></span>
@@ -42,8 +45,8 @@
 
 <!-- ===== NAV TABS ===== -->
 <nav class="nav" id="main-nav">
-  <button class="nav-tab nav-luna-tab" id="nav-luna" onclick="goHome()" title="Back to L.U.N.A. Search">
-    <span class="nav-luna-icon">✦</span> L.U.N.A.
+  <button class="nav-tab nav-luna-tab" id="nav-luna" onclick="goHome()" title="Back to LUCI Home">
+      <span class="nav-luna-icon">⬡</span> LUCI
   </button>
   <button class="nav-tab" id="nav-playbook" onclick="setView('playbook')">Playbook<span class="sync-badge" data-for="playbook"></span></button>
     <button class="nav-tab" id="nav-projects" onclick="setView('projects')">Projects<span class="sync-badge" data-for="projects"></span></button>
@@ -63,12 +66,12 @@
 <div id="view-luna" class="view active">
   <div class="luna-hero">
       <div class="luna-hero-wordmark-wrap">
-        <img class="luna-hero-lockup" src="assets/LUNA_lockup_horizontal_ink.svg"
-             data-light="assets/LUNA_lockup_horizontal_ink.svg"
-             data-dark="assets/LUNA_lockup_horizontal_cream.svg"
-             alt="L.U.N.A.">
-      </div>
-      <div class="luna-hero-subtitle">Level Up Network Agent</div>
+              <img class="luna-hero-lockup" src="assets/LUCI_lockup_ink.svg"
+                   data-light="assets/LUCI_lockup_ink.svg"
+                   data-dark="assets/LUCI_lockup_cream.svg"
+                   alt="LUCI">
+            </div>
+            <div class="luna-hero-subtitle">Level Up Command Interface</div>
     <div id="luna-reminders" class="luna-reminders"></div>
         <div id="luna-briefing" class="luna-briefing"></div>
         <div class="luna-hero-search-row">
@@ -91,7 +94,7 @@
       <span>Search playbook, projects, budget, templates, and more</span>
       <span class="luna-status-freq">Data: static as of Jun 8</span>
     </div>
-    <div class="luna-hero-footer">L.U.N.A. — Level Up Network Agent</div>
+    <div class="luna-hero-footer">LUCI — Level Up Command Interface</div>
   </div>
 </div>
 
@@ -196,23 +199,23 @@
 <div id="modal-template-preview" class="modal-overlay"></div>
 
 <!-- ===== LUNA CLIPPY ===== -->
-<div id="luna-clippy" class="luna-clippy" onclick="clippyClick()" title="Ask L.U.N.A.">
+<div id="luna-clippy" class="luna-clippy" onclick="clippyClick()" title="Ask LUCI">
   <div id="clippy-suggestion" class="clippy-suggestion" style="display:none">
     <span id="clippy-suggestion-text" class="clippy-suggestion-text"></span>
   </div>
   <img id="luna-clippy-icon" class="luna-clippy-icon"
-       src="assets/LUNA_face_ink.svg"
-       data-light="assets/LUNA_face_ink.svg"
-       data-dark="assets/LUNA_face_cream.svg"
-       alt="LUNA" draggable="false">
+         src="assets/LUCI_icon.svg"
+         data-light="assets/LUCI_icon.svg"
+         data-dark="assets/LUCI_icon.svg"
+         alt="LUCI" draggable="false">
   <div class="clippy-tab" id="clippy-tab" style="display:none"></div>
 </div>
-<div id="clippy-tab-standalone" class="clippy-tab-standalone" onclick="clippyExpand()" title="Open L.U.N.A." style="display:none">
+<div id="clippy-tab-standalone" class="clippy-tab-standalone" onclick="clippyExpand()" title="Open LUCI" style="display:none">
   <span class="clippy-tab-eye">👁</span>
 </div>
 <div id="chat-drawer" class="chat-drawer">
   <div class="chat-header" id="chat-header-drag">
-    <div class="chat-header-title">L.U.N.A. — Project Intelligence</div>
+    <div class="chat-header-title">LUCI — Project Intelligence</div>
     <div style="display:flex;gap:4px">
       <button class="chat-close" onclick="toggleChatSize()" title="Toggle size">⛶</button>
       <button class="chat-close" onclick="toggleChat()">×</button>
@@ -259,10 +262,10 @@
 <div id="password-overlay" class="password-overlay open">
   <div class="password-modal">
     <div class="password-modal-logo">
-      <img src="assets/lockup-black.svg?v=1" alt="Level Up" style="height:36px">
-    </div>
-    <div class="password-modal-title">L.U.N.A. — Level Up Network Agent</div>
-    <div class="password-modal-desc">Enter the team password to access the playbook, project intelligence, and L.U.N.A. search.</div>
+          <img src="assets/LUCI_lockup_ink.svg?v=1" data-light="assets/LUCI_lockup_ink.svg?v=1" data-dark="assets/LUCI_lockup_cream.svg?v=1" alt="LUCI" style="height:40px">
+        </div>
+        <div class="password-modal-title">LUCI — Level Up Command Interface</div>
+        <div class="password-modal-desc">Enter the team password to access the playbook, project intelligence, and LUCI search.</div>
     <div class="password-input-row">
           <input id="password-input" class="password-input" type="password" placeholder="Enter team password..." autocomplete="off">
           <button id="password-btn" class="password-btn">Unlock</button>
@@ -377,7 +380,7 @@
 
         <!-- ===== FOOTER ===== -->
 <div class="site-footer">
-  <span>© 2026 Level Up Project Development — L.U.N.A. Playbook</span>
+  <span>© 2026 Level Up Project Development — LUCI Playbook</span>
   <span class="footer-status">
     <span id="footer-status-text">JS OK</span>
     <span>·</span>

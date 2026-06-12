@@ -9,7 +9,7 @@ import json, os, sys, re, requests, win32com.client, pythoncom
 from datetime import datetime, timedelta
 
 # ── Config ──────────────────────────────────────────────────────────
-PLAYBOOK_URL = "https://level-up-playbook.vercel.app/api/flagged-store"
+PLAYBOOK_URL = "https://level-up-playbook.vercel.app/api/sync/flagged-store"
 SYNC_KEY = "59085493e8e63a164be0e443575b99f191b5c7fdb791c539"
 LOOKBACK_DAYS = 60  # how far back to scan for flagged
 LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts", "flagged-sync.log")
@@ -148,7 +148,9 @@ def sync():
     items = inbox.Items
     items.Sort("[ReceivedTime]", True)
 
-    cutoff = datetime.now() - timedelta(days=LOOKBACK_DAYS)
+    now = datetime.now()
+    cutoff = now - timedelta(days=LOOKBACK_DAYS)
+    cutoff_utc = cutoff.astimezone()  # make timezone-aware for COM comparison
     actions = []
 
     for item in items:
@@ -159,7 +161,7 @@ def sync():
             else:
                 received_dt = datetime.now()
 
-            if received_dt < cutoff:
+            if received_dt < cutoff_utc:
                 continue  # skip old emails
 
             flag_status = item.FlagStatus
