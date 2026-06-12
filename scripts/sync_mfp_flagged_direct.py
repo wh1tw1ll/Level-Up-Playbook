@@ -1,20 +1,14 @@
 #!/usr/bin/env python3
 """
-MFP Flagged Email Sync — reads flagged MFP emails via Outlook COM,
-analyzes body content for action/context, pushes to Playbook.
-Runs as a scheduled task.
+MFP Flagged Email Sync — direct (no threading) variant for session 0.
 """
-
-import json, os, sys, re, requests, win32com.client, pythoncom, threading
+import json, os, sys, re, requests, win32com.client, pythoncom
 from datetime import datetime, timedelta
 
-# ── Config ──────────────────────────────────────────────────────────
 PLAYBOOK_URL = "https://level-up-playbook.vercel.app/api/sync/flagged-store"
 SYNC_KEY = "59085493e8e63a164be0e443575b99f191b5c7fdb791c539"
-LOOKBACK_DAYS = 60  # how far back to scan for flagged
+LOOKBACK_DAYS = 60
 LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts", "flagged-sync.log")
-
-# ── Helpers ──────────────────────────────────────────────────────────
 
 def log(msg):
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -26,23 +20,14 @@ def log(msg):
     except:
         pass
 
-
 def extract_action(subject, body, sender, received):
-    """
-    Analyze email subject + body to extract:
-    - action_type: 'action_required', 'for_review', 'for_approval', 'informational', 'decision_needed', 'follow_up'
-    - summary: 1-2 line what needs to happen
-    - deadline detected (if any)
-    - confidence: high/medium/low
-    """
     text = (subject or "") + " " + (body or "")[:3000]
     text_lower = text.lower()
 
-    # Detect deadline patterns
     deadline = None
     deadline_patterns = [
         r'due\s+(?:by|on|date)?\s*:?\s*(\w+\s+\d{1,2}(?:st|nd|rd|th)?(?:\s*,?\s*\d{4})?)',
-        r'deadline[:\s]+(\w+\s+\d{1,2}(?:st|nd|rd|th)?(?:\s*,?\s*\d{4})?)',
+        r'deadline[:\\s]+(\w+\s+\d{1,2}(?:st|nd|rd|th)?(?:\s*,?\s*\d{4})?)',
         r'by\s+(\w+\s+\d{1,2}(?:st|nd|rd|th)?(?:\s*,?\s*\d{4})?)',
         r'(\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?)',
         r'response\s+(?:by|required|needed)\s+(\w+\s+\d{1,2}(?:st|nd|rd|th)?)',
@@ -53,14 +38,12 @@ def extract_action(subject, body, sender, received):
             deadline = m.group(1)[:30]
             break
 
-    # Detect action type
     urgency = "normal"
     for word in ["urgent", "asap", "immediately", "time sensitive", "critical", "overdue", "past due"]:
         if word in text_lower:
             urgency = "high"
             break
 
-    # Classify the action
     action_type = "follow_up"
     summary = subject or "(No subject)"
 
@@ -82,19 +65,15 @@ def extract_action(subject, body, sender, received):
         action_type = "informational"
         summary = f"Update: {subject}"
 
-    # Build a richer summary from body
-    # Try to find the actionable sentence
-    body_clean = re.sub(r'<[^>]+>', '', (body or ""))  # strip HTML
+    body_clean = re.sub(r'<[^>]+>', '', (body or ""))
     body_clean = re.sub(r'\s+', ' ', body_clean)[:2000]
 
-    # Extract first meaningful sentence
     for sep in ['\n\n', '\r\n\r\n']:
         if sep in body_clean:
             paragraphs = body_clean.split(sep)
             for p in paragraphs:
                 p = p.strip()
                 if len(p) > 20 and not p.startswith('>') and not p.startswith('On ') and 'wrote:' not in p:
-                    # Check if it sounds actionable
                     if any(w in p.lower() for w in ['please', 'can you', 'could you', 'need', 'required',
                                                       'let me know', 'send', 'review', 'approve', 'confirm']):
                         summary = p[:200]
@@ -114,39 +93,26 @@ def extract_action(subject, body, sender, received):
     }
     return result
 
-
 def sync():
-    pythoncom.CoInitialize()
+    pythoncom.CoInitializeEx(pythoncom.COINIT_APARTMENTTHREADED)
     log("=" * 60)
-    log("MFP Flagged Email Sync starting")
+    log("MFP Flagged Email Sync starting (direct mode)")
 
-    # Dispatch with timeout guard
     outlook_app = None
-    result_holder = []
-    error_holder = []
-    def _dispatch():
-        try:
-            pythoncom.CoInitialize()
-            app = win32com.client.Dispatch("Outlook.Application")
-            result_holder.append(app)
-        except Exception as e:
-            error_holder.append(e)
-        finally:
-            pythoncom.CoUninitialize()
-    t = threading.Thread(target=_dispatch, daemon=True)
-    t.start()
-    t.join(timeout=30)
-    if t.is_alive():
-        log("ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung")
+    try:
+        outlook_app = win32com.client.Dispatch("Outlook.Application")
+        log("Outlook Dispatch OK")
+    except Exception as e:
+        log(f"ERROR: Outlook COM dispatch failed: {e}")
         return
-    if error_holder:
-        log(f"ERROR: Outlook COM dispatch failed: {error_holder[0]}")
-        return
-    outlook_app = result_holder[0]
-    pythoncom.CoInitialize()  # re-init for main thread
-    outlook = outlook_app.GetNamespace("MAPI")
 
-    # Find MFP store
+    try:
+        outlook = outlook_app.GetNamespace("MAPI")
+        log("MAPI namespace OK")
+    except AttributeError as e:
+        log(f"ERROR: GetNamespace failed — MAPI may not be available: {e}")
+        return
+
     store_mfp = None
     for s in outlook.Stores:
         if "Whitney.Williams@miamifreedompark.com" in s.DisplayName and "Archive" not in s.DisplayName:
@@ -154,7 +120,9 @@ def sync():
             break
 
     if not store_mfp:
-        log("ERROR: MFP store not found")
+        log("ERROR: MFP store not found. Available stores:")
+        for s in outlook.Stores:
+            log(f"  - {s.DisplayName}")
         return
 
     root = store_mfp.GetRootFolder()
@@ -168,28 +136,27 @@ def sync():
         log("ERROR: MFP Inbox not found")
         return
 
-    # Get flagged items from inbox
     items = inbox.Items
     items.Sort("[ReceivedTime]", True)
 
     now = datetime.now()
     cutoff = now - timedelta(days=LOOKBACK_DAYS)
-    cutoff_utc = cutoff.astimezone()  # make timezone-aware for COM comparison
+    cutoff_utc = cutoff.astimezone()  # make timezone-aware
     actions = []
 
     for item in items:
         try:
             received = item.ReceivedTime
-            if received and hasattr(received, "timetuple"):
+            if hasattr(received, "timetuple"):
                 received_dt = received
             else:
                 received_dt = datetime.now().astimezone()
 
             if received_dt < cutoff_utc:
-                continue  # skip old emails
+                continue
 
             flag_status = item.FlagStatus
-            if flag_status not in [1, 2]:  # 1=flagged, 2=complete
+            if flag_status not in [1, 2]:
                 continue
 
             subject = item.Subject or ""
@@ -211,7 +178,6 @@ def sync():
         log("Nothing to sync")
         return
 
-    # Build payload
     payload = {
         "actions": actions,
         "source": "mfp_com_local",
@@ -219,16 +185,12 @@ def sync():
         "_scanned_at": datetime.now().isoformat()
     }
 
-    # POST to Playbook
     log(f"Posting {len(actions)} actions to Playbook...")
     try:
         resp = requests.post(
             PLAYBOOK_URL,
             json=payload,
-            headers={
-                "Content-Type": "application/json",
-                "x-sync-key": SYNC_KEY
-            },
+            headers={"Content-Type": "application/json", "x-sync-key": SYNC_KEY},
             timeout=30
         )
         if resp.ok:
@@ -239,7 +201,6 @@ def sync():
     except Exception as e:
         log(f"Sync ERROR: {e}")
 
-    # Also write local backup
     backup_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts", "flagged-local.json")
     try:
         with open(backup_path, "w") as f:
@@ -250,7 +211,6 @@ def sync():
 
     log(f"Sync complete ({len(actions)} actions)")
     log("=" * 60)
-
 
 if __name__ == "__main__":
     sync()

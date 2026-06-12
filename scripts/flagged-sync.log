@@ -1240,3 +1240,517 @@
 [2026-06-11 21:57:59] MFP Flagged Email Sync starting
 [2026-06-11 22:08:17] ============================================================
 [2026-06-11 22:08:17] MFP Flagged Email Sync starting
+[2026-06-11 22:29:53] ============================================================
+[2026-06-11 22:29:53] MFP Flagged Email Sync starting
+[2026-06-11 22:32:57] ============================================================
+[2026-06-11 22:32:57] MFP Flagged Email Sync starting
+[2026-06-11 22:42:39] ============================================================
+[2026-06-11 22:42:39] MFP Flagged Email Sync starting
+[2026-06-11 22:42:39] ERROR: Outlook COM dispatch failed: (-2147221008, 'CoInitialize has not been called.', None, None)
+[2026-06-11 22:43:03] ============================================================
+[2026-06-11 22:43:03] MFP Flagged Email Sync starting
+[2026-06-11 22:43:33] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-11 23:00:02] ============================================================
+[2026-06-11 23:00:02] MFP Flagged Email Sync starting
+[2026-06-11 23:00:32] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-11 23:27:51] ============================================================
+[2026-06-11 23:27:51] MFP Flagged Email Sync starting
+[2026-06-11 23:28:21] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-11 23:29:06] ============================================================
+[2026-06-11 23:29:06] MFP Flagged Email Sync starting
+[2026-06-11 23:29:36] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-11 23:46:11] ============================================================
+[2026-06-11 23:46:11] MFP Flagged Email Sync starting
+[2026-06-11 23:46:41] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-11 23:49:09] ============================================================
+[2026-06-11 23:49:09] MFP Flagged Email Sync starting
+[2026-06-11 23:49:39] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-11 23:49:54] ============================================================
+[2026-06-11 23:49:54] MFP Flagged Email Sync starting
+[2026-06-11 23:50:24] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 00:07:00] ============================================================
+[2026-06-12 00:07:00] MFP Flagged Email Sync starting
+[2026-06-12 00:07:30] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 00:34:50] ============================================================
+[2026-06-12 00:34:50] MFP Flagged Email Sync starting
+[2026-06-12 00:35:20] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 00:51:59] ============================================================
+[2026-06-12 00:51:59] MFP Flagged Email Sync starting
+[2026-06-12 00:52:29] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 00:53:28] ============================================================
+[2026-06-12 00:53:28] MFP Flagged Email Sync starting
+[2026-06-12 00:53:58] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 01:00:19] ============================================================
+[2026-06-12 01:00:19] MFP Flagged Email Sync starting
+[2026-06-12 01:02:19] ============================================================
+[2026-06-12 01:02:19] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 01:23:00] ============================================================
+[2026-06-12 01:23:00] MFP Flagged Email Sync starting
+[2026-06-12 01:23:30] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 01:23:58] ============================================================
+[2026-06-12 01:23:58] MFP Flagged Email Sync starting
+[2026-06-12 01:24:28] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 01:26:29] Outlook Dispatch OK
+[2026-06-12 01:26:29] MAPI namespace OK
+[2026-06-12 01:35:47] ============================================================
+[2026-06-12 01:35:47] MFP Flagged Email Sync starting
+[2026-06-12 01:39:55] ============================================================
+[2026-06-12 01:39:55] MFP Flagged Email Sync starting
+[2026-06-12 01:43:57] ============================================================
+[2026-06-12 01:43:57] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 01:44:00] Outlook Dispatch OK
+[2026-06-12 01:44:00] MAPI namespace OK
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:03]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:44:04] Found 0 flagged emails with actions extracted
+[2026-06-12 01:44:04] Nothing to sync
+[2026-06-12 01:44:57] ============================================================
+[2026-06-12 01:44:57] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 01:44:59] Outlook Dispatch OK
+[2026-06-12 01:45:00] MAPI namespace OK
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02]   Error processing item: can't compare offset-naive and offset-aware datetimes
+[2026-06-12 01:45:02] Found 0 flagged emails with actions extracted
+[2026-06-12 01:45:02] Nothing to sync
+[2026-06-12 01:47:38] ============================================================
+[2026-06-12 01:47:38] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 01:47:40] Outlook Dispatch OK
+[2026-06-12 01:47:40] MAPI namespace OK
+[2026-06-12 01:47:42]   Processing flagged: Erik Imler - Re: MFP x Kwik Goal - Player Shelter Chat
+[2026-06-12 01:47:43]   Processing flagged: Savannah Amparo - Re: MFP | Terrace Truss & Pergola
+[2026-06-12 01:47:43]   Processing flagged: Graham Oxley - RE: Agreement
+[2026-06-12 01:47:43]   Processing flagged: Genna Selesnick - Re: Stadium Sq. Footage
+[2026-06-12 01:47:43]   Processing flagged: Greg Giordano - Re: Baptist Health Benches In Community Fields
+[2026-06-12 01:47:43]   Processing flagged: Stephanie Acosta via Docusign - Completed: Lemartec - 19069 Miami Freedom Park Trade Agreeme
+[2026-06-12 01:47:43]   Processing flagged: Edwin Efezokhae (US) - Re: Miami Beckham United - 2024 Cost Seg Info Request TaxDoc
+[2026-06-12 01:47:43]   Processing flagged: Graham Oxley - RE: Garage Displays - Contract
+[2026-06-12 01:47:43]   Processing flagged: Delaney Myers - Re: Payment Update - Inter Miami Freedom Park
+[2026-06-12 01:47:44]   Processing flagged: Andrew Muriedas - MFP - Open Items 
+[2026-06-12 01:47:44]   Processing flagged: Victor Oliver - Re: TCO + Life Safety Plan concert
+[2026-06-12 01:47:44]   Processing flagged: Asker, Mohamed Y. - RE: MFP - Response to Arquitectonica
+[2026-06-12 01:47:44]   Processing flagged: Andres Mesa - MFP-Owner Direction to Hold Change Orders
+[2026-06-12 01:47:44]   Processing flagged: Ashley Reyes - Payment Update - Inter Miami Freedom Park
+[2026-06-12 01:47:44]   Processing flagged: Cybill Bellevue - RE: MFP | Project Turnover Progress
+[2026-06-12 01:47:44]   Processing flagged: Tristan Lewis - Re: MFP - Change Orders 
+[2026-06-12 01:47:44]   Processing flagged: Tyler Thompson - Re: Quick Chat
+[2026-06-12 01:47:44]   Processing flagged: Tristan Lewis - MFP - Change Orders 
+[2026-06-12 01:47:44]   Processing flagged: Charles Hugh Crain - RE: IMFC Stadium Design Team - punch list - TT
+[2026-06-12 01:47:44]   Processing flagged: Cristina Pena - RE: MFP - Inter Miami FC
+[2026-06-12 01:47:44]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 4 Hq-26-6561 File 377616
+[2026-06-12 01:47:44]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 3 Hq-26-6560 File 377614
+[2026-06-12 01:47:44]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 2 Hq-26-6559 File 377613
+[2026-06-12 01:47:44]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 1 Hq-26-6191 File 377285
+[2026-06-12 01:47:44]   Processing flagged: Reese, Andrea - Approved DALE DOG Hq-26-6502 File 377564
+[2026-06-12 01:47:44] Found 25 flagged emails with actions extracted
+[2026-06-12 01:47:44] Posting 25 actions to Playbook...
+[2026-06-12 01:47:45] Sync FAILED: HTTP 500 - A server error has occurred
+
+FUNCTION_INVOCATION_FAILED
+
+iad1::l4r22-1781243264447-9af311dd6a5c
+
+[2026-06-12 01:47:45] Local backup written to C:\Users\HermesAdmin\Level-Up-Playbook\scripts\..\scripts\flagged-local.json
+[2026-06-12 01:47:45] Sync complete (25 actions)
+[2026-06-12 01:47:45] ============================================================
+[2026-06-12 01:48:37] ============================================================
+[2026-06-12 01:48:37] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 01:48:40] Outlook Dispatch OK
+[2026-06-12 01:48:40] MAPI namespace OK
+[2026-06-12 01:48:42]   Processing flagged: Erik Imler - Re: MFP x Kwik Goal - Player Shelter Chat
+[2026-06-12 01:48:42]   Processing flagged: Savannah Amparo - Re: MFP | Terrace Truss & Pergola
+[2026-06-12 01:48:42]   Processing flagged: Graham Oxley - RE: Agreement
+[2026-06-12 01:48:43]   Processing flagged: Genna Selesnick - Re: Stadium Sq. Footage
+[2026-06-12 01:48:43]   Processing flagged: Greg Giordano - Re: Baptist Health Benches In Community Fields
+[2026-06-12 01:48:43]   Processing flagged: Stephanie Acosta via Docusign - Completed: Lemartec - 19069 Miami Freedom Park Trade Agreeme
+[2026-06-12 01:48:43]   Processing flagged: Edwin Efezokhae (US) - Re: Miami Beckham United - 2024 Cost Seg Info Request TaxDoc
+[2026-06-12 01:48:43]   Processing flagged: Graham Oxley - RE: Garage Displays - Contract
+[2026-06-12 01:48:43]   Processing flagged: Delaney Myers - Re: Payment Update - Inter Miami Freedom Park
+[2026-06-12 01:48:43]   Processing flagged: Andrew Muriedas - MFP - Open Items 
+[2026-06-12 01:48:43]   Processing flagged: Victor Oliver - Re: TCO + Life Safety Plan concert
+[2026-06-12 01:48:43]   Processing flagged: Asker, Mohamed Y. - RE: MFP - Response to Arquitectonica
+[2026-06-12 01:48:43]   Processing flagged: Andres Mesa - MFP-Owner Direction to Hold Change Orders
+[2026-06-12 01:48:43]   Processing flagged: Ashley Reyes - Payment Update - Inter Miami Freedom Park
+[2026-06-12 01:48:43]   Processing flagged: Cybill Bellevue - RE: MFP | Project Turnover Progress
+[2026-06-12 01:48:43]   Processing flagged: Tristan Lewis - Re: MFP - Change Orders 
+[2026-06-12 01:48:43]   Processing flagged: Tyler Thompson - Re: Quick Chat
+[2026-06-12 01:48:43]   Processing flagged: Tristan Lewis - MFP - Change Orders 
+[2026-06-12 01:48:43]   Processing flagged: Charles Hugh Crain - RE: IMFC Stadium Design Team - punch list - TT
+[2026-06-12 01:48:43]   Processing flagged: Cristina Pena - RE: MFP - Inter Miami FC
+[2026-06-12 01:48:43]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 4 Hq-26-6561 File 377616
+[2026-06-12 01:48:43]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 3 Hq-26-6560 File 377614
+[2026-06-12 01:48:43]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 2 Hq-26-6559 File 377613
+[2026-06-12 01:48:43]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 1 Hq-26-6191 File 377285
+[2026-06-12 01:48:43]   Processing flagged: Reese, Andrea - Approved DALE DOG Hq-26-6502 File 377564
+[2026-06-12 01:48:43] Found 25 flagged emails with actions extracted
+[2026-06-12 01:48:43] Posting 25 actions to Playbook...
+[2026-06-12 01:48:44] Sync FAILED: HTTP 500 - A server error has occurred
+
+FUNCTION_INVOCATION_FAILED
+
+iad1::jng8p-1781243323653-992d2c7de8c7
+
+[2026-06-12 01:48:44] Local backup written to C:\Users\HermesAdmin\Level-Up-Playbook\scripts\..\scripts\flagged-local.json
+[2026-06-12 01:48:44] Sync complete (25 actions)
+[2026-06-12 01:48:44] ============================================================
+[2026-06-12 02:13:06] ============================================================
+[2026-06-12 02:13:06] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 02:13:08] Outlook Dispatch OK
+[2026-06-12 02:13:08] MAPI namespace OK
+[2026-06-12 02:13:12]   Processing flagged: Erik Imler - Re: MFP x Kwik Goal - Player Shelter Chat
+[2026-06-12 02:13:13]   Processing flagged: Savannah Amparo - Re: MFP | Terrace Truss & Pergola
+[2026-06-12 02:13:13]   Processing flagged: Graham Oxley - RE: Agreement
+[2026-06-12 02:13:13]   Processing flagged: Genna Selesnick - Re: Stadium Sq. Footage
+[2026-06-12 02:13:13]   Processing flagged: Greg Giordano - Re: Baptist Health Benches In Community Fields
+[2026-06-12 02:13:13]   Processing flagged: Stephanie Acosta via Docusign - Completed: Lemartec - 19069 Miami Freedom Park Trade Agreeme
+[2026-06-12 02:13:13]   Processing flagged: Edwin Efezokhae (US) - Re: Miami Beckham United - 2024 Cost Seg Info Request TaxDoc
+[2026-06-12 02:13:13]   Processing flagged: Graham Oxley - RE: Garage Displays - Contract
+[2026-06-12 02:13:13]   Processing flagged: Delaney Myers - Re: Payment Update - Inter Miami Freedom Park
+[2026-06-12 02:13:14]   Processing flagged: Andrew Muriedas - MFP - Open Items 
+[2026-06-12 02:13:14]   Processing flagged: Victor Oliver - Re: TCO + Life Safety Plan concert
+[2026-06-12 02:13:14]   Processing flagged: Asker, Mohamed Y. - RE: MFP - Response to Arquitectonica
+[2026-06-12 02:13:14]   Processing flagged: Andres Mesa - MFP-Owner Direction to Hold Change Orders
+[2026-06-12 02:13:14]   Processing flagged: Ashley Reyes - Payment Update - Inter Miami Freedom Park
+[2026-06-12 02:13:14]   Processing flagged: Cybill Bellevue - RE: MFP | Project Turnover Progress
+[2026-06-12 02:13:14]   Processing flagged: Tristan Lewis - Re: MFP - Change Orders 
+[2026-06-12 02:13:14]   Processing flagged: Tyler Thompson - Re: Quick Chat
+[2026-06-12 02:13:14]   Processing flagged: Tristan Lewis - MFP - Change Orders 
+[2026-06-12 02:13:14]   Processing flagged: Charles Hugh Crain - RE: IMFC Stadium Design Team - punch list - TT
+[2026-06-12 02:13:14]   Processing flagged: Cristina Pena - RE: MFP - Inter Miami FC
+[2026-06-12 02:13:14]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 4 Hq-26-6561 File 377616
+[2026-06-12 02:13:14]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 3 Hq-26-6560 File 377614
+[2026-06-12 02:13:14]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 2 Hq-26-6559 File 377613
+[2026-06-12 02:13:14]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 1 Hq-26-6191 File 377285
+[2026-06-12 02:13:14]   Processing flagged: Reese, Andrea - Approved DALE DOG Hq-26-6502 File 377564
+[2026-06-12 02:13:14] Found 25 flagged emails with actions extracted
+[2026-06-12 02:13:14] Posting 25 actions to Playbook...
+[2026-06-12 02:13:15] Sync FAILED: HTTP 500 - A server error has occurred
+
+FUNCTION_INVOCATION_FAILED
+
+iad1::7g57t-1781244794471-380b116a9646
+
+[2026-06-12 02:13:15] Local backup written to C:\Users\HermesAdmin\Level-Up-Playbook\scripts\..\scripts\flagged-local.json
+[2026-06-12 02:13:15] Sync complete (25 actions)
+[2026-06-12 02:13:15] ============================================================
+[2026-06-12 02:30:19] ============================================================
+[2026-06-12 02:30:19] MFP Flagged Email Sync starting
+[2026-06-12 02:50:12] ============================================================
+[2026-06-12 02:50:12] MFP Flagged Email Sync starting
+[2026-06-12 03:07:14] ============================================================
+[2026-06-12 03:07:14] MFP Flagged Email Sync starting
+[2026-06-12 03:24:24] ============================================================
+[2026-06-12 03:24:24] MFP Flagged Email Sync starting
+[2026-06-12 03:41:16] ============================================================
+[2026-06-12 03:41:16] MFP Flagged Email Sync starting
+[2026-06-12 03:59:18] ============================================================
+[2026-06-12 03:59:18] MFP Flagged Email Sync starting
+[2026-06-12 04:17:15] ============================================================
+[2026-06-12 04:17:15] MFP Flagged Email Sync starting
+[2026-06-12 04:20:51] ============================================================
+[2026-06-12 04:20:51] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 04:20:53] Outlook Dispatch OK
+[2026-06-12 04:20:53] MAPI namespace OK
+[2026-06-12 04:20:57]   Processing flagged: Erik Imler - Re: MFP x Kwik Goal - Player Shelter Chat
+[2026-06-12 04:20:58]   Processing flagged: Savannah Amparo - Re: MFP | Terrace Truss & Pergola
+[2026-06-12 04:20:58]   Processing flagged: Graham Oxley - RE: Agreement
+[2026-06-12 04:20:58]   Processing flagged: Genna Selesnick - Re: Stadium Sq. Footage
+[2026-06-12 04:20:58]   Processing flagged: Greg Giordano - Re: Baptist Health Benches In Community Fields
+[2026-06-12 04:20:58]   Processing flagged: Stephanie Acosta via Docusign - Completed: Lemartec - 19069 Miami Freedom Park Trade Agreeme
+[2026-06-12 04:20:58]   Processing flagged: Edwin Efezokhae (US) - Re: Miami Beckham United - 2024 Cost Seg Info Request TaxDoc
+[2026-06-12 04:20:58]   Processing flagged: Graham Oxley - RE: Garage Displays - Contract
+[2026-06-12 04:20:58]   Processing flagged: Delaney Myers - Re: Payment Update - Inter Miami Freedom Park
+[2026-06-12 04:20:58]   Processing flagged: Andrew Muriedas - MFP - Open Items 
+[2026-06-12 04:20:58]   Processing flagged: Victor Oliver - Re: TCO + Life Safety Plan concert
+[2026-06-12 04:20:58]   Processing flagged: Asker, Mohamed Y. - RE: MFP - Response to Arquitectonica
+[2026-06-12 04:20:58]   Processing flagged: Andres Mesa - MFP-Owner Direction to Hold Change Orders
+[2026-06-12 04:20:58]   Processing flagged: Ashley Reyes - Payment Update - Inter Miami Freedom Park
+[2026-06-12 04:20:59]   Processing flagged: Cybill Bellevue - RE: MFP | Project Turnover Progress
+[2026-06-12 04:20:59]   Processing flagged: Tristan Lewis - Re: MFP - Change Orders 
+[2026-06-12 04:20:59]   Processing flagged: Tyler Thompson - Re: Quick Chat
+[2026-06-12 04:20:59]   Processing flagged: Tristan Lewis - MFP - Change Orders 
+[2026-06-12 04:20:59]   Processing flagged: Charles Hugh Crain - RE: IMFC Stadium Design Team - punch list - TT
+[2026-06-12 04:20:59]   Processing flagged: Cristina Pena - RE: MFP - Inter Miami FC
+[2026-06-12 04:20:59]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 4 Hq-26-6561 File 377616
+[2026-06-12 04:20:59]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 3 Hq-26-6560 File 377614
+[2026-06-12 04:20:59]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 2 Hq-26-6559 File 377613
+[2026-06-12 04:20:59]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 1 Hq-26-6191 File 377285
+[2026-06-12 04:20:59]   Processing flagged: Reese, Andrea - Approved DALE DOG Hq-26-6502 File 377564
+[2026-06-12 04:20:59] Found 25 flagged emails with actions extracted
+[2026-06-12 04:20:59] Posting 25 actions to Playbook...
+[2026-06-12 04:21:00] Sync FAILED: HTTP 500 - A server error has occurred
+
+FUNCTION_INVOCATION_FAILED
+
+iad1::v8j79-1781252459141-15196c8613d7
+
+[2026-06-12 04:21:00] Local backup written to C:\Users\HermesAdmin\Level-Up-Playbook\scripts\..\scripts\flagged-local.json
+[2026-06-12 04:21:00] Sync complete (25 actions)
+[2026-06-12 04:21:00] ============================================================
