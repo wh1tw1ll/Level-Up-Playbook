@@ -13,7 +13,6 @@ import sharepointSearch from '../lib/handlers/sharepoint-search.js';
 import sharepointRead from '../lib/handlers/sharepoint-read.js';
 import oauthHandler from '../lib/handlers/oauth.js';
 import chiefsHandler from '../lib/handlers/chiefs.js';
-import ssAdmin from '../lib/handlers/ss-admin.js';
 
 // Module-level flagged store cache (survives warm instances)
 let _flaggedCache = null;
@@ -66,9 +65,6 @@ export default function handler(req, res) {
       return sharepointRead(req, res);
     case '/api/chiefs':
       return chiefsHandler(req, res);
-    case '/api/ss-admin':
-      return ssAdmin(req, res);
-    default:
       if (path === '/api/oauth' || path.startsWith('/api/oauth/')) {
         return oauthHandler(req, res);
       }
