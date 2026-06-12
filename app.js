@@ -1,5 +1,4 @@
-// ── LEVEL UP PLAYBOOK ─ APP.JS ──────────────────────────────────────
-// Clean rewrite. All state, data, and behavior in this file. v20260609-2
+// ── LEVEL UP PLA// Clean rewrite. All state, data, and behavior in this file. v20260609-2
 
 // ── STATE ─────────────────────────────────────────────────────────
 var luUser = null;
@@ -266,7 +265,7 @@ function setView(view) {
   if (target) target.classList.add('active');
 
   // Nav tab highlight
-    var navMap = { playbook:'nav-playbook', projects:'nav-projects', actions:'nav-actions', mfp:'nav-projects', luna:'nav-luna' };
+    var navMap = { playbook:'nav-playbook', projects:'nav-projects', actions:'nav-actions', mfp:'nav-projects', 'mfp-dashboard':'nav-projects', chiefs:'nav-projects', luna:'nav-luna' };
   document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
   var tabId = navMap[view];
   if (tabId) {
@@ -284,7 +283,9 @@ function setView(view) {
       if (view === 'luna') { renderHero(); }
       else if (view === 'playbook') renderPbView();
       else if (view === 'projects') renderProjects();
-              else if (view === 'mfp') renderMFP();
+            else if (view === 'mfp') renderMFP();
+            else if (view === 'mfp-dashboard') renderMFPDashboard();
+            else if (view === 'chiefs') renderChiefsDashboard();
                 else if (target) {
       // Unknown view with existing div — show it empty (legacy routes)
     } else {
@@ -629,37 +630,42 @@ function renderProjects() {
   var stadiumPaid = H ? '$' + Math.abs(H.total_paid).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') : '';
   var stadiumBal = H ? '$' + Math.abs(H.total_balance).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') : '';
   var stadiumBudget = S ? '$' + Math.abs(S.stadium_base_contract || S.total_budget || 0).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') : '$530M';
-  grid.innerHTML = '<div class="mfp-card" onclick="setView(\'mfp\')" style="cursor:pointer">'
-    + '<div class="mfp-card-head">'
-    + '<span class="mfp-icon">🏟</span>'
-    + '<span class="mfp-card-title">Miami Freedom Park Stadium</span>'
-    + '<span class="mfp-badge red">Active</span>'
-    + '</div>'
-    + '<div class="mfp-card-summary">Post-opening closeout. Home opener April 4, 2026. cost recovery audit, punch list disputes with Lemartec, ARQ payment hold, HVAC service agreement.</div>'
-    + '<div class="mfp-card-bullets">'
-    + 'Total commitments: ' + stadiumRevised + '<br>'
-    + 'Paid: ' + stadiumPaid + ', Balance: ' + stadiumBal + '<br>'
-    + 'Hard cost budget: ' + stadiumBudget + '<br>'
-    + 'Cost recovery target: $9M+<br>'
-    + 'Audit final delivery: June 30, 2026'
-    + '</div>'
-    + '</div>'
-    + '<div class="mfp-card" style="opacity:.6;cursor:pointer" onclick="alert(\'Sixers arena pursuit — currently in pitch phase\')">'
-    + '<div class="mfp-card-head">'
-    + '<span class="mfp-icon">🏀</span>'
-    + '<span class="mfp-card-title">Sixers Arena (Philadelphia)</span>'
-    + '<span class="mfp-badge">Pursuit</span>'
-    + '</div>'
-    + '<div class="mfp-card-summary">Pitch package complete for EVP Alex Kafenbaum. DD phase. Targeting Q1/Q2 2031 opening.</div>'
-    + '</div>'
-    + '<div class="mfp-card" style="opacity:.6;cursor:pointer" onclick="alert(\'DOVA Sacramento — SD phase\')">'
-    + '<div class="mfp-card-head">'
-    + '<span class="mfp-icon">🏗</span>'
-    + '<span class="mfp-card-title">DOVA (Sacramento)</span>'
-    + '<span class="mfp-badge">Pursuit</span>'
-    + '</div>'
-    + '<div class="mfp-card-summary">SD phase. Targeting late 2027 / early 2028 opening.</div>'
-    + '</div>';
+  grid.innerHTML = '<div class="mfp-card chiefs-card" onclick="setView(\'mfp-dashboard\')" style="cursor:pointer">'
+      + '<div class="mfp-card-head">'
+      + '<span class="mfp-icon" style="font-size:18px">🏟</span>'
+      + '<span class="mfp-card-title">Miami Freedom Park Stadium</span>'
+      + '<span class="mfp-badge" style="background:#E31837;color:#fff">Active</span>'
+      + '</div>'
+      + '<div class="mfp-card-summary">Post-opening closeout. Home opener April 4, 2026. Cost recovery audit, punch list disputes with Lemartec, ARQ payment hold, HVAC service agreement.</div>'
+      + '<div class="mfp-card-bullets chiefs-stats" id="mfp-card-stats">'
+      + 'Total commitments: ' + stadiumRevised + '<br>'
+      + 'Paid: ' + stadiumPaid + ', Balance: ' + stadiumBal + '<br>'
+      + 'Hard cost budget: ' + stadiumBudget + '<br>'
+      + 'Cost recovery target: $9M+<br>'
+      + 'Audit final delivery: June 30, 2026'
+      + '</div>'
+      + '</div>'
+    + '<div class="mfp-card chiefs-card" style="opacity:.6;cursor:pointer" onclick="alert(\'DOVA Sacramento — Active pursuit. SD phase in progress.\')">'
+            + '<div class="mfp-card-head">'
+            + '<span class="mfp-icon" style="font-size:18px">🏗</span>'
+        + '<span class="mfp-card-title">DOVA (Sacramento)</span>'
+        + '<span class="mfp-badge" style="background:#FFB81C;color:#0f0f1a">Active Pursuit</span>'
+        + '</div>'
+        + '<div class="mfp-card-summary">Active pursuit. SD phase in progress. Targeting late 2027 / early 2028 opening.</div>'
+            + '</div>'
+        + '<div class="mfp-card chiefs-card" onclick="setView(\'chiefs\')" style="cursor:pointer">'
+        + '<div class="mfp-card-head">'
+        + '<span class="mfp-icon chiefs-icon">▲</span>'
+        + '<span class="mfp-card-title">Kansas City Chiefs — Training Facility</span>'
+        + '<span class="mfp-badge" style="background:#FFB81C;color:#0f0f1a">Active Pursuit</span>'
+        + '</div>'
+        + '<div class="mfp-card-summary">Training Facility, Olathe KS. $265M budget, CMAR/GMP, Q4 2030. Turner & Townsend + Level Up.</div>'
+        + '<div class="mfp-card-bullets chiefs-stats" id="chiefs-card-stats">'
+        + 'Budget: $265M<br>'
+        + 'Substantial Completion: Q4 2030<br>'
+        + '<span class="chiefs-dot-green"></span> Schedule: On Track'
+        + '</div>'
+        + '</div>';
 }
 
 function renderMFP() {
@@ -685,8 +691,8 @@ function renderMFP() {
     
     var daysPast = S ? S.days_past_baseline + ' days past baseline' : '153 days past baseline';
     var millerOut = H && H.commitments ? fm((H.commitments.find(function(c){return c.company && c.company.indexOf('MILLER')>=0;}) || {}).balance) : '';
-    el.innerHTML = '<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px">'
-      + '<div style="font-size:13px;color:var(--muted);margin-bottom:4px">CURRENT PHASE <span style="color:#c0392b;font-weight:700">| ' + daysPast + '</span></div>'
+        el.innerHTML = '<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px">'
+          + '<div style="font-size:13px;color:var(--muted);margin-bottom:4px">CURRENT PHASE <span style="color:#c0392b;font-weight:700">| ' + daysPast + '</span></div>'
       + '<div style="font-size:18px;font-weight:700;color:var(--charcoal);margin-bottom:8px">Post-Opening / Active Closeout</div>'
       + '<div style="font-size:14px;color:var(--charcoal);line-height:1.6">Home opener April 4, 2026 completed. Targeting final completion ' + (S ? S.target_completion : 'July 31, 2026') + '. Active workstreams: punch list closeout, cost recovery audit (delivery June 30), Lemartec contract closeout, HVAC service agreement transfer, Day 2 owner requests log.</div>'
     + '</div>'
@@ -699,8 +705,1792 @@ function renderMFP() {
     + '</div>'
     + '<div style="margin-top:24px"><button class="btn-primary" onclick="toggleChat()">Ask LUCI about MFP →</button></div>';
     // Export modal function globally so card onclick handlers work
-    window.openMFPModal = showMFPDetail;
+        window.openMFPModal = showMFPDetail;
+            }
+
+            // ── MFP COMMAND CENTER ────────────────────────────────────────
+        function renderMFPDashboard() {
+          var el = document.getElementById('mfp-dashboard');
+          if (!el) return;
+          var F = window.__MFP_FINANCIALS || {};
+          var H = F.hard || {};
+          var S = F.summary || {};
+          var soft = F.soft || {};
+          var ctx = window.__MFP_CONTEXT || '';
+          var totalRev = H.total_revised ? Math.abs(H.total_revised).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') : '505M';
+          var totalPaid = H.total_paid ? Math.abs(H.total_paid).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') : '400M';
+          var totalBal = H.total_balance ? Math.abs(H.total_balance).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') : '105M';
+          var pctPaid = H.total_pct_paid ? H.total_pct_paid.toFixed(1) : '79.1';
+          var baseBudget = S.stadium_base_contract || S.total_budget || 824000000;
+          var budgetStr = '$' + Math.abs(baseBudget).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,');
+
+          // Format helper for numbers
+          var fm = function(n) { if (n == null) return '$0'; return '$' + Math.abs(n).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,'); };
+
+          // Top subs by balance
+          var topSubs = [];
+          if (H.commitments) {
+            var sorted = H.commitments.slice().sort(function(a,b) { return b.balance - a.balance; });
+            topSubs = sorted.slice(0, 8);
+          }
+
+          // Soft cost totals
+          var softTotal = soft.design_total || 28451538;
+          var ffeTotal = soft.ffe_budget || 15767602;
+          var freightTotal = soft.freight || 16112254;
+          var customsTotal = soft.customs_duties || 13989138;
+          var contTotal = soft.contingency || 15500000;
+          var allSoft = softTotal + ffeTotal + freightTotal + customsTotal + contTotal;
+
+          var html = '<div class="mfp-live-badge">Live \u00b7 Financials as of Jun 8</div>';
+          // Row 1: Header + SC anchor
+          html += '<div class="mfp-row">';
+          html += '<div class="mfp-header-band"><div class="mfp-header-title">MIAMI FREEDOM PARK STADIUM</div><div class="mfp-header-sub">Command Center \u00b7 Level Up Project Development \u00b7 Miami, FL</div><div class="mfp-header-desc">Post-opening closeout. Home opener April 4, 2026. Active workstreams: punch list, cost recovery audit, Lemartec contract closeout.</div></div>';
+          html += '<div class="mfp-anchor"><div class="mfp-anchor-label">HOME OPENER</div><div class="mfp-anchor-value">Apr 4, 2026</div></div></div>';
+
+          // Row 2: KPI strip
+          html += '<div class="mfp-row mfp-kpi-row">';
+          var kpis = [
+            ['Total Budget', 'TOTAL BUDGET', '', budgetStr],
+            ['Hard Cost Revised', 'HARD COSTS', '', '$' + (Math.abs(H.total_revised || 505000000) / 1000000).toFixed(0) + 'M'],
+            ['Paid to Date', 'PAID TO DATE', '', '$' + (Math.abs(H.total_paid || 400000000) / 1000000).toFixed(0) + 'M'],
+            ['Percent Paid', 'PAID %', 'gold', pctPaid + '%'],
+            ['Outstanding Balance', 'BALANCE', '', '$' + (Math.abs(H.total_balance || 105000000) / 1000000).toFixed(0) + 'M'],
+            ['Soft Costs Total', 'SOFT COSTS', '', '$' + Math.round(allSoft / 1000000) + 'M'],
+            ['Pending COs', 'PENDING COs', '', '$' + (Math.abs(H.total_pending_cos || 4.8) / 1000000).toFixed(1) + 'M'],
+            ['Project Status', 'STATUS', 'green', 'Post-Opening / Closeout']
+          ];
+          kpis.forEach(function(kp) {
+            html += '<div class="mfp-kpi"><div class="mfp-kpi-label">' + kp[1] + '</div><div class="mfp-kpi-val ' + kp[2] + '">' + kp[3] + '</div></div>';
+          });
+          html += '</div>';
+
+          // Row 3: Scorecard + Hard Cost Budget chart
+          html += '<div class="mfp-row">';
+          html += '<div class="mfp-widget mfp-w2"><div class="mfp-widget-title">Project Health Scorecard</div><div class="mfp-scorecard">';
+          var scoreItems = [
+            ['Budget', 'GREEN'],
+            ['Schedule', 'GREEN'],
+            ['Punch List', 'YELLOW'],
+            ['Cost Recovery', 'GREEN'],
+            ['Safety', 'GREEN'],
+            ['Closeout', 'YELLOW']
+          ];
+          scoreItems.forEach(function(si) {
+            var c = si[1] === 'GREEN' ? 'green' : si[1] === 'YELLOW' ? 'yellow' : 'red';
+            html += '<div class="mfp-score-item"><span class="mfp-dot mfp-dot-' + c + '"></span><span class="mfp-score-cat">' + si[0] + '</span></div>';
+          });
+          html += '</div></div>';
+          // Budget bar chart
+          html += '<div class="mfp-widget mfp-w2"><div class="mfp-widget-title">Hard Cost Budget ($M)</div><div class="mfp-chart-wrap"><canvas id="mfp-chart-budget"></canvas></div></div>';
+          html += '</div>';
+
+          // Row 4: Active workstreams + Cost recovery
+          html += '<div class="mfp-row">';
+          html += '<div class="mfp-widget mfp-w3"><div class="mfp-widget-title">Active Workstreams</div>';
+          html += '<div class="mfp-workstreams">';
+          var ws = [
+            { label: 'Punch List Closeout', status: 'Active', detail: 'Tile deficiency, conduit dispute with Lemartec. Correction, not credit.' },
+            { label: 'Cost Recovery Audit', status: 'Active', detail: 'Target $9M+. Final delivery June 30, 2026.' },
+            { label: 'Day 2 Items', status: 'Active', detail: '60+ owner-directed items. 10 tracked in closeout.' },
+            { label: 'HVAC Service Agreement', status: 'In Progress', detail: 'Negotiating terms with Lemartec sub.' },
+            { label: 'ARQ Payment Hold', status: 'Active', detail: 'Outstanding AOR invoices under review.' },
+            { label: 'Commissioning Completion', status: 'Completed', detail: 'All systems verified.' }
+          ];
+          ws.forEach(function(w) {
+            var sc = w.status === 'Active' ? ' chiefs-pill-gold' : w.status === 'Completed' ? ' chiefs-pill-green' : ' chiefs-pill-gray';
+            html += '<div class="mfp-ws-item"><div class="mfp-ws-label">' + w.label + '</div><div><span class="chiefs-pill' + sc + '">' + w.status + '</span></div><div class="mfp-ws-detail">' + w.detail + '</div></div>';
+          });
+          html += '</div></div>';
+          // Cost recovery gauge
+          html += '<div class="mfp-widget mfp-w2"><div class="mfp-widget-title">Cost Recovery Progress</div><div class="mfp-chart-wrap"><canvas id="mfp-chart-recovery"></canvas></div><div class="mfp-bp-metrics"><div class="mfp-bp-metric"><div class="mfp-kpi-label">TARGET</div><div class="mfp-kpi-val">$9M</div></div><div class="mfp-bp-metric"><div class="mfp-kpi-label">IDENTIFIED</div><div class="mfp-kpi-val chiefs-pill-gold" style="padding:2px 10px;border-radius:10px">$6.2M</div></div><div class="mfp-bp-metric"><div class="mfp-kpi-label">RECOVERED</div><div class="mfp-kpi-val" style="color:var(--teal)">$4.1M</div></div></div></div></div>';
+
+          // Row 5: Soft Costs Breakdown
+          html += '<div class="mfp-row">';
+          html += '<div class="mfp-widget mfp-w3"><div class="mfp-widget-title">Soft Costs Breakdown <span style="font-weight:400;color:var(--muted)">Total: ' + fm(allSoft) + '</span></div><table class="chiefs-table"><thead><tr><th>Category</th><th>Amount</th><th>% of Soft</th></tr></thead><tbody>';
+          var softItems = [
+            ['Design Team Fees', softTotal, softTotal/allSoft],
+            ['FF&E Budget', ffeTotal, ffeTotal/allSoft],
+            ['Freight', freightTotal, freightTotal/allSoft],
+            ['Customs Duties / Tariffs', customsTotal, customsTotal/allSoft],
+            ['Contingency', contTotal, contTotal/allSoft]
+          ];
+          softItems.forEach(function(si) {
+            var amt = '$' + Math.round(si[1] / 1000000) + 'M';
+            var pct = (si[2] * 100).toFixed(0) + '%';
+            html += '<tr><td class="chiefs-cell-primary">' + si[0] + '</td><td>' + amt + '</td><td>' + pct + '</td></tr>';
+          });
+          html += '</tbody></table></div>';
+          // Design Team (top firms)
+          html += '<div class="mfp-widget mfp-w2"><div class="mfp-widget-title">Design Team <span style="font-weight:400;color:var(--muted)">Top firms by fee</span></div><table class="chiefs-table"><thead><tr><th>Firm</th><th>Scope</th><th>Fee</th></tr></thead><tbody>';
+          if (soft.design_team) {
+            soft.design_team.slice(0, 10).forEach(function(dt) {
+              html += '<tr><td class="chiefs-cell-primary">' + dt.firm + '</td><td>' + dt.scope + '</td><td>' + fm(dt.fee) + '</td></tr>';
+            });
+          }
+          html += '</tbody></table></div></div>';
+
+          // Row 6: Top Subcontractors + FF&E Categories
+          html += '<div class="mfp-row">';
+          html += '<div class="mfp-widget mfp-w3"><div class="mfp-widget-title">Top Subcontractors by Outstanding Balance</div><table class="chiefs-table"><thead><tr><th>Subcontractor</th><th>Trade</th><th>Revised</th><th>Balance</th><th>% Paid</th></tr></thead><tbody>';
+          topSubs.forEach(function(c) {
+            var balCls = c.pct_paid < 70 ? ' chiefs-pill-red' : c.pct_paid < 85 ? ' chiefs-pill-gold' : ' chiefs-pill-green';
+            html += '<tr><td class="chiefs-cell-primary">' + c.company.split(',')[0] + '</td><td>' + c.title + '</td><td>' + fm(c.revised) + '</td><td>' + fm(c.balance) + '</td><td><span class="chiefs-pill' + balCls + '">' + c.pct_paid.toFixed(0) + '%</span></td></tr>';
+          });
+          html += '</tbody></table></div>';
+          // FF&E breakdown
+          html += '<div class="mfp-widget mfp-w2"><div class="mfp-widget-title">FF&E by Category <span style="font-weight:400;color:var(--muted)">Total: ' + fm(ffeTotal) + '</span></div><table class="chiefs-table"><thead><tr><th>Category</th><th>Amount</th></tr></thead><tbody>';
+          if (soft.ffe_breakdown) {
+            soft.ffe_breakdown.forEach(function(ffe) {
+              html += '<tr><td class="chiefs-cell-primary">' + ffe.category + '</td><td>' + fm(ffe.amount) + '</td></tr>';
+            });
+          }
+          html += '</tbody></table></div></div>';
+
+          // Row 7: Key contracts + Stakeholders
+          html += '<div class="mfp-row">';
+          html += '<div class="mfp-widget mfp-w3"><div class="mfp-widget-title">Key Contracts</div><table class="chiefs-table"><thead><tr><th>Contract</th><th>Firm</th><th>Value</th><th>Status</th></tr></thead><tbody>';
+          var contracts = [
+            ['GC/CM', 'Lemartec', '$530M', 'Closeout'],
+            ['Architect', 'ARQ', '—', 'Hold'],
+            ['Structural', 'Walter P Moore', '—', 'Active'],
+            ['MEP', 'B & I Contractors', '—', 'Active'],
+            ['Scoreboard', 'Daktronics', '—', 'Complete'],
+            ['Security', 'Boldyn', '—', 'Active']
+          ];
+          contracts.forEach(function(c) {
+            var scls = c[3] === 'Complete' ? ' chiefs-pill-green' : c[3] === 'Hold' ? ' chiefs-pill-red' : c[3] === 'Closeout' ? ' chiefs-pill-gold' : ' chiefs-pill-gray';
+            html += '<tr><td class="chiefs-cell-primary">' + c[0] + '</td><td>' + c[1] + '</td><td>' + c[2] + '</td><td><span class="chiefs-pill' + scls + '">' + c[3] + '</span></td></tr>';
+          });
+          html += '</tbody></table></div>';
+          // Stakeholders
+          html += '<div class="mfp-widget mfp-w2"><div class="mfp-widget-title">Key Stakeholders</div><table class="chiefs-table"><thead><tr><th>Role</th><th>Name</th><th>Firm</th></tr></thead><tbody>';
+          var stakeholders = [
+            ['Owner (Day-to-Day)', 'Graham Oxley', 'MFP'],
+            ['Owner (Approver)', 'Devon McCorkle', 'MFP'],
+            ['Owner (Approver)', 'Victor Oliver', 'MFP'],
+            ['Owner\'s Rep', 'Whitney Williams', 'Level Up'],
+            ['Owner\'s Rep', 'Greg Wieting', 'Level Up'],
+            ['Field Director', 'Jordan Ward', 'Level Up'],
+            ['GC/CM', 'Jon Smith (PE)', 'Lemartec']
+          ];
+          stakeholders.forEach(function(sh) {
+            html += '<tr><td class="chiefs-cell-primary">' + sh[0] + '</td><td>' + sh[1] + '</td><td>' + sh[2] + '</td></tr>';
+          });
+          html += '</tbody></table></div></div>';
+
+          // Row 8: Key dates + Invoice status
+          html += '<div class="mfp-row">';
+          html += '<div class="mfp-widget mfp-w3"><div class="mfp-widget-title">Key Dates</div><table class="chiefs-table"><thead><tr><th>Milestone</th><th>Date</th><th>Status</th></tr></thead><tbody>';
+          var dates = [
+            ['Home Opener', 'Apr 4, 2026', 'Complete'],
+            ['Cost Recovery Final', 'Jun 30, 2026', 'On Track'],
+            ['Punch List Complete', 'Aug 2026', 'In Progress'],
+            ['Final Lien Waivers', 'Sep 2026', 'In Progress'],
+            ['Contract Closeout', 'Dec 2026', 'Not Started']
+          ];
+          dates.forEach(function(d) {
+            var dcls = d[2] === 'Complete' ? ' chiefs-pill-green' : d[2] === 'On Track' ? ' chiefs-pill-green' : d[2] === 'In Progress' ? ' chiefs-pill-gold' : ' chiefs-pill-gray';
+            html += '<tr><td class="chiefs-cell-primary">' + d[0] + '</td><td>' + d[1] + '</td><td><span class="chiefs-pill' + dcls + '">' + d[2] + '</span></td></tr>';
+          });
+          html += '</tbody></table></div>';
+          // Invoice summary
+          html += '<div class="mfp-widget mfp-w2"><div class="mfp-widget-title">Invoice Summary</div><div class="mfp-bp-metrics">';
+          html += '<div class="mfp-bp-metric"><div class="mfp-kpi-label">HARD COST ORIGINAL</div><div class="mfp-kpi-val">$485M</div></div>';
+          html += '<div class="mfp-bp-metric"><div class="mfp-kpi-label">APPROVED COs</div><div class="mfp-kpi-val" style="color:var(--teal)">$20.7M</div></div>';
+          html += '<div class="mfp-bp-metric"><div class="mfp-kpi-label">INVOICED TO DATE</div><div class="mfp-kpi-val">$459M</div></div>';
+          html += '<div class="mfp-bp-metric"><div class="mfp-kpi-label">PENDING COs</div><div class="mfp-kpi-val chiefs-pill-gold" style="padding:2px 6px;border-radius:6px">$4.8M</div></div>';
+          html += '</div></div></div>';
+
+          el.innerHTML = html;
+          renderMFPCharts();
+        }
+
+        function renderMFPCharts() {
+          if (typeof Chart === 'undefined') return;
+          var teal = '#184655', gold = '#e6a817', slate = '#8A8AA3', txt = 'var(--charcoal)', grid = 'rgba(138,138,163,0.15)';
+          Chart.defaults.color = txt; Chart.defaults.borderColor = grid;
+          var F = window.__MFP_FINANCIALS || {};
+          var H = F.hard || {};
+          var S = F.summary || {};
+
+          // Budget bar
+          if (document.getElementById('mfp-chart-budget')) {
+            var cats = ['Original', 'COs', 'Revised', 'Invoiced', 'Paid', 'Balance'];
+            var vals = [
+              Math.round((H.total_original || 485000000) / 1000000),
+              Math.round((H.total_approved_cos || 20700000) / 1000000),
+              Math.round((H.total_revised || 505000000) / 1000000),
+              Math.round((H.total_invoiced || 459000000) / 1000000),
+              Math.round((H.total_paid || 400000000) / 1000000),
+              Math.round((H.total_balance || 105000000) / 1000000)
+            ];
+            new Chart(document.getElementById('mfp-chart-budget'), {
+              type: 'bar',
+              data: { labels: cats, datasets: [{ label: 'Amount ($M)', data: vals, backgroundColor: [teal, gold, teal, slate, '#1D9E75', '#E31837'], borderRadius: 3 }] },
+              options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: txt, maxRotation: 45, font: { size: 10 } } }, y: { ticks: { color: txt } } } }
+            });
+          }
+
+          // Cost recovery gauge
+          if (document.getElementById('mfp-chart-recovery')) {
+            new Chart(document.getElementById('mfp-chart-recovery'), {
+              type: 'doughnut',
+              data: {
+                labels: ['Recovered', 'Identified', 'Remaining'],
+                datasets: [{ data: [4.1, 2.1, 2.8], backgroundColor: [teal, gold, slate], borderWidth: 0 }]
+              },
+              options: {
+                responsive: true, maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                  legend: { position: 'bottom', labels: { color: txt, boxWidth: 12, padding: 8 } }
+                }
+              }
+            });
+          }
+        }
+
+            // ── KC CHIEFS DASHBOARD ────────────────────────────────────────
+    // ── KC CHIEFS DASHBOARD (rebuild per spec v1.0) ────────────
+    var _chiefsData = {};
+    var _chiefsSheetMeta = {};
+    var _chiefsTimers = [];
+    var _chiefsSortState = {};
+    var _chiefsLastRefresh = 0;
+    var _chiefsRefreshTimer = null;
+    var _chiefsSectionErrors = {};
+
+    var CHIEFS_SHEET_URLS = {
+      '01':'https://app.smartsheet.com/sheets/p8C7HVqp3RrvQWwxwFGxJc7P8jHjWxv755Ghcp81',
+      '02':'','03':'','04':'','05':'','06':'','07':'','08':'','09':'','10':'','11':'','12':'','13':''
+    };
+
+    var CHIEFS_DOCS = [
+      {label:'Executive Schedule',url:''},{label:'Budget Tracker',url:''},
+      {label:'Procurement Log',url:''},{label:'OAC Minutes',url:''},
+      {label:'Monthly Reports',url:''},{label:'Drawings',url:''},
+      {label:'Pay Apps',url:''},{label:'Renderings',url:''},{label:'Site Photos',url:''}
+    ];
+
+    function chiefsFmtCurrency(val) {
+      if (val == null || val === '') return '-';
+      var n = parseFloat(String(val).replace(/[$,]/g,''));
+      if (isNaN(n)) return '-';
+      if (Math.abs(n) >= 1000000) return '$' + (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+      return '$' + Math.round(n).toLocaleString();
     }
+
+    function chiefsFmtDate(d) {
+      if (!d) return '-';
+      var dt = new Date(d);
+      if (isNaN(dt.getTime())) return d;
+      var now = new Date();
+      var dm = (now.getFullYear() - dt.getFullYear()) * 12 + now.getMonth() - dt.getMonth();
+      if (dm > 12) return dt.toLocaleDateString('en-US', { month:'short', year:'numeric' });
+      return dt.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    }
+
+    function chiefsStatusPill(status) {
+      if (!status) return '<span class="chiefs-pill chiefs-pill-gray">---</span>';
+      var s = String(status).toLowerCase().trim();
+      if (['complete','awarded','on track','released','decided','healthy'].includes(s))
+        return '<span class="chiefs-pill chiefs-pill-green">' + status + '</span>';
+      if (['in progress','pending','in procurement','open','scheduled','medium'].includes(s))
+        return '<span class="chiefs-pill chiefs-pill-gold">' + status + '</span>';
+      if (['high','delayed','at risk','behind'].includes(s))
+        return '<span class="chiefs-pill chiefs-pill-red">' + status + '</span>';
+      return '<span class="chiefs-pill chiefs-pill-gray">' + (status || '---') + '</span>';
+    }
+
+    function chiefsRatingPill(rating) {
+      if (!rating) return '<span class="chiefs-pill chiefs-pill-gray">---</span>';
+      var r = String(rating).toLowerCase().trim();
+      if (['high','red'].includes(r)) return '<span class="chiefs-pill chiefs-pill-red">High</span>';
+      if (['medium','yellow'].includes(r)) return '<span class="chiefs-pill chiefs-pill-gold">Medium</span>';
+      if (['low','green'].includes(r)) return '<span class="chiefs-pill chiefs-pill-green">Low</span>';
+      return '<span class="chiefs-pill chiefs-pill-gray">' + rating + '</span>';
+    }
+
+    function chiefsTrendArrow(trend) {
+      if (!trend) return '';
+      var t = String(trend).toLowerCase().trim();
+      if (['up','worsening'].includes(t)) return '<span style="color:#E31837">▲</span>';
+      if (['down','improving'].includes(t)) return '<span style="color:var(--teal,#184655)">▼</span>';
+      if (['flat','steady','stable'].includes(t)) return '<span style="color:var(--muted)">→</span>';
+      return trend;
+    }
+
+    function chiefsSectionError(label, sheetKey) {
+      return '<div class="chiefs-empty">Could not load ' + label
+        + ' <button class="chiefs-retry-btn" onclick="chiefsRetrySheet(\'' + sheetKey + '\')">Retry</button></div>';
+    }
+
+    function chiefsSourceLink(sheetKey) {
+      var url = CHIEFS_SHEET_URLS[sheetKey];
+      return url ? '<a class="chiefs-source-link" href="' + url + '" target="_blank" rel="noopener" title="Open in Smartsheet">&#x1F517;</a>' : '';
+    }
+
+    function chiefsStaleTag(sheetKey) {
+      var meta = _chiefsSheetMeta[sheetKey];
+      if (!meta || !meta.updatedAt) return '';
+      var dt = new Date(meta.updatedAt);
+      var days = (Date.now() - dt.getTime()) / 86400000;
+      if (days > 14) return '<span class="chiefs-stale-badge">&#x23F0; Updated ' + chiefsFmtDate(meta.updatedAt) + '</span>';
+      return '';
+    }
+
+    function chiefsFetchSheet(sheetKey) {
+      return fetch('/api/chiefs?sheet=' + sheetKey)
+        .then(function(r) { if (!r.ok) throw new Error(sheetKey + ': ' + r.status); return r.json(); })
+        .then(function(d) {
+          _chiefsData[sheetKey] = d.rows || [];
+          _chiefsSheetMeta[sheetKey] = { updatedAt: d.updatedAt || null, name: d.name || '' };
+          delete _chiefsSectionErrors[sheetKey];
+          return d.rows || [];
+        })
+        .catch(function(e) {
+          _chiefsSectionErrors[sheetKey] = e.message;
+          _chiefsData[sheetKey] = [];
+          return [];
+        });
+    }
+
+    function chiefsRetrySheet(sheetKey) {
+      var el = document.getElementById('chiefs-dashboard');
+      if (!el) return;
+      chiefsFetchSheet(sheetKey).then(function() { buildChiefsDashboard(el); });
+    }
+
+    function chiefsSortRows(rows, colKey, dir) {
+      if (!rows || !rows.length) return rows;
+      return rows.slice().sort(function(a, b) {
+        var va = a[colKey], vb = b[colKey];
+        if (va == null) va = ''; if (vb == null) vb = '';
+        var na = parseFloat(String(va).replace(/[$,]/g,''));
+        var nb = parseFloat(String(vb).replace(/[$,]/g,''));
+        if (!isNaN(na) && !isNaN(nb)) return dir === 'asc' ? na - nb : nb - na;
+        var da = new Date(va), db = new Date(vb);
+        if (!isNaN(da) && !isNaN(db)) return dir === 'asc' ? da - db : db - da;
+        va = String(va).toLowerCase(); vb = String(vb).toLowerCase();
+        return dir === 'asc' ? (va < vb ? -1 : va > vb ? 1 : 0) : (va > vb ? -1 : va < vb ? 1 : 0);
+      });
+    }
+
+    function chiefsBuildTable(sheetKey, columns, opts) {
+      opts = opts || {};
+      var rows = _chiefsData[sheetKey] || [];
+      var err = _chiefsSectionErrors[sheetKey];
+      var sectionKey = sheetKey + '-' + (columns[0] ? columns[0].key : 'col');
+      var state = _chiefsSortState[sectionKey];
+
+      if (err) return chiefsSectionError(opts.label || 'section', sheetKey);
+      if (!rows || !rows.length) return '<div class="chiefs-empty">' + (opts.emptyText || 'No items') + '</div>';
+
+      if (state && state.col) {
+        rows = chiefsSortRows(rows, state.col, state.dir);
+      } else if (opts.defaultSortCol) {
+        rows = chiefsSortRows(rows, opts.defaultSortCol, opts.defaultSortDir || 'asc');
+      }
+
+      var cap = opts.cap || 0;
+      var total = rows.length;
+      if (cap > 0 && rows.length > cap) rows = rows.slice(0, cap);
+
+      var h = '<div class="chiefs-table-wrap"><table class="chiefs-table"><thead><tr>';
+      columns.forEach(function(c) {
+        var asc = state && state.col === c.key && state.dir === 'asc';
+        var desc = state && state.col === c.key && state.dir === 'desc';
+        h += '<th onclick="chiefsSortTable(\'' + sectionKey + '\',\'' + c.key + '\')">' + c.label
+          + (asc ? ' ▲' : desc ? ' ▼' : '') + '</th>';
+      });
+      h += '</tr></thead><tbody>';
+
+      rows.forEach(function(row) {
+        var isComplete = String(row.Status || '').toLowerCase().trim() === 'complete';
+        h += '<tr' + (isComplete ? ' class="completed-row"' : '') + '>';
+        columns.forEach(function(c) {
+          var val = row[c.key];
+          var cellHTML = '';
+          if (c.fmt === 'currency') cellHTML = chiefsFmtCurrency(val);
+          else if (c.fmt === 'date') cellHTML = chiefsFmtDate(val);
+          else if (c.fmt === 'status') cellHTML = chiefsStatusPill(val);
+          else if (c.fmt === 'rating') cellHTML = chiefsRatingPill(val);
+          else if (c.fmt === 'trend') cellHTML = chiefsTrendArrow(val) + ' ' + (val || '');
+          else cellHTML = val || '-';
+          var overdue = (c.fmt === 'date' && val && !isComplete && new Date(val) < new Date() && !isNaN(new Date(val)));
+          h += '<td' + (overdue ? ' class="chiefs-cell-overdue"' : c.key === columns[0].key ? ' class="chiefs-cell-primary"' : '') + '>' + cellHTML + '</td>';
+        });
+        h += '</tr>';
+      });
+
+      if (cap > 0 && total > cap) {
+        h += '<tr><td colspan="' + columns.length + '" style="text-align:center;padding:6px;font-size:11px;color:var(--muted)">Showing ' + cap + ' of ' + total + ' items</td></tr>';
+      }
+      return h + '</tbody></table></div>';
+    }
+
+    function chiefsSortTable(sectionKey, colKey) {
+      var state = _chiefsSortState[sectionKey] || { col: colKey, dir: 'asc' };
+      if (state.col === colKey) state.dir = state.dir === 'asc' ? 'desc' : 'asc';
+      else { state.col = colKey; state.dir = 'asc'; }
+      _chiefsSortState[sectionKey] = state;
+      var el = document.getElementById('chiefs-dashboard');
+      if (el) buildChiefsDashboard(el);
+    }
+
+    // ── MAIN RENDER ───────────────────────────────────────────
+
+    function renderChiefsDashboard() {
+      var el = document.getElementById('chiefs-dashboard');
+      if (!el) return;
+      el.innerHTML = '<div class="chiefs-skeleton"><div class="chiefs-loader"></div>Loading Command Center...</div>';
+      var sheets = ['01','02','03','04','05','06','07','08','09','10','11','12','13'];
+      Promise.allSettled(sheets.map(function(s) { return chiefsFetchSheet(s); })).then(function() {
+        buildChiefsDashboard(el);
+        chiefsStartRefresh();
+      });
+    }
+
+    function buildChiefsDashboard(el) {
+      var d = _chiefsData;
+      var hasAuthErr = Object.values(_chiefsSectionErrors).some(function(e) { return String(e).indexOf('401') >= 0 || String(e).indexOf('403') >= 0; });
+      var now = new Date();
+      var html = '';
+
+      if (hasAuthErr) html += '<div class="chiefs-auth-banner">Smartsheet connection needs re-authorization</div>';
+
+      // Live badge + refresh
+      html += '<div class="chiefs-live-badge" id="chiefs-live-badge">';
+      html += '<span class="chiefs-refresh-dot" id="chiefs-refresh-dot"></span> Updated '
+        + now.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+      html += ' <button class="chiefs-refresh-btn" onclick="chiefsManualRefresh()">&#x21bb; Refresh</button>';
+      html += '</div>';
+
+      // Row 1: Header + anchor
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-header-band">';
+      html += '<div class="chiefs-header-title">KC CHIEFS TRAINING FACILITY ' + chiefsSourceLink('02') + '</div>';
+      html += '<div class="chiefs-header-sub">Project Command Center &middot; Turner & Townsend + Level Up &middot; Olathe, Kansas</div>';
+      html += '<div class="chiefs-header-desc">A single source of truth that keeps priorities visible, decisions organized, and Chiefs leadership informed.</div>';
+      html += '</div>';
+      html += '<div class="chiefs-anchor"><div class="chiefs-anchor-label">SUBSTANTIAL COMPLETION</div><div class="chiefs-anchor-value">Q4 2030</div></div>';
+      html += '</div>';
+
+      // Row 2: KPI strip (sheet 06)
+      var kpiRows = d['06'] || [];
+      html += '<div class="chiefs-row chiefs-kpi-row">';
+      ['Total Budget','Committed','Billed to Date','Percent Spent','Contingency','Schedule Status'].forEach(function(kpiName) {
+        var row = null;
+        kpiRows.forEach(function(r) { if (r.KPI === kpiName) row = r; });
+        var val = row ? row.Value : '-';
+        var display = (kpiName === 'Percent Spent') ? val : chiefsFmtCurrency(val);
+        var cls = '';
+        if (kpiName === 'Contingency') cls = 'gold';
+        else if (kpiName === 'Schedule Status' && val) {
+          var sv = String(val).toLowerCase();
+          cls = sv === 'on track' ? 'green' : sv === 'at risk' ? 'gold' : '';
+        }
+        var bar = '';
+        if (kpiName === 'Percent Spent' && val) {
+          var p = parseFloat(String(val).replace(/%/g,''));
+          if (!isNaN(p)) bar = '<div class="chiefs-kpi-progress"><div class="chiefs-kpi-progress-fill" style="width:' + Math.min(p,100) + '%"></div></div>';
+        }
+        html += '<div class="chiefs-kpi"><div class="chiefs-kpi-label">' + kpiName.toUpperCase() + '</div><div class="chiefs-kpi-val ' + cls + '">' + display + '</div>' + bar + '</div>';
+      });
+      html += '</div>';
+
+      // Row 3: Scorecard + Budget chart
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Project Health Scorecard ' + chiefsSourceLink('13') + chiefsStaleTag('13') + '</div>';
+      var healthRows = d['13'] || [];
+      if (healthRows.length) {
+        html += '<div class="chiefs-scorecard">';
+        healthRows.forEach(function(r) {
+          var st = String(r.Status || '').toLowerCase().trim();
+          var dc = st === 'green' ? 'chiefs-dot-green' : st === 'yellow' ? 'chiefs-dot-yellow' : 'chiefs-dot-red';
+          html += '<div class="chiefs-score-item" title="' + (r.Note || '').replace(/"/g,'') + '"><span class="chiefs-dot ' + dc + '"></span><span>' + (r.Category || '') + '</span></div>';
+        });
+        html += '</div>';
+      } else { html += '<div class="chiefs-empty">No health data</div>'; }
+      html += '</div>';
+
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Budget by Category ($M) ' + chiefsSourceLink('01') + chiefsStaleTag('01') + '</div>';
+      html += (d['01'] && d['01'].length) ? '<div class="chiefs-chart-wrap"><canvas id="chiefs-chart-budget"></canvas></div>' : '<div class="chiefs-empty">No budget data</div>';
+      html += '</div></div>';
+
+      // Row 4: Cash Flow + Milestones
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Cash Flow Curve (Cumulative $M) ' + chiefsSourceLink('05') + chiefsStaleTag('05') + '</div>';
+      var cfRows = d['05'] || [];
+      html += (cfRows.length > 1) ? '<div class="chiefs-chart-wrap"><canvas id="chiefs-chart-cashflow"></canvas></div>' : '<div class="chiefs-empty">' + (cfRows.length ? 'Not enough data to chart' : 'No cash flow data') + '</div>';
+      html += '</div>';
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Milestone Schedule ' + chiefsSourceLink('02') + chiefsStaleTag('02') + '</div>';
+      html += chiefsBuildTable('02', [{key:'Milestone',label:'Milestone'},{key:'Target Date',label:'Target',fmt:'date'},{key:'Variance',label:'Variance'},{key:'Status',label:'Status',fmt:'status'}], { defaultSortCol:'Target Date' });
+      html += '</div></div>';
+
+      // Row 5: Action Items + Procurement
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Action Items ' + chiefsSourceLink('03') + chiefsStaleTag('03') + '</div>';
+      html += chiefsBuildTable('03', [{key:'Item',label:'Item'},{key:'Owner',label:'Owner'},{key:'Due Date',label:'Due',fmt:'date'},{key:'Priority',label:'Priority',fmt:'rating'}], { cap:10, defaultSortCol:'Due Date' });
+      html += '</div>';
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Procurement & Long-Lead ' + chiefsSourceLink('07') + chiefsStaleTag('07') + '</div>';
+      html += chiefsBuildTable('07', [{key:'Package',label:'Package'},{key:'Budget Value',label:'Budget',fmt:'currency'},{key:'Need-By',label:'Need-By',fmt:'date'},{key:'Status',label:'Status',fmt:'status'}], { defaultSortCol:'Need-By' });
+      html += '</div></div>';
+
+      // Row 6: Decisions + Next 90
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Upcoming Key Decisions ' + chiefsSourceLink('08') + chiefsStaleTag('08') + '</div>';
+      html += chiefsBuildTable('08', [{key:'Decision',label:'Decision'},{key:'Needed By',label:'Needed By',fmt:'date'},{key:'Status',label:'Status',fmt:'status'}], { defaultSortCol:'Needed By' });
+      html += '</div>';
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Next 90 Days ' + chiefsSourceLink('09') + chiefsStaleTag('09') + '</div>';
+      html += chiefsBuildTable('09', [{key:'Activity',label:'Activity'},{key:'Start',label:'Start',fmt:'date'},{key:'Finish',label:'Finish',fmt:'date'},{key:'Owner',label:'Owner'}], { defaultSortCol:'Start' });
+      html += '</div></div>';
+
+      // Row 7: Risks + Budget Position
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-widget chiefs-w3"><div class="chiefs-widget-title">Top Risks & Mitigation ' + chiefsSourceLink('10') + chiefsStaleTag('10') + '</div>';
+      html += chiefsBuildTable('10', [{key:'Risk',label:'Risk'},{key:'Rating',label:'Rating',fmt:'rating'},{key:'Trend',label:'Trend',fmt:'trend'},{key:'Mitigation',label:'Mitigation'}], { defaultSortCol:'Rating', defaultSortDir:'desc' });
+      html += '</div>';
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Budget Position ' + chiefsSourceLink('12') + chiefsStaleTag('12') + '</div>';
+      html += '<div class="chiefs-chart-wrap"><canvas id="chiefs-chart-budgetpos"></canvas></div><div class="chiefs-bp-metrics" id="chiefs-bp-metrics"></div>';
+      html += '</div></div>';
+
+      // Row 8: Team + Snapshot
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Project Team ' + chiefsSourceLink('11') + chiefsStaleTag('11') + '</div>';
+      html += chiefsBuildTable('11', [{key:'Name',label:'Name'},{key:'Role',label:'Role'},{key:'Phase Focus',label:'Phase Focus'}], {});
+      html += '</div>';
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Project Snapshot ' + chiefsSourceLink('04') + chiefsStaleTag('04') + '</div>';
+      var snapRows = d['04'] || [];
+      if (snapRows.length) {
+        html += '<table class="chiefs-table"><tbody>';
+        snapRows.forEach(function(r) { html += '<tr><td class="chiefs-cell-primary" style="width:40%">' + (r.Metric || '') + '</td><td>' + (r.Value || '') + '</td></tr>'; });
+        html += '</tbody></table>';
+      } else { html += '<div class="chiefs-empty">No snapshot data</div>'; }
+      html += '</div></div>';
+
+      // Row 9: Docs + Camera
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Document Shortcuts</div><div class="chiefs-doc-links">';
+      CHIEFS_DOCS.forEach(function(doc) {
+        html += doc.url
+          ? '<a class="chiefs-doc-link" href="' + doc.url + '" target="_blank" rel="noopener">' + doc.label + '</a>'
+          : '<span class="chiefs-doc-link disabled">' + doc.label + '</span>';
+      });
+      html += '</div></div>';
+      html += '<div class="chiefs-widget chiefs-w1"><div class="chiefs-widget-title">Live Jobsite Camera</div><div class="chiefs-camera-ph"><div class="chiefs-camera-icon">&#x1F4F7;</div><div>Coming online with site mobilization</div></div></div>';
+      html += '</div>';
+
+      el.innerHTML = html;
+      renderChiefsCharts();
+      chiefsRenderBPMetrics();
+    }
+
+    // ── Charts ────────────────────────────────────────────────
+
+    function renderChiefsCharts() {
+      if (typeof Chart === 'undefined') return;
+      var root = document.documentElement;
+      var cs = getComputedStyle(root);
+      var txt = cs.getPropertyValue('--charcoal').trim() || '#181818';
+      var border = cs.getPropertyValue('--border').trim() || '#E2E2DE';
+      var teal = cs.getPropertyValue('--teal').trim() || '#184655';
+      var red = '#E31837', gold = '#FFB81C', slate = '#8A8AA3';
+      Chart.defaults.color = txt;
+      Chart.defaults.borderColor = 'rgba(138,138,163,0.15)';
+      var grid = 'rgba(138,138,163,0.15)';
+
+      // Budget bar (sheet 01)
+      var bd = _chiefsData['01'];
+      if (bd && bd.length && document.getElementById('chiefs-chart-budget')) {
+        var lb = [], am = [];
+        bd.forEach(function(r) { lb.push(r.Category || ''); am.push(r['Planned Amount'] ? Math.round(r['Planned Amount'] / 1000000) : 0); });
+        new Chart(document.getElementById('chiefs-chart-budget'), {
+          type: 'bar',
+          data: { labels: lb, datasets: [{ label: 'Planned ($M)', data: am, backgroundColor: teal, borderRadius: 3 }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: txt, maxRotation: 45, font: { size: 10 } } }, y: { ticks: { color: txt } } } }
+        });
+      }
+
+      // Cash flow (sheet 05)
+      var cd = _chiefsData['05'];
+      if (cd && cd.length > 1 && document.getElementById('chiefs-chart-cashflow')) {
+        var ql = [], pl = [], ac = [];
+        cd.forEach(function(r) { ql.push(r.Quarter || ''); pl.push(r['Planned Cumulative'] || 0); ac.push(r['Actual Cumulative'] != null ? r['Actual Cumulative'] : null); });
+        new Chart(document.getElementById('chiefs-chart-cashflow'), {
+          type: 'line',
+          data: { labels: ql, datasets: [
+            { label: 'Planned', data: pl, borderColor: slate, borderDash: [5,5], fill: false, pointRadius: 0, tension: 0.3 },
+            { label: 'Actual', data: ac, borderColor: teal, backgroundColor: teal + '18', fill: '-1', pointRadius: 3, tension: 0.3, spanGaps: false }
+          ]},
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: txt, boxWidth: 12 } } }, scales: { x: { ticks: { color: txt, font: { size: 9 } } }, y: { ticks: { color: txt } } } }
+        });
+      }
+
+      // Budget position (sheet 12)
+      if (_chiefsData['12'] && document.getElementById('chiefs-chart-budgetpos')) {
+        var bpd = _chiefsData['12'];
+        var f = function(l) { for (var i=0; i<bpd.length; i++) { if (bpd[i].Measure && bpd[i].Measure.indexOf(l) >= 0) return Math.round((bpd[i].Amount||0)/1000000); } return 0; };
+        new Chart(document.getElementById('chiefs-chart-budgetpos'), {
+          type: 'bar',
+          data: { labels: ['Budget Position'], datasets: [
+            { label: 'Paid', data: [f('Paid')], backgroundColor: teal, borderRadius: 2 },
+            { label: 'Retainage', data: [f('Retainage')], backgroundColor: gold, borderRadius: 2 },
+            { label: 'Remaining', data: [f('Remaining')], backgroundColor: border, borderRadius: 2 }
+          ]},
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: txt, boxWidth: 12 } } }, scales: { x: { display: false }, y: { stacked: true, ticks: { color: txt } } }, indexAxis: 'y' }
+        });
+      }
+    }
+
+    function chiefsRenderBPMetrics() {
+      var el = document.getElementById('chiefs-bp-metrics');
+      if (!el) return;
+      var bpd = _chiefsData['12'] || [];
+      var fv = function(l) { for (var i=0; i<bpd.length; i++) { if (bpd[i].Measure && bpd[i].Measure.indexOf(l) >= 0) return chiefsFmtCurrency(bpd[i].Amount); } return '-'; };
+      el.innerHTML = '<div class="chiefs-bp-metric"><div class="chiefs-kpi-label">PAID TO DATE</div><div class="chiefs-kpi-val">' + fv('Paid') + '</div></div>'
+        + '<div class="chiefs-bp-metric"><div class="chiefs-kpi-label">RETAINAGE HELD</div><div class="chiefs-kpi-val gold">' + fv('Retainage') + '</div></div>'
+        + '<div class="chiefs-bp-metric"><div class="chiefs-kpi-label">REMAINING</div><div class="chiefs-kpi-val">' + fv('Remaining') + '</div></div>';
+    }
+
+    // ── Refresh ───────────────────────────────────────────────
+
+    function chiefsStartRefresh() {
+      chiefsStopRefresh();
+      _chiefsRefreshTimer = setInterval(function() {
+        if (document.visibilityState === 'visible') chiefsRefreshAll();
+      }, 600000);
+      document.addEventListener('visibilitychange', function chiefsVisHandler() {
+        if (document.visibilityState === 'visible' && Date.now() - _chiefsLastRefresh > 600000) chiefsRefreshAll();
+      });
+    }
+
+    function chiefsStopRefresh() {
+      if (_chiefsRefreshTimer) { clearInterval(_chiefsRefreshTimer); _chiefsRefreshTimer = null; }
+    }
+
+    function chiefsManualRefresh() {
+      var btn = document.querySelector('.chiefs-refresh-btn');
+      if (btn) btn.disabled = true;
+      chiefsRefreshAll().then(function() { if (btn) btn.disabled = false; });
+    }
+
+    function chiefsRefreshAll() {
+      var sheets = ['01','02','03','04','05','06','07','08','09','10','11','12','13'];
+      return Promise.allSettled(sheets.map(function(s) { return chiefsFetchSheet(s); })).then(function() {
+        _chiefsLastRefresh = Date.now();
+        var el = document.getElementById('chiefs-dashboard');
+        if (el) buildChiefsDashboard(el);
+      });
+    }
+
+    // ── Theme change observer ─────────────────────────────────
+
+    (function() {
+      var ticking = false;
+      var observer = new MutationObserver(function() {
+        if (!ticking) { ticking = true;
+          setTimeout(function() { ticking = false; renderChiefsCharts(); }, 200); }
+      });
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+          })();
+
+      // ── LEVEL UP PLAYBOOK ─ APP.JS ──────────────────────────────────────
+
+// ── STATE ─────────────────────────────────────────────────────────
+var luUser = null;
+var currentView = 'luna';
+var currentPbView = 'sections';
+var activePhase = null;
+var activeTopic = null;
+var activeSearch = '';
+var collapsedGroups = {'1':true, '6':true, '13':true, '18':true, '37':true};  // {} = all expanded
+var openSections = {};
+var openSubsecs = {};
+var chatHistory = [];
+var lunaHistory = [];
+var chatOpen = false;
+var projectContext = null;
+var heroResults = {};
+
+var PHASES = ['Pre-Construction','Design','Construction','Closeout','Post-Opening','All Phases'];
+
+// Status helper — backward-compatible: done:true = 'completed'
+function getItemStatus(item) {
+  if (item.status === 'in_progress') return 'in_progress';
+  if (item.status === 'completed' || item.done === true) return 'completed';
+  return 'open';
+}
+var GROUPS = {
+  '1':  {label:'GROUP 1 — FOUNDATION', desc:'Purpose, philosophy, roles, governance'},
+  '6':  {label:'GROUP 2 — PROJECT SETUP', desc:'Mobilization, tools, communications'},
+  '13': {label:'GROUP 3 — CONTROLS', desc:'Budget, schedule, change, risk'},
+  '18': {label:'GROUP 4 — PHASE EXECUTION', desc:'Contract through closeout'},
+  '37': {label:'GROUP 5 — REFERENCE', desc:'Standards, templates, problems'}
+};
+var GKEYS = [1, 6, 13, 18, 37];
+window.aiTab = window.aiTab || 'team';
+
+// ── DATA LOADED FROM EXTERNAL FILES ───────────────────────────────
+var MFP_CONTEXT = window.__MFP_CONTEXT || '';
+var KB = window.__KB || [];  // Preloaded from data/kb.js
+var CONTRACT_KB = window.__CONTRACT_KB || [];  // Contract knowledge from data/contracts_kb.js
+var TEMPLATES = window.__TEMPLATES || {};
+var GLOSSARY = window.__GLOSSARY || {};
+var ALL_TOPICS = [];
+
+// Merge contract KB into searchable KB
+var FULL_KB = [];
+function buildFullKB() {
+  FULL_KB = KB.concat(CONTRACT_KB);
+}
+
+// Synchronous KB init — runs immediately since data is preloaded
+var kbLoaded = false;
+function initKB() {
+  if (kbLoaded || !KB.length) return;
+  buildFullKB();
+  var set = {};
+  KB.forEach(function(s) { (s.topics || []).forEach(function(t) { set[t] = true; }); });
+  CONTRACT_KB.forEach(function(s) { (s.topics || []).forEach(function(t) { set[t] = true; }); });
+  ALL_TOPICS = Object.keys(set).sort();
+  kbLoaded = true;
+  // If playbook view is active, re-render
+  if (currentView === 'playbook') renderPlaybook();
+  // Update footer with KB count
+  var footerEl = document.getElementById('footer-status-text');
+  if (footerEl) {
+    var status = luUser && luUser.authenticated ? 'Signed in: ' + luUser.email : 'Not signed in';
+    footerEl.textContent = 'JS OK · ' + status + ' · KB=' + KB.length;
+  }
+}
+// Run immediately
+initKB();
+
+function grpKey(n) {
+  var num = Number(n);
+  var g = 1;
+  for (var i = 0; i < GKEYS.length; i++) if (num >= GKEYS[i]) g = GKEYS[i];
+  return String(g);
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function fmtNum(n) {
+  if (n == null || isNaN(n)) return '0';
+  return Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function jsCallArg(v) {
+  // Build an argument string safe for use inside an onclick="..." attribute
+  // Wraps the value in &quot; so it survives HTML attribute parsing
+  return '&quot;' + String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,"\\'") + '&quot;';
+}
+
+
+
+function getCookie(name) {
+  var match = ('; ' + document.cookie).match(';\\s*' + name + '=([^;]*)');
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+// ── AUTH ──────────────────────────────────────────────────────────
+function checkAuthFromCookie() {
+  var raw = getCookie('lu_session');
+  if (raw) {
+    try {
+      var data = JSON.parse(raw);
+      if (data && data.name && data.expires_at && Date.now() < data.expires_at) {
+        luUser = { authenticated: true, name: data.name, email: data.email };
+        return true;
+      }
+    } catch(e) {}
+  }
+  luUser = null;
+  return false;
+}
+
+async function tryRefresh() {
+  try {
+    var res = await fetch('/auth/me', { credentials: 'include' });
+    if (res.ok) {
+      var data = await res.json();
+      if (data.authenticated) {
+        luUser = { authenticated: true, name: data.name, email: data.email };
+        updateAuthUI();
+        initDailyBriefing();
+        return true;
+      }
+    }
+  } catch(e) {}
+  return false;
+}
+
+function updateAuthUI() {
+  var signInBtn = document.getElementById('auth-signin-btn');
+  var userInfo = document.getElementById('auth-user-info');
+  var userName = document.getElementById('auth-user-name');
+  var calMeta = document.getElementById('cal-card-meta');
+  var spMeta = document.getElementById('sp-card-meta');
+
+  if (luUser && luUser.authenticated) {
+    if (signInBtn) signInBtn.style.display = 'none';
+    if (userInfo) userInfo.style.display = 'flex';
+    if (userName) userName.textContent = luUser.name || luUser.email;
+
+    // Show immediate connected status, then try to fetch live previews
+    if (calMeta) calMeta.textContent = '✓ Connected';
+    if (spMeta) spMeta.textContent = '✓ Connected';
+
+    // Fetch live calendar preview
+    if (calMeta && !calMeta._fetching) {
+      calMeta._fetching = true;
+      calMeta.textContent = 'Loading...';
+      fetch('/api/outlook/calendar?days=14', { credentials: 'include' })
+        .then(function(r) { if (!r.ok) throw new Error('' + r.status); return r.json(); })
+        .then(function(data) {
+          var evs = data.value || [];
+          var upcoming = evs.filter(function(e) {
+            var s = new Date(e.start.dateTime || e.start.date);
+            return s > new Date();
+          });
+          if (upcoming.length === 0) { calMeta.textContent = 'No upcoming events'; return; }
+          var next = new Date(upcoming[0].start.dateTime || upcoming[0].start.date);
+          var timeStr = next.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+          var countStr = upcoming.length > 1 ? ' +' + (upcoming.length - 1) + ' more' : '';
+          calMeta.textContent = 'Next: ' + timeStr + countStr;
+        })
+        .catch(function() { calMeta.textContent = '✓ Calendar'; })
+        .then(function() { calMeta._fetching = false; });
+    }
+  } else {
+      if (signInBtn) signInBtn.style.display = 'flex';
+      if (userInfo) userInfo.style.display = 'none';
+      if (calMeta) calMeta.textContent = 'Sign in to enable';
+      if (spMeta) spMeta.textContent = 'Sign in to enable';
+    }
+}
+
+function signInWithMicrosoft() {
+  try { localStorage.setItem('lu_return_view', currentView || 'home'); } catch(e) {}
+  window.location.href = '/auth/login';
+}
+
+function signOut() {
+  document.cookie = 'lu_session=; Path=/; Max-Age=0';
+  document.cookie = 'lu_auth=; Path=/; Max-Age=0';
+  window.location.href = '/auth/logout';
+}
+
+// ── THEME ─────────────────────────────────────────────────────────
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  document.documentElement.setAttribute('data-btn-theme', t === 'dark' ? '☽' : '☀');
+  var btn = document.getElementById('theme-btn');
+  if (btn) { btn.textContent = t === 'dark' ? '☽' : '☀'; btn.style.opacity = '1'; }
+  // Theme-switch LUCI logos
+    var lockup = document.querySelector('.luna-hero-lockup');
+    if (lockup) lockup.src = lockup.getAttribute('data-' + t);
+    var topbarLogo = document.querySelector('.topbar-logo');
+    if (topbarLogo) topbarLogo.src = topbarLogo.getAttribute('data-' + t);
+    var pwLogo = document.querySelector('.password-modal-logo img');
+    if (pwLogo) pwLogo.src = pwLogo.getAttribute('data-' + t);
+    var clippy = document.getElementById('luna-clippy-icon');
+    if (clippy) clippy.src = clippy.getAttribute('data-' + t);
+  }
+
+function toggleTheme() {
+  var cur = document.documentElement.getAttribute('data-theme') || 'light';
+  var next = cur === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  try { localStorage.setItem('lu_theme', next); } catch(e) {}
+}
+
+// ── VIEW ROUTING ──────────────────────────────────────────────────
+function jumpTo(num) {
+  setView('playbook');
+  setPlaybookView('sections');
+  openSections[num] = true;
+  collapsedGroups = {};
+  setTimeout(function() {
+    renderSections();
+    var el = document.querySelector('.section-card[data-num="' + num + '"]');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
+}
+
+function goHome() {
+  setView('luna');
+}
+
+function setPlaybookView(subview) {
+  currentPbView = subview;
+  // Update sub-nav tabs
+  document.querySelectorAll('.subnav-tab').forEach(function(t) {
+    t.classList.toggle('active', t.getAttribute('data-pbview') === subview);
+  });
+  renderPbView();
+}
+
+function renderPbView() {
+  if (currentPbView === 'sections') {
+    renderPlaybook();
+  } else if (currentPbView === 'templates') {
+    renderTemplates();
+  } else if (currentPbView === 'guide') {
+    renderPhaseGuideInline();
+  } else if (currentPbView === 'decision') {
+    renderDecisionTreeInline();
+  }
+  // Show the right sub-view div
+  document.querySelectorAll('.pb-subview').forEach(function(v) { v.classList.remove('active'); });
+  var map = { sections:'pb-sections-view', templates:'pb-templates-view', guide:'pb-guide-view', decision:'pb-decision-view' };
+  var el = document.getElementById(map[currentPbView]);
+  if (el) el.classList.add('active');
+}
+
+function setView(view) {
+  try {
+  currentView = view;
+
+  // Hide all views, show target
+  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+  var target = document.getElementById('view-' + view);
+  if (target) target.classList.add('active');
+
+  // Nav tab highlight
+    var navMap = { playbook:'nav-playbook', projects:'nav-projects', actions:'nav-actions', mfp:'nav-projects', 'mfp-dashboard':'nav-projects', chiefs:'nav-projects', luna:'nav-luna' };
+  document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
+  var tabId = navMap[view];
+  if (tabId) {
+    var tab = document.getElementById(tabId);
+    if (tab) tab.classList.add('active');
+  }
+
+  // Sub-nav visibility
+  var subnav = document.getElementById('subnav-playbook');
+  if (subnav) subnav.style.display = (view === 'playbook') ? 'flex' : 'none';
+
+  window.scrollTo(0, 0);
+
+  // View-specific render
+      if (view === 'luna') { renderHero(); }
+      else if (view === 'playbook') renderPbView();
+      else if (view === 'projects') renderProjects();
+            else if (view === 'mfp') renderMFP();
+            else if (view === 'mfp-dashboard') renderMFPDashboard();
+            else if (view === 'chiefs') renderChiefsDashboard();
+                else if (target) {
+      // Unknown view with existing div — show it empty (legacy routes)
+    } else {
+      // View doesn't exist at all — redirect to luna
+      currentView = 'luna';
+      target = document.getElementById('view-luna');
+      if (target) target.classList.add('active');
+      renderHero();
+    }
+    } catch(err) {
+        console.error('setView error:', err);
+      }
+  }
+
+// ── PLAYBOOK SEARCH ────────────────────────────────────────────────
+function pbSearchType(val) {
+  activeSearch = val.trim();
+  renderPlaybook();
+  var count = document.getElementById('pb-search-count');
+  if (count) {
+    var filtered = getFiltered();
+    count.textContent = activeSearch ? filtered.length + ' results' : '';
+  }
+}
+function pbSearch() {
+  var input = document.getElementById('pb-search-input');
+  if (input) pbSearchType(input.value);
+}
+
+// ── SIDEBAR TOGGLE ──────────────────────────────────────────────────
+function toggleSidebar() {
+  var sidebar = document.getElementById('playbook-sidebar');
+  if (sidebar) sidebar.classList.toggle('collapsed');
+}
+
+// ── STATS BAR ───────────────────────────────────────────────────────
+// ── REMINDERS ──────────────────────────────────────────────────────
+function renderReminders() {
+  var el = document.getElementById('luna-reminders');
+  if (!el) return;
+  var now = new Date();
+  var day = now.getDate();
+  var month = now.getMonth();
+  var year = now.getFullYear();
+  var monthKey = year + '-' + month;
+
+  // Get dismissed state
+  var dismissed = {};
+  try { var d = localStorage.getItem('lu_remind_dismiss'); if (d) dismissed = JSON.parse(d); } catch(e) {}
+
+  var reminders = [];
+
+  // Monthly Draw Package — due 10th
+  var drawDue = new Date(year, month, 10);
+  if (day > 10) drawDue.setMonth(month + 1);
+  var drawDays = Math.round((drawDue - now) / 86400000);
+  var drawId = 'draw_' + monthKey;
+  if (!dismissed[drawId]) reminders.push({
+    id: drawId, icon: '💰', title: 'Monthly Draw Package',
+    desc: 'Due in ' + drawDays + ' day' + (drawDays !== 1 ? 's' : ''),
+    urgent: drawDays <= 3, warn: drawDays <= 7 && drawDays > 3
+  });
+
+  // Monthly Expense Report — due 5th
+  var expDue = new Date(year, month, 5);
+  if (day > 5) expDue.setMonth(month + 1);
+  var expDays = Math.round((expDue - now) / 86400000);
+  var expId = 'expense_' + monthKey;
+  if (!dismissed[expId]) reminders.push({
+    id: expId, icon: '🧾', title: 'Monthly Expense Report',
+    desc: 'Due in ' + expDays + ' day' + (expDays !== 1 ? 's' : ''),
+    urgent: expDays <= 3, warn: expDays <= 7 && expDays > 3
+  });
+
+  // Weekly Events Calendar — due Friday
+  var friday = new Date(now);
+  friday.setDate(now.getDate() + (5 - now.getDay() + 7) % 7);
+  if (now.getDay() > 5) friday.setDate(friday.getDate() + 7);
+  if (now.getDay() === 5 && now.getHours() >= 17) friday.setDate(friday.getDate() + 7);
+  var calDays = Math.round((friday - now) / 86400000);
+  var calId = 'calendar_w' + year + '_' + (function(n){while(n<0)n+=7;return Math.floor((n-friday.getDay()+7)/7);})(now.getDay()) + '_' + friday.getDate();
+  // simpler ID
+  calId = 'cal_' + friday.getFullYear() + '_' + friday.getMonth() + '_' + friday.getDate();
+  if (!dismissed[calId]) reminders.push({
+    id: calId, icon: '📅', title: 'Weekly Events Calendar',
+    desc: calDays === 0 ? 'Due today' : 'Due in ' + calDays + ' day' + (calDays !== 1 ? 's' : ''),
+    urgent: calDays <= 1, warn: calDays <= 2 && calDays > 1
+  });
+
+  var html = '';
+  reminders.forEach(function(r) {
+    var bg = r.urgent ? '#fce8e8' : r.warn ? '#fef4e0' : 'var(--card)';
+    var border = r.urgent ? '#e74c3c' : r.warn ? '#e67e22' : 'var(--border)';
+    var txtColor = r.urgent ? '#c0392b' : r.warn ? '#a05c00' : 'var(--muted)';
+    html += '<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:' + bg + ';border:1px solid ' + border + ';border-radius:8px;margin-bottom:6px">'
+      + '<span style="font-size:18px">' + r.icon + '</span>'
+      + '<div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--charcoal)">' + escapeHtml(r.title) + '</div>'
+      + '<div style="font-size:12px;color:' + txtColor + '">' + escapeHtml(r.desc) + '</div></div>'
+      + (r.urgent ? '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#e74c3c;background:rgba(231,76,60,.12);padding:3px 8px;border-radius:6px">Due Soon</span>' : '')
+      + (r.warn ? '<span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#e67e22">Coming Up</span>' : '')
+      + '<button onclick="dismissReminder(\'' + r.id + '\')" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:4px" title="Dismiss">&times;</button>'
+      + '</div>';
+  });
+
+  el.innerHTML = html;
+}
+
+function dismissReminder(id) {
+  var dismissed = {};
+  try { var d = localStorage.getItem('lu_remind_dismiss'); if (d) dismissed = JSON.parse(d); } catch(e) {}
+  dismissed[id] = true;
+  try { localStorage.setItem('lu_remind_dismiss', JSON.stringify(dismissed)); } catch(e) {}
+  renderReminders();
+  }
+
+// ── PLAYBOOK RENDER ───────────────────────────────────────────────
+function getFiltered() {
+  return KB.filter(function(s) {
+    if (activePhase && activePhase !== 'All Phases') {
+      if (!s.phases.includes('All Phases') && !s.phases.includes(activePhase)) return false;
+    }
+    if (activeTopic) {
+      var has = s.topics.some(function(t) { return t.toLowerCase().includes(activeTopic.toLowerCase()); });
+      if (!has) return false;
+    }
+    if (activeSearch) {
+      var q = activeSearch.toLowerCase();
+      var hay = [s.title, s.num].concat(s.topics || []).concat(s.h2 || []).concat(s.content || []).concat(s.bullets || []).join(' ').toLowerCase();
+      if (hay.indexOf(q) < 0) return false;
+    }
+    return true;
+  });
+}
+
+function renderPlaybook() {
+  if (!kbLoaded) {
+    var container = document.getElementById('sections-container');
+    if (container) container.innerHTML = '<div style="padding:60px 24px;text-align:center"><div class="luna-spinner"></div> <span style="color:var(--muted);font-size:14px">Loading playbook...</span></div>';
+    return;
+  }
+  renderSidebar();
+  renderSections();
+}
+
+function renderSidebar() {
+  var pp = document.getElementById('phase-pills');
+  if (pp) {
+    pp.innerHTML = PHASES.map(function(p) {
+      var act = activePhase === p ? ' active' : '';
+      return '<button class="phase-pill' + act + '" onclick="setPhase(' + jsCallArg(p) + ')">' + escapeHtml(p) + '</button>';
+    }).join('');
+  }
+  var tc = document.getElementById('topic-chips');
+  if (tc) {
+    tc.innerHTML = ALL_TOPICS.slice(0, 40).map(function(t) {
+      var act = activeTopic === t ? ' active' : '';
+      return '<button class="topic-chip' + act + '" onclick="setTopic(' + jsCallArg(t) + ')">' + escapeHtml(t) + '</button>';
+    }).join('');
+  }
+}
+
+function renderSections() {
+  var container = document.getElementById('sections-container');
+  var meta = document.getElementById('results-meta');
+  if (!container) return;
+
+  var filtered = getFiltered();
+  var showGroups = true;
+
+  if (meta) {
+    var allExpanded = Object.keys(collapsedGroups).length === 0;
+    var label = (filtered.length === KB.length) ? (KB.length + ' sections') : (filtered.length + ' of ' + KB.length + ' sections');
+    meta.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">'
+      + '<span>' + label + '</span>'
+      + '<div style="display:flex;gap:6px">'
+      + '<button onclick="' + (allExpanded ? 'collapseAllGroups()' : 'expandAllGroups()') + '" style="background:var(--cool);border:none;padding:5px 11px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--charcoal)">' + (allExpanded ? 'Collapse All' : 'Expand All') + '</button>'
+      + '</div></div>';
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted)">No sections match your filters. <button class="back-btn" style="color:var(--teal);text-decoration:underline" onclick="clearFilters()">Clear filters</button></div>';
+    return;
+  }
+
+  var html = '';
+  var seenGroups = {};
+
+  filtered.forEach(function(s) {
+    var gk = showGroups ? grpKey(s.num) : null;
+
+    if (showGroups && !seenGroups[gk]) {
+      seenGroups[gk] = true;
+      var gInfo = GROUPS[gk];
+      var collapsed = collapsedGroups[gk] === true;
+      if (gInfo) {
+        html += '<div class="kb-group' + (collapsed ? ' collapsed' : '') + '" onclick="toggleGroup(' + jsCallArg(gk) + ')">'
+          + '<span class="kb-group-chevron">▼</span>'
+          + '<span class="kb-group-title">' + escapeHtml(gInfo.label) + '</span>'
+          + '<span class="kb-group-desc">' + escapeHtml(gInfo.desc) + '</span>'
+          + '</div>';
+      }
+    }
+
+    if (showGroups && collapsedGroups[gk] === true) return;
+
+    var isOpen = openSections[s.num] === true;
+    var phaseTags = (s.phases || []).map(function(p) {
+      return '<span class="sec-phase-tag">' + escapeHtml(p) + '</span>';
+    }).join('');
+
+    html += '<div class="section-card' + (isOpen ? ' open' : '') + '" data-num="' + escapeHtml(s.num) + '">'
+      + '<div class="section-card-header" onclick="toggleSection(' + jsCallArg(s.num) + ')">'
+      + '<span class="sec-badge">' + escapeHtml(s.num) + '</span>'
+      + '<div style="flex:1">'
+      + '<div class="sec-title">' + escapeHtml(s.title) + '</div>'
+      + '<div class="sec-phases">' + phaseTags + '</div>'
+      + '</div>'
+      + '<span class="sec-chevron">' + (isOpen ? '▲' : '▼') + '</span>'
+      + '</div>'
+      + '<div class="section-card-body">';
+
+    var h2s = s.h2 || [];
+    var content = s.content || [];
+    var bullets = s.bullets || [];
+
+    if (h2s.length > 0) {
+      // Each H2 is a collapsible subsection
+      var perSection = Math.ceil(content.length / h2s.length);
+      h2s.forEach(function(heading, idx) {
+        var subId = s.num + '_' + idx;
+        var subOpen = openSubsecs[subId] === true;
+        html += '<div class="subsec">'
+          + '<div class="subsec-header" onclick="toggleSubsec(' + jsCallArg(subId) + ')">'
+          + '<span class="subsec-chevron">' + (subOpen ? '▼' : '▶') + '</span>'
+          + '<span>' + escapeHtml(heading) + '</span>'
+          + '</div>'
+          + '<div class="subsec-body" style="display:' + (subOpen ? 'block' : 'none') + '">';
+        var start = idx * perSection;
+        var chunk = content.slice(start, start + perSection);
+        chunk.forEach(function(p) {
+          html += '<p>' + escapeHtml(p) + '</p>';
+        });
+        html += '</div></div>';
+      });
+    } else {
+      content.forEach(function(p) {
+        html += '<p>' + escapeHtml(p) + '</p>';
+      });
+    }
+
+    if (bullets.length > 0) {
+          html += '<ul>';
+          bullets.forEach(function(b) {
+            html += '<li>' + escapeHtml(b) + '</li>';
+          });
+          html += '</ul>';
+        }
+
+        // Related sections cross-references
+        if (s.related && s.related.length > 0) {
+          html += '<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;align-items:center">'
+            + '<span style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">See also:</span>';
+          s.related.forEach(function(r) {
+            html += '<span style="font-size:11px;padding:3px 9px;background:var(--teal-light);color:var(--teal);border-radius:6px;cursor:pointer;font-weight:600" onclick="jumpTo(\'' + escapeHtml(String(r)) + '\')">S' + escapeHtml(String(r)) + '</span>';
+          });
+          html += '</div>';
+        }
+
+        html += '</div></div>';
+  });
+
+  container.innerHTML = html;
+}
+
+function toggleGroup(gk) {
+  if (collapsedGroups[gk]) delete collapsedGroups[gk];
+  else collapsedGroups[gk] = true;
+  renderSections();
+}
+
+function toggleSection(num) {
+  if (openSections[num]) delete openSections[num];
+  else openSections[num] = true;
+  renderSections();
+}
+
+function toggleSubsec(id) {
+  if (openSubsecs[id]) delete openSubsecs[id];
+  else openSubsecs[id] = true;
+  renderSections();
+}
+
+function setPhase(p) {
+  activePhase = (activePhase === p) ? null : p;
+  activeTopic = null;
+  // Auto-expand groups when filtering by phase
+  if (activePhase) collapsedGroups = {};
+  renderPlaybook();
+}
+
+function setTopic(t) {
+  activeTopic = (activeTopic === t) ? null : t;
+  if (activeTopic) collapsedGroups = {};
+  renderPlaybook();
+}
+
+function clearFilters() {
+  activePhase = null;
+  activeTopic = null;
+  activeSearch = '';
+  var si = document.getElementById('luna-hero-input');
+  if (si) si.value = '';
+  // Reset to clean collapsed state
+  collapsedGroups = {'1':true, '6':true, '13':true, '18':true, '37':true};
+  openSections = {};
+  openSubsecs = {};
+  renderPlaybook();
+}
+
+function expandAllGroups() {
+  collapsedGroups = {};
+  renderSections();
+}
+
+function collapseAllGroups() {
+  collapsedGroups = {'1':true, '6':true, '13':true, '18':true, '37':true};
+  openSections = {};
+  openSubsecs = {};
+  renderSections();
+}
+
+
+// ── PROJECTS / MFP ────────────────────────────────────────────────
+function renderProjects() {
+  var grid = document.getElementById('projects-grid');
+  if (!grid) return;
+  var F = window.__MFP_FINANCIALS;
+  var H = F ? F.hard : null;
+  var S = F ? F.summary : null;
+  var stadiumRevised = H ? '$' + Math.abs(H.total_revised).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') : '$553M';
+  var stadiumPct = H ? (H.total_pct_paid).toFixed(1) + '%' : '94.2%';
+  var stadiumPaid = H ? '$' + Math.abs(H.total_paid).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') : '';
+  var stadiumBal = H ? '$' + Math.abs(H.total_balance).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') : '';
+  var stadiumBudget = S ? '$' + Math.abs(S.stadium_base_contract || S.total_budget || 0).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') : '$530M';
+  grid.innerHTML = '<div class="mfp-card chiefs-card" onclick="setView(\'mfp-dashboard\')" style="cursor:pointer">'
+      + '<div class="mfp-card-head">'
+      + '<span class="mfp-icon" style="font-size:18px">🏟</span>'
+      + '<span class="mfp-card-title">Miami Freedom Park Stadium</span>'
+      + '<span class="mfp-badge" style="background:#E31837;color:#fff">Active</span>'
+      + '</div>'
+      + '<div class="mfp-card-summary">Post-opening closeout. Home opener April 4, 2026. Cost recovery audit, punch list disputes with Lemartec, ARQ payment hold, HVAC service agreement.</div>'
+      + '<div class="mfp-card-bullets chiefs-stats" id="mfp-card-stats">'
+      + 'Total commitments: ' + stadiumRevised + '<br>'
+      + 'Paid: ' + stadiumPaid + ', Balance: ' + stadiumBal + '<br>'
+      + 'Hard cost budget: ' + stadiumBudget + '<br>'
+      + 'Cost recovery target: $9M+<br>'
+      + 'Audit final delivery: June 30, 2026'
+      + '</div>'
+      + '</div>'
+    + '<div class="mfp-card chiefs-card" style="opacity:.6;cursor:pointer" onclick="alert(\'DOVA Sacramento — Active pursuit. SD phase in progress.\')">'
+            + '<div class="mfp-card-head">'
+            + '<span class="mfp-icon" style="font-size:18px">🏗</span>'
+        + '<span class="mfp-card-title">DOVA (Sacramento)</span>'
+        + '<span class="mfp-badge" style="background:#FFB81C;color:#0f0f1a">Active Pursuit</span>'
+        + '</div>'
+        + '<div class="mfp-card-summary">Active pursuit. SD phase in progress. Targeting late 2027 / early 2028 opening.</div>'
+            + '</div>'
+        + '<div class="mfp-card chiefs-card" onclick="setView(\'chiefs\')" style="cursor:pointer">'
+        + '<div class="mfp-card-head">'
+        + '<span class="mfp-icon chiefs-icon">▲</span>'
+        + '<span class="mfp-card-title">Kansas City Chiefs — Training Facility</span>'
+        + '<span class="mfp-badge" style="background:#FFB81C;color:#0f0f1a">Active Pursuit</span>'
+        + '</div>'
+        + '<div class="mfp-card-summary">Training Facility, Olathe KS. $265M budget, CMAR/GMP, Q4 2030. Turner & Townsend + Level Up.</div>'
+        + '<div class="mfp-card-bullets chiefs-stats" id="chiefs-card-stats">'
+        + 'Budget: $265M<br>'
+        + 'Substantial Completion: Q4 2030<br>'
+        + '<span class="chiefs-dot-green"></span> Schedule: On Track'
+        + '</div>'
+        + '</div>';
+}
+
+function renderMFP() {
+  var el = document.getElementById('mfp-content');
+  if (!el) return;
+  var F = window.__MFP_FINANCIALS;
+  var S = F ? F.summary : null;
+  var H = F ? F.hard : null;
+  function fm(n){ if (n==null) return '$0'; var s=Math.abs(n).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,'); return '$'+s; }
+  // Ensure MFP_DETAILS is available for inline card expansion
+    if (!window.__MFP_DETAILS) {
+      showMFPDetail('issues');
+      var mfpModal = document.getElementById('modal-mfp-detail');
+      if (mfpModal) mfpModal.classList.remove('open');
+    }
+  var stadiumVal = S ? fm(S.stadium_base_contract) : '$530M';
+    var pctComplete = S ? S.stadium_pct_complete.toFixed(1) + '%' : '94.2%';
+    var budgetVal = S ? fm(S.total_budget) : '$824M';
+    var paidVal = S ? fm(S.paid_to_date) : '';
+    var retainVal = S ? fm(S.retainage_held) : '';
+    var pastDueVal = S ? fm(S.past_due) : '';
+    var approvedCOs = S ? fm(S.approved_cos_total) : '';
+    
+    var daysPast = S ? S.days_past_baseline + ' days past baseline' : '153 days past baseline';
+    var millerOut = H && H.commitments ? fm((H.commitments.find(function(c){return c.company && c.company.indexOf('MILLER')>=0;}) || {}).balance) : '';
+        el.innerHTML = '<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px">'
+          + '<div style="font-size:13px;color:var(--muted);margin-bottom:4px">CURRENT PHASE <span style="color:#c0392b;font-weight:700">| ' + daysPast + '</span></div>'
+      + '<div style="font-size:18px;font-weight:700;color:var(--charcoal);margin-bottom:8px">Post-Opening / Active Closeout</div>'
+      + '<div style="font-size:14px;color:var(--charcoal);line-height:1.6">Home opener April 4, 2026 completed. Targeting final completion ' + (S ? S.target_completion : 'July 31, 2026') + '. Active workstreams: punch list closeout, cost recovery audit (delivery June 30), Lemartec contract closeout, HVAC service agreement transfer, Day 2 owner requests log.</div>'
+    + '</div>'
+    + '<div class="mfp-grid">'
+    + '<div class="mfp-card" onclick="openMFPModal(\'issues\')"><div class="mfp-card-head"><span class="mfp-icon">🔴</span><span class="mfp-card-title">Live Issues</span><span class="mfp-badge red">5 HIGH</span></div><div class="mfp-card-summary">ARQ payment hold (~$1.5M), cost recovery audit deadline (Jun 30), Lemartec punch list disputes, HVAC contractor departure risk, Lemartec indirect cost gap ($39.5M).</div><div class="mfp-expand-content"></div></div>'
+        + '<div class="mfp-card" onclick="openMFPModal(\'financials\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDCB0</span><span class="mfp-card-title">Financials</span></div><div class="mfp-card-summary">Total budget: ' + budgetVal + '. Stadium: ' + stadiumVal + ' revised, ' + pctComplete + ' complete. Miller Electric outstanding: ' + millerOut + '. Retainage: ' + retainVal + '.</div><div class="mfp-expand-content"></div></div>'
+        + '<div class="mfp-card" onclick="openMFPModal(\'punchlist\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDCCB</span><span class="mfp-card-title">Punch List</span><span class="mfp-badge warn">Active</span></div><div class="mfp-card-summary">Tile installation deficiency and surface-mounted electrical conduit (spec required concealed) are active disputes with Lemartec. Position: correction, not credit.</div><div class="mfp-expand-content"></div></div>'
+        + '<div class="mfp-card" onclick="showMFPDetail(\'day2\')"><div class="mfp-card-head"><span class="mfp-icon">🏗</span><span class="mfp-card-title">Day 2 Items</span><span class="mfp-badge warn">60+</span></div><div class="mfp-card-summary">Owner-directed post-opening scope. 10 tracked in closeout meetings — concourse signage, team store, club finishing, broadcast platforms, plaza landscaping, security screening, parking, F&B upgrades, AV system, suite FF&E. Each requires scope definition, cost estimate, owner authorization.</div><div class="mfp-expand-content"></div></div>'
+        + '<div class="mfp-card" onclick="openMFPModal(\'stakeholders\')"><div class="mfp-card-head"><span class="mfp-icon">\uD83D\uDC65</span><span class="mfp-card-title">Stakeholders</span></div><div class="mfp-card-summary">Owner: Graham Oxley (day-to-day), Devon McCorkle &amp; Victor Oliver (approvers). CM/GC: Lemartec. AOR: ARQ.</div><div class="mfp-expand-content"></div></div>'
+    + '</div>'
+    + '<div style="margin-top:24px"><button class="btn-primary" onclick="toggleChat()">Ask LUCI about MFP →</button></div>';
+    // Export modal function globally so card onclick handlers work
+        window.openMFPModal = showMFPDetail;
+            }
+
+            // ── MFP COMMAND CENTER ────────────────────────────────────────
+        function renderMFPDashboard() {
+          var el = document.getElementById('mfp-dashboard');
+          if (!el) return;
+          var F = window.__MFP_FINANCIALS || {};
+          var H = F.hard || {};
+          var S = F.summary || {};
+          var soft = F.soft || {};
+          var ctx = window.__MFP_CONTEXT || '';
+          var totalRev = H.total_revised ? Math.abs(H.total_revised).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') : '505M';
+          var totalPaid = H.total_paid ? Math.abs(H.total_paid).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') : '400M';
+          var totalBal = H.total_balance ? Math.abs(H.total_balance).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,') : '105M';
+          var pctPaid = H.total_pct_paid ? H.total_pct_paid.toFixed(1) : '79.1';
+          var baseBudget = S.stadium_base_contract || S.total_budget || 824000000;
+          var budgetStr = '$' + Math.abs(baseBudget).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,');
+
+          // Format helper for numbers
+          var fm = function(n) { if (n == null) return '$0'; return '$' + Math.abs(n).toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g,'$1,'); };
+
+          // Top subs by balance
+          var topSubs = [];
+          if (H.commitments) {
+            var sorted = H.commitments.slice().sort(function(a,b) { return b.balance - a.balance; });
+            topSubs = sorted.slice(0, 8);
+          }
+
+          // Soft cost totals
+          var softTotal = soft.design_total || 28451538;
+          var ffeTotal = soft.ffe_budget || 15767602;
+          var freightTotal = soft.freight || 16112254;
+          var customsTotal = soft.customs_duties || 13989138;
+          var contTotal = soft.contingency || 15500000;
+          var allSoft = softTotal + ffeTotal + freightTotal + customsTotal + contTotal;
+
+          var html = '<div class="mfp-live-badge">Live \u00b7 Financials as of Jun 8</div>';
+          // Row 1: Header + SC anchor
+          html += '<div class="mfp-row">';
+          html += '<div class="mfp-header-band"><div class="mfp-header-title">MIAMI FREEDOM PARK STADIUM</div><div class="mfp-header-sub">Command Center \u00b7 Level Up Project Development \u00b7 Miami, FL</div><div class="mfp-header-desc">Post-opening closeout. Home opener April 4, 2026. Active workstreams: punch list, cost recovery audit, Lemartec contract closeout.</div></div>';
+          html += '<div class="mfp-anchor"><div class="mfp-anchor-label">HOME OPENER</div><div class="mfp-anchor-value">Apr 4, 2026</div></div></div>';
+
+          // Row 2: KPI strip
+          html += '<div class="mfp-row mfp-kpi-row">';
+          var kpis = [
+            ['Total Budget', 'TOTAL BUDGET', '', budgetStr],
+            ['Hard Cost Revised', 'HARD COSTS', '', '$' + (Math.abs(H.total_revised || 505000000) / 1000000).toFixed(0) + 'M'],
+            ['Paid to Date', 'PAID TO DATE', '', '$' + (Math.abs(H.total_paid || 400000000) / 1000000).toFixed(0) + 'M'],
+            ['Percent Paid', 'PAID %', 'gold', pctPaid + '%'],
+            ['Outstanding Balance', 'BALANCE', '', '$' + (Math.abs(H.total_balance || 105000000) / 1000000).toFixed(0) + 'M'],
+            ['Soft Costs Total', 'SOFT COSTS', '', '$' + Math.round(allSoft / 1000000) + 'M'],
+            ['Pending COs', 'PENDING COs', '', '$' + (Math.abs(H.total_pending_cos || 4.8) / 1000000).toFixed(1) + 'M'],
+            ['Project Status', 'STATUS', 'green', 'Post-Opening / Closeout']
+          ];
+          kpis.forEach(function(kp) {
+            html += '<div class="mfp-kpi"><div class="mfp-kpi-label">' + kp[1] + '</div><div class="mfp-kpi-val ' + kp[2] + '">' + kp[3] + '</div></div>';
+          });
+          html += '</div>';
+
+          // Row 3: Scorecard + Hard Cost Budget chart
+          html += '<div class="mfp-row">';
+          html += '<div class="mfp-widget mfp-w2"><div class="mfp-widget-title">Project Health Scorecard</div><div class="mfp-scorecard">';
+          var scoreItems = [
+            ['Budget', 'GREEN'],
+            ['Schedule', 'GREEN'],
+            ['Punch List', 'YELLOW'],
+            ['Cost Recovery', 'GREEN'],
+            ['Safety', 'GREEN'],
+            ['Closeout', 'YELLOW']
+          ];
+          scoreItems.forEach(function(si) {
+            var c = si[1] === 'GREEN' ? 'green' : si[1] === 'YELLOW' ? 'yellow' : 'red';
+            html += '<div class="mfp-score-item"><span class="mfp-dot mfp-dot-' + c + '"></span><span class="mfp-score-cat">' + si[0] + '</span></div>';
+          });
+          html += '</div></div>';
+          // Budget bar chart
+          html += '<div class="mfp-widget mfp-w2"><div class="mfp-widget-title">Hard Cost Budget ($M)</div><div class="mfp-chart-wrap"><canvas id="mfp-chart-budget"></canvas></div></div>';
+          html += '</div>';
+
+          // Row 4: Active workstreams + Cost recovery
+          html += '<div class="mfp-row">';
+          html += '<div class="mfp-widget mfp-w3"><div class="mfp-widget-title">Active Workstreams</div>';
+          html += '<div class="mfp-workstreams">';
+          var ws = [
+            { label: 'Punch List Closeout', status: 'Active', detail: 'Tile deficiency, conduit dispute with Lemartec. Correction, not credit.' },
+            { label: 'Cost Recovery Audit', status: 'Active', detail: 'Target $9M+. Final delivery June 30, 2026.' },
+            { label: 'Day 2 Items', status: 'Active', detail: '60+ owner-directed items. 10 tracked in closeout.' },
+            { label: 'HVAC Service Agreement', status: 'In Progress', detail: 'Negotiating terms with Lemartec sub.' },
+            { label: 'ARQ Payment Hold', status: 'Active', detail: 'Outstanding AOR invoices under review.' },
+            { label: 'Commissioning Completion', status: 'Completed', detail: 'All systems verified.' }
+          ];
+          ws.forEach(function(w) {
+            var sc = w.status === 'Active' ? ' chiefs-pill-gold' : w.status === 'Completed' ? ' chiefs-pill-green' : ' chiefs-pill-gray';
+            html += '<div class="mfp-ws-item"><div class="mfp-ws-label">' + w.label + '</div><div><span class="chiefs-pill' + sc + '">' + w.status + '</span></div><div class="mfp-ws-detail">' + w.detail + '</div></div>';
+          });
+          html += '</div></div>';
+          // Cost recovery gauge
+          html += '<div class="mfp-widget mfp-w2"><div class="mfp-widget-title">Cost Recovery Progress</div><div class="mfp-chart-wrap"><canvas id="mfp-chart-recovery"></canvas></div><div class="mfp-bp-metrics"><div class="mfp-bp-metric"><div class="mfp-kpi-label">TARGET</div><div class="mfp-kpi-val">$9M</div></div><div class="mfp-bp-metric"><div class="mfp-kpi-label">IDENTIFIED</div><div class="mfp-kpi-val chiefs-pill-gold" style="padding:2px 10px;border-radius:10px">$6.2M</div></div><div class="mfp-bp-metric"><div class="mfp-kpi-label">RECOVERED</div><div class="mfp-kpi-val" style="color:var(--teal)">$4.1M</div></div></div></div></div>';
+
+          // Row 5: Soft Costs Breakdown
+          html += '<div class="mfp-row">';
+          html += '<div class="mfp-widget mfp-w3"><div class="mfp-widget-title">Soft Costs Breakdown <span style="font-weight:400;color:var(--muted)">Total: ' + fm(allSoft) + '</span></div><table class="chiefs-table"><thead><tr><th>Category</th><th>Amount</th><th>% of Soft</th></tr></thead><tbody>';
+          var softItems = [
+            ['Design Team Fees', softTotal, softTotal/allSoft],
+            ['FF&E Budget', ffeTotal, ffeTotal/allSoft],
+            ['Freight', freightTotal, freightTotal/allSoft],
+            ['Customs Duties / Tariffs', customsTotal, customsTotal/allSoft],
+            ['Contingency', contTotal, contTotal/allSoft]
+          ];
+          softItems.forEach(function(si) {
+            var amt = '$' + Math.round(si[1] / 1000000) + 'M';
+            var pct = (si[2] * 100).toFixed(0) + '%';
+            html += '<tr><td class="chiefs-cell-primary">' + si[0] + '</td><td>' + amt + '</td><td>' + pct + '</td></tr>';
+          });
+          html += '</tbody></table></div>';
+          // Design Team (top firms)
+          html += '<div class="mfp-widget mfp-w2"><div class="mfp-widget-title">Design Team <span style="font-weight:400;color:var(--muted)">Top firms by fee</span></div><table class="chiefs-table"><thead><tr><th>Firm</th><th>Scope</th><th>Fee</th></tr></thead><tbody>';
+          if (soft.design_team) {
+            soft.design_team.slice(0, 10).forEach(function(dt) {
+              html += '<tr><td class="chiefs-cell-primary">' + dt.firm + '</td><td>' + dt.scope + '</td><td>' + fm(dt.fee) + '</td></tr>';
+            });
+          }
+          html += '</tbody></table></div></div>';
+
+          // Row 6: Top Subcontractors + FF&E Categories
+          html += '<div class="mfp-row">';
+          html += '<div class="mfp-widget mfp-w3"><div class="mfp-widget-title">Top Subcontractors by Outstanding Balance</div><table class="chiefs-table"><thead><tr><th>Subcontractor</th><th>Trade</th><th>Revised</th><th>Balance</th><th>% Paid</th></tr></thead><tbody>';
+          topSubs.forEach(function(c) {
+            var balCls = c.pct_paid < 70 ? ' chiefs-pill-red' : c.pct_paid < 85 ? ' chiefs-pill-gold' : ' chiefs-pill-green';
+            html += '<tr><td class="chiefs-cell-primary">' + c.company.split(',')[0] + '</td><td>' + c.title + '</td><td>' + fm(c.revised) + '</td><td>' + fm(c.balance) + '</td><td><span class="chiefs-pill' + balCls + '">' + c.pct_paid.toFixed(0) + '%</span></td></tr>';
+          });
+          html += '</tbody></table></div>';
+          // FF&E breakdown
+          html += '<div class="mfp-widget mfp-w2"><div class="mfp-widget-title">FF&E by Category <span style="font-weight:400;color:var(--muted)">Total: ' + fm(ffeTotal) + '</span></div><table class="chiefs-table"><thead><tr><th>Category</th><th>Amount</th></tr></thead><tbody>';
+          if (soft.ffe_breakdown) {
+            soft.ffe_breakdown.forEach(function(ffe) {
+              html += '<tr><td class="chiefs-cell-primary">' + ffe.category + '</td><td>' + fm(ffe.amount) + '</td></tr>';
+            });
+          }
+          html += '</tbody></table></div></div>';
+
+          // Row 7: Key contracts + Stakeholders
+          html += '<div class="mfp-row">';
+          html += '<div class="mfp-widget mfp-w3"><div class="mfp-widget-title">Key Contracts</div><table class="chiefs-table"><thead><tr><th>Contract</th><th>Firm</th><th>Value</th><th>Status</th></tr></thead><tbody>';
+          var contracts = [
+            ['GC/CM', 'Lemartec', '$530M', 'Closeout'],
+            ['Architect', 'ARQ', '—', 'Hold'],
+            ['Structural', 'Walter P Moore', '—', 'Active'],
+            ['MEP', 'B & I Contractors', '—', 'Active'],
+            ['Scoreboard', 'Daktronics', '—', 'Complete'],
+            ['Security', 'Boldyn', '—', 'Active']
+          ];
+          contracts.forEach(function(c) {
+            var scls = c[3] === 'Complete' ? ' chiefs-pill-green' : c[3] === 'Hold' ? ' chiefs-pill-red' : c[3] === 'Closeout' ? ' chiefs-pill-gold' : ' chiefs-pill-gray';
+            html += '<tr><td class="chiefs-cell-primary">' + c[0] + '</td><td>' + c[1] + '</td><td>' + c[2] + '</td><td><span class="chiefs-pill' + scls + '">' + c[3] + '</span></td></tr>';
+          });
+          html += '</tbody></table></div>';
+          // Stakeholders
+          html += '<div class="mfp-widget mfp-w2"><div class="mfp-widget-title">Key Stakeholders</div><table class="chiefs-table"><thead><tr><th>Role</th><th>Name</th><th>Firm</th></tr></thead><tbody>';
+          var stakeholders = [
+            ['Owner (Day-to-Day)', 'Graham Oxley', 'MFP'],
+            ['Owner (Approver)', 'Devon McCorkle', 'MFP'],
+            ['Owner (Approver)', 'Victor Oliver', 'MFP'],
+            ['Owner\'s Rep', 'Whitney Williams', 'Level Up'],
+            ['Owner\'s Rep', 'Greg Wieting', 'Level Up'],
+            ['Field Director', 'Jordan Ward', 'Level Up'],
+            ['GC/CM', 'Jon Smith (PE)', 'Lemartec']
+          ];
+          stakeholders.forEach(function(sh) {
+            html += '<tr><td class="chiefs-cell-primary">' + sh[0] + '</td><td>' + sh[1] + '</td><td>' + sh[2] + '</td></tr>';
+          });
+          html += '</tbody></table></div></div>';
+
+          // Row 8: Key dates + Invoice status
+          html += '<div class="mfp-row">';
+          html += '<div class="mfp-widget mfp-w3"><div class="mfp-widget-title">Key Dates</div><table class="chiefs-table"><thead><tr><th>Milestone</th><th>Date</th><th>Status</th></tr></thead><tbody>';
+          var dates = [
+            ['Home Opener', 'Apr 4, 2026', 'Complete'],
+            ['Cost Recovery Final', 'Jun 30, 2026', 'On Track'],
+            ['Punch List Complete', 'Aug 2026', 'In Progress'],
+            ['Final Lien Waivers', 'Sep 2026', 'In Progress'],
+            ['Contract Closeout', 'Dec 2026', 'Not Started']
+          ];
+          dates.forEach(function(d) {
+            var dcls = d[2] === 'Complete' ? ' chiefs-pill-green' : d[2] === 'On Track' ? ' chiefs-pill-green' : d[2] === 'In Progress' ? ' chiefs-pill-gold' : ' chiefs-pill-gray';
+            html += '<tr><td class="chiefs-cell-primary">' + d[0] + '</td><td>' + d[1] + '</td><td><span class="chiefs-pill' + dcls + '">' + d[2] + '</span></td></tr>';
+          });
+          html += '</tbody></table></div>';
+          // Invoice summary
+          html += '<div class="mfp-widget mfp-w2"><div class="mfp-widget-title">Invoice Summary</div><div class="mfp-bp-metrics">';
+          html += '<div class="mfp-bp-metric"><div class="mfp-kpi-label">HARD COST ORIGINAL</div><div class="mfp-kpi-val">$485M</div></div>';
+          html += '<div class="mfp-bp-metric"><div class="mfp-kpi-label">APPROVED COs</div><div class="mfp-kpi-val" style="color:var(--teal)">$20.7M</div></div>';
+          html += '<div class="mfp-bp-metric"><div class="mfp-kpi-label">INVOICED TO DATE</div><div class="mfp-kpi-val">$459M</div></div>';
+          html += '<div class="mfp-bp-metric"><div class="mfp-kpi-label">PENDING COs</div><div class="mfp-kpi-val chiefs-pill-gold" style="padding:2px 6px;border-radius:6px">$4.8M</div></div>';
+          html += '</div></div></div>';
+
+          el.innerHTML = html;
+          renderMFPCharts();
+        }
+
+        function renderMFPCharts() {
+          if (typeof Chart === 'undefined') return;
+          var teal = '#184655', gold = '#e6a817', slate = '#8A8AA3', txt = 'var(--charcoal)', grid = 'rgba(138,138,163,0.15)';
+          Chart.defaults.color = txt; Chart.defaults.borderColor = grid;
+          var F = window.__MFP_FINANCIALS || {};
+          var H = F.hard || {};
+          var S = F.summary || {};
+
+          // Budget bar
+          if (document.getElementById('mfp-chart-budget')) {
+            var cats = ['Original', 'COs', 'Revised', 'Invoiced', 'Paid', 'Balance'];
+            var vals = [
+              Math.round((H.total_original || 485000000) / 1000000),
+              Math.round((H.total_approved_cos || 20700000) / 1000000),
+              Math.round((H.total_revised || 505000000) / 1000000),
+              Math.round((H.total_invoiced || 459000000) / 1000000),
+              Math.round((H.total_paid || 400000000) / 1000000),
+              Math.round((H.total_balance || 105000000) / 1000000)
+            ];
+            new Chart(document.getElementById('mfp-chart-budget'), {
+              type: 'bar',
+              data: { labels: cats, datasets: [{ label: 'Amount ($M)', data: vals, backgroundColor: [teal, gold, teal, slate, '#1D9E75', '#E31837'], borderRadius: 3 }] },
+              options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: txt, maxRotation: 45, font: { size: 10 } } }, y: { ticks: { color: txt } } } }
+            });
+          }
+
+          // Cost recovery gauge
+          if (document.getElementById('mfp-chart-recovery')) {
+            new Chart(document.getElementById('mfp-chart-recovery'), {
+              type: 'doughnut',
+              data: {
+                labels: ['Recovered', 'Identified', 'Remaining'],
+                datasets: [{ data: [4.1, 2.1, 2.8], backgroundColor: [teal, gold, slate], borderWidth: 0 }]
+              },
+              options: {
+                responsive: true, maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                  legend: { position: 'bottom', labels: { color: txt, boxWidth: 12, padding: 8 } }
+                }
+              }
+            });
+          }
+        }
+
+            // ── KC CHIEFS DASHBOARD ────────────────────────────────────────
+    var _chiefsData = {};
+    var _chiefsTimers = [];
+
+    function renderChiefsDashboard() {
+      var el = document.getElementById('chiefs-dashboard');
+      if (!el) return;
+      el.innerHTML = '<div class="chiefs-skeleton"><div class="chiefs-loader"></div>Loading Command Center...</div>';
+      var keys = ['01','02','03','04','05','06','07','08','09','10','11','12','13'];
+      var fetches = keys.map(function(k) {
+        return fetch('/api/chiefs?sheet=' + k).then(function(r){if(!r.ok)throw new Error(k+':'+r.status);return r.json();}).then(function(d){_chiefsData[k]=d;}).catch(function(e){_chiefsData[k]={error:true,message:e.message,rows:[],columns:[]};});
+      });
+      Promise.all(fetches).then(function(){buildDashboard(el);startChiefsRefresh();});
+    }
+
+    function buildDashboard(el) {
+      var d = _chiefsData;
+      var html = '<div class="chiefs-live-badge" id="chiefs-live-badge">Live \u00b7 Updated just now</div>';
+      // Row 1: Header + SC anchor
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-header-band"><div class="chiefs-header-title">KC CHIEFS TRAINING FACILITY</div><div class="chiefs-header-sub">Project Command Center \u00b7 Turner & Townsend + Level Up \u00b7 Olathe, Kansas</div><div class="chiefs-header-desc">A single source of truth that keeps priorities visible, decisions organized, and Chiefs leadership informed.</div></div>';
+      var scVal='Q4 2030'; if(d['06']&&d['06'].rows)d['06'].rows.forEach(function(r){if(r.KPI&&r.KPI.indexOf('Substantial')>=0)scVal=r.Value||scVal;});
+      html += '<div class="chiefs-anchor"><div class="chiefs-anchor-label">SUBSTANTIAL COMPLETION</div><div class="chiefs-anchor-value">'+scVal+'</div></div></div>';
+  
+      // Row 2: KPI strip
+      html += '<div class="chiefs-row chiefs-kpi-row">';
+      [['Total Budget','TOTAL BUDGET',''],['Committed','COMMITTED',''],['Billed to Date','BILLED TO DATE',''],['Percent Spent','PERCENT SPENT','gold'],['Contingency Remaining','CONTINGENCY',''],['Schedule Status','SCHEDULE','green']].forEach(function(kp){
+        var v='';if(d['06']&&d['06'].rows)d['06'].rows.forEach(function(r){if(r.KPI&&r.KPI.indexOf(kp[0])>=0)v=r.Value||'';});
+        html += '<div class="chiefs-kpi"><div class="chiefs-kpi-label">'+kp[1]+'</div><div class="chiefs-kpi-val '+kp[2]+'">'+v+'</div></div>';
+      });
+      html += '</div>';
+  
+      // Row 3: Scorecard + charts
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Project Health Scorecard <a class="chiefs-source-link" href="'+(d['13']?d['13'].permalink:'#')+'" target="_blank" title="View source">&#x1F517;</a></div><div class="chiefs-scorecard">';
+      if(d['13']&&d['13'].rows)d['13'].rows.forEach(function(r){var st=r.Status||'GREEN',c=st==='GREEN'?'green':st==='YELLOW'?'yellow':'red';html+='<div class="chiefs-score-item"><span class="chiefs-dot chiefs-dot-'+c+'"></span><span class="chiefs-score-cat">'+(r.Category||'')+'</span></div>';});
+      html += '</div></div>';
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Budget by Category ($M) <a class="chiefs-source-link" href="'+(d['01']?d['01'].permalink:'#')+'" target="_blank" title="View source">&#x1F517;</a></div><div class="chiefs-chart-wrap"><canvas id="chiefs-chart-budget"></canvas></div></div>';
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Cash Flow Curve (Cumulative $M) <a class="chiefs-source-link" href="'+(d['05']?d['05'].permalink:'#')+'" target="_blank" title="View source">&#x1F517;</a></div><div class="chiefs-chart-wrap"><canvas id="chiefs-chart-cashflow"></canvas></div></div></div>';
+  
+      // Row 4: Schedule + Action Items
+      html += '<div class="chiefs-row">'+buildTable('02','Milestone Schedule',['Milestone','Target Date','Variance','Status'])+buildTable('03','Action Items',['Item','Owner','Due Date','Priority'])+'</div>';
+  
+      // Row 5: Procurement + Decisions
+      html += '<div class="chiefs-row">'+buildTable('07','Procurement & Long-Lead Buyout',['Package','Budget Value','Need-By','Status']);
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Upcoming Key Decisions <a class="chiefs-source-link" href="'+(d['08']?d['08'].permalink:'#')+'" target="_blank" title="View source">&#x1F517;</a></div>'+buildTableInner('08',['Decision','Needed By','Status'])+'</div></div>';
+  
+      // Row 6: Look-ahead + Risk
+      html += '<div class="chiefs-row">'+buildTable('09','Next 90 Days',['Activity','Start','Finish','Owner'])+buildTable('10','Top Risks & Mitigation',['Risk','Rating','Trend','Mitigation'])+'</div>';
+  
+      // Row 7: Budget position + Team + Camera
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-widget chiefs-w3"><div class="chiefs-widget-title">Budget Position <a class="chiefs-source-link" href="'+(d['12']?d['12'].permalink:'#')+'" target="_blank" title="View source">&#x1F517;</a></div><div class="chiefs-chart-wrap"><canvas id="chiefs-chart-budgetpos"></canvas></div><div class="chiefs-bp-metrics">';
+      var bv=function(l){if(!d['12']||!d['12'].rows)return'';for(var i=0;i<d['12'].rows.length;i++){if(d['12'].rows[i].Measure&&d['12'].rows[i].Measure.indexOf(l)>=0)return'$'+Math.round(d['12'].rows[i].Amount/1000000)+'M';}return'';};
+      html += '<div class="chiefs-bp-metric"><div class="chiefs-kpi-label">PAID TO DATE</div><div class="chiefs-kpi-val">'+bv('Paid')+'</div></div><div class="chiefs-bp-metric"><div class="chiefs-kpi-label">RETAINAGE HELD</div><div class="chiefs-kpi-val">'+bv('Retainage')+'</div></div><div class="chiefs-bp-metric"><div class="chiefs-kpi-label">REMAINING</div><div class="chiefs-kpi-val">'+bv('Remaining')+'</div></div>';
+      html += '</div></div>'+buildTable('11','Project Team',['Name','Role','Firm']);
+      html += '<div class="chiefs-widget chiefs-w1"><div class="chiefs-widget-title">Live Jobsite Camera</div><div class="chiefs-camera-ph"><div class="chiefs-camera-icon">&#x1F4F7;</div><div>Camera 1 \u00b7 South View</div><div class="chiefs-camera-sub">Activates at groundbreaking</div></div></div></div>';
+  
+      // Row 8: Snapshot + Doc shortcuts
+      html += '<div class="chiefs-row">'+buildTable('04','Project Snapshot',['Metric','Value','Notes']);
+      html += '<div class="chiefs-widget chiefs-w3"><div class="chiefs-widget-title">Document Shortcuts</div><div class="chiefs-doc-links">';
+      [['Executive Schedule','02'],['Budget Tracker','01'],['Procurement Log','07'],['OAC Minutes',''],['Monthly Reports',''],['Drawings',''],['Pay Apps',''],['Renderings',''],['Site Photos','']].forEach(function(dl){
+        var url=dl[1]&&d[dl[1]]?d[dl[1]].permalink:'#';html+='<a class="chiefs-doc-link" href="'+url+'" target="_blank">'+dl[0]+'</a>';
+      });
+      html += '</div></div></div>';
+  
+      el.innerHTML = html;
+      renderCharts();
+    }
+
+    function buildTable(sk,title,cols){
+      var d=_chiefsData[sk],pl=d&&d.permalink?d.permalink:'#';
+      return '<div class="chiefs-widget chiefs-w3"><div class="chiefs-widget-title">'+title+' <a class="chiefs-source-link" href="'+pl+'" target="_blank" title="View source">&#x1F517;</a></div>'+buildTableInner(sk,cols)+'</div>';
+    }
+
+    function buildTableInner(sk,cols){
+      var d=_chiefsData[sk];if(!d||!d.rows||!d.rows.length)return'<div class="chiefs-empty">No data</div>';
+      var h='<table class="chiefs-table"><thead><tr>';cols.forEach(function(c){h+='<th>'+c+'</th>';});h+='</tr></thead><tbody>';
+      d.rows.forEach(function(row){
+        h+='<tr>';
+        cols.forEach(function(c,i){
+          var v=row[c]!==undefined&&row[c]!==null?row[c]:'',cls='';
+          if(c==='Status'||c==='Priority'||c==='Rating'){
+            var sv=String(v).toLowerCase();
+            if(sv==='complete'||sv==='awarded'||sv==='on track'||sv==='healthy')cls=' chiefs-pill-green';
+            else if(sv==='in progress'||sv==='planning'||sv==='watch'||sv==='medium')cls=' chiefs-pill-gold';
+            else if(sv==='high'||sv==='at risk'||sv==='long lead - track')cls=' chiefs-pill-red';
+            else if(sv==='not started'||sv==='')cls=' chiefs-pill-gray';
+            else if(sv==='green')cls=' chiefs-pill-green';else if(sv==='yellow')cls=' chiefs-pill-gold';else if(sv==='red')cls=' chiefs-pill-red';
+          }
+          if(i===0)h+='<td class="chiefs-cell-primary">'+v+'</td>';
+          else if(cls)h+='<td><span class="chiefs-pill'+cls+'">'+v+'</span></td>';
+          else h+='<td>'+v+'</td>';
+        });
+        h+='</tr>';
+      });
+      return h+'</tbody></table>';
+    }
+
+    function renderCharts(){
+      if(typeof Chart==='undefined')return;
+      var red='#E31837',gold='#FFB81C',slate='#8A8AA3',txt='#D0D0E0',grid='rgba(138,138,163,0.15)';
+      Chart.defaults.color=txt;Chart.defaults.borderColor=grid;
+      // Budget bar
+      var bd=_chiefsData['01'];
+      if(bd&&bd.rows&&document.getElementById('chiefs-chart-budget')){
+        var lb=[],am=[];bd.rows.forEach(function(r){lb.push(r.Category||'');var a=r['Planned Amount'];am.push(a?Math.round(a/1000000):0);});
+        new Chart(document.getElementById('chiefs-chart-budget'),{type:'bar',data:{labels:lb,datasets:[{label:'Planned ($M)',data:am,backgroundColor:red,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:txt,maxRotation:45,font:{size:10}}},y:{ticks:{color:txt}}}}});
+      }
+      // Cash flow line
+      var cd=_chiefsData['05'];
+      if(cd&&cd.rows&&document.getElementById('chiefs-chart-cashflow')){
+        var ql=[],pl=[],ac=[];cd.rows.forEach(function(r){ql.push(r.Quarter||'');pl.push(r['Planned Cumulative']||0);var a=r['Actual Cumulative'];ac.push(a!==null&&a!==undefined?a:null);});
+        new Chart(document.getElementById('chiefs-chart-cashflow'),{type:'line',data:{labels:ql,datasets:[{label:'Planned',data:pl,borderColor:gold,backgroundColor:gold+'20',borderDash:[5,5],fill:false,pointRadius:0,tension:0.3},{label:'Actual',data:ac,borderColor:red,backgroundColor:red+'20',fill:false,pointRadius:3,tension:0.3,spanGaps:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:txt,boxWidth:12,padding:8}}},scales:{x:{ticks:{color:txt,font:{size:9},maxRotation:60}},y:{ticks:{color:txt}}}}});
+      }
+      // Budget position stacked bar
+      var bpd=_chiefsData['12'];
+      if(bpd&&bpd.rows&&document.getElementById('chiefs-chart-budgetpos')){
+        var fa=function(l){for(var i=0;i<bpd.rows.length;i++){if(bpd.rows[i].Measure&&bpd.rows[i].Measure.indexOf(l)>=0)return Math.round((bpd.rows[i].Amount||0)/1000000);}return 0;};
+        new Chart(document.getElementById('chiefs-chart-budgetpos'),{type:'bar',data:{labels:['Budget Position'],datasets:[{label:'Paid',data:[fa('Paid')],backgroundColor:red,borderRadius:2},{label:'Retainage',data:[fa('Retainage')],backgroundColor:gold,borderRadius:2},{label:'Remaining',data:[fa('Remaining')],backgroundColor:slate,borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:txt,boxWidth:12}}},scales:{x:{display:false},y:{stacked:true,ticks:{color:txt}}},indexAxis:'y'}});
+      }
+    }
+
+    function startChiefsRefresh(){
+      _chiefsTimers.forEach(function(t){clearTimeout(t);});_chiefsTimers=[];
+      var tick=function(){
+        _chiefsTimers.push(setTimeout(function(){
+          var keys=['01','02','03','04','05','06','07','08','09','10','11','12','13'];
+          Promise.all(keys.map(function(k){return fetch('/api/chiefs?sheet='+k).then(function(r){if(!r.ok)return null;return r.json();}).then(function(d){if(d&&!d.error){_chiefsData[k]=d;}}).catch(function(){});})).then(function(){
+            var badge=document.getElementById('chiefs-live-badge');
+            if(badge){
+              var now=new Date(),t=now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+              badge.innerHTML='Live \u00b7 Updated '+t;badge.classList.add('chiefs-pulse');
+              setTimeout(function(){badge.classList.remove('chiefs-pulse');},1000);
+            }
+            tick();
+          });
+        },60000));
+      };
+      tick();
+    }
+
     function toggleMFPExpand(card, view) {
           var content = card.querySelector('.mfp-expand-content');
           if (!content) return;
@@ -1737,6 +3527,31 @@ function showModal(id, html) {
   setTimeout(function() { el.classList.add('open'); }, 10);
   }
 
+// ── SUMMON LUNA (Help button fly-in) ──────────────────────────────
+function summonLuna() {
+  var clippy = document.getElementById('luna-clippy');
+  var btn = document.getElementById('help-btn');
+  if (!clippy) return;
+  // If already visible, just open the chat
+  if (clippy.style.display !== 'none' && clippy.style.display !== '') {
+    clippyClick();
+    return;
+  }
+  // Remove any existing animation class
+  clippy.classList.remove('luna-fly-in');
+  // Show it but off-screen right
+  clippy.style.display = 'block';
+  // Force reflow, then trigger fly-in
+  void clippy.offsetWidth;
+  clippy.classList.add('luna-fly-in');
+  // Hide the help button after summoning
+  if (btn) btn.style.display = 'none';
+}
+
+function dismissLuna() {
+  clippyTab();
+}
+
 // ── LUNA CLIPPY ────────────────────────────────────────────────────
 var clippyState = 'full'; // 'full' | 'tab' | 'chat_open'
 var clippySuggestions = [
@@ -1788,9 +3603,9 @@ function clippyExpand() {
 function clippyTab() {
   clippyState = 'tab';
   var clippy = document.getElementById('luna-clippy');
-  var tab = document.getElementById('clippy-tab-standalone');
+  var btn = document.getElementById('help-btn');
   if (clippy) { clippy.style.display = 'none'; }
-  if (tab) tab.style.display = 'flex';
+  if (btn) btn.style.display = 'flex';
   hideClippySuggestion();
 }
 
@@ -1898,9 +3713,7 @@ function toggleChat() {
   if (d) d.classList.toggle('open', chatOpen);
   // Hide/show clippy
   var clippy = document.getElementById('luna-clippy');
-  var tab = document.getElementById('clippy-tab-standalone');
-  if (clippy) clippy.classList.toggle('chat-open', chatOpen);
-  if (tab) tab.classList.toggle('chat-open', chatOpen);
+    if (clippy) clippy.classList.toggle('chat-open', chatOpen);
   if (chatOpen) {
       if (chatHistory.length === 0) {
         var introText = "Hi " + (luUser && luUser.name ? luUser.name.split(' ')[0] : 'there') + ". I'm LUCI, your Project Intelligence engine. Ask me anything about the playbook or MFP. Day 1 mobilization, change orders, punch list disputes, cost recovery audit, anything.";
@@ -3265,18 +5078,10 @@ function buildBriefing() {
 
     html += '</div>';
 
-  // Budget snapshot
-  if (Su) {
-    html += '<div class="briefing-section-label">Budget Snapshot</div>'
-      + '<div class="briefing-budget">'
-      + '<div class="briefing-budget-item"><span>Total Budget</span><strong>$' + Math.round(Su.total_budget/1000000) + 'M</strong></div>'
-      + '<div class="briefing-budget-item"><span>Paid to Date</span><strong>$' + Math.round(Su.paid_to_date/1000000) + 'M</strong></div>'
-      + '<div class="briefing-budget-item"><span>Past Due</span><strong style="color:#c0392b">$' + Math.round(Su.past_due/1000000) + 'M</strong></div>'
-      + '<div class="briefing-budget-item"><span>Retainage</span><strong>$' + Math.round(Su.retainage_held/1000000) + 'M</strong></div>'
-      + '</div>';
-  }
+  // Budget snapshot removed per Whitney request
+    // Financial data is in the MFP Command Center dashboard now
 
-  html += '</div>';
+    html += '</div>';
   return html;
 }
 
@@ -3318,24 +5123,42 @@ function verifyPassword() {
   btn.disabled = true;
   btn.textContent = 'Checking...';
   err.style.display = 'none';
-  fetch('/api/verify-password', {
+    // Safety timeout — never hang on 'Checking...' forever
+    var timedOut = false;
+    var timeout = setTimeout(function() {
+      timedOut = true;
+      err.textContent = 'Request timed out. Try again.';
+      err.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Unlock';
+    }, 10000);
+    fetch('/api/verify-password', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ password: pw })
   }).then(function(r) {
-    if (!r.ok) {
+      clearTimeout(timeout);
+      if (timedOut) return;
+      if (!r.ok) {
       if (r.status === 401) throw new Error('Incorrect password');
       throw new Error('Server error (' + r.status + ')');
     }
     return r.json();
   }).then(function(data) {
-    if (data.valid) {
-      document.getElementById('password-overlay').classList.remove('open');
-      document.getElementById('password-overlay').style.display = 'none';
-    }
+      if (data.valid || data.success) {
+        document.getElementById('password-overlay').classList.remove('open');
+        document.getElementById('password-overlay').style.display = 'none';
+      } else {
+        err.textContent = 'Unexpected response. Try again.';
+        err.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Unlock';
+      }
   }).catch(function(e) {
-    err.textContent = e.message;
-    err.style.display = 'block';
+      clearTimeout(timeout);
+            if (timedOut) return;
+          err.textContent = e.message;
+          err.style.display = 'block';
     btn.disabled = false;
     btn.textContent = 'Unlock';
     inp.value = '';

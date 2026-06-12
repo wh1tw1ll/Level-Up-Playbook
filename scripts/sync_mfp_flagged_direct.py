@@ -141,23 +141,26 @@ def sync():
 
     now = datetime.now()
     cutoff = now - timedelta(days=LOOKBACK_DAYS)
-    cutoff_utc = cutoff.astimezone()  # make timezone-aware
+    cutoff_str = cutoff.strftime("%m/%d/%Y %I:%M %p")
+
+    # Restrict to only flagged items — avoids iterating the entire inbox
+    filter_str = f"[FlagStatus] = 2 AND [ReceivedTime] >= '{cutoff_str}'"
+    log(f"Filter: {filter_str}")
+    try:
+        flagged_items = items.Restrict(filter_str)
+    except Exception as e:
+        log(f"WARNING: Restrict failed ({e}), falling back to full iteration")
+        flagged_items = items
+
     actions = []
 
-    for item in items:
+    for item in flagged_items:
         try:
             received = item.ReceivedTime
             if hasattr(received, "timetuple"):
                 received_dt = received
             else:
                 received_dt = datetime.now().astimezone()
-
-            if received_dt < cutoff_utc:
-                continue
-
-            flag_status = item.FlagStatus
-            if flag_status not in [1, 2]:
-                continue
 
             subject = item.Subject or ""
             sender = item.SenderName or item.SenderEmailAddress or "MFP"

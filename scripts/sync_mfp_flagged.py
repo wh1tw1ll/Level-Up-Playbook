@@ -2,7 +2,10 @@
 """
 MFP Flagged Email Sync — reads flagged MFP emails via Outlook COM,
 analyzes body content for action/context, pushes to Playbook.
-Runs as a scheduled task.
+DESIGN: This script is designed to run from the interactive Windows session
+(Session 1, e.g. via the Windows Startup folder VBS script sync_mfp_flagged.vbs).
+It will NOT work from a Session 0 cron/scheduled task because Outlook COM
+requires an interactive user profile.
 """
 
 import json, os, sys, re, requests, win32com.client, pythoncom, threading
@@ -11,10 +14,8 @@ from datetime import datetime, timedelta
 # ── Config ──────────────────────────────────────────────────────────
 PLAYBOOK_URL = "https://level-up-playbook.vercel.app/api/sync/flagged-store"
 SYNC_KEY = "59085493e8e63a164be0e443575b99f191b5c7fdb791c539"
-LOOKBACK_DAYS = 60  # how far back to scan for flagged
+LOOKBACK_DAYS = 60
 LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts", "flagged-sync.log")
-
-# ── Helpers ──────────────────────────────────────────────────────────
 
 def log(msg):
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -28,13 +29,7 @@ def log(msg):
 
 
 def extract_action(subject, body, sender, received):
-    """
-    Analyze email subject + body to extract:
-    - action_type: 'action_required', 'for_review', 'for_approval', 'informational', 'decision_needed', 'follow_up'
-    - summary: 1-2 line what needs to happen
-    - deadline detected (if any)
-    - confidence: high/medium/low
-    """
+    """Analyze email subject+body, return structured action item."""
     text = (subject or "") + " " + (body or "")[:3000]
     text_lower = text.lower()
 
@@ -42,109 +37,85 @@ def extract_action(subject, body, sender, received):
     deadline = None
     deadline_patterns = [
         r'due\s+(?:by|on|date)?\s*:?\s*(\w+\s+\d{1,2}(?:st|nd|rd|th)?(?:\s*,?\s*\d{4})?)',
-        r'deadline[:\s]+(\w+\s+\d{1,2}(?:st|nd|rd|th)?(?:\s*,?\s*\d{4})?)',
+        r'deadline[\s:]+(\w+\s+\d{1,2}(?:st|nd|rd|th)?(?:\s*,?\s*\d{4})?)',
         r'by\s+(\w+\s+\d{1,2}(?:st|nd|rd|th)?(?:\s*,?\s*\d{4})?)',
         r'(\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?)',
         r'response\s+(?:by|required|needed)\s+(\w+\s+\d{1,2}(?:st|nd|rd|th)?)',
     ]
     for pat in deadline_patterns:
-        m = re.search(pat, text_lower)
+        m = re.search(pat, text, re.IGNORECASE)
         if m:
-            deadline = m.group(1)[:30]
+            deadline = m.group(1).strip()
             break
 
-    # Detect action type
-    urgency = "normal"
-    for word in ["urgent", "asap", "immediately", "time sensitive", "critical", "overdue", "past due"]:
-        if word in text_lower:
-            urgency = "high"
-            break
-
-    # Classify the action
-    action_type = "follow_up"
-    summary = subject or "(No subject)"
-
-    if any(w in text_lower for w in ["please sign", "approval needed", "for your approval", "approve", "executed"]):
-        action_type = "for_approval"
-        summary = f"Approve: {subject}"
-    elif any(w in text_lower for w in ["please review", "for your review", "review needed", "feedback needed"]):
-        action_type = "for_review"
-        summary = f"Review: {subject}"
-    elif any(w in text_lower for w in ["please respond", "response needed", "your input", "decision needed",
-                                         "what do you think", "let me know", "please advise", "action required"]):
-        action_type = "decision_needed"
-        summary = f"Decision needed: {subject}"
-    elif any(w in text_lower for w in ["action required", "please complete", "need you to", "please provide",
-                                         "please submit", "todo", "to-do"]):
-        action_type = "action_required"
-        summary = f"Action: {subject}"
-    elif any(w in text_lower for w in ["fyi", "for your information", "update", "status", "progress"]):
-        action_type = "informational"
-        summary = f"Update: {subject}"
-
-    # Build a richer summary from body
-    # Try to find the actionable sentence
-    body_clean = re.sub(r'<[^>]+>', '', (body or ""))  # strip HTML
-    body_clean = re.sub(r'\s+', ' ', body_clean)[:2000]
-
-    # Extract first meaningful sentence
-    for sep in ['\n\n', '\r\n\r\n']:
-        if sep in body_clean:
-            paragraphs = body_clean.split(sep)
-            for p in paragraphs:
-                p = p.strip()
-                if len(p) > 20 and not p.startswith('>') and not p.startswith('On ') and 'wrote:' not in p:
-                    # Check if it sounds actionable
-                    if any(w in p.lower() for w in ['please', 'can you', 'could you', 'need', 'required',
-                                                      'let me know', 'send', 'review', 'approve', 'confirm']):
-                        summary = p[:200]
-                        break
-
-    result = {
-        "subject": (subject or "")[:200],
-        "from": sender or "Unknown",
-        "received": received.isoformat() if received else datetime.now().isoformat(),
-        "action_type": action_type,
-        "summary": summary[:300],
-        "urgency": urgency,
-        "deadline": deadline if deadline else None,
-        "has_deadline": deadline is not None,
-        "source": "MFP (Flagged)",
-        "status": "open" if urgency == "high" else ("open" if action_type != "informational" else "read"),
+    urgency_keywords = {
+        'action_required': ['action required', 'urgent', 'immediately', 'asap', 'critical', 'time-sensitive'],
+        'for_approval': ['approval', 'approve', 'approved', 'sign off', 'for your signature'],
+        'for_review': ['review', 'please review', 'for your review', 'feedback needed', 'comments'],
+        'decision_needed': ['decision', 'decide', 'please advise', 'your input needed', 'what should we'],
+        'follow_up': ['follow up', 'check in', 'touching base', 'next steps', 'update', 'status', 'progress'],
+        'informational': ['inform', 'notice', 'announcement', 'update', 'notification'],
     }
-    return result
+
+    action_type = 'informational'
+    for atype, kws in urgency_keywords.items():
+        if any(kw in text_lower for kw in kws):
+            action_type = atype
+            break
+
+    summary = (subject or "(no subject)").strip()
+    if len(summary) < 10 and body:
+        first_line = body.strip().split('\n')[0][:100]
+        if first_line:
+            summary = first_line
+
+    confidence = "low"
+    if action_type in ('action_required', 'for_approval', 'decision_needed'):
+        confidence = "high"
+    elif action_type in ('for_review', 'follow_up'):
+        confidence = "medium"
+
+    return {
+        "action_type": action_type,
+        "summary": summary,
+        "deadline": deadline,
+        "confidence": confidence,
+        "sender": sender or "unknown",
+        "received": received or ""
+    }
 
 
 def sync():
-    pythoncom.CoInitialize()
     log("=" * 60)
     log("MFP Flagged Email Sync starting")
 
-    # Dispatch with timeout guard
+    pythoncom.CoInitialize()
+
+    # Connect to Outlook — try Dispatch first (works in Session 0 headless),
+    # fallback to GetActiveObject (works when there's a visible window)
     outlook_app = None
-    result_holder = []
-    error_holder = []
-    def _dispatch():
+    try:
+        outlook_app = win32com.client.Dispatch("Outlook.Application")
+        log("Outlook connected via Dispatch")
+    except Exception as e1:
         try:
-            pythoncom.CoInitialize()
-            app = win32com.client.Dispatch("Outlook.Application")
-            result_holder.append(app)
-        except Exception as e:
-            error_holder.append(e)
-        finally:
-            pythoncom.CoUninitialize()
-    t = threading.Thread(target=_dispatch, daemon=True)
-    t.start()
-    t.join(timeout=30)
-    if t.is_alive():
-        log("ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung")
+            outlook_app = win32com.client.GetActiveObject("Outlook.Application")
+            log("Outlook connected via GetActiveObject")
+        except Exception as e2:
+            log(f"ERROR: Cannot connect to Outlook. Dispatch: {e1}. GetActiveObject: {e2}")
+            log("HINT: Outlook COM automation only works from an interactive Windows session")
+            log("HINT: where the user is logged in and a mail profile is configured.")
+            log(f"HINT: Current session: {os.environ.get('SESSIONNAME', '?')}, PID: {os.getpid()}")
+            return
+
+    # Get MAPI namespace
+    try:
+        outlook = outlook_app.GetNamespace("MAPI")
+        log("MAPI namespace obtained")
+    except Exception as e:
+        log(f"ERROR: GetNamespace('MAPI') failed: {e}")
+        log("HINT: Outlook may be running without a configured mail profile.")
         return
-    if error_holder:
-        log(f"ERROR: Outlook COM dispatch failed: {error_holder[0]}")
-        return
-    outlook_app = result_holder[0]
-    pythoncom.CoInitialize()  # re-init for main thread
-    outlook = outlook_app.GetNamespace("MAPI")
 
     # Find MFP store
     store_mfp = None
@@ -154,7 +125,10 @@ def sync():
             break
 
     if not store_mfp:
-        log("ERROR: MFP store not found")
+        log("ERROR: MFP store not found (Whitney.Williams@miamifreedompark.com)")
+        log("Available stores:")
+        for s in outlook.Stores:
+            log(f"  - {s.DisplayName}")
         return
 
     root = store_mfp.GetRootFolder()
@@ -168,88 +142,90 @@ def sync():
         log("ERROR: MFP Inbox not found")
         return
 
-    # Get flagged items from inbox
+    log(f"MFP store: {store_mfp.DisplayName}")
+    log(f"Total inbox items: {inbox.Items.Count}")
+
+    # Use Restrict filter to get only flagged items — avoids full inbox scan
     items = inbox.Items
     items.Sort("[ReceivedTime]", True)
 
-    now = datetime.now()
-    cutoff = now - timedelta(days=LOOKBACK_DAYS)
-    cutoff_utc = cutoff.astimezone()  # make timezone-aware for COM comparison
-    actions = []
+    cutoff = datetime.now() - timedelta(days=LOOKBACK_DAYS)
+    filter_str = f"[ReceivedTime] >= '{cutoff.strftime('%m/%d/%Y %I:%M %p')}' AND [FlagStatus] = 2"
 
-    for item in items:
+    flagged_items = None
+    try:
+        flagged_items = items.Restrict(filter_str)
+        log(f"Filtered flagged items (Restrict): {flagged_items.Count}")
+    except Exception as e:
+        log(f"WARNING: Restrict filter failed ({e}), falling back to full iteration")
+        flagged_items = items
+
+    # Process each flagged email
+    synced = []
+    errors = 0
+    processed = 0
+
+    for mail in flagged_items:
         try:
-            received = item.ReceivedTime
-            if received and hasattr(received, "timetuple"):
-                received_dt = received
+            # If we couldn't use Restrict, filter manually
+            if flagged_items is items:
+                if getattr(mail, "FlagStatus", 0) != 2:
+                    continue
+                received = getattr(mail, "ReceivedTime", None)
+                if received and hasattr(received, "timetuple") and received < cutoff:
+                    continue
+
+            processed += 1
+            subject = getattr(mail, "Subject", "") or ""
+            body = getattr(mail, "Body", "") or ""
+            sender = getattr(mail, "SenderName", "") or getattr(mail, "SenderEmailAddress", "") or ""
+            entry_id = getattr(mail, "EntryID", "") or ""
+
+            received = getattr(mail, "ReceivedTime", None)
+            received_str = received.isoformat() if received and hasattr(received, "timetuple") else str(received or "")
+
+            analysis = extract_action(subject, body, sender, received_str)
+
+            payload = {
+                "entry_id": entry_id,
+                "subject": subject,
+                "sender": analysis["sender"],
+                "received": analysis["received"],
+                "action_type": analysis["action_type"],
+                "summary": analysis["summary"],
+                "deadline": analysis["deadline"] or None,
+                "confidence": analysis["confidence"]
+            }
+
+            resp = requests.post(
+                PLAYBOOK_URL,
+                json=payload,
+                headers={"Authorization": f"Bearer {SYNC_KEY}"},
+                timeout=15
+            )
+
+            if resp.status_code == 200:
+                synced.append(payload["subject"])
+                log(f"  SYNCED [{analysis['action_type']}] {payload['subject'][:80]}")
+            elif resp.status_code == 409:
+                log(f"  SKIP (already synced) {payload['subject'][:80]}")
             else:
-                received_dt = datetime.now().astimezone()
-
-            if received_dt < cutoff_utc:
-                continue  # skip old emails
-
-            flag_status = item.FlagStatus
-            if flag_status not in [1, 2]:  # 1=flagged, 2=complete
-                continue
-
-            subject = item.Subject or ""
-            sender = item.SenderName or item.SenderEmailAddress or "MFP"
-            body = item.Body or ""
-
-            log(f"  Processing flagged: {sender} - {subject[:60]}")
-
-            action = extract_action(subject, body, sender, received_dt)
-            actions.append(action)
+                log(f"  ERROR {resp.status_code} syncing {payload['subject'][:80]}: {resp.text[:200]}")
+                errors += 1
 
         except Exception as e:
-            log(f"  Error processing item: {e}")
-            continue
+            log(f"  ERROR processing email: {e}")
+            errors += 1
 
-    log(f"Found {len(actions)} flagged emails with actions extracted")
-
-    if not actions:
-        log("Nothing to sync")
-        return
-
-    # Build payload
-    payload = {
-        "actions": actions,
-        "source": "mfp_com_local",
-        "_count": len(actions),
-        "_scanned_at": datetime.now().isoformat()
-    }
-
-    # POST to Playbook
-    log(f"Posting {len(actions)} actions to Playbook...")
-    try:
-        resp = requests.post(
-            PLAYBOOK_URL,
-            json=payload,
-            headers={
-                "Content-Type": "application/json",
-                "x-sync-key": SYNC_KEY
-            },
-            timeout=30
-        )
-        if resp.ok:
-            result = resp.json()
-            log(f"Sync OK: {result.get('count', 0)} actions stored")
-        else:
-            log(f"Sync FAILED: HTTP {resp.status_code} - {resp.text[:200]}")
-    except Exception as e:
-        log(f"Sync ERROR: {e}")
-
-    # Also write local backup
-    backup_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts", "flagged-local.json")
-    try:
-        with open(backup_path, "w") as f:
-            json.dump(payload, f, indent=2, default=str)
-        log(f"Local backup written to {backup_path}")
-    except Exception as e:
-        log(f"Backup write error: {e}")
-
-    log(f"Sync complete ({len(actions)} actions)")
     log("=" * 60)
+    log(f"Sync complete: {len(synced)} synced, {processed} flagged processed, {errors} errors")
+    log(f"Result: {len(synced)} actions pushed to Playbook")
+
+    # Cleanup
+    try:
+        outlook_app.Quit()
+    except:
+        pass
 
 
 if __name__ == "__main__":

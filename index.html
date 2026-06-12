@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LUCI — Level Up Central Intelligence</title>
+<link rel="icon" type="image/svg+xml" href="assets/LUCI_icon.svg">
 <script>
 (function(){
   var t;try{t=localStorage.getItem('lu_theme')}catch(e){}
@@ -13,8 +14,8 @@
   document.documentElement.setAttribute('data-btn-theme', t === 'dark' ? '☾' : '☀');
 })();
 </script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260610-v5">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800&family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=20260612-dash-fix">
 </head>
 <body>
 
@@ -27,9 +28,9 @@
              data-dark="assets/LUCI_lockup_cream.svg?v=1"
              alt="LUCI">
       </a>
-    <span class="topbar-tagline">Project Intelligence, In Your Pocket</span>
-  <button id="theme-btn" class="topbar-btn" onclick="toggleTheme()" title="Toggle theme" style="opacity:0"></button>
-  <div id="auth-user-info" class="topbar-user" style="display:none">
+            <span class="topbar-byline">by <strong>Level Up</strong></span>
+            <button id="theme-btn" class="topbar-btn" onclick="toggleTheme()" title="Toggle theme" style="opacity:0"></button>
+      <div id="auth-user-info" class="topbar-user" style="display:none">
     <span id="auth-user-name"></span>
     <button class="topbar-btn" onclick="signOut()">Sign out</button>
   </div>
@@ -41,7 +42,13 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
           Procore
         </button>
-  </header>
+          </header>
+  
+          <!-- ===== HELP BUTTON ===== -->
+          <button id="help-btn" class="help-btn" onclick="summonLuna()" title="Summon LUNA">
+            <span id="help-btn-icon" class="help-btn-icon">⬡</span>
+            <span class="help-btn-label">Help</span>
+          </button>
 
 <!-- ===== NAV TABS ===== -->
 <nav class="nav" id="main-nav">
@@ -50,8 +57,7 @@
   </button>
   <button class="nav-tab" id="nav-playbook" onclick="setView('playbook')">Playbook<span class="sync-badge" data-for="playbook"></span></button>
     <button class="nav-tab" id="nav-projects" onclick="setView('projects')">Projects<span class="sync-badge" data-for="projects"></span></button>
-          <button class="nav-tab" id="nav-actions" onclick="openReminderPanel()" title="Open action items in briefing panel">Action Items<span class="sync-badge" data-for="actionItems"></span></button>
-        </nav>
+          </nav>
 
 <!-- ===== PLAYBOOK SUB-NAV ===== -->
 <nav class="subnav" id="subnav-playbook" style="display:none">
@@ -162,13 +168,35 @@
 
 <!-- ===== ACTION ITEMS VIEW REMOVED — only in Briefing side panel ===== -->
 
-<!-- ===== SECONDARY VIEWS ===== -->
-<div id="view-mfp" class="view">
+|<!-- ===== MFP FULL DASHBOARD ===== -->
+|<div id="view-mfp-dashboard" class="view">
+|  <div class="view-header mfp-header">
+|    <button class="back-btn" onclick="setView('projects')">← Projects</button>
+|    <div class="view-title"><span class="mfp-mark">🏟</span> MIAMI FREEDOM PARK STADIUM</div>
+|  </div>
+|  <div id="mfp-dashboard" class="mfp-dashboard">
+|    <div class="mfp-skeleton"><div class="mfp-loader"></div>Loading Command Center...</div>
+|  </div>
+|</div>
+|
+|<!-- ===== SECONDARY VIEWS ===== -->
+|<div id="view-mfp" class="view">
   <div class="view-header">
     <button class="back-btn" onclick="setView('projects')">← Projects</button>
     <div class="view-title"><span>🏟</span> Miami Freedom Park Stadium</div>
   </div>
   <div id="mfp-content"></div>
+</div>
+
+<!-- ===== KC CHIEFS DASHBOARD ===== -->
+<div id="view-chiefs" class="view">
+  <div class="view-header chiefs-header">
+    <button class="back-btn" onclick="setView('projects')">← Projects</button>
+    <div class="view-title"><span class="chiefs-mark">▲</span> KC CHIEFS TRAINING FACILITY</div>
+  </div>
+  <div id="chiefs-dashboard" class="chiefs-dashboard">
+    <div class="chiefs-skeleton"><div class="chiefs-loader"></div>Loading Command Center...</div>
+  </div>
 </div>
 
 <!-- ===== LEGACY VIEWS (for shares/links) ===== -->
@@ -200,6 +228,7 @@
 
 <!-- ===== LUNA CLIPPY ===== -->
 <div id="luna-clippy" class="luna-clippy" onclick="clippyClick()" title="Ask LUCI">
+  <button id="clippy-dismiss" class="clippy-dismiss" onclick="event.stopPropagation();dismissLuna()" title="Dismiss LUCI">×</button>
   <div id="clippy-suggestion" class="clippy-suggestion" style="display:none">
     <span id="clippy-suggestion-text" class="clippy-suggestion-text"></span>
   </div>
@@ -210,7 +239,7 @@
          alt="LUCI" draggable="false">
   <div class="clippy-tab" id="clippy-tab" style="display:none"></div>
 </div>
-<div id="clippy-tab-standalone" class="clippy-tab-standalone" onclick="clippyExpand()" title="Open LUCI" style="display:none">
+<div id="clippy-tab-standalone" class="clippy-tab-standalone" style="display:none" title="Open LUCI">
   <span class="clippy-tab-eye">👁</span>
 </div>
 <div id="chat-drawer" class="chat-drawer">
@@ -284,9 +313,17 @@
   if (!btn || !inp) return;
   
   function hideOverlay() {
-    overlay.classList.remove('open');
-    overlay.style.display = 'none';
-  }
+          overlay.classList.remove('open');
+          overlay.style.display = 'none';
+          // Check for direct view link
+          var params = new URLSearchParams(window.location.search);
+          var view = params.get('view');
+          if (view) {
+            setTimeout(function() {
+              if (window.setView) window.setView(view);
+            }, 100);
+          }
+        }
   
   // ── Password verification ──────────────────────────────────────────
   function verify() {
@@ -337,24 +374,40 @@
       authXhr.open('GET', authPath, true);
       authXhr.withCredentials = true;
       authXhr.onload = function() {
-        if (authXhr.status === 200) {
-          var data = JSON.parse(authXhr.responseText);
-          if (data.authenticated) { hideOverlay(); }
-        }
-      };
-      authXhr.onerror = function() {
-        // Fallback: try /api/auth/me directly
-        var fallback = new XMLHttpRequest();
-        fallback.open('GET', '/api/auth/me', true);
-        fallback.withCredentials = true;
-        fallback.onload = function() {
-          if (fallback.status === 200) {
-            var fd = JSON.parse(fallback.responseText);
-            if (fd.authenticated) { hideOverlay(); }
-          }
-        };
-        fallback.send();
-      };
+              if (authXhr.status === 200) {
+                var data = JSON.parse(authXhr.responseText);
+                if (data.authenticated) { hideOverlay(); }
+              }
+            };
+            authXhr.onerror = function() {
+              // Fallback: try /api/auth/me directly
+              var fallback = new XMLHttpRequest();
+              fallback.open('GET', '/api/auth/me', true);
+              fallback.withCredentials = true;
+              fallback.onload = function() {
+                if (fallback.status === 200) {
+                  var fd = JSON.parse(fallback.responseText);
+                  if (fd.authenticated) { hideOverlay(); }
+                }
+              };
+              fallback.send();
+            };
+
+            // Handle direct view links after auth
+            (function checkViewLink() {
+              var params = new URLSearchParams(window.location.search);
+              var view = params.get('view');
+              if (view) {
+                // Watch for setView to become available
+                var iv = setInterval(function() {
+                  if (window.setView) {
+                    clearInterval(iv);
+                    setTimeout(function() { window.setView(view); }, 200);
+                  }
+                }, 200);
+                setTimeout(function() { clearInterval(iv); }, 10000);
+              }
+            })();
       authXhr.send();
 
     // ── Show auth error from URL (Microsoft sign-in failure) ───
@@ -399,7 +452,7 @@
       <script src="data/mfp_cowatchdog.js?v=20260610-clippy"></script>
             <script src="data/contracts_kb.js?v=1"></script>
                         <script src="data/kb.js?v=20260610-clippy"></script>
-                  <script src="app.js?v=20260610-cleanup"></script>
+                  <script src="app.js?v=20260612-dash-fix"></script>
                   <!-- ES module infrastructure (available as window.LU.store, .api, .cache, .settings) -->
                   <script type="module">
                                       import { store } from '/js/core/store.js';
@@ -452,5 +505,6 @@
                                                           </div>
                                                         </div>
                                                       </div>
-                                                </body>
+                                                                                                      <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+                                                                                                      </body>
 </html>

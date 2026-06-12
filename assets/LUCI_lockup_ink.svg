@@ -1,15 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 148">
-  <!-- Icon -->
-  <g transform="translate(0, 0)">
-    <path d="M74 12 L132 44 L132 108 L74 140 L16 108 L16 44 Z" fill="none" stroke="#8BED1C" stroke-width="5.5" stroke-linejoin="round" stroke-linecap="round"/>
-    <circle cx="50" cy="62" r="4.2" fill="#8BED1C"/>
-    <circle cx="78" cy="62" r="4.2" fill="#8BED1C"/>
-    <path d="M48 82 Q64 96 80 82" fill="none" stroke="#8BED1C" stroke-width="4.5" stroke-linecap="round"/>
-    <path d="M108 42 C110.5 50 110.5 50 118 52 C110.5 54 110.5 54 108 62 C105.5 54 105.5 54 98 52 C105.5 50 105.5 50 108 42 Z" fill="none" stroke="#8BED1C" stroke-width="5.5" stroke-linejoin="round" stroke-linecap="round"/>
-  </g>
-  <!-- LUCI text -->
-  <g transform="translate(165, 30)">
-    <text x="0" y="90" font-family="'DM Sans', sans-serif" font-weight="700" font-size="90" fill="#221f1f" letter-spacing="8">LUCI</text>
-    <text x="4" y="115" font-family="'DM Sans', sans-serif" font-weight="500" font-size="14" fill="#8BED1C" letter-spacing="4">LEVEL UP CENTRAL INTELLIGENCE</text>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 706.1 186.0"><svg x="8" y="8.0" width="196.3" height="170.0" viewBox="-30.333333333333336 6.5 155.66666666666666 134.83333333333331"><path d="M15.8 120.8 L9.2 128.2" fill="none" stroke="#231F20" stroke-width="9.2256" stroke-linejoin="round" stroke-linecap="round"/><path d="M1.4 101.6 L-12.1 108.2" fill="none" stroke="#231F20" stroke-width="9.2256" stroke-linejoin="round" stroke-linecap="round"/><path d="M-4.8 78.4 L-21.8 79.6" fill="none" stroke="#231F20" stroke-width="9.2256" stroke-linejoin="round" stroke-linecap="round"/><path d="M-1.9 54.5 L-16.2 49.9" fill="none" stroke="#231F20" stroke-width="9.2256" stroke-linejoin="round" stroke-linecap="round"/><path d="M9.7 33.5 L2.1 27.1" fill="none" stroke="#231F20" stroke-width="9.2256" stroke-linejoin="round" stroke-linecap="round"/><g transform="translate(116 0) scale(-1 1)"><path d="M80.70 22.81 A56 56 0 1 0 80.70 125.19 A60 60 0 0 1 80.70 22.81 Z" fill="none" stroke="#231F20" stroke-width="14.879999999999999" stroke-linejoin="round" stroke-linecap="round"/><rect x="29.5" y="58.5" width="19" height="15" rx="5" fill="none" stroke="#231F20" stroke-width="3.7199999999999998"/><rect x="59.5" y="58.5" width="19" height="15" rx="5" fill="none" stroke="#231F20" stroke-width="3.7199999999999998"/><path d="M48.5 66 Q54.0 67.5 59.5 66" fill="none" stroke="#231F20" stroke-width="3.7199999999999998" stroke-linejoin="round" stroke-linecap="round"/><circle cx="39" cy="66" r="3.3" fill="#231F20"/><circle cx="37.7" cy="64.6" r="1.2" fill="#F4F1EC"/><circle cx="69" cy="66" r="3.3" fill="#231F20"/><circle cx="67.7" cy="64.6" r="1.2" fill="#F4F1EC"/><path d="M40 81 Q53 91 66 82" fill="none" stroke="#231F20" stroke-width="5.89" stroke-linejoin="round" stroke-linecap="round"/></g><path d="M10.8 52.5 C13.180000000000001 58.62 13.180000000000001 58.62 19.3 61 C13.180000000000001 63.38 13.180000000000001 63.38 10.8 69.5 C8.42 63.38 8.42 63.38 2.3000000000000007 61 C8.42 58.62 8.42 58.62 10.8 52.5 Z" fill="none" stroke="#231F20" stroke-width="7.84176" stroke-linejoin="round" stroke-linecap="round"/></svg><svg x="222.3" y="43.0" width="475.9" height="100.0" viewBox="0 0 3902 820">
+<g transform="translate(60 60)"><path d="M0 0 H228 V512 H640 V550 A150 150 0 0 1 490 700 H0 Z" fill="#231F20" fill-rule="nonzero"/></g>
+<g transform="translate(758 60)"><path d="M62 495 H143 A62 62 0 0 1 205 557 V638 A62 62 0 0 1 143 700 H62 A62 62 0 0 1 0 638 V557 A62 62 0 0 1 62 495 Z" fill="#231F20" fill-rule="nonzero"/></g>
+<g transform="translate(1083 60)"><path d="M0 0 H844 V368 A340 340 0 0 1 504 708 H340 A340 340 0 0 1 0 368 Z M148 0 A70 70 0 0 1 218 70 V366 A150 150 0 0 0 368 516 H476 A150 150 0 0 0 626 366 V70 A70 70 0 0 1 696 0 Z" fill="#231F20" fill-rule="evenodd"/></g>
+<g transform="translate(1985 60)"><path d="M62 495 H143 A62 62 0 0 1 205 557 V638 A62 62 0 0 1 143 700 H62 A62 62 0 0 1 0 638 V557 A62 62 0 0 1 62 495 Z" fill="#231F20" fill-rule="nonzero"/></g>
+<g transform="translate(2310 60)"><path d="M587.2 35.2 A378 378 0 1 0 587.2 664.8 Q658.9 602.9 588.3 539.4 L506.6 465.8 A173 173 0 1 1 506.6 234.2 L588.3 160.6 Q658.9 97.1 587.2 35.2 Z" fill="#231F20" fill-rule="nonzero"/></g>
+<g transform="translate(3026 60)"><path d="M62 495 H143 A62 62 0 0 1 205 557 V638 A62 62 0 0 1 143 700 H62 A62 62 0 0 1 0 638 V557 A62 62 0 0 1 62 495 Z" fill="#231F20" fill-rule="nonzero"/></g>
+<g transform="translate(3351 60)"><path d="M0 0 H228 V700 H0 Z" fill="#231F20" fill-rule="nonzero"/></g>
+<g transform="translate(3637 60)"><path d="M62 495 H143 A62 62 0 0 1 205 557 V638 A62 62 0 0 1 143 700 H62 A62 62 0 0 1 0 638 V557 A62 62 0 0 1 62 495 Z" fill="#231F20" fill-rule="nonzero"/></g>
+</svg></svg>

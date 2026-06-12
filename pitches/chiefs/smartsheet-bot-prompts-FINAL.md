@@ -22,9 +22,7 @@ Dashboard (Sight) ID: 2958782033618820
 
 ## PROMPT 1 - Ground rules + create all sheets
 
-You are working in the Smartsheet account for Level Up Project Development via the REST API at <https://api.smartsheet.com/2.0>. Authenticate every request with `Authorization: Bearer <TOKEN>`.
-
-HARD RULES, do not deviate:
+You are working in the Smartsheet account for Level Up Project Development via the REST API at <https://api.smartsheet.com/2.0>. Authenticate every request with `Authorization: Bearer *** RULES, do not deviate:
 
 1. Do NOT call any dashboard widget endpoints. PUT /sights/{id}/widgets/{widgetId}, DELETE widget endpoints, and POST widget creation all return 500 and are unsupported. Widgets are added manually in the UI. If you are about to call a widget endpoint, stop.
 1. All sheets go inside workspace 180213104568196 via POST /workspaces/180213104568196/sheets. Not Home, not any other folder.

@@ -1754,3 +1754,261 @@ iad1::v8j79-1781252459141-15196c8613d7
 [2026-06-12 04:21:00] Local backup written to C:\Users\HermesAdmin\Level-Up-Playbook\scripts\..\scripts\flagged-local.json
 [2026-06-12 04:21:00] Sync complete (25 actions)
 [2026-06-12 04:21:00] ============================================================
+[2026-06-12 04:40:17] ============================================================
+[2026-06-12 04:40:17] MFP Flagged Email Sync starting
+[2026-06-12 04:41:00] Re-sent cached 25 actions via cron fallback — API HTTP 200, 25 stored
+[2026-06-12 04:56:21] ============================================================
+[2026-06-12 04:56:21] MFP Flagged Email Sync starting
+[2026-06-12 04:58:13] ============================================================
+[2026-06-12 04:58:13] MFP Flagged Email Sync starting
+[2026-06-12 04:59:08] ============================================================
+[2026-06-12 04:59:08] MFP Flagged Email Sync starting
+[2026-06-12 05:23:06] ============================================================
+[2026-06-12 05:23:06] MFP Flagged Email Sync starting
+[2026-06-12 05:23:36] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 05:24:01] Re-sent cached 25 actions via cron fallback via API — HTTP 200, 25 stored
+[2026-06-12 05:40:50] ============================================================
+[2026-06-12 05:40:50] MFP Flagged Email Sync starting
+[2026-06-12 05:41:20] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 05:41:39] ============================================================
+[2026-06-12 05:41:39] MFP Flagged Email Sync starting
+[2026-06-12 05:42:09] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 05:42:33] ============================================================
+[2026-06-12 05:42:33] MFP Flagged Email Sync starting
+[2026-06-12 05:43:03] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 06:09:53] ============================================================
+[2026-06-12 06:09:53] MFP Flagged Email Sync starting
+[2026-06-12 06:10:23] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 06:10:54] ============================================================
+[2026-06-12 06:10:54] MFP Flagged Email Sync starting
+[2026-06-12 06:11:24] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 06:12:13] ============================================================
+[2026-06-12 06:12:13] MFP Flagged Email Sync starting
+[2026-06-12 06:12:43] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 06:39:57] ============================================================
+[2026-06-12 06:39:57] MFP Flagged Email Sync starting
+[2026-06-12 06:40:27] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 06:41:23] ============================================================
+[2026-06-12 06:41:23] MFP Flagged Email Sync starting
+[2026-06-12 06:41:53] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 06:44:31] ============================================================
+[2026-06-12 06:44:31] MFP Flagged Email Sync starting
+[2026-06-12 06:45:01] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 07:02:21] ============================================================
+[2026-06-12 07:02:21] MFP Flagged Email Sync starting
+[2026-06-12 07:03:44] ============================================================
+[2026-06-12 07:03:44] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 07:03:45] Outlook Dispatch OK
+[2026-06-12 07:03:45] MAPI namespace OK
+[2026-06-12 07:03:46]   Processing flagged: Erik Imler - Re: MFP x Kwik Goal - Player Shelter Chat
+[2026-06-12 07:03:46]   Processing flagged: Savannah Amparo - Re: MFP | Terrace Truss & Pergola
+[2026-06-12 07:03:47]   Processing flagged: Graham Oxley - RE: Agreement
+[2026-06-12 07:03:47]   Processing flagged: Genna Selesnick - Re: Stadium Sq. Footage
+[2026-06-12 07:03:47]   Processing flagged: Greg Giordano - Re: Baptist Health Benches In Community Fields
+[2026-06-12 07:03:47]   Processing flagged: Stephanie Acosta via Docusign - Completed: Lemartec - 19069 Miami Freedom Park Trade Agreeme
+[2026-06-12 07:03:47]   Processing flagged: Edwin Efezokhae (US) - Re: Miami Beckham United - 2024 Cost Seg Info Request TaxDoc
+[2026-06-12 07:03:47]   Processing flagged: Graham Oxley - RE: Garage Displays - Contract
+[2026-06-12 07:03:47]   Processing flagged: Delaney Myers - Re: Payment Update - Inter Miami Freedom Park
+[2026-06-12 07:03:47]   Processing flagged: Andrew Muriedas - MFP - Open Items 
+[2026-06-12 07:03:47]   Processing flagged: Victor Oliver - Re: TCO + Life Safety Plan concert
+[2026-06-12 07:03:47]   Processing flagged: Asker, Mohamed Y. - RE: MFP - Response to Arquitectonica
+[2026-06-12 07:03:47]   Processing flagged: Andres Mesa - MFP-Owner Direction to Hold Change Orders
+[2026-06-12 07:03:47]   Processing flagged: Ashley Reyes - Payment Update - Inter Miami Freedom Park
+[2026-06-12 07:03:47]   Processing flagged: Cybill Bellevue - RE: MFP | Project Turnover Progress
+[2026-06-12 07:03:47]   Processing flagged: Tristan Lewis - Re: MFP - Change Orders 
+[2026-06-12 07:03:47]   Processing flagged: Tyler Thompson - Re: Quick Chat
+[2026-06-12 07:03:47]   Processing flagged: Tristan Lewis - MFP - Change Orders 
+[2026-06-12 07:03:47]   Processing flagged: Charles Hugh Crain - RE: IMFC Stadium Design Team - punch list - TT
+[2026-06-12 07:03:47]   Processing flagged: Cristina Pena - RE: MFP - Inter Miami FC
+[2026-06-12 07:03:47]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 4 Hq-26-6561 File 377616
+[2026-06-12 07:03:47]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 3 Hq-26-6560 File 377614
+[2026-06-12 07:03:47]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 2 Hq-26-6559 File 377613
+[2026-06-12 07:03:47]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 1 Hq-26-6191 File 377285
+[2026-06-12 07:03:47]   Processing flagged: Reese, Andrea - Approved DALE DOG Hq-26-6502 File 377564
+[2026-06-12 07:03:47] Found 25 flagged emails with actions extracted
+[2026-06-12 07:03:47] Posting 25 actions to Playbook...
+[2026-06-12 07:03:47] Sync OK: 25 actions stored
+[2026-06-12 07:03:47] Local backup written to C:\Users\HermesAdmin\Level-Up-Playbook\scripts\..\scripts\flagged-local.json
+[2026-06-12 07:03:47] Sync complete (25 actions)
+[2026-06-12 07:03:47] ============================================================
+[2026-06-12 07:04:44] ============================================================
+[2026-06-12 07:04:44] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 07:04:45] Outlook Dispatch OK
+[2026-06-12 07:04:45] MAPI namespace OK
+[2026-06-12 07:04:48]   Processing flagged: Erik Imler - Re: MFP x Kwik Goal - Player Shelter Chat
+[2026-06-12 07:04:49]   Processing flagged: Savannah Amparo - Re: MFP | Terrace Truss & Pergola
+[2026-06-12 07:04:49]   Processing flagged: Graham Oxley - RE: Agreement
+[2026-06-12 07:04:49]   Processing flagged: Genna Selesnick - Re: Stadium Sq. Footage
+[2026-06-12 07:04:49]   Processing flagged: Greg Giordano - Re: Baptist Health Benches In Community Fields
+[2026-06-12 07:04:49]   Processing flagged: Stephanie Acosta via Docusign - Completed: Lemartec - 19069 Miami Freedom Park Trade Agreeme
+[2026-06-12 07:04:49]   Processing flagged: Edwin Efezokhae (US) - Re: Miami Beckham United - 2024 Cost Seg Info Request TaxDoc
+[2026-06-12 07:04:49]   Processing flagged: Graham Oxley - RE: Garage Displays - Contract
+[2026-06-12 07:04:49]   Processing flagged: Delaney Myers - Re: Payment Update - Inter Miami Freedom Park
+[2026-06-12 07:04:49]   Processing flagged: Andrew Muriedas - MFP - Open Items 
+[2026-06-12 07:04:49]   Processing flagged: Victor Oliver - Re: TCO + Life Safety Plan concert
+[2026-06-12 07:04:49]   Processing flagged: Asker, Mohamed Y. - RE: MFP - Response to Arquitectonica
+[2026-06-12 07:04:49]   Processing flagged: Andres Mesa - MFP-Owner Direction to Hold Change Orders
+[2026-06-12 07:04:49]   Processing flagged: Ashley Reyes - Payment Update - Inter Miami Freedom Park
+[2026-06-12 07:04:49]   Processing flagged: Cybill Bellevue - RE: MFP | Project Turnover Progress
+[2026-06-12 07:04:49]   Processing flagged: Tristan Lewis - Re: MFP - Change Orders 
+[2026-06-12 07:04:49]   Processing flagged: Tyler Thompson - Re: Quick Chat
+[2026-06-12 07:04:49]   Processing flagged: Tristan Lewis - MFP - Change Orders 
+[2026-06-12 07:04:49]   Processing flagged: Charles Hugh Crain - RE: IMFC Stadium Design Team - punch list - TT
+[2026-06-12 07:04:49]   Processing flagged: Cristina Pena - RE: MFP - Inter Miami FC
+[2026-06-12 07:04:49]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 4 Hq-26-6561 File 377616
+[2026-06-12 07:04:49]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 3 Hq-26-6560 File 377614
+[2026-06-12 07:04:49]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 2 Hq-26-6559 File 377613
+[2026-06-12 07:04:49]   Processing flagged: Reese, Andrea - Approved DIPPIN DOTS 1 Hq-26-6191 File 377285
+[2026-06-12 07:04:49]   Processing flagged: Reese, Andrea - Approved DALE DOG Hq-26-6502 File 377564
+[2026-06-12 07:04:49] Found 25 flagged emails with actions extracted
+[2026-06-12 07:04:49] Posting 25 actions to Playbook...
+[2026-06-12 07:04:49] Sync OK: 25 actions stored
+[2026-06-12 07:04:49] Local backup written to C:\Users\HermesAdmin\Level-Up-Playbook\scripts\..\scripts\flagged-local.json
+[2026-06-12 07:04:49] Sync complete (25 actions)
+[2026-06-12 07:04:49] ============================================================
+[2026-06-12 07:21:33] ============================================================
+[2026-06-12 07:21:33] MFP Flagged Email Sync starting
+[2026-06-12 07:22:03] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 07:38:25] ============================================================
+[2026-06-12 07:38:25] MFP Flagged Email Sync starting
+[2026-06-12 07:38:55] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 07:40:27] ============================================================
+[2026-06-12 07:40:27] MFP Flagged Email Sync starting
+[2026-06-12 07:40:57] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 07:51:32] ============================================================
+[2026-06-12 07:51:32] MFP Flagged Email Sync starting
+[2026-06-12 07:52:02] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 07:57:54] ============================================================
+[2026-06-12 07:57:54] MFP Flagged Email Sync starting
+[2026-06-12 08:00:43] ============================================================
+[2026-06-12 08:00:43] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 08:02:44] ERROR: Outlook COM dispatch failed: (-2146959355, 'Server execution failed', None, None)
+[2026-06-12 08:05:15] ============================================================
+[2026-06-12 08:05:15] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 08:05:32] Outlook Dispatch OK
+[2026-06-12 08:05:32] MAPI namespace OK
+[2026-06-12 08:08:32] ============================================================
+[2026-06-12 08:08:32] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 08:13:55] Outlook Dispatch OK
+[2026-06-12 08:13:55] MAPI namespace OK
+[2026-06-12 08:18:43] ============================================================
+[2026-06-12 08:18:43] MFP Flagged Email Sync starting
+[2026-06-12 08:43:10] ============================================================
+[2026-06-12 08:43:10] MFP Flagged Email Sync starting
+[2026-06-12 09:33:30] ============================================================
+[2026-06-12 09:33:30] MFP Flagged Email Sync starting
+[2026-06-12 09:34:00] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 10:06:31] ============================================================
+[2026-06-12 10:06:31] MFP Flagged Email Sync starting
+[2026-06-12 10:07:01] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 10:07:34] ============================================================
+[2026-06-12 10:07:34] MFP Flagged Email Sync starting
+[2026-06-12 10:08:04] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 10:08:38] ============================================================
+[2026-06-12 10:08:38] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 10:15:58] ============================================================
+[2026-06-12 10:15:58] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 10:16:06] Outlook Dispatch OK
+[2026-06-12 10:16:06] Outlook Dispatch OK
+[2026-06-12 10:16:06] MAPI namespace OK
+[2026-06-12 10:17:56] ============================================================
+[2026-06-12 10:17:56] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 10:17:56] Outlook Dispatch OK
+[2026-06-12 10:17:56] MAPI namespace OK
+[2026-06-12 10:21:38] ============================================================
+[2026-06-12 10:21:38] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 10:23:38] ERROR: Outlook COM dispatch failed: (-2146959355, 'Server execution failed', None, None)
+[2026-06-12 10:28:00] ============================================================
+[2026-06-12 10:28:00] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 10:30:00] ERROR: Outlook COM dispatch failed: (-2146959355, 'Server execution failed', None, None)
+[2026-06-12 10:37:09] ============================================================
+[2026-06-12 10:37:09] MFP Sync Fallback: Posted 25 actions from local backup (COM unavailable)
+[2026-06-12 10:37:09] Response: ok, stored_at=2026-06-12T14:37:02.547Z
+[2026-06-12 10:37:09] ============================================================
+[2026-06-12 10:39:18] ============================================================
+[2026-06-12 10:39:18] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 10:41:19] ERROR: Outlook COM dispatch failed: (-2146959355, 'Server execution failed', None, None)
+[2026-06-12 10:45:02] ============================================================
+[2026-06-12 10:45:02] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 10:47:02] ERROR: Outlook COM dispatch failed: (-2146959355, 'Server execution failed', None, None)
+[2026-06-12 11:08:59] ============================================================
+[2026-06-12 11:08:59] MFP Flagged Email Sync starting
+[2026-06-12 11:10:02] ============================================================
+[2026-06-12 11:10:02] MFP Flagged Email Sync starting
+[2026-06-12 11:10:32] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 11:27:14] ============================================================
+[2026-06-12 11:27:14] MFP Flagged Email Sync starting
+[2026-06-12 11:27:44] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 11:28:59] ============================================================
+[2026-06-12 11:28:59] MFP Flagged Email Sync starting
+[2026-06-12 11:29:29] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy or hung
+[2026-06-12 11:31:00] ============================================================
+[2026-06-12 11:31:00] MFP Flagged Email Sync starting
+[2026-06-12 11:32:00] ERROR: Outlook COM dispatch timed out (60s) — Outlook may be busy or hung
+[2026-06-12 11:33:22] ============================================================
+[2026-06-12 11:33:22] MFP Flagged Email Sync starting
+[2026-06-12 11:34:22] ERROR: Outlook COM dispatch timed out (60s) — Outlook may be busy or hung
+[2026-06-12 11:40:31] ============================================================
+[2026-06-12 11:40:31] MFP Flagged Email Sync starting
+[2026-06-12 12:12:55] ============================================================
+[2026-06-12 12:12:55] MFP Flagged Email Sync starting
+[2026-06-12 12:13:55] ERROR: Outlook COM dispatch timed out (60s) — Outlook may be busy or hung
+[2026-06-12 12:30:09] ============================================================
+[2026-06-12 12:30:09] MFP Flagged Email Sync starting
+[2026-06-12 12:31:09] ERROR: Outlook COM dispatch timed out (60s) — Outlook may be busy or hung
+[2026-06-12 12:31:44] ============================================================
+[2026-06-12 12:31:44] MFP Flagged Email Sync starting
+[2026-06-12 12:32:44] ERROR: Outlook COM dispatch timed out (60s) — Outlook may be busy or hung
+[2026-06-12 12:54:43] ============================================================
+[2026-06-12 12:54:43] MFP Flagged Email Sync starting
+[2026-06-12 13:10:44] ============================================================
+[2026-06-12 13:10:44] MFP Flagged Email Sync starting
+[2026-06-12 13:11:51] ============================================================
+[2026-06-12 13:11:51] MFP Flagged Email Sync starting
+[2026-06-12 13:12:51] ERROR: Outlook COM dispatch timed out (60s) — Outlook may be busy or hung
+[2026-06-12 13:14:02] ============================================================
+[2026-06-12 13:14:02] MFP Flagged Email Sync starting
+[2026-06-12 13:14:02] GetActiveObject failed: (-2147221021, 'Operation unavailable', None, None)
+[2026-06-12 13:14:32] ERROR: Outlook COM dispatch timed out (30s) — Outlook may be busy, hung, or not available for COM automation
+[2026-06-12 13:14:32] HINT: Ensure an Outlook profile is configured and Outlook is running with MFP account added
+[2026-06-12 13:15:22] ============================================================
+[2026-06-12 13:15:22] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 13:15:47] Outlook Dispatch OK
+[2026-06-12 13:15:47] MAPI namespace OK
+[2026-06-12 13:18:19] ============================================================
+[2026-06-12 13:18:19] MFP Flagged Email Sync starting (direct mode)
+[2026-06-12 13:18:20] Outlook Dispatch OK
+[2026-06-12 13:18:20] MAPI namespace OK
+[2026-06-12 13:20:40] ============================================================
+[2026-06-12 13:20:40] MFP Flagged Email Sync starting
+[2026-06-12 13:20:41] Outlook connected via Dispatch
+[2026-06-12 13:20:41] MAPI namespace obtained
+[2026-06-12 13:38:52] ============================================================
+[2026-06-12 13:38:52] MFP Flagged Email Sync starting
+[2026-06-12 13:38:53] Outlook connected via Dispatch
+[2026-06-12 13:38:53] MAPI namespace obtained
+[2026-06-12 13:44:14] ============================================================
+[2026-06-12 13:44:14] CRON FALLBACK: Pushed cached local backup (25 actions) to Playbook API
+[2026-06-12 13:44:14] Reason: Direct Outlook COM sync unavailable in Session 0 (SYSTEM cron context)
+[2026-06-12 13:44:14] Local backup source: flagged-local.json (created 2026-06-12 07:04 from earlier interactive sync)
+[2026-06-12 13:44:14] Playbook API response: status=ok, count=25
+[2026-06-12 13:44:14] ============================================================
+[2026-06-12 13:59:45] ============================================================
+[2026-06-12 13:59:45] MFP Flagged Email Sync starting
+[2026-06-12 13:59:46] Outlook connected via Dispatch
+[2026-06-12 13:59:46] MAPI namespace obtained
+[2026-06-12 14:02:14] ============================================================
+[2026-06-12 14:02:14] MFP Flagged Email Sync starting
+[2026-06-12 14:05:15] ERROR: Cannot connect to Outlook. Dispatch: (-2147418111, 'Call was rejected by callee.', None, None). GetActiveObject: (-2147221021, 'Operation unavailable', None, None)
+[2026-06-12 14:05:15] HINT: Outlook COM automation only works from an interactive Windows session
+[2026-06-12 14:05:15] HINT: where the user is logged in and a mail profile is configured.
+[2026-06-12 14:05:15] HINT: Current session: ?, PID: 10684
+[2026-06-12 14:08:10] ============================================================
+[2026-06-12 14:08:10] MFP Sync Fallback: Attempting cached local backup push
+[2026-06-12 14:08:10] Local backup source: flagged-local.json (created 2026-06-12 07:04 from earlier interactive sync)
+[2026-06-12 14:08:10] Actions in cache: 25
+[2026-06-12 14:08:10] Posting 25 actions to Playbook API...
+[2026-06-12 14:08:10] CRON FALLBACK: Pushed cached local backup (25 actions) to Playbook API
+[2026-06-12 14:08:10] Playbook API response: status=ok, count=25
+[2026-06-12 14:08:10] Result: 25 actions synced to Playbook
+[2026-06-12 14:08:10] ============================================================
