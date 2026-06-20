@@ -5303,3 +5303,5 @@ iad1::v8j79-1781252459141-15196c8613d7
 [2026-06-20 16:28:42] HINT: Outlook COM automation only works from an interactive Windows session
 [2026-06-20 16:28:42] HINT: where the user is logged in and a mail profile is configured.
 [2026-06-20 16:28:42] HINT: Current session: ?, PID: 18968
+[2026-06-20 16:43:43] ============================================================
+[2026-06-20 16:43:43] MFP Flagged Email Sync starting
