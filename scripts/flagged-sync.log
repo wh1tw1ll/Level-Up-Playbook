@@ -5239,3 +5239,35 @@ iad1::v8j79-1781252459141-15196c8613d7
 [2026-06-20 14:45:32] HINT: Outlook COM automation only works from an interactive Windows session
 [2026-06-20 14:45:32] HINT: where the user is logged in and a mail profile is configured.
 [2026-06-20 14:45:32] HINT: Current session: ?, PID: 10260
+[2026-06-20 15:01:34] ============================================================
+[2026-06-20 15:01:34] MFP Flagged Email Sync starting
+[2026-06-20 15:03:41] ============================================================
+[2026-06-20 15:03:41] MFP Flagged Email Sync starting
+[2026-06-20 15:04:36] ERROR: Cannot connect to Outlook. Dispatch: (-2147418111, 'Call was rejected by callee.', None, None). GetActiveObject: (-2147221021, 'Operation unavailable', None, None)
+[2026-06-20 15:04:36] HINT: Outlook COM automation only works from an interactive Windows session
+[2026-06-20 15:04:36] HINT: where the user is logged in and a mail profile is configured.
+[2026-06-20 15:04:36] HINT: Current session: ?, PID: 25520
+[2026-06-20 15:06:42] ERROR: Cannot connect to Outlook. Dispatch: (-2147418111, 'Call was rejected by callee.', None, None). GetActiveObject: (-2147221021, 'Operation unavailable', None, None)
+[2026-06-20 15:06:42] HINT: Outlook COM automation only works from an interactive Windows session
+[2026-06-20 15:06:42] HINT: where the user is logged in and a mail profile is configured.
+[2026-06-20 15:06:42] HINT: Current session: ?, PID: 30844
+[2026-06-20 15:22:39] ============================================================
+[2026-06-20 15:22:39] MFP Flagged Email Sync starting
+[2026-06-20 15:24:45] ============================================================
+[2026-06-20 15:24:45] MFP Flagged Email Sync starting
+[2026-06-20 15:25:40] ERROR: Cannot connect to Outlook. Dispatch: (-2147418111, 'Call was rejected by callee.', None, None). GetActiveObject: (-2147221021, 'Operation unavailable', None, None)
+[2026-06-20 15:25:40] HINT: Outlook COM automation only works from an interactive Windows session
+[2026-06-20 15:25:40] HINT: where the user is logged in and a mail profile is configured.
+[2026-06-20 15:25:40] HINT: Current session: ?, PID: 20700
+[2026-06-20 15:27:46] ERROR: Cannot connect to Outlook. Dispatch: (-2147418111, 'Call was rejected by callee.', None, None). GetActiveObject: (-2147221021, 'Operation unavailable', None, None)
+[2026-06-20 15:27:46] HINT: Outlook COM automation only works from an interactive Windows session
+[2026-06-20 15:27:46] HINT: where the user is logged in and a mail profile is configured.
+[2026-06-20 15:27:46] HINT: Current session: ?, PID: 15908
+[2026-06-20 15:43:38] ============================================================
+[2026-06-20 15:43:38] MFP Flagged Email Sync starting
+[2026-06-20 15:46:28] ============================================================
+[2026-06-20 15:46:28] MFP Flagged Email Sync starting
+[2026-06-20 15:46:39] ERROR: Cannot connect to Outlook. Dispatch: (-2147418111, 'Call was rejected by callee.', None, None). GetActiveObject: (-2147221021, 'Operation unavailable', None, None)
+[2026-06-20 15:46:39] HINT: Outlook COM automation only works from an interactive Windows session
+[2026-06-20 15:46:39] HINT: where the user is logged in and a mail profile is configured.
+[2026-06-20 15:46:39] HINT: Current session: ?, PID: 26892
