@@ -13,6 +13,10 @@ import sharepointSearch from '../lib/handlers/sharepoint-search.js';
 import sharepointRead from '../lib/handlers/sharepoint-read.js';
 import oauthHandler from '../lib/handlers/oauth.js';
 import chiefsHandler from '../lib/handlers/chiefs.js';
+import chiefsV3Handler from '../lib/handlers/chiefs-v3.js';
+import ssOpsHandler from './ss-ops.js';
+import dovaHandler from '../lib/handlers/dova.js';
+import dovaDashboardHandler from '../lib/handlers/dova-dashboard.js';
 
 // Module-level flagged store cache (survives warm instances)
 let _flaggedCache = null;
@@ -64,10 +68,17 @@ export default function handler(req, res) {
     case '/api/sharepoint/read':
       return sharepointRead(req, res);
     case '/api/chiefs':
+    case '/api/chiefs/admin':
       return chiefsHandler(req, res);
-      if (path === '/api/oauth' || path.startsWith('/api/oauth/')) {
-        return oauthHandler(req, res);
-      }
+    case '/api/chiefs-v3':
+      return chiefsV3Handler(req, res);
+    case '/api/ss-ops':
+      return ssOpsHandler(req, res);
+    case '/api/dova':
+      return dovaHandler(req, res);
+    case '/api/dova-dashboard':
+      return dovaDashboardHandler(req, res);
+    default:
       res.status(404).json({ error: 'Route not found', path });
   }
 }
