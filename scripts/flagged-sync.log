@@ -5271,3 +5271,7 @@ iad1::v8j79-1781252459141-15196c8613d7
 [2026-06-20 15:46:39] HINT: Outlook COM automation only works from an interactive Windows session
 [2026-06-20 15:46:39] HINT: where the user is logged in and a mail profile is configured.
 [2026-06-20 15:46:39] HINT: Current session: ?, PID: 26892
+[2026-06-20 15:49:29] ERROR: Cannot connect to Outlook. Dispatch: (-2147418111, 'Call was rejected by callee.', None, None). GetActiveObject: (-2147221021, 'Operation unavailable', None, None)
+[2026-06-20 15:49:29] HINT: Outlook COM automation only works from an interactive Windows session
+[2026-06-20 15:49:29] HINT: where the user is logged in and a mail profile is configured.
+[2026-06-20 15:49:29] HINT: Current session: ?, PID: 26008
