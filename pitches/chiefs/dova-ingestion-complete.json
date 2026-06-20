@@ -1,0 +1,46 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "last_updated": "2026-06-16",
+    "updated_by": "LUNA",
+    "phase": "Phase 0 complete - all 16 files + 18 emails ingested"
+  },
+  "project": {
+    "name": "DOVA Arena / Downtown DOVA / Cordova City Center",
+    "client": {
+      "entity": "KozPure Development, LLC",
+      "address": "3195 Zinfandel Dr, Ste 21, Rancho Cordova, CA 95670",
+      "ceo": "Joshua Wood - Josh@kozpure.com",
+      "president": "Charanjeet (Charlie) Kaur Tiwana-Purewal - Charlie@kozpure.com",
+      "vp_finance": "Onkar Purewal - Onkar@kozpure.com",
+      "admin": "Orlana Van Zandt - Orlana@kozpure.com"
+    },
+    "level_up": {
+      "role": "Owner's Representative / Project Delivery Consulting",
+      "principal": "Whitney Williams (Sacramento/on-site by Sep 2026)",
+      "senior": "Greg Wieting (Denver-based with regular travel)",
+      "pm": "Justin Williams (starts Oct 2026, Sacramento/on-site)",
+      "field": "Jordan Ward"
+    },
+    "delivery_method": "ASSUMPTION: Design-Build (DBIA) - McCarthy holds Perkins & Will contract",
+    "budget_total": "Source discrepancy: $275.9M (May Estimate) vs $272.9M (McCarthy email) vs $252.9M (revised with reductions)",
+    "completion_target": "March 23, 2028 Substantial / May 31, 2028 Final per PM Letter",
+    "schedule_source": "Summary Schedule - June 15 shows Mar 23, 2029 Final",
+    "access_limitations": {
+      "microsoft_teams": "NOT ACCESSED - No Teams tool available",
+      "collab_channel": "'COLLAB_Dova Arena' channel content unknown"
+    }
+  },
+  "source_inventory": {
+    "total_files": 16,
+    "total_emails": 18,
+    "sources_fully_read": ["Local OneDrive folder (16 files)", "Email (13 - DOVA folder, 18 messages)"],
+    "sources_not_accessed": ["Microsoft Teams - COLLAB_Dova Arena channel"],
+    "most_recent_document": "2026-06-16 (Meeting Minutes x2, Emails from McCarthy and KozPure)",
+    "oldest_document": "2026-01-19 (Traditional Steel Structure Estimate)",
+    "duplicates_flagged": ["Level Up + McCarthy Introduction .docx and .pdf are same content"],
+    "superseded_flagged": ["30 Day Work Plan (May 6) superseded by 30 Day LOI Schedule (May 21)"],
+    "draft_flagged": ["PM Letter Agreement - Client signature line blank"],
+    "formula_errors": ["Traditional Steel Structure Estimate.xlsx has #REF! errors from broken cross-sheet links"]
+  }
+}

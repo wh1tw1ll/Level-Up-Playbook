@@ -3,13 +3,17 @@ r"""mfp-cron-fallback.py — Deterministic cron fallback for MFP flagged email s
 
 Call from cron/session 0 every 15-30 minutes. This script handles the full
 decision logic:
-  1. Checks flagged-sync.log for today's fallback completion markers
-  2. If a fallback already ran today -> exits silently (suppresses delivery)
-  3. Otherwise -> reads flagged-local.json and POSTs to Playbook API
-  4. Logs the result to flagged-sync.log
+  1. Checks today's fallback marker (flagged-fallback-marker.txt) for dedup
+  2. Falls back to log scan of last 1000 lines if marker is missing
+  3. If a fallback already ran today -> writes marker (for next cycle speed)
+     -> exits silently (suppresses delivery)
+  4. Otherwise -> reads flagged-local.json and POSTs to Playbook API
+  5. Writes marker file on success to prevent re-POSTs
+  6. Logs the result to flagged-sync.log
 
-This avoids duplicate re-POSTs (the API accumulates rather than replaces,
-so re-sending creates duplicate action items).
+The marker file avoids the window-size fragility of pure log scanning —
+a single-line state file is accurate across reboots, log rotations, and
+arbitrarily long gaps between cron cycles.
 
 Usage:
   python C:\Users\HermesAdmin\Level-Up-Playbook\scripts\mfp-cron-fallback.py
@@ -23,6 +27,7 @@ from datetime import datetime, date
 SCRIPT_DIR = r"C:\Users\HermesAdmin\Level-Up-Playbook\scripts"
 LOG_FILE = os.path.join(SCRIPT_DIR, "flagged-sync.log")
 BACKUP_PATH = os.path.join(SCRIPT_DIR, "flagged-local.json")
+MARKER_PATH = os.path.join(SCRIPT_DIR, "flagged-fallback-marker.txt")
 PLAYBOOK_URL = "https://level-up-playbook.vercel.app/api/sync/flagged-store"
 SYNC_KEY = "59085493e8e63a164be0e443575b99f191b5c7fdb791c539"
 
@@ -51,11 +56,28 @@ def load_backup():
 
 
 def check_todays_fallback():
-    """Check if a fallback already ran today. Returns count or 0."""
-    today_str = date.today().strftime("%Y-%m-%d")
+    """Check if a fallback already ran today. Returns count or 0.
+    
+    Uses a persistent marker file (fast, accurate, survives log rotation).
+    Falls back to log scan (last 1000 lines) if marker is missing or stale.
+    """
+    today = date.today()
+    today_str = today.strftime("%Y-%m-%d")
+
+    # Primary: marker file (one read, no log parsing)
+    if os.path.exists(MARKER_PATH):
+        try:
+            with open(MARKER_PATH) as f:
+                marker_date, marker_count = f.read().strip().split("|")
+            if marker_date == today_str:
+                return int(marker_count)
+        except (ValueError, OSError):
+            pass  # Corrupt or unreadable -- fall through to log scan
+
+    # Fallback: log scan (last 1000 lines covers ~24h at current log rates)
     patterns = [
-        r"fallback.*pushed.*cached.*local.*backup.*(\d+).*actions.*playbook",
-        r"MFP Sync Fallback: Posted.*(\d+).*actions.*from local backup",
+        r"fallback.*pushed.*cached.*local.*backup.*?\((\d+).*actions.*playbook",
+        r"MFP Sync Fallback: Posted.*?(\d+).*actions.*from local backup",
     ]
 
     if not os.path.exists(LOG_FILE):
@@ -67,8 +89,7 @@ def check_todays_fallback():
     except OSError:
         return 0
 
-    # Scan last 100 lines for today's date + any fallback pattern
-    for line in lines[-100:]:
+    for line in lines[-1000:]:
         if today_str not in line:
             continue
         for pat in patterns:
@@ -76,6 +97,16 @@ def check_todays_fallback():
             if m:
                 return int(m.group(1))
     return 0
+
+
+def write_marker(count):
+    """Write today's fallback marker file."""
+    today_str = date.today().strftime("%Y-%m-%d")
+    try:
+        with open(MARKER_PATH, "w") as f:
+            f.write(f"{today_str}|{count}")
+    except OSError:
+        pass
 
 
 def hash_actions(actions):
@@ -130,8 +161,9 @@ def main():
     # Step 1: Check if a fallback already ran today
     already_pushed = check_todays_fallback()
     if already_pushed > 0:
-        # Exit silently -- cron infrastructure will see no output and
-        # not deliver an empty report. The log already has the record.
+        # Write marker on early-exit too, so subsequent cycles use fast marker-read
+        # instead of re-scanning 1000 log lines every time.
+        write_marker(already_pushed)
         log(f"Fallback already ran today ({already_pushed} actions). Suppressing.")
         print("[SILENT]")
         sys.exit(0)
@@ -161,6 +193,7 @@ def main():
 
     count = result.get("count", len(actions))
     stored_at = result.get("stored_at", "unknown")
+    write_marker(count)
     log(f"CRON FALLBACK: Pushed cached local backup ({count} actions) to Playbook API")
     log(f"Playbook API response: status=ok, count={count}, stored_at={stored_at}")
     log(f"Result: {count} actions synced to Playbook")

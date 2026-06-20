@@ -9,7 +9,7 @@ requires an interactive user profile.
 """
 
 import json, os, sys, re, requests, win32com.client, pythoncom, threading
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 # ── Config ──────────────────────────────────────────────────────────
 PLAYBOOK_URL = "https://level-up-playbook.vercel.app/api/sync/flagged-store"
@@ -149,7 +149,7 @@ def sync():
     items = inbox.Items
     items.Sort("[ReceivedTime]", True)
 
-    cutoff = datetime.now() - timedelta(days=LOOKBACK_DAYS)
+    cutoff = datetime.now(timezone.utc).astimezone() - timedelta(days=LOOKBACK_DAYS)
     filter_str = f"[ReceivedTime] >= '{cutoff.strftime('%m/%d/%Y %I:%M %p')}' AND [FlagStatus] = 2"
 
     flagged_items = None

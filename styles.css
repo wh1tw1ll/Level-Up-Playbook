@@ -1474,7 +1474,7 @@ mark.search-highlight{background:#fff3a8;padding:1px 2px;border-radius:2px;color
   display: inline-block;
   flex-shrink: 0;
 }
-.chiefs-dot-green { background: var(--teal, #184655); }
+.chiefs-dot-green { background: #2F8F5B; }
 .chiefs-dot-yellow { background: #FFB81C; }
 .chiefs-dot-red { background: #E31837; }
 .chiefs-chart-wrap {
@@ -1627,7 +1627,7 @@ mark.search-highlight{background:#fff3a8;padding:1px 2px;border-radius:2px;color
   display: inline-block;
   width: 8px; height: 8px;
   border-radius: 50%;
-  background: var(--teal, #184655);
+  background: #2F8F5B;
   margin-right: 4px;
   vertical-align: middle;
 }
@@ -1845,3 +1845,30 @@ mark.search-highlight{background:#fff3a8;padding:1px 2px;border-radius:2px;color
   min-width: 120px;
 }
 .mfp-mark { color: var(--sage); font-size: 16px; }
+
+/* ── KC Chiefs Dashboard — Gantt + Collapsible ── */
+.chiefs-collapsible-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;padding:4px 0}
+.chiefs-collapsible-header:hover{opacity:0.8}
+.chiefs-collapsible-header .chiefs-chevron{transition:transform 0.25s ease;width:20px;height:20px;color:#999;flex-shrink:0}
+.chiefs-collapsible.collapsed .chiefs-chevron{transform:rotate(-90deg)}
+.chiefs-collapsible-body{overflow:hidden;transition:max-height 0.3s ease}
+.chiefs-collapsible.collapsed .chiefs-collapsible-body{max-height:0 !important}
+.chiefs-gantt-wrap{overflow-x:auto;width:100%}
+.chiefs-gantt-wrap svg{display:block;min-width:850px}
+.chiefs-gantt-tooltip{position:fixed;background:#1a1a2e;color:#fff;padding:8px 12px;border-radius:6px;font-size:12px;pointer-events:none;z-index:1000;white-space:nowrap;display:none;box-shadow:0 2px 8px rgba(0,0,0,0.2);line-height:1.4}
+.chiefs-kpi-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.chiefs-top-row{display:flex;gap:14px}
+.chiefs-top-left{flex:1}
+.chiefs-top-right{flex:1;background:#fafafa;border-radius:8px;padding:12px 14px;border:1px solid #eee;font-size:12px;align-self:stretch}
+.chiefs-top-right table{width:100%;font-size:12px}
+.chiefs-top-right td{padding:4px 8px 4px 0}
+.chiefs-top-right td:first-child{font-weight:600;color:#555;white-space:nowrap;width:45%}
+.chiefs-top-right td:last-child{color:#1B2A4A;font-weight:600}
+
+/* ── DOVA ARENA ───────────────────────────────────────────────── */
+.dova-header { border-bottom: 3px solid #1B3A5C; }
+.dova-mark { color: #1B3A5C; font-weight: 800; }
+.dova-dashboard { padding: 0 16px; }
+.dova-skeleton { display:flex;align-items:center;justify-content:center;min-height:200px;color:#888; }
+.dova-loader { width:32px;height:32px;border:3px solid #e0e0e0;border-top-color:#1B3A5C;border-radius:50%;animation:spin .8s linear infinite;margin-right:12px; }
+@keyframes spin { to { transform: rotate(360deg); } }

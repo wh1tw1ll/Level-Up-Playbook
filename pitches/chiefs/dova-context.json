@@ -1,0 +1,40 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "last_updated": "2026-06-14",
+    "updated_by": "LUNA"
+  },
+  "project": {
+    "name": "DOVA",
+    "client": "KozPure",
+    "level_up_role": "Project Management",
+    "phase": "Pre-development / Pursuit",
+    "folder": "05 - DOVA",
+    "folder_path": "C:\\Users\\HermesAdmin\\OneDrive - levelup-pd.com\\Documents - Level Up\\05 - DOVA"
+  },
+  "documents": {
+    "02 - Contracts & Legal/01 - Level Up Agreements": [
+      "2026.06.12_KozPure_DOVA_PM Letter Agreement.docx"
+    ],
+    "02 - Contracts & Legal/03 - NDAs": [
+      "2026.06.15_KozPure_DOVA_NDA_Alpha One.pdf"
+    ],
+    "03 - Meeting Agendas & Minutes/01 - Client Meetings": [
+      "2026.06.11_KozPure_DOVA_Meeting Agenda.pdf",
+      "2026.06.15_KozPure_DOVA_Meeting Minutes.docx"
+    ],
+    "06 - Design & Engineering": [
+      "2026.06.10_KozPure_DOVA_Arena Updates.pdf"
+    ]
+  },
+  "folder_structure": [
+    "01 - Project Management (00-Archive, 01-Meetings, 02-Logs, 03-Reporting)",
+    "02 - Contracts & Legal (00-Archive, 01-Level Up Agreements, 02-Client Agreements, 03-NDAs, 04-Third Party)",
+    "03 - Meeting Agendas & Minutes (00-Archive, 01-Client Meetings, 02-Internal Meetings)",
+    "04 - Financial (00-Archive, 01-Budget, 02-Invoicing)",
+    "05 - Project Schedule (00-Archive, 01-Master Schedule, 02-Look-Ahead)",
+    "06 - Design & Engineering (00-Archive, 01-Drawings, 02-Specifications)",
+    "07 - Executive Reporting (00-Archive, 01-Weekly Reports, 02-Monthly Reports)",
+    "08 - Misc"
+  ]
+}

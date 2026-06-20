@@ -286,6 +286,7 @@ function setView(view) {
             else if (view === 'mfp') renderMFP();
             else if (view === 'mfp-dashboard') renderMFPDashboard();
             else if (view === 'chiefs') renderChiefsDashboard();
+            else if (view === 'dova') renderDovaDashboard();
                 else if (target) {
       // Unknown view with existing div — show it empty (legacy routes)
     } else {
@@ -645,15 +646,20 @@ function renderProjects() {
       + 'Audit final delivery: June 30, 2026'
       + '</div>'
       + '</div>'
-    + '<div class="mfp-card chiefs-card" style="opacity:.6;cursor:pointer" onclick="alert(\'DOVA Sacramento — Active pursuit. SD phase in progress.\')">'
-            + '<div class="mfp-card-head">'
-            + '<span class="mfp-icon" style="font-size:18px">🏗</span>'
-        + '<span class="mfp-card-title">DOVA (Sacramento)</span>'
-        + '<span class="mfp-badge" style="background:#FFB81C;color:#0f0f1a">Active Pursuit</span>'
-        + '</div>'
-        + '<div class="mfp-card-summary">Active pursuit. SD phase in progress. Targeting late 2027 / early 2028 opening.</div>'
-            + '</div>'
-        + '<div class="mfp-card chiefs-card" onclick="setView(\'chiefs\')" style="cursor:pointer">'
+    + '<div class="mfp-card chiefs-card" onclick="setView(\'dova\')" style="cursor:pointer">'
+          + '<div class="mfp-card-head">'
+          + '<span class="mfp-icon" style="font-size:18px">🏗</span>'
+          + '<span class="mfp-card-title">DOVA Arena (Sacramento)</span>'
+          + '<span class="mfp-badge" style="background:#1B3A5C;color:#fff">Active</span>'
+          + '</div>'
+          + '<div class="mfp-card-summary">Multi-purpose arena in Rancho Cordova, CA. 8,032 seats, ~200K SF. SD phase in progress. Construction target Apr 2027.</div>'
+          + '<div class="mfp-card-bullets dova-stats">'
+          + 'Budget: $275.9M (May Estimate)<br>'
+          + 'Site: 2875 Kilgore Rd, 28 acres<br>'
+          + 'Design: Perkins&Will | CM/GC: McCarthy<br>'
+          + '</div>'
+          + '</div>'
+        + '<div class="mfp-card chiefs-card" onclick="alert(\'KC Chiefs Training Facility — Active pursuit. Proposal phase.\')" style="opacity:.6;cursor:pointer">'
         + '<div class="mfp-card-head">'
         + '<span class="mfp-icon chiefs-icon">▲</span>'
         + '<span class="mfp-card-title">Kansas City Chiefs — Training Facility</span>'
@@ -1167,19 +1173,27 @@ function renderMFP() {
       html += ' <button class="chiefs-refresh-btn" onclick="chiefsManualRefresh()">&#x21bb; Refresh</button>';
       html += '</div>';
 
-      // Row 1: Header + anchor
+      // ── ROW 1: Header ──
       html += '<div class="chiefs-row">';
       html += '<div class="chiefs-header-band">';
-      html += '<div class="chiefs-header-title">KC CHIEFS TRAINING FACILITY ' + chiefsSourceLink('02') + '</div>';
-      html += '<div class="chiefs-header-sub">Project Command Center &middot; Turner & Townsend + Level Up &middot; Olathe, Kansas</div>';
+      html += '<div class="chiefs-header-title">';
+      html += '<img src="assets/chiefs-logo.svg" style="height:32px;vertical-align:middle;margin-right:12px" alt="KC Chiefs">';
+      html += 'KC CHIEFS TRAINING FACILITY &amp; HEADQUARTERS ' + chiefsSourceLink('02');
+      html += '</div>';
+      html += '<div class="chiefs-header-sub">Command Center &middot; T&amp;T + Level Up &middot; Olathe, Kansas</div>';
       html += '<div class="chiefs-header-desc">A single source of truth that keeps priorities visible, decisions organized, and Chiefs leadership informed.</div>';
       html += '</div>';
-      html += '<div class="chiefs-anchor"><div class="chiefs-anchor-label">SUBSTANTIAL COMPLETION</div><div class="chiefs-anchor-value">Q4 2030</div></div>';
+      html += '<div class="chiefs-anchor"><div class="chiefs-anchor-label">SUBSTANTIAL COMPLETION</div><div class="chiefs-anchor-value">'+(function(){var sched=d["02"];if(sched&&sched.rows&&sched.rows.length){var last=sched.rows[sched.rows.length-1];var dt=last["Target Date"]||last["Baseline Date"]||"";if(dt){var pd=Date.parse(dt);if(!isNaN(pd)){var d2=new Date(pd);return"Q"+(Math.floor(d2.getMonth()/3)+1)+" "+d2.getFullYear();}}}return"--";})()+'</div></div>';
       html += '</div>';
 
-      // Row 2: KPI strip (sheet 06)
+      // ── ROW 2: KPI Grid (left 50%) + Project Snapshot (right 50%) ──
       var kpiRows = d['06'] || [];
-      html += '<div class="chiefs-row chiefs-kpi-row">';
+      html += '<div class="chiefs-row chiefs-top-row">';
+
+      // Left: KPI Grid (2x3)
+      html += '<div class="chiefs-widget chiefs-top-left">';
+            html += '<div class="chiefs-widget-title">KPIs ' + chiefsSourceLink('06') + chiefsStaleTag('06') + '</div>';
+            html += '<div class="chiefs-kpi-grid">';
       ['Total Budget','Committed','Billed to Date','Percent Spent','Contingency','Schedule Status'].forEach(function(kpiName) {
         var row = null;
         kpiRows.forEach(function(r) { if (r.KPI === kpiName) row = r; });
@@ -1198,70 +1212,10 @@ function renderMFP() {
         }
         html += '<div class="chiefs-kpi"><div class="chiefs-kpi-label">' + kpiName.toUpperCase() + '</div><div class="chiefs-kpi-val ' + cls + '">' + display + '</div>' + bar + '</div>';
       });
-      html += '</div>';
-
-      // Row 3: Scorecard + Budget chart
-      html += '<div class="chiefs-row">';
-      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Project Health Scorecard ' + chiefsSourceLink('13') + chiefsStaleTag('13') + '</div>';
-      var healthRows = d['13'] || [];
-      if (healthRows.length) {
-        html += '<div class="chiefs-scorecard">';
-        healthRows.forEach(function(r) {
-          var st = String(r.Status || '').toLowerCase().trim();
-          var dc = st === 'green' ? 'chiefs-dot-green' : st === 'yellow' ? 'chiefs-dot-yellow' : 'chiefs-dot-red';
-          html += '<div class="chiefs-score-item" title="' + (r.Note || '').replace(/"/g,'') + '"><span class="chiefs-dot ' + dc + '"></span><span>' + (r.Category || '') + '</span></div>';
-        });
-        html += '</div>';
-      } else { html += '<div class="chiefs-empty">No health data</div>'; }
-      html += '</div>';
-
-      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Budget by Category ($M) ' + chiefsSourceLink('01') + chiefsStaleTag('01') + '</div>';
-      html += (d['01'] && d['01'].length) ? '<div class="chiefs-chart-wrap"><canvas id="chiefs-chart-budget"></canvas></div>' : '<div class="chiefs-empty">No budget data</div>';
       html += '</div></div>';
 
-      // Row 4: Cash Flow + Milestones
-      html += '<div class="chiefs-row">';
-      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Cash Flow Curve (Cumulative $M) ' + chiefsSourceLink('05') + chiefsStaleTag('05') + '</div>';
-      var cfRows = d['05'] || [];
-      html += (cfRows.length > 1) ? '<div class="chiefs-chart-wrap"><canvas id="chiefs-chart-cashflow"></canvas></div>' : '<div class="chiefs-empty">' + (cfRows.length ? 'Not enough data to chart' : 'No cash flow data') + '</div>';
-      html += '</div>';
-      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Milestone Schedule ' + chiefsSourceLink('02') + chiefsStaleTag('02') + '</div>';
-      html += chiefsBuildTable('02', [{key:'Milestone',label:'Milestone'},{key:'Target Date',label:'Target',fmt:'date'},{key:'Variance',label:'Variance'},{key:'Status',label:'Status',fmt:'status'}], { defaultSortCol:'Target Date' });
-      html += '</div></div>';
-
-      // Row 5: Action Items + Procurement
-      html += '<div class="chiefs-row">';
-      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Action Items ' + chiefsSourceLink('03') + chiefsStaleTag('03') + '</div>';
-      html += chiefsBuildTable('03', [{key:'Item',label:'Item'},{key:'Owner',label:'Owner'},{key:'Due Date',label:'Due',fmt:'date'},{key:'Priority',label:'Priority',fmt:'rating'}], { cap:10, defaultSortCol:'Due Date' });
-      html += '</div>';
-      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Procurement & Long-Lead ' + chiefsSourceLink('07') + chiefsStaleTag('07') + '</div>';
-      html += chiefsBuildTable('07', [{key:'Package',label:'Package'},{key:'Budget Value',label:'Budget',fmt:'currency'},{key:'Need-By',label:'Need-By',fmt:'date'},{key:'Status',label:'Status',fmt:'status'}], { defaultSortCol:'Need-By' });
-      html += '</div></div>';
-
-      // Row 6: Decisions + Next 90
-      html += '<div class="chiefs-row">';
-      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Upcoming Key Decisions ' + chiefsSourceLink('08') + chiefsStaleTag('08') + '</div>';
-      html += chiefsBuildTable('08', [{key:'Decision',label:'Decision'},{key:'Needed By',label:'Needed By',fmt:'date'},{key:'Status',label:'Status',fmt:'status'}], { defaultSortCol:'Needed By' });
-      html += '</div>';
-      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Next 90 Days ' + chiefsSourceLink('09') + chiefsStaleTag('09') + '</div>';
-      html += chiefsBuildTable('09', [{key:'Activity',label:'Activity'},{key:'Start',label:'Start',fmt:'date'},{key:'Finish',label:'Finish',fmt:'date'},{key:'Owner',label:'Owner'}], { defaultSortCol:'Start' });
-      html += '</div></div>';
-
-      // Row 7: Risks + Budget Position
-      html += '<div class="chiefs-row">';
-      html += '<div class="chiefs-widget chiefs-w3"><div class="chiefs-widget-title">Top Risks & Mitigation ' + chiefsSourceLink('10') + chiefsStaleTag('10') + '</div>';
-      html += chiefsBuildTable('10', [{key:'Risk',label:'Risk'},{key:'Rating',label:'Rating',fmt:'rating'},{key:'Trend',label:'Trend',fmt:'trend'},{key:'Mitigation',label:'Mitigation'}], { defaultSortCol:'Rating', defaultSortDir:'desc' });
-      html += '</div>';
-      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Budget Position ' + chiefsSourceLink('12') + chiefsStaleTag('12') + '</div>';
-      html += '<div class="chiefs-chart-wrap"><canvas id="chiefs-chart-budgetpos"></canvas></div><div class="chiefs-bp-metrics" id="chiefs-bp-metrics"></div>';
-      html += '</div></div>';
-
-      // Row 8: Team + Snapshot
-      html += '<div class="chiefs-row">';
-      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Project Team ' + chiefsSourceLink('11') + chiefsStaleTag('11') + '</div>';
-      html += chiefsBuildTable('11', [{key:'Name',label:'Name'},{key:'Role',label:'Role'},{key:'Phase Focus',label:'Phase Focus'}], {});
-      html += '</div>';
-      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Project Snapshot ' + chiefsSourceLink('04') + chiefsStaleTag('04') + '</div>';
+      // Right: Project Snapshot (Sheet 04)
+      html += '<div class="chiefs-widget chiefs-top-right"><div class="chiefs-widget-title">Project Snapshot ' + chiefsSourceLink('04') + chiefsStaleTag('04') + '</div>';
       var snapRows = d['04'] || [];
       if (snapRows.length) {
         html += '<table class="chiefs-table"><tbody>';
@@ -1270,7 +1224,11 @@ function renderMFP() {
       } else { html += '<div class="chiefs-empty">No snapshot data</div>'; }
       html += '</div></div>';
 
-      // Row 9: Docs + Camera
+      // ── ROW 3: Docs + Camera (collapsible) ──
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-collapsible" id="chiefs-docs-section">';
+      html += '<div class="chiefs-collapsible-header" onclick="chiefsToggleCollapse(\'chiefs-docs-section\')"><span class="chiefs-chevron">&#x25BC;</span> Documents &amp; Camera</div>';
+      html += '<div class="chiefs-collapsible-body">';
       html += '<div class="chiefs-row">';
       html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Document Shortcuts</div><div class="chiefs-doc-links">';
       CHIEFS_DOCS.forEach(function(doc) {
@@ -1280,16 +1238,488 @@ function renderMFP() {
       });
       html += '</div></div>';
       html += '<div class="chiefs-widget chiefs-w1"><div class="chiefs-widget-title">Live Jobsite Camera</div><div class="chiefs-camera-ph"><div class="chiefs-camera-icon">&#x1F4F7;</div><div>Coming online with site mobilization</div></div></div>';
+      html += '</div></div></div></div>';
+
+      // ── ROW 4: Health + Charts (collapsible, 2x2 grid) ──
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-collapsible" id="chiefs-health-section">';
+      html += '<div class="chiefs-collapsible-header" onclick="chiefsToggleCollapse(\'chiefs-health-section\')"><span class="chiefs-chevron">&#x25BC;</span> Health &amp; Charts</div>';
+      html += '<div class="chiefs-collapsible-body">';
+
+      // 2x2 grid
+      // Top-left: Scorecard
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Project Health Scorecard ' + chiefsSourceLink('13') + chiefsStaleTag('13') + '</div>';
+      var healthRows = d['13'] || [];
+      if (healthRows.length) {
+        html += '<div class="chiefs-scorecard">';
+        healthRows.forEach(function(r) {
+          var st = String(r.Status || '').toLowerCase().trim();
+          var dc = st === 'green' ? 'chiefs-dot-green' : st === 'yellow' ? 'chiefs-dot-yellow' : 'chiefs-dot-red';
+          html += '<div class="chiefs-score-item" title="' + (r.Note || '').replace(/\"/g,'') + '"><span class="chiefs-dot ' + dc + '"></span><span>' + (r.Category || '') + '</span></div>';
+        });
+        html += '</div>';
+      } else { html += '<div class="chiefs-empty">No health data</div>'; }
       html += '</div>';
 
+      // Top-right: Budget by Category doughnut chart
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Budget by Category ($M) ' + chiefsSourceLink('01') + chiefsStaleTag('01') + '</div>';
+      html += (d['01'] && d['01'].length) ? '<div class="chiefs-chart-wrap"><canvas id="chiefs-chart-budget"></canvas></div>' : '<div class="chiefs-empty">No budget data</div>';
+      html += '</div></div>';
+
+      // Bottom row of 2x2
+      html += '<div class="chiefs-row">';
+      // Bottom-left: Cash Flow line chart
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Cash Flow Curve (Cumulative $M) ' + chiefsSourceLink('05') + chiefsStaleTag('05') + '</div>';
+      var cfRows = d['05'] || [];
+      html += (cfRows.length > 1) ? '<div class="chiefs-chart-wrap"><canvas id="chiefs-chart-cashflow"></canvas></div>' : '<div class="chiefs-empty">' + (cfRows.length ? 'Not enough data to chart' : 'No cash flow data') + '</div>';
+      html += '</div>';
+
+      // Bottom-right: Budget Consumption bar chart
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Budget Consumption $M ' + chiefsSourceLink('01') + chiefsStaleTag('01') + '</div>';
+      html += (d['01'] && d['01'].length) ? '<div class="chiefs-chart-wrap"><canvas id="chiefs-chart-budgetbar"></canvas></div>' : '<div class="chiefs-empty">No budget data</div>';
+      html += '</div></div>';
+
+      html += '</div></div></div>';
+
+      // ── ROW 5: Gantt Chart (collapsible) ──
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-collapsible" id="chiefs-gantt-section">';
+      html += '<div class="chiefs-collapsible-header" onclick="chiefsToggleCollapse(\'chiefs-gantt-section\')"><span class="chiefs-chevron">&#x25BC;</span> Project Schedule (Gantt) ' + chiefsSourceLink('02') + ' ' + chiefsSourceLink('09') + '</div>';
+      html += '<div class="chiefs-collapsible-body"><div id="chiefs-gantt-body"></div></div>';
+      html += '</div></div>';
+
+      // ── ROW 6: Next 90 Days (collapsible) ──
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-collapsible" id="chiefs-next90-section">';
+      html += '<div class="chiefs-collapsible-header" onclick="chiefsToggleCollapse(\'chiefs-next90-section\')"><span class="chiefs-chevron">&#x25BC;</span> Next 90 Days ' + chiefsSourceLink('09') + chiefsStaleTag('09') + '</div>';
+      html += '<div class="chiefs-collapsible-body">';
+      var schedRows = d['09'] || [];
+      var today = new Date();
+      today.setHours(0,0,0,0);
+      var upcoming = [];
+      schedRows.forEach(function(r) {
+        if (String(r.Type || '').trim() === 'Phase') return;
+        var fin = r.Finish ? new Date(r.Finish) : null;
+        if (fin && !isNaN(fin.getTime()) && fin >= today) {
+          upcoming.push(r);
+        }
+      });
+      upcoming.sort(function(a,b) {
+        var da = a.Finish ? new Date(a.Finish) : new Date(9999,0,1);
+        var db = b.Finish ? new Date(b.Finish) : new Date(9999,0,1);
+        return da - db;
+      });
+      if (upcoming.length) {
+        html += '<table class="chiefs-table"><thead><tr><th>Activity</th><th>Start</th><th>Finish</th><th>Owner</th></tr></thead><tbody>';
+        var cap = Math.min(upcoming.length, 15);
+        for (var i = 0; i < cap; i++) {
+          var r = upcoming[i];
+          html += '<tr><td class="chiefs-cell-primary">' + (r.Activity || '-') + '</td>'
+            + '<td>' + chiefsFmtDate(r.Start) + '</td>'
+            + '<td>' + chiefsFmtDate(r.Finish) + '</td>'
+            + '<td>' + (r.Owner || '-') + '</td></tr>';
+        }
+        if (upcoming.length > 15) {
+          html += '<tr><td colspan="4" style="text-align:center;padding:6px;font-size:11px;color:var(--muted)">Showing 15 of ' + upcoming.length + ' items</td></tr>';
+        }
+        html += '</tbody></table>';
+      } else {
+        html += '<div class="chiefs-empty">No upcoming activities in next 90 days</div>';
+      }
+      html += '</div></div></div>';
+
+      // ── ROW 7: Action Items + Procurement (collapsible) ──
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-collapsible" id="chiefs-actions-section">';
+      html += '<div class="chiefs-collapsible-header" onclick="chiefsToggleCollapse(\'chiefs-actions-section\')"><span class="chiefs-chevron">&#x25BC;</span> Action Items &amp; Procurement</div>';
+      html += '<div class="chiefs-collapsible-body">';
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Action Items ' + chiefsSourceLink('03') + chiefsStaleTag('03') + '</div>';
+      html += chiefsBuildTable('03', [{key:'Item',label:'Item'},{key:'Owner',label:'Owner'},{key:'Due Date',label:'Due',fmt:'date'},{key:'Priority',label:'Priority',fmt:'rating'}], { cap:10, defaultSortCol:'Due Date' });
+      html += '</div>';
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Procurement & Long-Lead ' + chiefsSourceLink('07') + chiefsStaleTag('07') + '</div>';
+      html += chiefsBuildTable('07', [{key:'Package',label:'Package'},{key:'Budget Value',label:'Budget',fmt:'currency'},{key:'Need-By',label:'Need-By',fmt:'date'},{key:'Status',label:'Status',fmt:'status'}], { defaultSortCol:'Need-By' });
+      html += '</div></div></div></div></div>';
+
+      // ── ROW 8: Decisions + Risks (collapsible) ──
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-collapsible" id="chiefs-decisions-section">';
+      html += '<div class="chiefs-collapsible-header" onclick="chiefsToggleCollapse(\'chiefs-decisions-section\')"><span class="chiefs-chevron">&#x25BC;</span> Decisions &amp; Risks</div>';
+      html += '<div class="chiefs-collapsible-body">';
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Upcoming Key Decisions ' + chiefsSourceLink('08') + chiefsStaleTag('08') + '</div>';
+      html += chiefsBuildTable('08', [{key:'Decision',label:'Decision'},{key:'Needed By',label:'Needed By',fmt:'date'},{key:'Status',label:'Status',fmt:'status'}], { defaultSortCol:'Needed By' });
+      html += '</div>';
+      html += '<div class="chiefs-widget chiefs-w2"><div class="chiefs-widget-title">Top Risks & Mitigation ' + chiefsSourceLink('10') + chiefsStaleTag('10') + '</div>';
+      html += chiefsBuildTable('10', [{key:'Risk',label:'Risk'},{key:'Rating',label:'Rating',fmt:'rating'},{key:'Trend',label:'Trend',fmt:'trend'},{key:'Mitigation',label:'Mitigation'}], { defaultSortCol:'Rating', defaultSortDir:'desc' });
+      html += '</div></div></div></div></div>';
+
+      // ── ROW 9: Budget Position (collapsible) ──
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-collapsible" id="chiefs-budgetpos-section">';
+      html += '<div class="chiefs-collapsible-header" onclick="chiefsToggleCollapse(\'chiefs-budgetpos-section\')"><span class="chiefs-chevron">&#x25BC;</span> Budget Position</div>';
+      html += '<div class="chiefs-collapsible-body">';
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-widget chiefs-w2" style="flex:1"><div class="chiefs-widget-title">Budget Position ' + chiefsSourceLink('12') + chiefsStaleTag('12') + '</div>';
+      html += '<div class="chiefs-chart-wrap"><canvas id="chiefs-chart-budgetpos"></canvas></div><div class="chiefs-bp-metrics" id="chiefs-bp-metrics"></div>';
+      html += '</div></div></div></div></div>';
+
+      // ── ROW 10: Project Team (collapsible) ──
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-collapsible" id="chiefs-team-section">';
+      html += '<div class="chiefs-collapsible-header" onclick="chiefsToggleCollapse(\'chiefs-team-section\')"><span class="chiefs-chevron">&#x25BC;</span> Project Team</div>';
+      html += '<div class="chiefs-collapsible-body">';
+      html += '<div class="chiefs-row">';
+      html += '<div class="chiefs-widget chiefs-w2" style="flex:1"><div class="chiefs-widget-title">Project Team ' + chiefsSourceLink('11') + chiefsStaleTag('11') + '</div>';
+      html += chiefsBuildTable('11', [{key:'Name',label:'Name'},{key:'Role',label:'Role'},{key:'Phase Focus',label:'Phase Focus'}], {});
+      html += '</div></div></div></div></div>';
+
       el.innerHTML = html;
+
+      // Restore collapsed state
+      chiefsInitCollapse();
+
+      // Render gantt if gantt section not collapsed
+      var ganttSec = document.getElementById('chiefs-gantt-section');
+      if (ganttSec && !ganttSec.classList.contains('collapsed')) {
+        setTimeout(function(){ renderChiefsGantt('chiefs-gantt-body'); }, 50);
+      }
+
+      // Render charts
       renderChiefsCharts();
       chiefsRenderBPMetrics();
+
+      // Convert budget chart to doughnut (overwrite if Chart.js loaded)
+      setTimeout(function() {
+        if (typeof Chart === 'undefined') return;
+        var bd = _chiefsData['01'];
+        var cb = document.getElementById('chiefs-chart-budget');
+        if (bd && bd.length && cb) {
+          var lb = [], am = [];
+          bd.forEach(function(r) { lb.push(r.Category || ''); am.push(r['Planned Amount'] ? Math.round(r['Planned Amount'] / 1000000) : 0); });
+          var root = document.documentElement;
+          var cs = getComputedStyle(root);
+          var txt = cs.getPropertyValue('--charcoal').trim() || '#181818';
+          var teal = cs.getPropertyValue('--teal').trim() || '#184655';
+          var gold = '#FFB81C', red = '#E31837', slate = '#8A8AA3';
+          new Chart(cb, {
+            type: 'doughnut',
+            data: {
+              labels: lb,
+              datasets: [{
+                data: am,
+                backgroundColor: [teal, gold, red, slate, '#2D6A4F', '#7B2D8B'],
+                borderWidth: 0
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { position: 'right', labels: { color: txt, boxWidth: 12, font: { size: 10 } } }
+              },
+              cutout: '55%'
+            }
+          });
+        }
+        // Budget bar chart (consumption)
+        var bb = document.getElementById('chiefs-chart-budgetbar');
+        if (bd && bd.length && bb) {
+          var lb2 = [], am2 = [];
+          bd.forEach(function(r) { lb2.push(r.Category || ''); am2.push(r['Planned Amount'] ? Math.round(r['Planned Amount'] / 1000000) : 0); });
+          var root2 = document.documentElement;
+          var cs2 = getComputedStyle(root2);
+          var txt2 = cs2.getPropertyValue('--charcoal').trim() || '#181818';
+          var teal2 = cs2.getPropertyValue('--teal').trim() || '#184655';
+          new Chart(bb, {
+            type: 'bar',
+            data: {
+              labels: lb2,
+              datasets: [{ label: 'Planned ($M)', data: am2, backgroundColor: teal2, borderRadius: 3 }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              indexAxis: 'y',
+              plugins: { legend: { display: false } },
+              scales: {
+                x: { ticks: { color: txt2 } },
+                y: { ticks: { color: txt2, font: { size: 9 } } }
+              }
+            }
+          });
+        }
+      }, 100);
     }
 
-    // ── Charts ────────────────────────────────────────────────
+    // ── COLLAPSE TOGGLE ────────────────────────────────────────────
+    function chiefsToggleCollapse(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.classList.toggle('collapsed');
+      // Persist state
+      var collapsed = new Set(JSON.parse(localStorage.getItem('kc_collapsed') || '[]'));
+      if (el.classList.contains('collapsed')) {
+        collapsed.add(id);
+      } else {
+        collapsed.delete(id);
+      }
+      localStorage.setItem('kc_collapsed', JSON.stringify(Array.from(collapsed)));
+      // If expanding gantt, re-render
+      if (id === 'chiefs-gantt-section' && !el.classList.contains('collapsed')) {
+        setTimeout(function(){ renderChiefsGantt('chiefs-gantt-body'); }, 350);
+      }
+    }
 
-    function renderChiefsCharts() {
+    function chiefsInitCollapse() {
+      // Restore collapsed state from localStorage
+      var collapsed = new Set(JSON.parse(localStorage.getItem('kc_collapsed') || '[]'));
+      document.querySelectorAll('.chiefs-collapsible').forEach(function(el) {
+        if (collapsed.has(el.id)) el.classList.add('collapsed');
+      });
+    }
+
+    // ── CHIEFS GANTT ──────────────────────────────────────────────
+    function renderChiefsGantt(cid) {
+      var container = document.getElementById(cid);
+      if (!container) return;
+
+      // Parse helper (available as parseDate in standalone, define locally for safety)
+      function parseDate(str) {
+        if (!str) return null;
+        var d = new Date(str);
+        if (!isNaN(d.getTime())) return d;
+        // Try MM/DD/YYYY
+        var m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if (m) return new Date(parseInt(m[3]), parseInt(m[1])-1, parseInt(m[2]));
+        // Try Mon DD, YYYY or Mon DD YYYY
+        m = str.match(/^(\w+)\s+(\d{1,2}),?\s*(\d{4})$/);
+        if (m) {
+          var months = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+          var mon = months[m[1].toLowerCase().substring(0,3)];
+          if (mon !== undefined) return new Date(parseInt(m[3]), mon, parseInt(m[2]));
+        }
+        return null;
+      }
+
+      function fmtDate(d) {
+        return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+      }
+
+      // Collect items
+      var phases = [];
+      var milestones = [];
+      var sched09 = _chiefsData['09'] || [];
+      var sheet02 = _chiefsData['02'] || [];
+
+      // Phases from Sheet 09 where Type === 'Phase'
+      sched09.forEach(function(r) {
+        if (String(r.Type || '').trim() !== 'Phase') return;
+        var st = parseDate(r.Start);
+        var fn = parseDate(r.Finish);
+        if (!st || !fn) return;
+        phases.push({ label: r.Activity || 'Phase', start: st, finish: fn, owner: r.Owner || '' });
+      });
+
+      // Milestones from Sheet 02
+      sheet02.forEach(function(r) {
+        var dt = parseDate(r['Target Date'] || r.Target);
+        if (!dt) return;
+        milestones.push({ label: r.Milestone || 'Milestone', date: dt, status: r.Status || '' });
+      });
+
+      if (!phases.length && !milestones.length) {
+        container.innerHTML = '<div class="chiefs-empty">No schedule data to chart</div>';
+        return;
+      }
+
+      // Determine date range
+      var allDates = [];
+      phases.forEach(function(p) { allDates.push(p.start, p.finish); });
+      milestones.forEach(function(m) { allDates.push(m.date); });
+      allDates.sort(function(a,b){ return a - b; });
+      var minDate = allDates[0];
+      var maxDate = allDates[allDates.length - 1];
+
+      // Pad range by 30 days
+      var pad = 30 * 86400000;
+      var startRange = new Date(minDate.getTime() - pad);
+      var endRange = new Date(maxDate.getTime() + pad);
+      var totalMs = endRange.getTime() - startRange.getTime();
+
+      // Chart dimensions
+      var chartW = 900;
+      var rowH = 28;
+      var headerH = 50;
+      var labelW = 180;
+      var barPadL = labelW;
+      var barAreaW = chartW - barPadL - 20;
+      var totalH = headerH + (phases.length + milestones.length) * rowH + 30;
+
+      function xPos(d) {
+        var pct = (d.getTime() - startRange.getTime()) / totalMs;
+        return barPadL + pct * barAreaW;
+      }
+
+      function barWidth(d1, d2) {
+        var p1 = xPos(d1);
+        var p2 = xPos(d2);
+        return Math.max(p2 - p1, 4);
+      }
+
+      // Quarter headers
+      function getQuarterLabel(d) {
+        var q = Math.floor(d.getMonth() / 3) + 1;
+        return 'Q' + q + ' ' + d.getFullYear();
+      }
+
+      function buildQuarters() {
+        var quarters = [];
+        var cur = new Date(startRange);
+        cur.setDate(1);
+        cur.setMonth(Math.floor(cur.getMonth() / 3) * 3);
+        while (cur < endRange) {
+          var qStart = new Date(cur);
+          var qEnd = new Date(cur);
+          qEnd.setMonth(qEnd.getMonth() + 3);
+          quarters.push({ label: getQuarterLabel(qStart), start: qStart, end: qEnd });
+          cur.setMonth(cur.getMonth() + 3);
+        }
+        return quarters;
+      }
+
+      var quarters = buildQuarters();
+
+      // $ SPENT line position from Sheet 06 Percent Spent KPI
+      var spentPct = 0;
+      var kpi06 = _chiefsData['06'] || [];
+      kpi06.forEach(function(r) {
+        if (r.KPI === 'Percent Spent' && r.Value) {
+          spentPct = parseFloat(String(r.Value).replace(/%/g,''));
+          if (isNaN(spentPct)) spentPct = 0;
+        }
+      });
+
+      var spentX = barPadL + (spentPct / 100) * barAreaW;
+
+      // Build SVG
+      var svg = '<svg width="100%" viewBox="0 0 ' + chartW + ' ' + totalH + '" style="background:transparent;font-family:inherit;overflow:visible">';
+
+      // Defs
+      svg += '<defs>'
+        + '<linearGradient id="gantt-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(0,0,0,0.02)"/><stop offset="100%" stop-color="rgba(0,0,0,0.04)"/></linearGradient>'
+        + '<filter id="gantt-shadow"><feDropShadow dx="0" dy="1" stdDeviation="1" flood-opacity="0.15"/></filter>'
+        + '</defs>';
+
+      // Background
+      svg += '<rect x="0" y="0" width="' + chartW + '" height="' + totalH + '" fill="url(#gantt-bg)" rx="6"/>';
+
+      // Quarter grid lines and labels
+      quarters.forEach(function(q) {
+        var x1 = xPos(q.start);
+        var x2 = xPos(q.end);
+        svg += '<line x1="' + x1 + '" y1="0" x2="' + x1 + '" y2="' + totalH + '" stroke="rgba(138,138,163,0.1)" stroke-width="1"/>';
+        svg += '<text x="' + (x1 + (x2 - x1) / 2) + '" y="' + (headerH - 18) + '" text-anchor="middle" font-size="10" fill="#8A8AA3" font-weight="600">' + q.label + '</text>';
+      });
+
+      // Quarter header background
+      svg += '<rect x="' + barPadL + '" y="0" width="' + barAreaW + '" height="' + headerH + '" fill="rgba(0,0,0,0.03)" rx="4"/>';
+
+      // Monthly tick lines
+      var curMonth = new Date(startRange);
+      curMonth.setDate(1);
+      while (curMonth < endRange) {
+        var mx = xPos(curMonth);
+        svg += '<line x1="' + mx + '" y1="' + headerH + '" x2="' + mx + '" y2="' + totalH + '" stroke="rgba(138,138,163,0.06)" stroke-width="1" stroke-dasharray="3,3"/>';
+        svg += '<text x="' + mx + '" y="' + (headerH - 4) + '" text-anchor="middle" font-size="8" fill="#8A8AA3">' + curMonth.toLocaleDateString('en-US',{month:'short'}) + '</text>';
+        curMonth.setMonth(curMonth.getMonth() + 1);
+      }
+
+      // $ SPENT vertical line
+      var spentColor = '#E31837';
+      svg += '<line x1="' + spentX + '" y1="0" x2="' + spentX + '" y2="' + totalH + '" stroke="' + spentColor + '" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.6"/>';
+      svg += '<rect x="' + (spentX - 30) + '" y="2" width="60" height="16" rx="3" fill="' + spentColor + '" opacity="0.85"/>';
+      svg += '<text x="' + spentX + '" y="14" text-anchor="middle" font-size="9" fill="#fff" font-weight="700">$ SPENT</text>';
+
+      // Today line
+      var today = new Date();
+      if (today >= startRange && today <= endRange) {
+        var tx = xPos(today);
+        svg += '<line x1="' + tx + '" y1="' + headerH + '" x2="' + tx + '" y2="' + totalH + '" stroke="#184655" stroke-width="1" stroke-dasharray="4,2" opacity="0.4"/>';
+        svg += '<text x="' + tx + '" y="' + (headerH - 4) + '" text-anchor="middle" font-size="8" fill="#184655">Today</text>';
+      }
+
+      // Render phases
+      var curY = headerH;
+      phases.sort(function(a,b){ return a.start - b.start || a.finish - b.finish; });
+      phases.forEach(function(p, idx) {
+        var y = curY + 4;
+        var h = rowH - 8;
+        var x = xPos(p.start);
+        var w = barWidth(p.start, p.finish);
+        var rowBg = idx % 2 === 0 ? 'rgba(0,0,0,0.02)' : 'transparent';
+
+        // Row background
+        svg += '<rect x="0" y="' + curY + '" width="' + chartW + '" height="' + rowH + '" fill="' + rowBg + '"/>';
+
+        // Label
+        var label = p.label.length > 25 ? p.label.substring(0,24) + '...' : p.label;
+        svg += '<text x="8" y="' + (curY + rowH / 2 + 4) + '" font-size="11" fill="#181818" font-weight="600" dominant-baseline="middle">' + label + '</text>';
+
+        // Bar
+        svg += '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="4" fill="#1A1A1A" filter="url(#gantt-shadow)" opacity="0.85"/>';
+
+        // Tooltip
+        var tooltip = fmtDate(p.start) + ' → ' + fmtDate(p.finish);
+        svg += '<title>' + tooltip + '</title>';
+
+        curY += rowH;
+      });
+
+      // Render milestones
+      milestones.sort(function(a,b){ return a.date - b.date; });
+      milestones.forEach(function(m, idx) {
+        var y = curY + 4;
+        var rowBg = idx % 2 === 0 ? 'rgba(0,0,0,0.02)' : 'transparent';
+
+        // Row background
+        svg += '<rect x="0" y="' + curY + '" width="' + chartW + '" height="' + rowH + '" fill="' + rowBg + '"/>';
+
+        // Label
+        var label = m.label.length > 25 ? m.label.substring(0,24) + '...' : m.label;
+        svg += '<text x="8" y="' + (curY + rowH / 2 + 4) + '" font-size="11" fill="#181818" dominant-baseline="middle">' + label + '</text>';
+
+        // Diamond marker (gold, rotated square)
+        var cx = xPos(m.date);
+        var cy = y + (rowH - 8) / 2;
+        var sz = 7;
+        var pts = (cx) + ',' + (cy - sz) + ' '
+          + (cx + sz) + ',' + (cy) + ' '
+          + (cx) + ',' + (cy + sz) + ' '
+          + (cx - sz) + ',' + (cy);
+        svg += '<polygon points="' + pts + '" fill="#FFB81C" stroke="#D4941A" stroke-width="1" filter="url(#gantt-shadow)"/>';
+
+        // Tooltip
+        svg += '<title>' + m.label + ' — ' + fmtDate(m.date) + (m.status ? ' [' + m.status + ']' : '') + '</title>';
+
+        curY += rowH;
+      });
+
+      // Legend
+      var legendY = totalH - 22;
+      svg += '<rect x="' + (barPadL) + '" y="' + legendY + '" width="12" height="6" rx="2" fill="#1A1A1A" opacity="0.85"/>';
+      svg += '<text x="' + (barPadL + 16) + '" y="' + (legendY + 6) + '" font-size="9" fill="#8A8AA3">Phase</text>';
+      svg += '<polygon points="' + (barPadL + 70) + ',' + (legendY + 2) + ' ' + (barPadL + 76) + ',' + (legendY + 7) + ' ' + (barPadL + 70) + ',' + (legendY + 12) + ' ' + (barPadL + 64) + ',' + (legendY + 7) + '" fill="#FFB81C" stroke="#D4941A" stroke-width="0.5"/>';
+      svg += '<text x="' + (barPadL + 82) + '" y="' + (legendY + 6) + '" font-size="9" fill="#8A8AA3">Milestone</text>';
+      svg += '<line x1="' + (barPadL + 145) + '" y1="' + (legendY + 3) + '" x2="' + (barPadL + 160) + '" y2="' + (legendY + 3) + '" stroke="#E31837" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.6"/>';
+      svg += '<text x="' + (barPadL + 166) + '" y="' + (legendY + 6) + '" font-size="9" fill="#8A8AA3">$ SPENT</text>';
+
+      svg += '</svg>';
+
+      container.innerHTML = svg;
+    }
+function renderChiefsCharts() {
       if (typeof Chart === 'undefined') return;
       var root = document.documentElement;
       var cs = getComputedStyle(root);
@@ -1301,17 +1731,17 @@ function renderMFP() {
       Chart.defaults.borderColor = 'rgba(138,138,163,0.15)';
       var grid = 'rgba(138,138,163,0.15)';
 
-      // Budget bar (sheet 01)
-      var bd = _chiefsData['01'];
-      if (bd && bd.length && document.getElementById('chiefs-chart-budget')) {
-        var lb = [], am = [];
-        bd.forEach(function(r) { lb.push(r.Category || ''); am.push(r['Planned Amount'] ? Math.round(r['Planned Amount'] / 1000000) : 0); });
-        new Chart(document.getElementById('chiefs-chart-budget'), {
-          type: 'bar',
-          data: { labels: lb, datasets: [{ label: 'Planned ($M)', data: am, backgroundColor: teal, borderRadius: 3 }] },
-          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: txt, maxRotation: 45, font: { size: 10 } } }, y: { ticks: { color: txt } } } }
-        });
-      }
+      // Budget bar (sheet 01) — now handled by buildChiefsDashboard setTimeout (doughnut)
+            /* var bd = _chiefsData['01'];
+            if (bd && bd.length && document.getElementById('chiefs-chart-budget')) {
+              var lb = [], am = [];
+              bd.forEach(function(r) { lb.push(r.Category || ''); am.push(r['Planned Amount'] ? Math.round(r['Planned Amount'] / 1000000) : 0); });
+              new Chart(document.getElementById('chiefs-chart-budget'), {
+                type: 'bar',
+                data: { labels: lb, datasets: [{ label: 'Planned ($M)', data: am, backgroundColor: teal, borderRadius: 3 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: txt, maxRotation: 45, font: { size: 10 } } }, y: { ticks: { color: txt } } } }
+              });
+            } */
 
       // Cash flow (sheet 05)
       var cd = _chiefsData['05'];
@@ -1396,10 +1826,12 @@ function renderMFP() {
       observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
           })();
 
-      // ── LEVEL UP PLAYBOOK ─ APP.JS ──────────────────────────────────────
+          function renderDovaDashboard() { window.location.href = '/api/dova-dashboard'; }
 
-// ── STATE ─────────────────────────────────────────────────────────
-var luUser = null;
+                              // ── LEVEL UP PLAYBOOK ─ APP.JS ──────────────────────────────────────
+
+          // ── STATE ─────────────────────────────────────────────────────────
+          var luUser = null;
 var currentView = 'luna';
 var currentPbView = 'sections';
 var activePhase = null;
@@ -1684,6 +2116,7 @@ function setView(view) {
             else if (view === 'mfp') renderMFP();
             else if (view === 'mfp-dashboard') renderMFPDashboard();
             else if (view === 'chiefs') renderChiefsDashboard();
+            else if (view === 'dova') renderDovaDashboard();
                 else if (target) {
       // Unknown view with existing div — show it empty (legacy routes)
     } else {
@@ -2043,15 +2476,20 @@ function renderProjects() {
       + 'Audit final delivery: June 30, 2026'
       + '</div>'
       + '</div>'
-    + '<div class="mfp-card chiefs-card" style="opacity:.6;cursor:pointer" onclick="alert(\'DOVA Sacramento — Active pursuit. SD phase in progress.\')">'
-            + '<div class="mfp-card-head">'
-            + '<span class="mfp-icon" style="font-size:18px">🏗</span>'
-        + '<span class="mfp-card-title">DOVA (Sacramento)</span>'
-        + '<span class="mfp-badge" style="background:#FFB81C;color:#0f0f1a">Active Pursuit</span>'
-        + '</div>'
-        + '<div class="mfp-card-summary">Active pursuit. SD phase in progress. Targeting late 2027 / early 2028 opening.</div>'
-            + '</div>'
-        + '<div class="mfp-card chiefs-card" onclick="setView(\'chiefs\')" style="cursor:pointer">'
+    + '<div class="mfp-card chiefs-card" onclick="setView(\'dova\')" style="cursor:pointer">'
+          + '<div class="mfp-card-head">'
+          + '<span class="mfp-icon" style="font-size:18px">🏗</span>'
+          + '<span class="mfp-card-title">DOVA Arena (Sacramento)</span>'
+          + '<span class="mfp-badge" style="background:#1B3A5C;color:#fff">Active</span>'
+          + '</div>'
+          + '<div class="mfp-card-summary">Multi-purpose arena in Rancho Cordova, CA. 8,032 seats, ~200K SF. SD phase in progress. Construction target Apr 2027.</div>'
+          + '<div class="mfp-card-bullets dova-stats">'
+          + 'Budget: $275.9M (May Estimate)<br>'
+          + 'Site: 2875 Kilgore Rd, 28 acres<br>'
+          + 'Design: Perkins&Will | CM/GC: McCarthy<br>'
+          + '</div>'
+          + '</div>'
+        + '<div class="mfp-card chiefs-card" onclick="alert(\'KC Chiefs Training Facility — Active pursuit. Proposal phase.\')" style="opacity:.6;cursor:pointer">'
         + '<div class="mfp-card-head">'
         + '<span class="mfp-icon chiefs-icon">▲</span>'
         + '<span class="mfp-card-title">Kansas City Chiefs — Training Facility</span>'
@@ -2489,9 +2927,11 @@ function renderMFP() {
         },60000));
       };
       tick();
-    }
+          }
 
-    function toggleMFPExpand(card, view) {
+          function renderDovaDashboard() { window.location.href = '/api/dova-dashboard'; }
+
+          function toggleMFPExpand(card, view) {
           var content = card.querySelector('.mfp-expand-content');
           if (!content) return;
           if (content.innerHTML) {

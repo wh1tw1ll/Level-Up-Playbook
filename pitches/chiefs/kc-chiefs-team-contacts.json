@@ -1,0 +1,25 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "last_updated": "2026-06-14",
+    "updated_by": "LUNA",
+    "project": "KC Chiefs Training Facility & HQ"
+  },
+  "team": [
+    {"name": "David Bower, AIA", "role": "Principal-in-Charge", "firm": "Turner & Townsend", "email": "David.Bower.KC@gmail.com"},
+    {"name": "Tom Harrison", "role": "Sports Practice Lead", "firm": "Turner & Townsend", "email": "thomas.harrison@turntown.com"},
+    {"name": "Allison Baker", "role": "Regional Lead", "firm": "Turner & Townsend", "email": "allison.baker@turntown.com"},
+    {"name": "Greg Wieting", "role": "Senior Project Manager", "firm": "Level Up", "email": "greg@levelup-pd.com"},
+    {"name": "Whitney Williams", "role": "Project Manager (onsite)", "firm": "Level Up", "email": "wwilliams@levelup-pd.com"},
+    {"name": "Gary Berlin, RA", "role": "Project Manager (onsite)", "firm": "Turner & Townsend", "email": "gary.berlin@turntown.com"},
+    {"name": "Jacob Ortmann", "role": "Assistant Project Manager", "firm": "Turner & Townsend", "email": "jacob.ortmann@turntown.com"},
+    {"name": "Leslie Policar", "role": "Estimator", "firm": "Turner & Townsend", "email": "leslie.policar@turntown.com"},
+    {"name": "Nick Seaton", "role": "KC Cost Estimator", "firm": "Turner & Townsend", "email": "nick.seaton@turntown.com"},
+    {"name": "Jordan Ward", "role": "Field Advisor", "firm": "Level Up", "email": "jward@levelup-pd.com"}
+  ],
+  "email_notes": {
+    "confirmed": ["David.Bower.KC@gmail.com", "thomas.harrison@turntown.com", "greg@levelup-pd.com", "wwilliams@levelup-pd.com", "jward@levelup-pd.com"],
+    "educated_guess_turntown_pattern": "firstname.lastname@turntown.com",
+    "guesses_to_verify": ["allison.baker@turntown.com", "gary.berlin@turntown.com", "jacob.ortmann@turntown.com", "leslie.policar@turntown.com", "nick.seaton@turntown.com"]
+  }
+}
