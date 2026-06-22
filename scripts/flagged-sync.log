@@ -170,3 +170,4 @@
 [2026-06-22 07:22:10] MFP cron fallback starting
 [2026-06-22 07:22:10] Fallback already ran today (25 actions). Suppressing.
 [2026-06-22 07:22:29] ERROR: Outlook COM dispatch failed: (-2147418111, 'Call was rejected by callee.', None, None)
+[2026-06-22 10:29:31] BLOCKED: Session 0 (use VBS startup script)
