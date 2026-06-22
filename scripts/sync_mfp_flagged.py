@@ -11,11 +11,48 @@ requires an interactive user profile.
 import json, os, sys, re, requests, win32com.client, pythoncom, threading
 from datetime import datetime, timedelta, timezone
 
+# ── Session guard (cron-safe) ─────────────────────────────────────
+# Outlook COM automation only works from an interactive Windows desktop
+# session (Session 1+). Cron / scheduled tasks run in Session 0 where
+# COM dispatch hangs. Exit silently; log to file at most once/hour.
+SESSION_NAME = os.environ.get("SESSIONNAME", "")
+if not SESSION_NAME or SESSION_NAME.upper() in ("", "0", "SERVICES", "CONSOLE"):
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    sess = os.environ.get("SESSIONNAME", "(unset)")
+    print(f"[{ts}] BLOCKED: Session 0 (use VBS startup script)", end="")
+    now = datetime.now()
+    log_path = os.path.normpath(os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "..", "scripts", "flagged-sync.log"
+    ))
+    try:
+        last_ts = None
+        if os.path.exists(log_path):
+            with open(log_path, "r") as f:
+                for line in f:
+                    if "BLOCKED: Session 0" in line:
+                        m = re.search(r'\[(.*?)\]', line)
+                        if m:
+                            last_ts = m.group(1)
+        if last_ts:
+            from datetime import datetime as dt2
+            last_blocked = dt2.strptime(last_ts, "%Y-%m-%d %H:%M:%S")
+            if (now - last_blocked).total_seconds() < 3600:
+                sys.exit(0)
+    except Exception:
+        pass
+    try:
+        with open(log_path, "a") as f:
+            f.write(f"[{ts}] BLOCKED: Session 0 (use VBS startup script)\n")
+    except Exception:
+        pass
+    sys.exit(0)
+
 # ── Config ──────────────────────────────────────────────────────────
 PLAYBOOK_URL = "https://level-up-playbook.vercel.app/api/sync/flagged-store"
 SYNC_KEY = "59085493e8e63a164be0e443575b99f191b5c7fdb791c539"
 LOOKBACK_DAYS = 60
 LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts", "flagged-sync.log")
+
 
 def log(msg):
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -37,7 +74,7 @@ def extract_action(subject, body, sender, received):
     deadline = None
     deadline_patterns = [
         r'due\s+(?:by|on|date)?\s*:?\s*(\w+\s+\d{1,2}(?:st|nd|rd|th)?(?:\s*,?\s*\d{4})?)',
-        r'deadline[\s:]+(\w+\s+\d{1,2}(?:st|nd|rd|th)?(?:\s*,?\s*\d{4})?)',
+        r'deadline[\s:]+\w+\s+\d{1,2}(?:st|nd|rd|th)?(?:\s*,?\s*\d{4})?',
         r'by\s+(\w+\s+\d{1,2}(?:st|nd|rd|th)?(?:\s*,?\s*\d{4})?)',
         r'(\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?)',
         r'response\s+(?:by|required|needed)\s+(\w+\s+\d{1,2}(?:st|nd|rd|th)?)',
