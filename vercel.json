@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/", "destination": "/api/dova-dashboard" },
     { "source": "/auth/login", "destination": "/api/oauth?provider=microsoft&action=login" },
     { "source": "/auth/callback", "destination": "/api/oauth?provider=microsoft&action=callback" },
     { "source": "/auth/me", "destination": "/api/oauth?provider=microsoft&action=me" },

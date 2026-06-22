@@ -102,3 +102,71 @@
 [2026-06-21 22:35:38] ============================================================
 [2026-06-21 22:35:38] MFP cron fallback starting
 [2026-06-21 22:35:38] Fallback already ran today (25 actions). Suppressing.
+[2026-06-21 23:24:34] ============================================================
+[2026-06-21 23:24:34] MFP cron fallback starting
+[2026-06-21 23:24:34] Fallback already ran today (25 actions). Suppressing.
+[2026-06-21 23:40:22] BLOCKED: Session 0 (use VBS startup script)
+[2026-06-21 23:43:16] ============================================================
+[2026-06-21 23:43:16] MFP cron fallback starting
+[2026-06-21 23:43:16] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 00:31:46] ============================================================
+[2026-06-22 00:31:46] MFP cron fallback starting
+[2026-06-22 00:31:46] Cache: flagged-local.json (created 2026-06-12 07:04), 25 actions
+[2026-06-22 00:31:46] Posting 25 actions to Playbook API...
+[2026-06-22 00:31:48] CRON FALLBACK: Pushed cached local backup (25 actions) to Playbook API
+[2026-06-22 00:31:48] Playbook API response: status=ok, count=25, stored_at=2026-06-22T04:31:48.140Z
+[2026-06-22 00:31:48] Result: 25 actions synced to Playbook
+[2026-06-22 00:31:48] ============================================================
+[2026-06-22 00:47:26] BLOCKED: Session 0 (use VBS startup script)
+[2026-06-22 01:05:09] ============================================================
+[2026-06-22 01:05:09] MFP cron fallback starting
+[2026-06-22 01:05:09] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 02:26:55] ============================================================
+[2026-06-22 02:26:55] MFP cron fallback starting
+[2026-06-22 02:26:55] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 02:42:40] BLOCKED: Session 0 (use VBS startup script)
+[2026-06-22 02:59:33] ============================================================
+[2026-06-22 02:59:33] MFP cron fallback starting
+[2026-06-22 02:59:33] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 03:17:33] ============================================================
+[2026-06-22 03:17:33] MFP cron fallback starting
+[2026-06-22 03:17:33] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 03:37:45] ============================================================
+[2026-06-22 03:37:45] MFP cron fallback starting
+[2026-06-22 03:37:45] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 03:53:43] ============================================================
+[2026-06-22 03:53:43] MFP cron fallback starting
+[2026-06-22 03:53:43] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 04:09:43] BLOCKED: Session 0 (use VBS startup script)
+[2026-06-22 04:11:59] ============================================================
+[2026-06-22 04:11:59] MFP cron fallback starting
+[2026-06-22 04:11:59] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 05:02:42] ============================================================
+[2026-06-22 05:02:42] MFP Flagged Email Sync starting (direct mode)
+[2026-06-22 05:05:43] ERROR: Outlook COM dispatch failed: (-2147418111, 'Call was rejected by callee.', None, None)
+[2026-06-22 05:21:43] BLOCKED: Session 0 (use VBS startup script)
+[2026-06-22 05:37:56] ============================================================
+[2026-06-22 05:37:56] MFP cron fallback starting
+[2026-06-22 05:37:56] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 05:54:08] ============================================================
+[2026-06-22 05:54:08] MFP cron fallback starting
+[2026-06-22 05:54:08] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 06:11:12] ============================================================
+[2026-06-22 06:11:12] MFP cron fallback starting
+[2026-06-22 06:11:12] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 06:26:51] BLOCKED: Session 0 (use VBS startup script)
+[2026-06-22 06:27:50] ============================================================
+[2026-06-22 06:27:50] MFP cron fallback starting
+[2026-06-22 06:27:50] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 06:44:53] ============================================================
+[2026-06-22 06:44:53] MFP cron fallback starting
+[2026-06-22 06:44:53] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 07:02:08] ============================================================
+[2026-06-22 07:02:08] MFP cron fallback starting
+[2026-06-22 07:02:08] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 07:19:28] ============================================================
+[2026-06-22 07:19:28] MFP Flagged Email Sync starting (direct mode)
+[2026-06-22 07:22:10] ============================================================
+[2026-06-22 07:22:10] MFP cron fallback starting
+[2026-06-22 07:22:10] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 07:22:29] ERROR: Outlook COM dispatch failed: (-2147418111, 'Call was rejected by callee.', None, None)
