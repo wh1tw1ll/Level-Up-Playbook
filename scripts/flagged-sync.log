@@ -174,3 +174,73 @@
 [2026-06-22 11:02:39] ============================================================
 [2026-06-22 11:02:39] MFP cron fallback starting
 [2026-06-22 11:02:39] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 11:35:56] ============================================================
+[2026-06-22 11:35:56] MFP cron fallback starting
+[2026-06-22 11:35:56] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 11:51:48] ============================================================
+[2026-06-22 11:51:48] MFP cron fallback starting
+[2026-06-22 11:51:48] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 12:08:45] BLOCKED: Session 0 (use VBS startup script)
+[2026-06-22 12:26:36] ============================================================
+[2026-06-22 12:26:36] MFP cron fallback starting
+[2026-06-22 12:26:36] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 12:42:59] ============================================================
+[2026-06-22 12:42:59] MFP cron fallback starting
+[2026-06-22 12:42:59] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 13:16:34] BLOCKED: Session 0 (use VBS startup script)
+[2026-06-22 13:17:53] ============================================================
+[2026-06-22 13:17:53] MFP Flagged Email Sync starting (direct mode)
+[2026-06-22 13:20:54] ERROR: Outlook COM dispatch failed: (-2147418111, 'Call was rejected by callee.', None, None)
+[2026-06-22 13:21:41] ============================================================
+[2026-06-22 13:21:41] MFP cron fallback starting
+[2026-06-22 13:21:41] Cache: flagged-local.json (created 2026-06-12 07:04:49), 25 actions
+[2026-06-22 13:21:41] Posting 25 actions to Playbook API...
+[2026-06-22 13:21:41] CRON FALLBACK: Pushed cached local backup (25 actions) to Playbook API
+[2026-06-22 13:21:41] Playbook API response: status=ok, count=25, stored_at=2026-06-22T17:21:42.044Z
+[2026-06-22 13:21:41] Result: 25 actions synced to Playbook
+[2026-06-22 13:21:41] ============================================================
+[2026-06-22 13:38:13] ============================================================
+[2026-06-22 13:38:13] MFP cron fallback starting
+[2026-06-22 13:38:13] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 14:12:32] ============================================================
+[2026-06-22 14:12:32] MFP cron fallback starting
+[2026-06-22 14:12:32] Cache: flagged-local.json (created 2026-06-12 07:04:49), 25 actions
+[2026-06-22 14:12:32] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 14:28:45] BLOCKED: Session 0 (use VBS startup script)
+[2026-06-22 14:45:47] ============================================================
+[2026-06-22 14:45:47] MFP cron fallback starting
+[2026-06-22 14:45:47] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 15:02:34] ============================================================
+[2026-06-22 15:02:34] MFP cron fallback starting
+[2026-06-22 15:02:34] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 16:14:47] BLOCKED: Session 0 (use VBS startup script)
+[2026-06-22 16:15:44] ============================================================
+[2026-06-22 16:15:44] MFP cron fallback starting
+[2026-06-22 16:15:44] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 17:08:07] ============================================================
+[2026-06-22 17:08:07] MFP cron fallback starting
+[2026-06-22 17:08:07] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 17:24:05] BLOCKED: Session 0 (use VBS startup script)
+[2026-06-22 17:44:24] ============================================================
+[2026-06-22 17:44:24] MFP cron fallback starting
+[2026-06-22 17:44:24] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 18:17:59] ============================================================
+[2026-06-22 18:17:59] MFP cron fallback starting
+[2026-06-22 18:17:59] Cache: flagged-local.json (created 2026-06-12 07:04:49), 25 actions
+[2026-06-22 18:17:59] Fallback already ran today (25 actions). Suppressing.
+[2026-06-22 18:33:50] BLOCKED: Session 0 (use VBS startup script)
+[2026-06-22 18:34:09] ============================================================
+[2026-06-22 18:34:09] MFP cron fallback starting
+[2026-06-22 18:34:09] Fallback already ran today (25 actions). Suppressing.
+[2026-06-23 11:42:00] ============================================================
+[2026-06-23 11:42:00] MFP cron fallback starting
+[2026-06-23 11:42:00] Cache: flagged-local.json (created 2026-06-12 07:04), 25 actions
+[2026-06-23 11:42:00] Posting 25 actions to Playbook API...
+[2026-06-23 11:42:00] CRON FALLBACK: Pushed cached local backup (25 actions) to Playbook API
+[2026-06-23 11:42:00] Playbook API response: status=ok, count=25, stored_at=2026-06-23T15:42:03.261Z
+[2026-06-23 11:42:00] Result: 25 actions synced to Playbook
+[2026-06-23 11:42:00] ============================================================
+[2026-06-23 11:58:38] BLOCKED: Session 0 (use VBS startup script)
+[2026-06-23 12:00:39] ============================================================
+[2026-06-23 12:00:39] MFP cron fallback starting
+[2026-06-23 12:00:39] Fallback already ran today (25 actions). Suppressing.

@@ -20,6 +20,7 @@ import dovaDashboardHandler from '../lib/handlers/dova-dashboard.js';
 import dovaSetupHandler from '../lib/handlers/dova-setup.js';
 import dovaSeedHandler from '../lib/handlers/dova-seed.js';
 import dovaWorkspaceHandler from '../lib/handlers/dova-workspace.js';
+import dovaUpdateSchedule from '../lib/handlers/dova-update-schedule.js';
 
 // Module-level flagged store cache (survives warm instances)
 let _flaggedCache = null;
@@ -87,6 +88,8 @@ export default function handler(req, res) {
       return dovaSeedHandler(req, res);
     case '/api/dova-workspace':
       return dovaWorkspaceHandler(req, res);
+    case '/api/dova-update-schedule':
+      return dovaUpdateSchedule(req, res);
     default:
       res.status(404).json({ error: 'Route not found', path });
   }
@@ -98,5 +101,5 @@ function parsePath(path) {
 }
 
 export const config = {
-  maxDuration: 30
+  maxDuration: 60
 };
