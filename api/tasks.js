@@ -1,6 +1,4 @@
 // api/tasks.js — GET /api/tasks and POST /api/tasks/:rowId
-const SHEET_ID_PROJECT = '4456864287772548';
-const SHEET_ID_PERSONAL = '2802755367554948';
 // GET returns all rows from the Action Tracker sheet
 // GET /api/tasks/:rowId/discussions — get discussions with comments for a row
 // GET /api/tasks/:rowId/notes — flattened comment thread for a row
@@ -19,6 +17,8 @@ function parseBody(b) {
 }
 
 export default async function handler(req, res) {
+  const SHEET_ID_PROJECT = '4456864287772548';
+  const SHEET_ID_PERSONAL = '2802755367554948';
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   if (req.method === 'OPTIONS') {
@@ -100,7 +100,7 @@ async function handleGet(req, res, token, sheetId) {
         { headers: { Authorization: 'Bearer ' + token } }
       ),
       fetch(
-              `https://api.smartsheet.com/2.0/sheets/${SHEET_ID_PERSONAL}?include=objectValue,discussions`,
+              `https://api.smartsheet.com/2.0/sheets/2802755367554948?include=objectValue,discussions`,
         { headers: { Authorization: 'Bearer ' + token } }
       )
     ]);
