@@ -86,6 +86,7 @@ body{display:flex;flex-direction:column}
 .note-send{padding:4px 10px;background:var(--accent);color:var(--bg);border:none;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;line-height:20px}
 .note-send:hover{opacity:0.85}
 .note-send:disabled{opacity:0.4;cursor:default}
+.note-status-line{margin-bottom:4px;padding:2px 0;border-bottom:1px solid var(--border)}
 .status-bar{flex:0 0 auto;padding:3px 8px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);display:flex;justify-content:space-between}
 </style>
 </head>
@@ -234,19 +235,15 @@ function render() {
     const div = document.createElement('div');
         div.className = cls;
         div.dataset.rowId = t.rowId;
-        div.onclick = function(e) { if (e.target.closest('.task-check,.status-note,.status-note-empty,.status-note-input,.note-input,.note-send')) return; toggleRow(this, t.rowId); };
+        div.onclick = function(e) { if (e.target.closest('.task-check,.status-note,.status-note-input,.note-input,.note-send')) return; toggleRow(this, t.rowId); };
         let discBadge = '';
         if (t.discussionCount > 0) {
           discBadge = '<span class="meta-tag disc">💬 ' + t.discussionCount + '</span>';
         }
         let snHtml = '';
-        if (!isComplete) {
-          if (t.statusNote) {
-            snHtml = '<div class="status-note" title="Click to edit" onclick="event.stopPropagation();editStatusNote(this,' + t.rowId + ')">' + escapeHtml(t.statusNote) + '</div>';
-          } else {
-            snHtml = '<div class="status-note-empty" onclick="event.stopPropagation();editStatusNote(this,' + t.rowId + ')"></div>';
-          }
-        }
+            if (!isComplete && t.statusNote) {
+              snHtml = '<div class="status-note" title="Click to edit" onclick="event.stopPropagation();editStatusNote(this,' + t.rowId + ')">' + escapeHtml(t.statusNote) + '</div>';
+            }
         div.innerHTML =
           '<div class="task-check' + (isComplete ? ' done' : '') + '" onclick="event.stopPropagation();toggleTask(this,' + t.rowId + ')">' +
             (isComplete ? '&#10003;' : '') +
@@ -413,7 +410,24 @@ function renderNotes(rowId) {
         '<textarea class="note-input" placeholder="Add a note..." rows="1"></textarea>' +
         '<button class="note-send" onclick="submitNote(' + rowId + ')">Send</button>' +
         '</div>';
+      // Add status line (editable) above notes
+      html = '<div class="note-status-line" id="nl-' + rowId + '"></div>' + html;
       area.innerHTML = html;
+
+      // Load the status note value
+      fetch('/api/tasks')
+        .then(r => r.json())
+        .then(allData => {
+          const task = (allData.tasks || []).find(t => t.rowId == rowId);
+          const snDiv = area.querySelector('.note-status-line');
+          if (!snDiv) return;
+          if (task && task.statusNote) {
+            snDiv.innerHTML = '<div class="status-note" onclick="event.stopPropagation();editExpandedNote(this,' + rowId + ')">' + escapeHtml(task.statusNote) + '</div>';
+          } else {
+            snDiv.innerHTML = '<div class="status-note" onclick="event.stopPropagation();editExpandedNote(this,' + rowId + ')" style="opacity:0.4">Status note...</div>';
+          }
+        })
+        .catch(() => {});
 
       // Wire up textarea submit
       const ta = area.querySelector('.note-input');
@@ -483,7 +497,7 @@ function submitNote(rowId) {
 
 // ── STATUS NOTE (inline edit) ──
 function editStatusNote(el, rowId) {
-  const currentText = el.textContent;
+  const currentText = el.textContent === 'Status note...' ? '' : el.textContent;
   const input = document.createElement('input');
   input.className = 'status-note-input';
   input.type = 'text';
@@ -516,6 +530,10 @@ function editStatusNote(el, rowId) {
     if (e.key === 'Enter') { save(); }
     if (e.key === 'Escape') { input.blur(); }
   };
+}
+
+function editExpandedNote(el, rowId) {
+  editStatusNote(el, rowId);
 }
 
 // ── EVENT BINDING ──
