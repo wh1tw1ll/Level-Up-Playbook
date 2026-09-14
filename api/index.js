@@ -80,8 +80,8 @@ export default function handler(req, res) {
     case '/api/ss-ops':
       return ssOpsHandler(req, res);
     case '/api/tasks':
-      return tasksHandler(req, res);
-    case '/api/dova':
+          return tasksHandler(req, res);
+        case '/api/dova':
       return dovaHandler(req, res);
     case '/api/dova-dashboard':
       return dovaDashboardHandler(req, res);
@@ -94,7 +94,13 @@ export default function handler(req, res) {
     case '/api/dova-update-schedule':
       return dovaUpdateSchedule(req, res);
     default:
-      res.status(404).json({ error: 'Route not found', path });
+          // Pass through tasks sub-routes (e.g. /api/tasks/12345/discussions)
+          if (path.startsWith('/api/tasks/')) {
+            const origPath = req.query.path ? '/api/' + req.query.path : path;
+            req.url = origPath + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '');
+            return tasksHandler(req, res);
+          }
+          res.status(404).json({ error: 'Route not found', path });
   }
 }
 
