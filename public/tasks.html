@@ -73,6 +73,22 @@ body{display:flex;flex-direction:column}
 .disc-text{color:var(--fg);margin:1px 0 0;word-break:break-word}
 .disc-load{font-size:11px;color:var(--muted);padding:4px}
 .status-bar{flex:0 0 auto;padding:3px 8px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);display:flex;justify-content:space-between}
+/* Delete */
+.task-delete{flex:0 0 16px;margin-top:2px;width:14px;height:14px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);opacity:0;transition:opacity .15s,color .15s;cursor:pointer;border:none;background:none;padding:0;border-radius:3px}
+.task:hover .task-delete{opacity:0.4}
+.task .task-delete:hover{opacity:1;color:var(--danger);background:transparent}
+/* Confirm overlay */
+.confirm-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:100;display:flex;align-items:center;justify-content:center;animation:fadeIn .15s}
+.confirm-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;min-width:220px;max-width:320px}
+.confirm-text{font-size:13px;color:var(--fg);margin:0 0 10px;line-height:1.4}
+.confirm-actions{display:flex;gap:6px;justify-content:flex-end}
+.confirm-btn{font-size:12px;padding:4px 10px;border-radius:var(--radius);border:1px solid var(--border);cursor:pointer;background:var(--card);color:var(--fg);font-family:var(--font)}
+.confirm-btn.cancel:hover{background:var(--hover)}
+.confirm-btn.danger{background:var(--danger);color:var(--bg);border-color:var(--danger)}
+.confirm-btn.danger:hover{opacity:0.85}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.task.removing{animation:slideOut .25s forwards}
+@keyframes slideOut{from{opacity:1;max-height:100px}to{opacity:0;max-height:0;padding:0 8px;margin:0;border:none}}
 </style>
 </head>
 <body>
@@ -160,6 +176,7 @@ function render() {
 
   // Filter
   let filtered = allTasks.filter(t => {
+    if (t.status === 'Archived') return false;
     if (currentProject !== 'all' && t.project !== currentProject) return false;
     if (currentStatus === 'open' && t.status !== 'Not Started' && t.status !== 'In Progress') return false;
     if (currentStatus === 'closed' && t.status !== 'Complete') return false;
@@ -246,8 +263,9 @@ function render() {
           discBadge +
         '</div>' +
         '<div class="disc-thread" id="disc-' + t.rowId + '"></div>' +
-      '</div>';
-    list.appendChild(div);
+              '</div>' +
+              '<button class="task-delete" onclick="event.stopPropagation();deleteTask(' + t.rowId + ',this)" title="Archive">&#10005;</button>' +
+            list.appendChild(div);
   }
 
   // Counts
@@ -410,6 +428,54 @@ function editStatusNote(el, rowId) {
     if (e.key === 'Enter') { save(); }
     if (e.key === 'Escape') { input.blur(); }
   };
+}
+
+// ── DELETE TASK (soft: set status to Archived) ──
+function deleteTask(rowId, btnEl) {
+  confirmAction(
+    'Remove this task from view?',
+    'It stays in Smartsheet as "Archived" — never permanently deleted.',
+    function() {
+      const taskEl = btnEl.closest('.task');
+      taskEl.classList.add('removing');
+      fetch('/api/tasks/' + rowId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'Archived' })
+      })
+        .then(r => {
+          if (!r.ok) {
+            taskEl.classList.remove('removing');
+          } else {
+            setTimeout(function() { taskEl.remove(); render(); }, 260);
+          }
+        })
+        .catch(function() {
+          taskEl.classList.remove('removing');
+        });
+    }
+  );
+}
+
+// ── CONFIRMATION DIALOG ──
+function confirmAction(text, subtext, onConfirm) {
+  const overlay = document.createElement('div');
+  overlay.className = 'confirm-overlay';
+  overlay.innerHTML =
+    '<div class="confirm-box">' +
+      '<p class="confirm-text">' + escapeHtml(text) + '<br><span style="font-size:11px;color:var(--muted)">' + escapeHtml(subtext || '') + '</span></p>' +
+      '<div class="confirm-actions">' +
+        '<button class="confirm-btn cancel" id="confirm-cancel">Cancel</button>' +
+        '<button class="confirm-btn danger" id="confirm-ok">Archive</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  document.getElementById('confirm-ok').onclick = function() {
+    overlay.remove();
+    onConfirm();
+  };
+  document.getElementById('confirm-cancel').onclick = function() { overlay.remove(); };
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
 }
 
 // ── EVENT BINDING ──
