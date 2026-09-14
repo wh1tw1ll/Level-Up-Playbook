@@ -64,8 +64,11 @@ body{display:flex;flex-direction:column}
 .meta-tag.hot{background:var(--danger);color:var(--bg)}
 .meta-tag.disc{background:rgba(137,180,250,0.12);color:var(--accent);cursor:pointer}
 .meta-tag.disc:hover{background:rgba(137,180,250,0.25)}
-.status-note{font-size:12px;color:var(--muted);margin:2px 0 0;display:flex;align-items:center;gap:4px}
-.status-note::before{content:'💬';font-size:10px}
+.status-note{font-size:12px;color:var(--muted);margin:2px 0 0;display:flex;align-items:center;gap:4px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;padding:1px 0;min-height:0}
+.status-note:hover{color:var(--accent);background:rgba(137,180,250,0.08);border-radius:3px}
+.status-note-empty{cursor:text;height:0;overflow:visible;position:relative}
+.status-note-empty::after{content:'';display:block;height:2px;margin:1px 0;border-radius:1px;transition:background .15s}
+.task:hover .status-note-empty::after{background:var(--border)}
 .status-note-input{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1px 6px;color:var(--fg);font-size:12px;width:100%;outline:none;margin-top:2px;font-family:var(--font)}
 .status-note-input:focus{border-color:var(--accent)}
 .disc-thread{font-size:12px;margin:3px 0 0;background:rgba(49,50,68,0.6);border:1px solid var(--border);border-radius:var(--radius);padding:5px 7px;display:none}
@@ -229,11 +232,11 @@ function render() {
       discBadge = '<span class="meta-tag disc" onclick="event.stopPropagation();toggleDiscussions(this,' + t.rowId + ')">💬 ' + t.discussionCount + '</span>';
     }
     let snHtml = '';
-    if (t.statusNote) {
-      snHtml = '<div class="status-note" onclick="event.stopPropagation();editStatusNote(this,' + t.rowId + ')">' + escapeHtml(t.statusNote) + '</div>';
-    } else {
-      snHtml = '<div class="status-note" onclick="event.stopPropagation();editStatusNote(this,' + t.rowId + ')" style="opacity:0.4;cursor:text">Add note...</div>';
-    }
+        if (t.statusNote) {
+          snHtml = '<div class="status-note" title="Click to edit" onclick="event.stopPropagation();editStatusNote(this,' + t.rowId + ')">' + escapeHtml(t.statusNote) + '</div>';
+        } else {
+          snHtml = '<div class="status-note-empty" onclick="event.stopPropagation();editStatusNote(this,' + t.rowId + ')"></div>';
+        }
     div.innerHTML =
       '<div class="task-check' + (isComplete ? ' done' : '') + '" onclick="event.stopPropagation();toggleTask(this,' + t.rowId + ')">' +
         (isComplete ? '&#10003;' : '') +
