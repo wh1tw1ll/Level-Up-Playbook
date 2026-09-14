@@ -29,9 +29,10 @@ export default async function handler(req, res) {
   }
 
   const sheetId = '4456864287772548';
+  const personalSheetId = '2802755367554948';
 
-  // Parse path to determine sub-route
-  const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+    // Parse path to determine sub-route
+    const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathParts = url.pathname.split('/').filter(Boolean);
 
   // /api/tasks/:rowId/notes — GET: fetch comments, POST: add comment
@@ -62,19 +63,25 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    // POST to /api/tasks/:rowId — update Status or Status Note
-    let body;
-    try {
-      body = parseBody(req.body);
-    } catch {
-      return res.status(400).json({ error: 'Invalid JSON body' });
-    }
+      // POST to /api/tasks/:rowId — update Status, Status Note, Action ID, or delete
+      const source = url.searchParams.get('source') || 'project';
+      const targetSheetId = source === 'personal' ? personalSheetId : sheetId;
 
-    if (body.statusNote !== undefined) {
-      return handleStatusNotePost(req, res, token, sheetId, body.statusNote);
+      let body;
+      try {
+        body = parseBody(req.body);
+      } catch {
+        return res.status(400).json({ error: 'Invalid JSON body' });
+      }
+
+      if (body.action === 'delete') {
+        return handleDelete(req, res, token, targetSheetId);
+      }
+      if (body.statusNote !== undefined) {
+        return handleStatusNotePost(req, res, token, targetSheetId, body.statusNote);
+      }
+      return handlePost(req, res, token, targetSheetId);
     }
-    return handlePost(req, res, token, sheetId);
-  }
 
   // GET /api/tasks/:rowId — legacy discussion fetch (only when no sub-resource)
     if (pathParts.length === 3 && pathParts[2] !== 'logo' && pathParts[2] !== 'notes') {
@@ -85,84 +92,102 @@ export default async function handler(req, res) {
   return handleGet(req, res, token, sheetId);
 }
 
-// ── GET: fetch all rows ──
+// ── GET: fetch all rows from both sheets, merged ──
 async function handleGet(req, res, token, sheetId) {
   try {
-    const resp = await fetch(
-      `https://api.smartsheet.com/2.0/sheets/${sheetId}?include=objectValue,discussions`,
-      { headers: { Authorization: 'Bearer ' + token } }
-    );
-    if (!resp.ok) {
-      const err = await resp.text();
-      return res.status(502).json({ error: 'Smartsheet API error', detail: err });
+    const [projResp, personalResp] = await Promise.all([
+      fetch(
+        `https://api.smartsheet.com/2.0/sheets/${sheetId}?include=objectValue,discussions`,
+        { headers: { Authorization: 'Bearer ' + token } }
+      ),
+      fetch(
+        `https://api.smartsheet.com/2.0/sheets/${personalSheetId}?include=objectValue,discussions`,
+        { headers: { Authorization: 'Bearer ' + token } }
+      )
+    ]);
+
+    if (!projResp.ok) {
+      const err = await projResp.text();
+      return res.status(502).json({ error: 'Project log fetch failed', detail: err });
+    }
+    if (!personalResp.ok) {
+      const err = await personalResp.text();
+      return res.status(502).json({ error: 'Personal sheet fetch failed', detail: err });
     }
 
-    const data = await resp.json();
-    const rows = data.rows || [];
-    const columns = data.columns || [];
+    const projData = await projResp.json();
+    const personalData = await personalResp.json();
 
-    const colMap = {};
-    for (const c of columns) {
-      colMap[c.id] = c.title;
-    }
+    function extractTasks(data, source) {
+      const rows = data.rows || [];
+      const columns = data.columns || [];
+      const colMap = {};
+      for (const c of columns) colMap[c.id] = c.title;
 
-    const tasks = rows.map(row => {
-      const cells = row.cells || [];
-      const resolved = {};
-
-      for (const cell of cells) {
-        const title = colMap[cell.columnId];
-        if (!title) continue;
-        let val = null;
-        if (cell.value !== undefined && cell.value !== null && cell.value !== '') {
-          val = String(cell.value);
-        } else if (cell.displayValue) {
-          val = String(cell.displayValue);
-        }
-        resolved[title] = val;
-      }
-
-      // Extract discussions
-      const discussions = row.discussions || [];
-      let latestComment = '';
-      let commentCount = 0;
-      if (discussions.length > 0) {
-        for (const d of discussions) {
-          commentCount += d.commentCount || d.comments?.length || 0;
-          if (d.comments && d.comments.length > 0) {
-            const last = d.comments[d.comments.length - 1];
-            const t = last.text || '';
-            if (t.length > latestComment.length) {
-              latestComment = t;
-            }
+      return rows.map(row => {
+        const cells = row.cells || [];
+        const resolved = {};
+        for (const cell of cells) {
+          const title = colMap[cell.columnId];
+          if (!title) continue;
+          let val = null;
+          if (cell.value !== undefined && cell.value !== null && cell.value !== '') {
+            val = String(cell.value);
+          } else if (cell.displayValue) {
+            val = String(cell.displayValue);
           }
+          resolved[title] = val;
         }
-      }
 
-      return {
-        rowId: row.id,
-        rowNumber: row.rowNumber,
-        actionItem: resolved['Action ID'] || null,
-        owner: resolved['Owner'] || null,
-        status: resolved['Status'] || null,
-        dueDate: resolved['Due Date'] || null,
-        project: resolved['Project'] || null,
-        category: resolved['Category'] || null,
-        responsibleFirm: resolved['Responsible Firm(s)'] || null,
-        hotTopic: resolved['Hot Topic'] === 'true' || resolved['Hot Topic'] === true,
-        hierarchy: resolved['Heirarchy'] || null,
-        statusNote: resolved['Status Note'] || null,
-        discussionCount: commentCount,
-        latestDiscussion: latestComment.slice(0, 150),
-      };
+        const discussions = row.discussions || [];
+        let commentCount = 0;
+        for (const d of discussions) commentCount += d.commentCount || d.comments?.length || 0;
+
+        return {
+          rowId: row.id,
+          rowNumber: row.rowNumber,
+          actionItem: resolved['Action ID'] || null,
+          owner: resolved['Owner'] || null,
+          status: resolved['Status'] || null,
+          dueDate: resolved['Due Date'] || null,
+          project: resolved['Project'] || null,
+          category: resolved['Category'] || null,
+          responsibleFirm: resolved['Responsible Firm(s)'] || null,
+          hotTopic: resolved['Hot Topic'] === 'true' || resolved['Hot Topic'] === true,
+          hierarchy: resolved['Heirarchy'] || null,
+          statusNote: resolved['Status Note'] || null,
+          source: source,
+          sourceRef: resolved['SourceRef'] || null,
+          linkedRowId: resolved['LinkedRowId'] || null,
+          confidence: resolved['Confidence'] || null,
+          discussionCount: commentCount,
+        };
+      });
+    }
+
+    const projectTasks = extractTasks(projData, 'project');
+    const personalTasks = extractTasks(personalData, 'personal');
+
+    // Sort: personal items interleaved by due date (project first, then personal within same date)
+    // Also, deferred (archived/completed) go to bottom
+    const merged = [...projectTasks, ...personalTasks].sort((a, b) => {
+      // Completed at bottom
+      if (a.status === 'Complete' && b.status !== 'Complete') return 1;
+      if (a.status !== 'Complete' && b.status === 'Complete') return -1;
+      if (a.status === 'Archived' && b.status !== 'Archived') return 1;
+      if (a.status !== 'Archived' && b.status === 'Archived') return -1;
+      // Due date sort
+      const ad = a.dueDate || '9999-12-31';
+      const bd = b.dueDate || '9999-12-31';
+      return ad.localeCompare(bd);
     });
 
-    res.json({
-      sheet: data.name,
-      totalRows: tasks.length,
-      tasks
-    });
-  } catch (err) {
+        res.json({
+          sheet: projData.name + ' + Personal',
+          totalRows: merged.length,
+          tasks: merged
+        });
+      } catch (err) {
     res.status(500).json({ error: err.message });
   }
 }
@@ -441,6 +466,32 @@ async function handleStatusNotePost(req, res, token, sheetId, statusNote) {
     }
 
     res.json({ success: true, rowId, statusNote });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+// ── HARD DELETE (personal rows only) ──
+async function handleDelete(req, res, token, sheetId) {
+  try {
+    const url = new URL(req.url, 'http://' + (req.headers.host || 'localhost'));
+    const pathParts = url.pathname.split('/').filter(Boolean);
+    const rowId = pathParts[2];
+    if (!rowId) {
+      return res.status(400).json({ error: 'Missing rowId in URL path' });
+    }
+
+    const delResp = await fetch(
+      'https://api.smartsheet.com/2.0/sheets/' + sheetId + '/rows/' + rowId,
+      { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } }
+    );
+
+    if (!delResp.ok) {
+      const err = await delResp.text();
+      return res.status(502).json({ error: 'Delete failed', detail: err });
+    }
+
+    res.json({ success: true, rowId, deleted: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
