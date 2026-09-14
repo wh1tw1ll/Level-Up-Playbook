@@ -81,8 +81,6 @@ export default function handler(req, res) {
       return ssOpsHandler(req, res);
     case '/api/tasks':
               return tasksHandler(req, res);
-            case '/api/create-personal-sheet':
-          return createPersonalSheet(req, res);
             case '/api/dova':
       return dovaHandler(req, res);
     case '/api/dova-dashboard':
@@ -114,58 +112,3 @@ function parsePath(path) {
 export const config = {
   maxDuration: 60
 };
-
-// ── CREATE PERSONAL SHEET ──
-async function createPersonalSheet(req, res) {
-  const token = process.env.SMARTSHEET_TOKEN;
-  if (!token) return res.status(500).json({ error: 'Token not set' });
-
-  try {
-    // Check if personal sheet already exists
-    const listResp = await fetch('https://api.smartsheet.com/2.0/sheets?includeAll=true', {
-      headers: { Authorization: 'Bearer ' + token }
-    });
-    const listData = await listResp.json();
-    const mySheet = (listData.data || []).find(s =>
-      s.name && s.name.toLowerCase().includes('personal') && s.owner === 'Whitney Williams'
-    );
-    if (mySheet) {
-      return res.json({ sheetId: mySheet.id, name: mySheet.name, existing: true });
-    }
-
-    // Define columns directly (mirrors project log structure - manual inspection)
-        const columns = [
-          { title: 'Action ID', type: 'TEXT_NUMBER', primary: true },
-          { title: 'Owner', type: 'PICKLIST', options: ['Whitney Williams', 'Greg Wieting', 'Jordan Ward', 'TBD'] },
-          { title: 'Status', type: 'PICKLIST', options: ['Not Started', 'In Progress', 'Complete', 'Archived'] },
-          { title: 'Due Date', type: 'DATE' },
-          { title: 'Project', type: 'PICKLIST', options: ['DOVA', 'MFP', 'Sphere', 'SPH', 'Business', 'General'] },
-          { title: 'Category', type: 'TEXT_NUMBER' },
-          { title: 'Responsible Firm(s)', type: 'TEXT_NUMBER' },
-          { title: 'Hot Topic', type: 'CHECKBOX' },
-          { title: 'Status Note', type: 'TEXT_NUMBER' },
-          { title: 'Source', type: 'PICKLIST', options: ['Manual', 'Email', 'Notes'] },
-          { title: 'SourceRef', type: 'TEXT_NUMBER' },
-          { title: 'LinkedRowId', type: 'TEXT_NUMBER' },
-          { title: 'Confidence', type: 'PICKLIST', options: ['High', 'Low'] }
-        ];
-
-    const createResp = await fetch('https://api.smartsheet.com/2.0/sheets', {
-      method: 'POST',
-      headers: {
-        Authorization: 'Bearer ' + token,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ name: 'LUCI - Personal Action Log', columns })
-    });
-    const createData = await createResp.json();
-
-    if (!createResp.ok) {
-      return res.status(502).json({ error: 'Create failed', detail: createData });
-    }
-
-    res.json({ sheetId: createData.result.id, name: createData.result.name, existing: false });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-}
