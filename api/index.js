@@ -16,6 +16,7 @@ import chiefsHandler from '../lib/handlers/chiefs.js';
 import chiefsV3Handler from '../lib/handlers/chiefs-v3.js';
 import ssOpsHandler from './ss-ops.js';
 import tasksHandler from './tasks.js';
+import actionsHandler from './actions.js';
 import dovaHandler from '../lib/handlers/dova.js';
 import dovaDashboardHandler from '../lib/handlers/dova-dashboard.js';
 import dovaSetupHandler from '../lib/handlers/dova-setup.js';
@@ -85,6 +86,8 @@ export default function handler(req, res) {
       return dovaHandler(req, res);
     case '/api/dova-dashboard':
       return dovaDashboardHandler(req, res);
+    case '/api/actions':
+      return actionsHandler(req, res);
     case '/api/dova-setup':
       return dovaSetupHandler(req, res);
     case '/api/dova-seed':

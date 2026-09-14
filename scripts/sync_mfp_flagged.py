@@ -2,56 +2,22 @@
 """
 MFP Flagged Email Sync — reads flagged MFP emails via Outlook COM,
 analyzes body content for action/context, pushes to Playbook.
-DESIGN: This script is designed to run from the interactive Windows session
-(Session 1, e.g. via the Windows Startup folder VBS script sync_mfp_flagged.vbs).
-It will NOT work from a Session 0 cron/scheduled task because Outlook COM
-requires an interactive user profile.
+DESIGN: Interactive Windows session (Session 1+) reads live Outlook flagged
+items.  When run from Session 0 (cron/scheduled task), falls back to pushing
+cached data from flagged-local.json so the Playbook always gets the latest
+known set of flagged emails even when Outlook COM is unavailable.
 """
 
-import json, os, sys, re, requests, win32com.client, pythoncom, threading
+import json, os, sys, re, requests, win32com.client, pythoncom
 from datetime import datetime, timedelta, timezone
-
-# ── Session guard (cron-safe) ─────────────────────────────────────
-# Outlook COM automation only works from an interactive Windows desktop
-# session (Session 1+). Cron / scheduled tasks run in Session 0 where
-# COM dispatch hangs. Exit silently; log to file at most once/hour.
-SESSION_NAME = os.environ.get("SESSIONNAME", "")
-if not SESSION_NAME or SESSION_NAME.upper() in ("", "0", "SERVICES", "CONSOLE"):
-    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    sess = os.environ.get("SESSIONNAME", "(unset)")
-    print(f"[{ts}] BLOCKED: Session 0 (use VBS startup script)", end="")
-    now = datetime.now()
-    log_path = os.path.normpath(os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "..", "scripts", "flagged-sync.log"
-    ))
-    try:
-        last_ts = None
-        if os.path.exists(log_path):
-            with open(log_path, "r") as f:
-                for line in f:
-                    if "BLOCKED: Session 0" in line:
-                        m = re.search(r'\[(.*?)\]', line)
-                        if m:
-                            last_ts = m.group(1)
-        if last_ts:
-            from datetime import datetime as dt2
-            last_blocked = dt2.strptime(last_ts, "%Y-%m-%d %H:%M:%S")
-            if (now - last_blocked).total_seconds() < 3600:
-                sys.exit(0)
-    except Exception:
-        pass
-    try:
-        with open(log_path, "a") as f:
-            f.write(f"[{ts}] BLOCKED: Session 0 (use VBS startup script)\n")
-    except Exception:
-        pass
-    sys.exit(0)
 
 # ── Config ──────────────────────────────────────────────────────────
 PLAYBOOK_URL = "https://level-up-playbook.vercel.app/api/sync/flagged-store"
 SYNC_KEY = "59085493e8e63a164be0e443575b99f191b5c7fdb791c539"
 LOOKBACK_DAYS = 60
-LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts", "flagged-sync.log")
+SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
+LOG_FILE = os.path.join(SCRIPTS_DIR, "flagged-sync.log")
+CACHE_FILE = os.path.join(SCRIPTS_DIR, "flagged-local.json")
 
 
 def log(msg):
@@ -61,8 +27,51 @@ def log(msg):
     try:
         with open(LOG_FILE, "a") as f:
             f.write(line + "\n")
-    except:
+    except Exception:
         pass
+
+
+def do_cron_fallback():
+    """Push cached flagged-local.json to Playbook when Outlook COM is unavailable."""
+    log("=" * 60)
+    log("MFP Cron Sync starting (fallback mode)")
+
+    if not os.path.exists(CACHE_FILE):
+        log(f"No cached data found at {CACHE_FILE}")
+        log("=" * 60)
+        return 0
+
+    try:
+        with open(CACHE_FILE, "r") as f:
+            cached = json.load(f)
+
+        mtime = datetime.fromtimestamp(os.path.getmtime(CACHE_FILE))
+        count = cached.get("_count", len(cached.get("actions", [])))
+        log(f"Cache: {os.path.basename(CACHE_FILE)} (modified {mtime.strftime('%Y-%m-%d %H:%M:%S')}), {count} actions")
+        log(f"Posting {count} actions to Playbook API...")
+
+        resp = requests.post(
+            PLAYBOOK_URL,
+            json=cached,
+            headers={"Content-Type": "application/json", "x-sync-key": SYNC_KEY},
+            timeout=30
+        )
+        if resp.ok:
+            result = resp.json()
+            stored = result.get("count", count)
+            log(f"CRON FALLBACK: Pushed cached local backup ({stored} actions) to Playbook API")
+            log(f"Playbook API response: status={result.get('status','?')}, count={stored}, stored_at={result.get('stored_at','?')}")
+            log(f"Result: {stored} actions synced to Playbook")
+            log("=" * 60)
+            return stored
+        else:
+            log(f"CRON FALLBACK FAILED: HTTP {resp.status_code} - {resp.text[:200]}")
+            log("=" * 60)
+            return -1
+    except Exception as e:
+        log(f"CRON FALLBACK ERROR: {e}")
+        log("=" * 60)
+        return -1
 
 
 def extract_action(subject, body, sender, received):
@@ -74,7 +83,7 @@ def extract_action(subject, body, sender, received):
     deadline = None
     deadline_patterns = [
         r'due\s+(?:by|on|date)?\s*:?\s*(\w+\s+\d{1,2}(?:st|nd|rd|th)?(?:\s*,?\s*\d{4})?)',
-        r'deadline[\s:]+\w+\s+\d{1,2}(?:st|nd|rd|th)?(?:\s*,?\s*\d{4})?',
+        r'deadline[\s:]+(\w+\s+\d{1,2}(?:st|nd|rd|th)?(?:\s*,?\s*\d{4})?)',
         r'by\s+(\w+\s+\d{1,2}(?:st|nd|rd|th)?(?:\s*,?\s*\d{4})?)',
         r'(\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?)',
         r'response\s+(?:by|required|needed)\s+(\w+\s+\d{1,2}(?:st|nd|rd|th)?)',
@@ -261,9 +270,17 @@ def sync():
     # Cleanup
     try:
         outlook_app.Quit()
-    except:
+    except Exception:
         pass
 
 
 if __name__ == "__main__":
+    # ── Session detection with cron fallback ─────────────────────────
+    SESSION_NAME = os.environ.get("SESSIONNAME", "")
+    in_session_0 = not SESSION_NAME or SESSION_NAME.upper() in ("", "0", "SERVICES", "CONSOLE")
+
+    if in_session_0:
+        count = do_cron_fallback()
+        sys.exit(0 if count != -1 else 1)
+
     sync()
