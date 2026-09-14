@@ -35,7 +35,7 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
       let body;
       try {
-        body = JSON.parse(req.body || '{}');
+        body = JSON.parse(typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {}));
       } catch {
         return res.status(400).json({ error: 'Invalid JSON body' });
       }
@@ -56,7 +56,7 @@ export default async function handler(req, res) {
     // POST to /api/tasks/:rowId — update Status or Status Note
     let body;
     try {
-      body = JSON.parse(req.body || '{}');
+      body = JSON.parse(typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {}));
     } catch {
       return res.status(400).json({ error: 'Invalid JSON body' });
     }
@@ -319,7 +319,7 @@ async function handlePost(req, res, token, sheetId) {
 
     let body;
     try {
-      body = JSON.parse(req.body || '{}');
+      body = JSON.parse(typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {}));
     } catch {
       return res.status(400).json({ error: 'Invalid JSON body' });
     }
