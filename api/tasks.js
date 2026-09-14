@@ -140,7 +140,23 @@ async function handleGetDiscussions(req, res, token, sheetId, rowId) {
       return res.status(502).json({ error: 'Failed to fetch discussions', detail: err });
     }
     const data = await resp.json();
-    res.json({ discussions: data.data || [] });
+    const discussions = data.data || [];
+
+    // Fetch each discussion's comments separately
+    for (const disc of discussions) {
+      const discResp = await fetch(
+        `https://api.smartsheet.com/2.0/sheets/${sheetId}/discussions/${disc.id}`,
+        { headers: { Authorization: 'Bearer ' + token } }
+      );
+      if (discResp.ok) {
+        const discData = await discResp.json();
+        disc.comments = discData.comments || [];
+      } else {
+        disc.comments = [];
+      }
+    }
+
+    res.json({ discussions });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
