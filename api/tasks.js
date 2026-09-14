@@ -88,7 +88,7 @@ export default async function handler(req, res) {
   }
 
   // GET /api/tasks — fetch all rows
-  return handleGet(req, res, token, sheetId);
+  return handleGet(req, res, token, SHEET_ID_PROJECT);
 }
 
 // ── GET: fetch all rows from both sheets, merged ──
