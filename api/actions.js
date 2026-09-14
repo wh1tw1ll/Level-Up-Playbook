@@ -71,14 +71,21 @@ body{display:flex;flex-direction:column}
 .task:hover .status-note-empty::after{background:var(--border)}
 .status-note-input{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1px 6px;color:var(--fg);font-size:12px;width:100%;outline:none;margin-top:2px;font-family:var(--font)}
 .status-note-input:focus{border-color:var(--accent)}
-.disc-thread{font-size:12px;margin:3px 0 0;background:rgba(49,50,68,0.6);border:1px solid var(--border);border-radius:var(--radius);padding:5px 7px;display:none}
-.disc-thread.open{display:block}
-.disc-msg{padding:3px 0;border-bottom:1px solid var(--border)}
-.disc-msg:last-child{border-bottom:none}
-.disc-author{color:var(--accent);font-weight:500}
-.disc-time{color:var(--muted);font-size:10px;margin-left:4px}
-.disc-text{color:var(--fg);margin:1px 0 0;word-break:break-word}
-.disc-load{font-size:11px;color:var(--muted);padding:4px}
+/* Notes / expanded row */
+.task-expanded{background:rgba(49,50,68,0.8);border:1px solid var(--accent);border-radius:var(--radius);margin:2px 4px;padding:6px 8px}
+.task-notes{font-size:12px;margin:4px 0 0;display:flex;flex-direction:column;gap:2px}
+.note-msg{padding:3px 0 3px 16px;border-left:2px solid var(--border);margin:0 0 2px}
+.note-author{color:var(--accent);font-weight:500;font-size:11px}
+.note-time{color:var(--muted);font-size:10px;margin-left:4px}
+.note-text{color:var(--fg);margin:1px 0 0;word-break:break-word;font-size:12px}
+.note-empty{padding:8px 0;color:var(--muted);font-size:11px;text-align:center}
+.note-input-area{display:flex;gap:4px;margin-top:4px;align-items:flex-start}
+.note-input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:4px 6px;color:var(--fg);font-size:12px;outline:none;resize:none;font-family:var(--font);min-height:28px;max-height:80px;line-height:1.3}
+.note-input:focus{border-color:var(--accent)}
+.note-input::placeholder{color:var(--muted)}
+.note-send{padding:4px 10px;background:var(--accent);color:var(--bg);border:none;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;line-height:20px}
+.note-send:hover{opacity:0.85}
+.note-send:disabled{opacity:0.4;cursor:default}
 .status-bar{flex:0 0 auto;padding:3px 8px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);display:flex;justify-content:space-between}
 </style>
 </head>
@@ -225,13 +232,14 @@ function render() {
     let firm = t.responsibleFirm || '';
 
     const div = document.createElement('div');
-    div.className = cls;
-    div.dataset.rowId = t.rowId;
-    let discBadge = '';
-    if (t.discussionCount > 0) {
-      discBadge = '<span class="meta-tag disc" onclick="event.stopPropagation();toggleDiscussions(this,' + t.rowId + ')">💬 ' + t.discussionCount + '</span>';
-    }
-    let snHtml = '';
+        div.className = cls;
+        div.dataset.rowId = t.rowId;
+        div.onclick = function(e) { if (e.target.closest('.task-check,.status-note,.status-note-empty,.status-note-input,.note-input,.note-send')) return; toggleRow(this, t.rowId); };
+        let discBadge = '';
+        if (t.discussionCount > 0) {
+          discBadge = '<span class="meta-tag disc">💬 ' + t.discussionCount + '</span>';
+        }
+        let snHtml = '';
         if (!isComplete) {
           if (t.statusNote) {
             snHtml = '<div class="status-note" title="Click to edit" onclick="event.stopPropagation();editStatusNote(this,' + t.rowId + ')">' + escapeHtml(t.statusNote) + '</div>';
@@ -239,24 +247,23 @@ function render() {
             snHtml = '<div class="status-note-empty" onclick="event.stopPropagation();editStatusNote(this,' + t.rowId + ')"></div>';
           }
         }
-    div.innerHTML =
-      '<div class="task-check' + (isComplete ? ' done' : '') + '" onclick="event.stopPropagation();toggleTask(this,' + t.rowId + ')">' +
-        (isComplete ? '&#10003;' : '') +
-      '</div>' +
-      '<div class="task-body">' +
-        '<div class="task-title">' + escapeHtml(t.actionItem) + '</div>' +
-        snHtml +
-        '<div class="task-meta">' +
-          (t.owner ? '<span class="meta-tag owner">' + escapeHtml(t.owner) + '</span>' : '') +
-          (t.dueDate ? '<span class="meta-tag ' + dueClass + '">' + dueLabel + '</span>' : '') +
-          (t.project ? '<span class="meta-tag project">' + escapeHtml(t.project) + '</span>' : '') +
-          (firm ? '<span class="meta-tag firm">' + escapeHtml(firm) + '</span>' : '') +
-          (t.status ? '<span class="meta-tag ' + statusClass + '">' + escapeHtml(t.status) + '</span>' : '') +
-          discBadge +
-        '</div>' +
-        '<div class="disc-thread" id="disc-' + t.rowId + '"></div>' +
-      '</div>';
-    list.appendChild(div);
+        div.innerHTML =
+          '<div class="task-check' + (isComplete ? ' done' : '') + '" onclick="event.stopPropagation();toggleTask(this,' + t.rowId + ')">' +
+            (isComplete ? '&#10003;' : '') +
+          '</div>' +
+          '<div class="task-body">' +
+            '<div class="task-title">' + escapeHtml(t.actionItem) + '</div>' +
+            snHtml +
+            '<div class="task-meta">' +
+              (t.owner ? '<span class="meta-tag owner">' + escapeHtml(t.owner) + '</span>' : '') +
+              (t.dueDate ? '<span class="meta-tag ' + dueClass + '">' + dueLabel + '</span>' : '') +
+              (t.project ? '<span class="meta-tag project">' + escapeHtml(t.project) + '</span>' : '') +
+              (firm ? '<span class="meta-tag firm">' + escapeHtml(firm) + '</span>' : '') +
+              (t.status ? '<span class="meta-tag ' + statusClass + '">' + escapeHtml(t.status) + '</span>' : '') +
+              discBadge +
+            '</div>' +
+          '</div>';
+        list.appendChild(div);
   }
 
   // Counts
@@ -342,42 +349,135 @@ function toggleTask(el, rowId) {
     });
 }
 
-// ── DISCUSSIONS ──
-function toggleDiscussions(el, rowId) {
-  const thread = document.getElementById('disc-' + rowId);
-  if (!thread) return;
+// ── ROW EXPANSION ──
+let expandedRowId = null;
+let expandedElement = null;
 
-  if (thread.classList.contains('open')) {
-    thread.classList.remove('open');
-    thread.innerHTML = '';
+function toggleRow(el, rowId) {
+  if (expandedRowId === rowId) {
+    collapseRow();
     return;
   }
+  collapseRow();
+  expandedRowId = rowId;
+  expandedElement = el;
+  el.classList.add('task-expanded');
+  renderNotes(rowId);
+}
 
-  thread.innerHTML = '<div class="disc-load">Loading...</div>';
-  thread.classList.add('open');
+function collapseRow() {
+  if (expandedElement) {
+    expandedElement.classList.remove('task-expanded');
+  }
+  const notesArea = document.getElementById('notes-area');
+  if (notesArea) notesArea.remove();
+  expandedRowId = null;
+  expandedElement = null;
+}
 
-  fetch('/api/tasks/' + rowId + '/discussions')
+function renderNotes(rowId) {
+  // Remove old notes area
+  const old = document.getElementById('notes-area');
+  if (old) old.remove();
+
+  const area = document.createElement('div');
+  area.id = 'notes-area';
+  area.className = 'task-notes';
+  area.innerHTML = '<div class="note-empty">Loading...</div>';
+
+  // Insert after the expanded row
+  if (expandedElement && expandedElement.nextSibling) {
+    expandedElement.parentNode.insertBefore(area, expandedElement.nextSibling);
+  } else if (expandedElement) {
+    expandedElement.parentNode.appendChild(area);
+  }
+
+  // Fetch notes
+  fetch('/api/tasks/' + rowId + '/notes')
     .then(r => r.json())
     .then(data => {
-      const discussions = data.discussions || [];
-      if (discussions.length === 0) {
-        thread.innerHTML = '<div class="disc-load">No discussions</div>';
-        return;
-      }
+      const notes = data.notes || [];
       let html = '';
-      for (const d of discussions) {
-        const comments = d.comments || [];
-        for (const c of comments) {
-          const author = c.createdBy ? (c.createdBy.name || c.createdBy.email || '?') : '?';
-          const ts = c.createdAt ? new Date(c.createdAt).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '';
-          const text = c.text || '';
-          html += '<div class="disc-msg"><span class="disc-author">' + escapeHtml(author) + '</span><span class="disc-time">' + ts + '</span><div class="disc-text">' + escapeHtml(text) + '</div></div>';
+      if (notes.length === 0) {
+        html = '<div class="note-empty">No notes yet</div>';
+      } else {
+        for (const n of notes) {
+          const author = escapeHtml(n.author || '?');
+          const ts = n.createdAt ? new Date(n.createdAt).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '';
+          const text = escapeHtml(n.text || '');
+          html += '<div class="note-msg"><span class="note-author">' + author + '</span><span class="note-time">' + ts + '</span><div class="note-text">' + text + '</div></div>';
         }
       }
-      thread.innerHTML = html;
+      // Add input area
+      html += '<div class="note-input-area">' +
+        '<textarea class="note-input" placeholder="Add a note..." rows="1"></textarea>' +
+        '<button class="note-send" onclick="submitNote(' + rowId + ')">Send</button>' +
+        '</div>';
+      area.innerHTML = html;
+
+      // Wire up textarea submit
+      const ta = area.querySelector('.note-input');
+      if (ta) {
+        ta.focus();
+        ta.onkeydown = function(e) {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            submitNote(rowId);
+          }
+        };
+        // Auto-grow
+        ta.oninput = function() {
+          this.style.height = 'auto';
+          this.style.height = Math.min(this.scrollHeight, 80) + 'px';
+        };
+      }
     })
     .catch(() => {
-      thread.innerHTML = '<div class="disc-load">Failed to load</div>';
+      area.innerHTML = '<div class="note-empty">Failed to load notes</div>' +
+        '<div class="note-input-area">' +
+        '<textarea class="note-input" placeholder="Add a note..." rows="1"></textarea>' +
+        '<button class="note-send" onclick="submitNote(' + rowId + ')">Send</button>' +
+        '</div>';
+    });
+}
+
+function submitNote(rowId) {
+  const area = document.getElementById('notes-area');
+  if (!area) return;
+  const ta = area.querySelector('.note-input');
+  const btn = area.querySelector('.note-send');
+  if (!ta || !ta.value.trim()) return;
+  const text = ta.value.trim();
+
+  // Optimistic: disable and show sending
+  ta.disabled = true;
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  // Post note
+  fetch('/api/tasks/' + rowId + '/notes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text })
+  })
+    .then(r => r.json())
+    .then(data => {
+      // Clear and reload notes
+      ta.value = '';
+      ta.disabled = false;
+      btn.disabled = false;
+      btn.textContent = 'Send';
+      ta.style.height = 'auto';
+      ta.focus();
+      renderNotes(rowId);  // Refresh thread
+    })
+    .catch(() => {
+      // Revert on error
+      ta.disabled = false;
+      btn.disabled = false;
+      btn.textContent = 'Send';
+      ta.style.borderColor = 'var(--danger)';
+      setTimeout(() => { ta.style.borderColor = ''; }, 2000);
     });
 }
 
