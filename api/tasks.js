@@ -316,7 +316,7 @@ async function handlePostNote(req, res, token, sheetId, rowId, text) {
   }
 }
 
-// ── POST: update a single row's Status cell ──
+// ── POST: update a single row's Status or Action Item ──
 async function handlePost(req, res, token, sheetId) {
   try {
     const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
@@ -334,8 +334,10 @@ async function handlePost(req, res, token, sheetId) {
     }
 
     const newStatus = body.status;
-    if (!newStatus || (newStatus !== 'Complete' && newStatus !== 'Not Started' && newStatus !== 'In Progress')) {
-      return res.status(400).json({ error: 'Status must be "Complete", "In Progress", or "Not Started"' });
+    const newActionItem = body.actionItem;
+
+    if (!newStatus && newActionItem === undefined) {
+      return res.status(400).json({ error: 'No fields to update. Provide status or actionItem.' });
     }
 
     const sheetResp = await fetch(
@@ -348,9 +350,22 @@ async function handlePost(req, res, token, sheetId) {
     }
 
     const sheetData = await sheetResp.json();
-    const statusCol = (sheetData.columns || []).find(c => c.title === 'Status');
-    if (!statusCol) {
-      return res.status(500).json({ error: 'Status column not found in sheet' });
+    const cells = [];
+
+    if (newStatus) {
+      const statusCol = (sheetData.columns || []).find(c => c.title === 'Status');
+      if (!statusCol) {
+        return res.status(500).json({ error: 'Status column not found in sheet' });
+      }
+      cells.push({ columnId: statusCol.id, value: newStatus, strict: false });
+    }
+
+    if (newActionItem !== undefined) {
+      const actionCol = (sheetData.columns || []).find(c => c.title === 'Action ID');
+      if (!actionCol) {
+        return res.status(500).json({ error: 'Action ID column not found in sheet' });
+      }
+      cells.push({ columnId: actionCol.id, value: String(newActionItem), strict: false });
     }
 
     const updateResp = await fetch(
@@ -361,23 +376,21 @@ async function handlePost(req, res, token, sheetId) {
           Authorization: 'Bearer ' + token,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          cells: [{ columnId: statusCol.id, value: newStatus, strict: false }]
-        })
-      }
-    );
+        body: JSON.stringify({ cells })
+              }
+            );
 
-    const updateData = await updateResp.json();
+            const updateData = await updateResp.json();
 
-    if (!updateResp.ok) {
-      return res.status(502).json({
-        error: 'Smartsheet update failed',
-        smartsheetCode: updateData.errorCode,
-        detail: updateData.message
-      });
-    }
+            if (!updateResp.ok) {
+              return res.status(502).json({
+                error: 'Smartsheet update failed',
+                smartsheetCode: updateData.errorCode,
+                detail: updateData.message
+              });
+            }
 
-    res.json({ success: true, rowId, status: newStatus });
+            res.json({ success: true, rowId, status: newStatus, actionItem: newActionItem });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
