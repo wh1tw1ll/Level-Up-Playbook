@@ -58,7 +58,20 @@ body{display:flex;flex-direction:column}
 .meta-tag.status.complete{background:rgba(166,227,161,0.12);color:var(--success)}
 .meta-tag.status.inactive{background:rgba(88,91,112,0.2);color:var(--muted)}
 .meta-tag.hot{background:var(--danger);color:var(--bg)}
-/* Status bar */
+.meta-tag.disc{background:rgba(137,180,250,0.12);color:var(--accent);cursor:pointer}
+.meta-tag.disc:hover{background:rgba(137,180,250,0.25)}
+.status-note{font-size:12px;color:var(--muted);margin:2px 0 0;display:flex;align-items:center;gap:4px}
+.status-note::before{content:'\01F4AC';font-size:10px}
+.status-note-input{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1px 6px;color:var(--fg);font-size:12px;width:100%;outline:none;margin-top:2px;font-family:var(--font)}
+.status-note-input:focus{border-color:var(--accent)}
+.disc-thread{font-size:12px;margin:3px 0 0;background:rgba(49,50,68,0.6);border:1px solid var(--border);border-radius:var(--radius);padding:5px 7px;display:none}
+.disc-thread.open{display:block}
+.disc-msg{padding:3px 0;border-bottom:1px solid var(--border)}
+.disc-msg:last-child{border-bottom:none}
+.disc-author{color:var(--accent);font-weight:500}
+.disc-time{color:var(--muted);font-size:10px;margin-left:4px}
+.disc-text{color:var(--fg);margin:1px 0 0;word-break:break-word}
+.disc-load{font-size:11px;color:var(--muted);padding:4px}
 .status-bar{flex:0 0 auto;padding:3px 8px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);display:flex;justify-content:space-between}
 </style>
 </head>
@@ -207,19 +220,32 @@ function render() {
     const div = document.createElement('div');
     div.className = cls;
     div.dataset.rowId = t.rowId;
+    let discBadge = '';
+    if (t.discussionCount > 0) {
+      discBadge = '<span class="meta-tag disc" onclick="event.stopPropagation();toggleDiscussions(this,' + t.rowId + ')">\01F4AC ' + t.discussionCount + '</span>';
+    }
+    let snHtml = '';
+    if (t.statusNote) {
+      snHtml = '<div class="status-note" onclick="event.stopPropagation();editStatusNote(this,' + t.rowId + ')">' + escapeHtml(t.statusNote) + '</div>';
+    } else {
+      snHtml = '<div class="status-note" onclick="event.stopPropagation();editStatusNote(this,' + t.rowId + ')" style="opacity:0.4;cursor:text">Add note...</div>';
+    }
     div.innerHTML =
       '<div class="task-check' + (isComplete ? ' done' : '') + '" onclick="event.stopPropagation();toggleTask(this,' + t.rowId + ')">' +
         (isComplete ? '&#10003;' : '') +
       '</div>' +
       '<div class="task-body">' +
         '<div class="task-title">' + escapeHtml(t.actionItem) + '</div>' +
+        snHtml +
         '<div class="task-meta">' +
           (t.owner ? '<span class="meta-tag owner">' + escapeHtml(t.owner) + '</span>' : '') +
           (t.dueDate ? '<span class="meta-tag ' + dueClass + '">' + dueLabel + '</span>' : '') +
           (t.project ? '<span class="meta-tag project">' + escapeHtml(t.project) + '</span>' : '') +
           (firm ? '<span class="meta-tag firm">' + escapeHtml(firm) + '</span>' : '') +
           (t.status ? '<span class="meta-tag ' + statusClass + '">' + escapeHtml(t.status) + '</span>' : '') +
+          discBadge +
         '</div>' +
+        '<div class="disc-thread" id="disc-' + t.rowId + '"></div>' +
       '</div>';
     list.appendChild(div);
   }
@@ -307,6 +333,83 @@ function toggleTask(el, rowId) {
       el.innerHTML = isDone ? '&#10003;' : '';
       taskEl.classList.toggle('completed');
     });
+}
+
+// ── DISCUSSIONS ──
+function toggleDiscussions(el, rowId) {
+  const thread = document.getElementById('disc-' + rowId);
+  if (!thread) return;
+  
+  if (thread.classList.contains('open')) {
+    thread.classList.remove('open');
+    thread.innerHTML = '';
+    return;
+  }
+  
+  thread.innerHTML = '<div class="disc-load">Loading...</div>';
+  thread.classList.add('open');
+  
+  fetch('/api/tasks/' + rowId + '/discussions')
+    .then(r => r.json())
+    .then(data => {
+      const discussions = data.discussions || [];
+      if (discussions.length === 0) {
+        thread.innerHTML = '<div class="disc-load">No discussions</div>';
+        return;
+      }
+      let html = '';
+      for (const d of discussions) {
+        const comments = d.comments || [];
+        for (const c of comments) {
+          const author = c.createdBy ? (c.createdBy.name || c.createdBy.email || '?') : '?';
+          const ts = c.createdAt ? new Date(c.createdAt).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '';
+          const text = c.text || '';
+          html += '<div class="disc-msg"><span class="disc-author">' + escapeHtml(author) + '</span><span class="disc-time">' + ts + '</span><div class="disc-text">' + escapeHtml(text) + '</div></div>';
+        }
+      }
+      thread.innerHTML = html;
+    })
+    .catch(() => {
+      thread.innerHTML = '<div class="disc-load">Failed to load</div>';
+    });
+}
+
+// ── STATUS NOTE (inline edit) ──
+function editStatusNote(el, rowId) {
+  const currentText = el.textContent;
+  const input = document.createElement('input');
+  input.className = 'status-note-input';
+  input.type = 'text';
+  input.value = currentText;
+  input.placeholder = 'Add status note...';
+  el.replaceWith(input);
+  input.focus();
+  input.select();
+  
+  function save() {
+    const newText = input.value.trim();
+    const parent = input.closest('.task-body');
+    
+    // Create status note div
+    const div = document.createElement('div');
+    div.className = 'status-note';
+    div.textContent = newText;
+    div.onclick = function(e) { e.stopPropagation(); editStatusNote(this, rowId); };
+    input.replaceWith(div);
+    
+    // Write to API
+    fetch('/api/tasks/' + rowId, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ statusNote: newText })
+    }).catch(() => {});
+  }
+  
+  input.onblur = save;
+  input.onkeydown = function(e) {
+    if (e.key === 'Enter') { save(); }
+    if (e.key === 'Escape') { input.blur(); }
+  };
 }
 
 // ── EVENT BINDING ──
