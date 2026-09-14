@@ -232,10 +232,12 @@ function render() {
       discBadge = '<span class="meta-tag disc" onclick="event.stopPropagation();toggleDiscussions(this,' + t.rowId + ')">💬 ' + t.discussionCount + '</span>';
     }
     let snHtml = '';
-        if (t.statusNote) {
-          snHtml = '<div class="status-note" title="Click to edit" onclick="event.stopPropagation();editStatusNote(this,' + t.rowId + ')">' + escapeHtml(t.statusNote) + '</div>';
-        } else {
-          snHtml = '<div class="status-note-empty" onclick="event.stopPropagation();editStatusNote(this,' + t.rowId + ')"></div>';
+        if (!isComplete) {
+          if (t.statusNote) {
+            snHtml = '<div class="status-note" title="Click to edit" onclick="event.stopPropagation();editStatusNote(this,' + t.rowId + ')">' + escapeHtml(t.statusNote) + '</div>';
+          } else {
+            snHtml = '<div class="status-note-empty" onclick="event.stopPropagation();editStatusNote(this,' + t.rowId + ')"></div>';
+          }
         }
     div.innerHTML =
       '<div class="task-check' + (isComplete ? ' done' : '') + '" onclick="event.stopPropagation();toggleTask(this,' + t.rowId + ')">' +
