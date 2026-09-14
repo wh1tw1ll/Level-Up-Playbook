@@ -81,9 +81,8 @@ body{display:flex;flex-direction:column}
   <input id="search-input" type="text" placeholder="Search actions..." autocomplete="off">
   <select class="filter-select" id="status-filter">
     <option value="">All</option>
-    <option value="Complete">Complete</option>
-    <option value="In Progress">In Progress</option>
-    <option value="Not Started">Not Started</option>
+    <option value="open" selected>Open</option>
+    <option value="closed">Closed</option>
   </select>
   <select class="filter-select" id="owner-filter">
     <option value="">All Owners</option>
@@ -100,7 +99,7 @@ body{display:flex;flex-direction:column}
 let allTasks = [];
 let myName = 'Whitney Williams';
 let currentProject = 'all';
-let currentStatus = '';
+let currentStatus = 'open';
 let currentOwner = '';
 let searchText = '';
 
@@ -148,7 +147,8 @@ function render() {
   // Filter
   let filtered = allTasks.filter(t => {
     if (currentProject !== 'all' && t.project !== currentProject) return false;
-    if (currentStatus && t.status !== currentStatus) return false;
+    if (currentStatus === 'open' && t.status !== 'Not Started' && t.status !== 'In Progress') return false;
+    if (currentStatus === 'closed' && t.status !== 'Complete') return false;
     if (ownerVal && t.owner !== ownerVal) return false;
     if (q) {
       const text = ((t.actionItem || '') + ' ' + (t.notes || '') + ' ' + (t.responsibleFirm || '')).toLowerCase();
@@ -283,7 +283,29 @@ function toggleTask(el, rowId) {
   const newStatus = isDone ? 'Not Started' : 'Complete';
 
   // Write to API
-  // (placeholder - Step 4 will add the write endpoint)
+  fetch('/api/tasks/' + rowId, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: newStatus })
+  })
+    .then(r => {
+      if (!r.ok) {
+        // Revert optimistic UI on failure
+        el.classList.toggle('done');
+        el.innerHTML = isDone ? '&#10003;' : '';
+        taskEl.classList.toggle('completed');
+        console.error('Toggle failed');
+      } else {
+        // Refresh to get up-to-date data
+        loadTasks();
+      }
+    })
+    .catch(() => {
+      // Revert on network error
+      el.classList.toggle('done');
+      el.innerHTML = isDone ? '&#10003;' : '';
+      taskEl.classList.toggle('completed');
+    });
 }
 
 // ── EVENT BINDING ──
