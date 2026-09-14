@@ -1,4 +1,6 @@
 // api/tasks.js — GET /api/tasks and POST /api/tasks/:rowId
+const SHEET_ID_PROJECT = '4456864287772548';
+const SHEET_ID_PERSONAL = '2802755367554948';
 // GET returns all rows from the Action Tracker sheet
 // GET /api/tasks/:rowId/discussions — get discussions with comments for a row
 // GET /api/tasks/:rowId/notes — flattened comment thread for a row
@@ -24,12 +26,9 @@ export default async function handler(req, res) {
   }
 
   const token = process.env.SMARTSHEET_TOKEN;
-  if (!token) {
-    return res.status(500).json({ error: 'SMARTSHEET_TOKEN not set' });
-  }
-
-  const sheetId = '4456864287772548';
-  const personalSheetId = '2802755367554948';
+    if (!token) {
+      return res.status(500).json({ error: 'SMARTSHEET_TOKEN not set' });
+    }
 
     // Parse path to determine sub-route
     const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
@@ -40,7 +39,7 @@ export default async function handler(req, res) {
     const rowId = pathParts[2];
 
     if (req.method === 'GET') {
-      return handleGetNotes(req, res, token, sheetId, rowId);
+      return handleGetNotes(req, res, token, SHEET_ID_PROJECT, rowId);
     }
     if (req.method === 'POST') {
       let body;
@@ -49,7 +48,7 @@ export default async function handler(req, res) {
       } catch {
         return res.status(400).json({ error: 'Invalid JSON body' });
       }
-      return handlePostNote(req, res, token, sheetId, rowId, body.text || '');
+      return handlePostNote(req, res, token, SHEET_ID_PROJECT, rowId, body.text || '');
     }
     return res.status(405).json({ error: 'GET or POST only' });
   }
@@ -59,13 +58,13 @@ export default async function handler(req, res) {
     if (req.method !== 'GET') {
       return res.status(405).json({ error: 'GET only' });
     }
-    return handleGetDiscussions(req, res, token, sheetId, pathParts[2]);
+    return handleGetDiscussions(req, res, token, SHEET_ID_PROJECT, pathParts[2]);
   }
 
   if (req.method === 'POST') {
       // POST to /api/tasks/:rowId — update Status, Status Note, Action ID, or delete
       const source = url.searchParams.get('source') || 'project';
-      const targetSheetId = source === 'personal' ? personalSheetId : sheetId;
+      const targetSheetId = source === 'personal' ? SHEET_ID_PERSONAL : SHEET_ID_PROJECT;
 
       let body;
       try {
@@ -85,7 +84,7 @@ export default async function handler(req, res) {
 
   // GET /api/tasks/:rowId — legacy discussion fetch (only when no sub-resource)
     if (pathParts.length === 3 && pathParts[2] !== 'logo' && pathParts[2] !== 'notes') {
-    return handleGetDiscussions(req, res, token, sheetId, pathParts[2]);
+    return handleGetDiscussions(req, res, token, SHEET_ID_PROJECT, pathParts[2]);
   }
 
   // GET /api/tasks — fetch all rows
@@ -101,7 +100,7 @@ async function handleGet(req, res, token, sheetId) {
         { headers: { Authorization: 'Bearer ' + token } }
       ),
       fetch(
-        `https://api.smartsheet.com/2.0/sheets/${personalSheetId}?include=objectValue,discussions`,
+              `https://api.smartsheet.com/2.0/sheets/${SHEET_ID_PERSONAL}?include=objectValue,discussions`,
         { headers: { Authorization: 'Bearer ' + token } }
       )
     ]);
