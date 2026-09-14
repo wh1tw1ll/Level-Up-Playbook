@@ -5,7 +5,16 @@
 // POST /api/tasks/:rowId — update Status cell
 // POST /api/tasks/:rowId/notes — add a comment (creates discussion if needed)
 // POST /api/tasks/:rowId with body {statusNote: "..."} — update Status Note column
-// No credentials in source — uses SMARTSHEET_TOKEN env var only
+function parseBody(b) {
+  if (typeof b === 'string') {
+    try { return JSON.parse(b); } catch { return {}; }
+  }
+  if (b && typeof b === 'object' && b.type === 'Buffer' && Array.isArray(b.data)) {
+    try { return JSON.parse(Buffer.from(b.data).toString('utf8')); } catch { return {}; }
+  }
+  if (b && typeof b === 'object') return b;
+  return {};
+}
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -35,7 +44,7 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
       let body;
       try {
-        body = JSON.parse(typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {}));
+        body = parseBody(req.body);
       } catch {
         return res.status(400).json({ error: 'Invalid JSON body' });
       }
@@ -56,7 +65,7 @@ export default async function handler(req, res) {
     // POST to /api/tasks/:rowId — update Status or Status Note
     let body;
     try {
-      body = JSON.parse(typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {}));
+      body = parseBody(req.body);
     } catch {
       return res.status(400).json({ error: 'Invalid JSON body' });
     }
@@ -319,7 +328,7 @@ async function handlePost(req, res, token, sheetId) {
 
     let body;
     try {
-      body = JSON.parse(typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {}));
+      body = parseBody(req.body);
     } catch {
       return res.status(400).json({ error: 'Invalid JSON body' });
     }
