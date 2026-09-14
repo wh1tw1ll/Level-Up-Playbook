@@ -133,30 +133,22 @@ async function createPersonalSheet(req, res) {
       return res.json({ sheetId: mySheet.id, name: mySheet.name, existing: true });
     }
 
-    // Fetch project log columns
-    const projResp = await fetch(
-      'https://api.smartsheet.com/2.0/sheets/4456864287772548?include=columns',
-      { headers: { Authorization: 'Bearer ' + token } }
-    );
-    if (!projResp.ok) {
-      return res.status(502).json({ error: 'Failed to fetch project log', detail: await projResp.text() });
-    }
-    const projData = await projResp.json();
-    const projCols = (projData.columns || []).filter(c => c.title !== 'Heirarchy');
-
-    const columns = projCols.map(c => ({
-      title: c.title,
-            type: c.type,
-            options: c.options || undefined,
-            symbol: c.symbol || undefined
-          }));
-
-    columns.push(
+    // Define columns directly (mirrors project log structure - manual inspection)
+        const columns = [
+          { title: 'Action ID', type: 'TEXT_NUMBER', primary: true },
+          { title: 'Owner', type: 'PICKLIST', options: ['Whitney Williams', 'Greg Wieting', 'Jordan Ward', 'TBD'] },
+          { title: 'Status', type: 'PICKLIST', options: ['Not Started', 'In Progress', 'Complete', 'Archived'] },
+          { title: 'Due Date', type: 'DATE' },
+          { title: 'Project', type: 'PICKLIST', options: ['DOVA', 'MFP', 'Sphere', 'SPH', 'Business', 'General'] },
+          { title: 'Category', type: 'TEXT_NUMBER' },
+          { title: 'Responsible Firm(s)', type: 'TEXT_NUMBER' },
+          { title: 'Hot Topic', type: 'CHECKBOX' },
+          { title: 'Status Note', type: 'TEXT_NUMBER' },
           { title: 'Source', type: 'PICKLIST', options: ['Manual', 'Email', 'Notes'] },
           { title: 'SourceRef', type: 'TEXT_NUMBER' },
           { title: 'LinkedRowId', type: 'TEXT_NUMBER' },
           { title: 'Confidence', type: 'PICKLIST', options: ['High', 'Low'] }
-        );
+        ];
 
     const createResp = await fetch('https://api.smartsheet.com/2.0/sheets', {
       method: 'POST',
