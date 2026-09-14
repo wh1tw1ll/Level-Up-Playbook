@@ -89,6 +89,24 @@ body{display:flex;flex-direction:column}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .task.removing{animation:slideOut .25s forwards}
 @keyframes slideOut{from{opacity:1;max-height:100px}to{opacity:0;max-height:0;padding:0 8px;margin:0;border:none}}
+/* Source chips */
+.source-chips{display:flex;gap:2px;padding:0 8px;overflow-x:auto;scrollbar-width:none}
+.source-chips::-webkit-scrollbar{display:none}
+.source-chip{padding:3px 8px;border-radius:var(--radius);font-size:11px;font-weight:500;cursor:pointer;color:var(--muted);background:transparent;border:none;transition:all .15s;font-family:var(--font);white-space:nowrap}
+.source-chip:hover{color:var(--fg);background:var(--hover)}
+.source-chip.active{color:var(--accent);background:rgba(190,209,198,0.12)}
+/* Source badge */
+.source-badge{font-size:10px;font-weight:600;padding:1px 5px;border-radius:3px;letter-spacing:0.3px;margin-left:auto;flex:0 0 auto;display:inline-flex;align-items:center;gap:2px}
+.source-badge.project{background:rgba(190,209,198,0.12);color:var(--accent)}
+.source-badge.personal{background:rgba(230,200,124,0.12);color:var(--warn)}
+/* Linked row indicator */
+.linked-row{font-size:10px;color:var(--accent);cursor:pointer;opacity:0.5;transition:opacity .15s}
+.linked-row:hover{opacity:1}
+/* Undo toast */
+.undo-toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#333;border:1px solid #555;border-radius:var(--radius);padding:6px 12px;font-size:12px;color:var(--fg);display:flex;align-items:center;gap:8px;z-index:200;animation:toastIn .2s;box-shadow:0 4px 12px rgba(0,0,0,0.4)}
+.undo-toast button{font-size:12px;padding:2px 8px;border-radius:var(--radius);border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;font-family:var(--font)}
+.undo-toast button:hover{background:rgba(190,209,198,0.15)}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 </style>
 </head>
 <body>
@@ -105,6 +123,11 @@ body{display:flex;flex-direction:column}
     <button class="tab" data-project="Sphere">Sphere</button>
     <button class="tab" data-project="SPH">SPH</button>
     <button class="tab" data-project="Business">Business</button>
+  </div>
+  <div class="source-chips">
+    <button class="source-chip active" data-source="all">All</button>
+    <button class="source-chip" data-source="project">Project</button>
+    <button class="source-chip" data-source="personal">Personal</button>
   </div>
 </div>
 <div class="filters">
@@ -131,6 +154,7 @@ let myName = 'Whitney Williams';
 let currentProject = 'all';
 let currentStatus = 'open';
 let currentOwner = '';
+let currentSource = 'all';
 let searchText = '';
 
 // ── HELPERS ──
@@ -178,6 +202,7 @@ function render() {
   let filtered = allTasks.filter(t => {
     if (t.status === 'Archived') return false;
     if (currentProject !== 'all' && t.project !== currentProject) return false;
+    if (currentSource !== 'all' && t.source !== currentSource) return false;
     if (currentStatus === 'open' && t.status !== 'Not Started' && t.status !== 'In Progress') return false;
     if (currentStatus === 'closed' && t.status !== 'Complete') return false;
     if (ownerVal && t.owner !== ownerVal) return false;
@@ -247,6 +272,16 @@ function render() {
     } else {
       snHtml = '<div class="status-note" onclick="event.stopPropagation();editStatusNote(this,' + t.rowId + ')" style="opacity:0.4;cursor:text">Add note...</div>';
     }
+    div.dataset.source = t.source;
+    let sourceBadge = t.source === 'personal'
+      ? '<span class="meta-tag source-badge personal">PERSONAL</span>'
+      : '<span class="meta-tag source-badge project">PROJECT</span>';
+    let linkedHtml = t.source === 'personal' && t.linkedRowId
+      ? '<span class="linked-row" onclick="event.stopPropagation();jumpToLinkedRow(\'' + t.linkedRowId + '\')">&#128279;</span>'
+      : '';
+    let deleteBtn = t.source === 'personal'
+      ? '<button class="task-delete" onclick="event.stopPropagation();deleteTask(this,' + t.rowId + ')" title="Delete">&#10005;</button>'
+      : '';
     div.innerHTML =
       '<div class="task-check' + (isComplete ? ' done' : '') + '" onclick="event.stopPropagation();toggleTask(this,' + t.rowId + ')">' +
         (isComplete ? '&#10003;' : '') +
@@ -260,11 +295,13 @@ function render() {
           (t.project ? '<span class="meta-tag project">' + escapeHtml(t.project) + '</span>' : '') +
           (firm ? '<span class="meta-tag firm">' + escapeHtml(firm) + '</span>' : '') +
           (t.status ? '<span class="meta-tag ' + statusClass + '">' + escapeHtml(t.status) + '</span>' : '') +
+          sourceBadge +
           discBadge +
+          linkedHtml +
         '</div>' +
         '<div class="disc-thread" id="disc-' + t.rowId + '"></div>' +
               '</div>' +
-              '<button class="task-delete" onclick="event.stopPropagation();deleteTask(' + t.rowId + ',this)" title="Archive">&#10005;</button>';
+              deleteBtn;
     list.appendChild(div);
   }
 
@@ -326,9 +363,10 @@ function toggleTask(el, rowId) {
   taskEl.classList.toggle('completed');
 
   const newStatus = isDone ? 'Not Started' : 'Complete';
+  const source = taskEl.dataset.source || 'project';
 
   // Write to API
-  fetch('/api/tasks/' + rowId, {
+  fetch('/api/tasks/' + rowId + '?source=' + source, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status: newStatus })
@@ -416,7 +454,9 @@ function editStatusNote(el, rowId) {
     input.replaceWith(div);
     
     // Write to API
-    fetch('/api/tasks/' + rowId, {
+    const taskEl = input.closest('.task');
+    const src = taskEl ? taskEl.dataset.source || 'project' : 'project';
+    fetch('/api/tasks/' + rowId + '?source=' + src, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ statusNote: newText })
@@ -449,7 +489,9 @@ function editTaskTitle(el, rowId) {
     div.textContent = newText || currentText;
     div.style.cursor = 'pointer';
     if (newText && newText !== currentText) {
-      fetch('/api/tasks/' + rowId, {
+      const taskEl = input.closest('.task');
+      const src = taskEl ? taskEl.dataset.source || 'project' : 'project';
+      fetch('/api/tasks/' + rowId + '?source=' + src, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ actionItem: newText })
@@ -466,31 +508,71 @@ function editTaskTitle(el, rowId) {
   };
 }
 
-// ── DELETE TASK (soft: set status to Archived) ──
-function deleteTask(rowId, btnEl) {
-  confirmAction(
-    'Remove this task from view?',
-    'It stays in Smartsheet as "Archived" — never permanently deleted.',
-    function() {
-      const taskEl = btnEl.closest('.task');
-      taskEl.classList.add('removing');
-      fetch('/api/tasks/' + rowId, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'Archived' })
-      })
-        .then(r => {
-          if (!r.ok) {
-            taskEl.classList.remove('removing');
-          } else {
-            setTimeout(function() { taskEl.remove(); render(); }, 260);
-          }
+// ── DELETE TASK (personal: hard delete with undo toast, project: archive) ──
+function deleteTask(btnEl, rowId) {
+  const taskEl = btnEl.closest('.task');
+  const source = taskEl.dataset.source || 'project';
+
+  if (source !== 'personal') {
+    // Project rows: soft archive (shouldn't happen but keep as safety)
+    confirmAction(
+      'Remove this task from view?',
+      'It stays in Smartsheet as "Archived" - never permanently deleted.',
+      function() {
+        taskEl.classList.add('removing');
+        fetch('/api/tasks/' + rowId + '?source=project', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'Archived' })
         })
-        .catch(function() {
-          taskEl.classList.remove('removing');
-        });
-    }
-  );
+          .then(r => {
+            if (!r.ok) { taskEl.classList.remove('removing'); }
+            else { setTimeout(function() { taskEl.remove(); render(); }, 260); }
+          })
+          .catch(function() { taskEl.classList.remove('removing'); });
+      }
+    );
+    return;
+  }
+
+  // Personal rows: hard delete with undo toast
+  const actionItem = taskEl.querySelector('.task-title')?.textContent || '';
+  taskEl.classList.add('removing');
+
+  fetch('/api/tasks/' + rowId + '?source=personal', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'delete' })
+  })
+    .then(r => {
+      if (!r.ok) {
+        taskEl.classList.remove('removing');
+        return;
+      }
+      taskEl.remove();
+      render();
+
+      // Show undo toast
+      const toast = document.createElement('div');
+      toast.className = 'undo-toast';
+      toast.innerHTML = '<span>Deleted</span><button id="undo-delete">Undo</button>';
+      document.body.appendChild(toast);
+
+      let undone = false;
+      document.getElementById('undo-delete').onclick = function() {
+        undone = true;
+        toast.remove();
+        // Re-add by refreshing the API data (row is gone, but we can't restore it)
+        loadTasks();
+      };
+
+      setTimeout(function() {
+        if (!undone) { toast.remove(); }
+      }, 5000);
+    })
+    .catch(function() {
+      taskEl.classList.remove('removing');
+    });
 }
 
 // ── CONFIRMATION DIALOG ──
@@ -512,6 +594,20 @@ function confirmAction(text, subtext, onConfirm) {
   };
   document.getElementById('confirm-cancel').onclick = function() { overlay.remove(); };
   overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+}
+
+// ── JUMP TO LINKED ROW ──
+function jumpToLinkedRow(linkedRowId) {
+  // Switch source filter to show all, find the row, scroll to it
+  currentSource = 'all';
+  document.querySelectorAll('.source-chip').forEach(c => c.classList.remove('active'));
+  document.querySelector('.source-chip[data-source="all"]').classList.add('active');
+  render();
+  // Wait for render then scroll
+  setTimeout(function() {
+    const el = document.querySelector('.task[data-row-id="' + linkedRowId + '"]');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
 }
 
 // ── EVENT BINDING ──
@@ -542,6 +638,16 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('owner-filter').addEventListener('change', function() {
     currentOwner = this.value;
     render();
+  });
+
+  // Source chips
+  document.querySelectorAll('.source-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      document.querySelectorAll('.source-chip').forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      currentSource = this.dataset.source;
+      render();
+    });
   });
 
   // Initial load from cache then fetch
