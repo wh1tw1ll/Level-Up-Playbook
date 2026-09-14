@@ -146,18 +146,17 @@ async function createPersonalSheet(req, res) {
 
     const columns = projCols.map(c => ({
       title: c.title,
-      type: c.type,
-      options: c.options || undefined,
-      symbol: c.symbol || undefined,
-      strict: false
-    }));
+            type: c.type,
+            options: c.options || undefined,
+            symbol: c.symbol || undefined
+          }));
 
     columns.push(
-      { title: 'Source', type: 'PICKLIST', options: ['Manual', 'Email', 'Notes'], strict: false },
-      { title: 'SourceRef', type: 'TEXT_NUMBER', strict: false },
-      { title: 'LinkedRowId', type: 'TEXT_NUMBER', strict: false },
-      { title: 'Confidence', type: 'PICKLIST', options: ['High', 'Low'], strict: false }
-    );
+          { title: 'Source', type: 'PICKLIST', options: ['Manual', 'Email', 'Notes'] },
+          { title: 'SourceRef', type: 'TEXT_NUMBER' },
+          { title: 'LinkedRowId', type: 'TEXT_NUMBER' },
+          { title: 'Confidence', type: 'PICKLIST', options: ['High', 'Low'] }
+        );
 
     const createResp = await fetch('https://api.smartsheet.com/2.0/sheets', {
       method: 'POST',
