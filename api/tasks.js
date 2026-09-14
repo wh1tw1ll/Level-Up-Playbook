@@ -1,6 +1,10 @@
 // api/tasks.js — GET /api/tasks and POST /api/tasks/:rowId
 // GET returns all rows from the Action Tracker sheet
-// POST updates the Status cell of a single row
+// GET /api/tasks/:rowId/discussions — get discussions with comments for a row
+// GET /api/tasks/:rowId/notes — flattened comment thread for a row
+// POST /api/tasks/:rowId — update Status cell
+// POST /api/tasks/:rowId/notes — add a comment (creates discussion if needed)
+// POST /api/tasks/:rowId with body {statusNote: "..."} — update Status Note column
 // No credentials in source — uses SMARTSHEET_TOKEN env var only
 
 export default async function handler(req, res) {
@@ -17,8 +21,39 @@ export default async function handler(req, res) {
 
   const sheetId = '4456864287772548';
 
+  // Parse path to determine sub-route
+  const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+  const pathParts = url.pathname.split('/').filter(Boolean);
+
+  // /api/tasks/:rowId/notes — GET: fetch comments, POST: add comment
+  if (pathParts.length >= 4 && pathParts[3] === 'notes') {
+    const rowId = pathParts[2];
+
+    if (req.method === 'GET') {
+      return handleGetNotes(req, res, token, sheetId, rowId);
+    }
+    if (req.method === 'POST') {
+      let body;
+      try {
+        body = JSON.parse(req.body || '{}');
+      } catch {
+        return res.status(400).json({ error: 'Invalid JSON body' });
+      }
+      return handlePostNote(req, res, token, sheetId, rowId, body.text || '');
+    }
+    return res.status(405).json({ error: 'GET or POST only' });
+  }
+
+  // /api/tasks/:rowId/discussions — GET: fetch discussions with comments (legacy)
+  if (pathParts.length >= 4 && pathParts[3] === 'discussions') {
+    if (req.method !== 'GET') {
+      return res.status(405).json({ error: 'GET only' });
+    }
+    return handleGetDiscussions(req, res, token, sheetId, pathParts[2]);
+  }
+
   if (req.method === 'POST') {
-    // Check if it's a Status Note update (body has statusNote)
+    // POST to /api/tasks/:rowId — update Status or Status Note
     let body;
     try {
       body = JSON.parse(req.body || '{}');
@@ -32,17 +67,12 @@ export default async function handler(req, res) {
     return handlePost(req, res, token, sheetId);
   }
 
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'GET or POST only' });
-  }
-
-  // Check if this is a discussions request (/api/tasks/12345/discussions)
-  const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-  const pathParts = url.pathname.split('/').filter(Boolean);
-  if (pathParts.length >= 3 && pathParts[2] !== 'logo') {
+  // GET /api/tasks/:rowId — legacy discussion fetch (no sub-resource)
+  if (pathParts.length >= 3 && pathParts[2] !== 'logo' && pathParts[2] !== 'notes') {
     return handleGetDiscussions(req, res, token, sheetId, pathParts[2]);
   }
 
+  // GET /api/tasks — fetch all rows
   return handleGet(req, res, token, sheetId);
 }
 
@@ -157,6 +187,121 @@ async function handleGetDiscussions(req, res, token, sheetId, rowId) {
     }
 
     res.json({ discussions });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+// ── GET notes: flattened comment thread for a row ──
+async function handleGetNotes(req, res, token, sheetId, rowId) {
+  try {
+    const listResp = await fetch(
+      `https://api.smartsheet.com/2.0/sheets/${sheetId}/rows/${rowId}/discussions`,
+      { headers: { Authorization: 'Bearer ' + token } }
+    );
+    if (!listResp.ok) {
+      const err = await listResp.text();
+      return res.status(502).json({ error: 'Failed to fetch notes', detail: err });
+    }
+    const listData = await listResp.json();
+    const discussions = listData.data || [];
+
+    const notes = [];
+    for (const disc of discussions) {
+      const discResp = await fetch(
+        `https://api.smartsheet.com/2.0/sheets/${sheetId}/discussions/${disc.id}`,
+        { headers: { Authorization: 'Bearer ' + token } }
+      );
+      if (!discResp.ok) continue;
+      const discData = await discResp.json();
+      const comments = discData.comments || [];
+      for (const c of comments) {
+        notes.push({
+          id: c.id,
+          text: c.text || '',
+          author: c.createdBy ? (c.createdBy.name || c.createdBy.email || '?') : '?',
+          createdAt: c.createdAt || '',
+          discussionId: disc.id
+        });
+      }
+    }
+
+    notes.sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''));
+    res.json({ notes, discussionCount: discussions.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+// ── POST note: add a comment to an existing discussion, or create one first ──
+async function handlePostNote(req, res, token, sheetId, rowId, text) {
+  if (!text || !text.trim()) {
+    return res.status(400).json({ error: 'text field is required' });
+  }
+
+  try {
+    const listResp = await fetch(
+      `https://api.smartsheet.com/2.0/sheets/${sheetId}/rows/${rowId}/discussions`,
+      { headers: { Authorization: 'Bearer ' + token } }
+    );
+    if (!listResp.ok) {
+      const err = await listResp.text();
+      return res.status(502).json({ error: 'Failed to fetch discussions', detail: err });
+    }
+    const listData = await listResp.json();
+    const discussions = listData.data || [];
+
+    let discussionId;
+    if (discussions.length > 0) {
+      discussionId = discussions[0].id;
+    } else {
+      const createResp = await fetch(
+        `https://api.smartsheet.com/2.0/sheets/${sheetId}/rows/${rowId}/discussions`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: 'Bearer ' + token,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ title: 'Discussion on row ' + rowId, comment: { text } })
+        }
+      );
+      if (!createResp.ok) {
+        const err = await createResp.text();
+        return res.status(502).json({ error: 'Failed to create discussion', detail: err });
+      }
+      const createData = await createResp.json();
+      discussionId = createData.id;
+      return res.json({ success: true, discussionId, note: { text, author: '', createdAt: '', id: null } });
+    }
+
+    const commentResp = await fetch(
+      `https://api.smartsheet.com/2.0/sheets/${sheetId}/discussions/${discussionId}/comments`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text })
+      }
+    );
+    if (!commentResp.ok) {
+      const err = await commentResp.text();
+      return res.status(502).json({ error: 'Failed to add comment', detail: err });
+    }
+
+    const commentData = await commentResp.json();
+    res.json({
+      success: true,
+      discussionId,
+      note: {
+        id: commentData.id,
+        text: commentData.text || '',
+        author: commentData.createdBy ? (commentData.createdBy.name || commentData.createdBy.email || '?') : '?',
+        createdAt: commentData.createdAt || ''
+      }
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
