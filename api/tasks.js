@@ -67,8 +67,8 @@ export default async function handler(req, res) {
     return handlePost(req, res, token, sheetId);
   }
 
-  // GET /api/tasks/:rowId — legacy discussion fetch (no sub-resource)
-  if (pathParts.length >= 3 && pathParts[2] !== 'logo' && pathParts[2] !== 'notes') {
+  // GET /api/tasks/:rowId — legacy discussion fetch (only when no sub-resource)
+    if (pathParts.length === 3 && pathParts[2] !== 'logo' && pathParts[2] !== 'notes') {
     return handleGetDiscussions(req, res, token, sheetId, pathParts[2]);
   }
 
