@@ -293,15 +293,15 @@ async function handlePostNote(req, res, token, sheetId, rowId, text) {
 
     const commentData = await commentResp.json();
     res.json({
-      success: true,
-      discussionId,
-      note: {
-        id: commentData.id,
-        text: commentData.text || '',
-        author: commentData.createdBy ? (commentData.createdBy.name || commentData.createdBy.email || '?') : '?',
-        createdAt: commentData.createdAt || ''
-      }
-    });
+          success: true,
+          discussionId,
+          note: {
+            id: commentData.id,
+            text: commentData.text || text,
+            author: commentData.createdBy ? (commentData.createdBy.name || commentData.createdBy.email || '?') : '?',
+            createdAt: commentData.createdAt || ''
+          }
+        });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
