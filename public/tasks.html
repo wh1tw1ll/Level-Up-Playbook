@@ -59,12 +59,17 @@ body{display:flex;flex-direction:column}
 .completed .task-title{text-decoration:line-through;opacity:0.6}
 .task-meta{display:flex;gap:8px;margin-top:0;flex-wrap:wrap;align-items:center;line-height:1.5}
 .meta-tag{font-size:14px;white-space:nowrap;color:rgba(240,239,239,0.65)}
+.meta-tag.owner{background:rgba(190,209,198,0.15);color:var(--accent);padding:1px 5px;border-radius:3px}
 .meta-tag.overdue-tag{color:#e86060;font-weight:500}
 .meta-tag.soon{color:#e6c87c}
-.meta-tag.hot{background:var(--accent);color:var(--bg);padding:1px 6px;border-radius:3px;font-size:12px;font-weight:600}
+.meta-tag.project{background:rgba(126,207,126,0.12);color:var(--success);padding:1px 5px;border-radius:3px}
+.meta-tag.firm{background:rgba(136,136,136,0.1);color:var(--muted);padding:1px 5px;border-radius:3px}
+.meta-tag.status{background:rgba(230,200,124,0.12);color:var(--warn);padding:1px 5px;border-radius:3px}
+.meta-tag.status.closed{background:rgba(126,207,126,0.12);color:var(--success);padding:1px 5px;border-radius:3px}
+.meta-tag.hot{background:var(--danger);color:var(--bg);padding:1px 6px;border-radius:3px;font-size:12px;font-weight:600}
 .meta-tag.unowned{font-style:italic;color:var(--danger)}
-.meta-tag.disc{color:var(--accent);cursor:pointer}
-.meta-tag.disc:hover{text-decoration:underline}
+.meta-tag.disc{background:rgba(190,209,198,0.12);color:var(--accent);cursor:pointer;padding:1px 5px;border-radius:3px}
+.meta-tag.disc:hover{background:rgba(190,209,198,0.25)}
 /* Task actions (right pinned) */
 .task-actions{display:flex;gap:4px;align-items:center;margin-left:auto;flex:0 0 auto}
 .status-note{font-size:12px;color:var(--muted);margin:2px 0 0;display:flex;align-items:center;gap:4px}
@@ -319,6 +324,7 @@ function render() {
     }
 
     let statusLabel = displayStatus(t.status);
+    let statusClass = 'status' + (t.status === 'Complete' ? ' closed' : '');
     let firm = t.responsibleFirm || '';
 
     const div = document.createElement('div');
@@ -364,11 +370,11 @@ function render() {
         '<div class="task-title" onclick="event.stopPropagation();editTaskTitle(this,' + t.rowId + ')">' + escapeHtml(t.actionItem) + '</div>' +
         snHtml +
         '<div class="task-meta">' +
-          (t.owner ? '<span class="meta-tag">' + escapeHtml(t.owner) + '</span>' : '') +
+          (t.owner ? '<span class="meta-tag owner">' + escapeHtml(t.owner) + '</span>' : '') +
           (t.dueDate ? '<span class="meta-tag ' + dueClass + '">' + dueLabel + '</span>' : '') +
-          (t.project ? '<span class="meta-tag">' + escapeHtml(t.project) + '</span>' : '') +
-          (firm ? '<span class="meta-tag">' + escapeHtml(firm) + '</span>' : '') +
-          (statusLabel ? '<span class="meta-tag">' + escapeHtml(statusLabel) + '</span>' : '') +
+          (t.project ? '<span class="meta-tag project">' + escapeHtml(t.project) + '</span>' : '') +
+          (firm ? '<span class="meta-tag firm">' + escapeHtml(firm) + '</span>' : '') +
+          (statusLabel ? '<span class="meta-tag ' + statusClass + '">' + escapeHtml(statusLabel) + '</span>' : '') +
           (sourceText ? '<span class="meta-tag">' + sourceText + '</span>' : '') +
           hotBadge +
           unownedBadge +
