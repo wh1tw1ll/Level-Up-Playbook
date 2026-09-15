@@ -88,11 +88,12 @@ export default async function handler(req, res) {
   }
 
   // GET /api/tasks — fetch all rows
-  return handleGet(req, res, token, SHEET_ID_PROJECT);
-}
+    const showNotes = url.searchParams.get('showNotes') === 'true';
+    return handleGet(req, res, token, SHEET_ID_PROJECT, showNotes);
+  }
 
 // ── GET: fetch all rows from both sheets, merged ──
-async function handleGet(req, res, token, sheetId) {
+async function handleGet(req, res, token, sheetId, showNotes = false) {
   try {
     const [projResp, personalResp] = await Promise.all([
       fetch(
@@ -165,11 +166,29 @@ async function handleGet(req, res, token, sheetId) {
     }
 
     const projectTasks = extractTasks(projData, 'project');
-    const personalTasks = extractTasks(personalData, 'personal');
+        const personalTasks = extractTasks(personalData, 'personal');
+        const merged = [...projectTasks, ...personalTasks];
 
-    // Sort: personal items interleaved by due date (project first, then personal within same date)
-    // Also, deferred (archived/completed) go to bottom
-    const merged = [...projectTasks, ...personalTasks].sort((a, b) => {
+        const sectionHeaders = [
+          'next steps', 'action items', 'proposal and next steps',
+          'new items added and next steps', 'general action item log review',
+          'granola setup and next steps', 'advice for whitney and next steps',
+          'outreach to trade contractors and next steps',
+          '1.', '2.', '3.',
+        ];
+
+        // Filter out Meeting Note rows (and section headers) unless showNotes is true
+        const filtered = merged.filter(t => {
+          if (showNotes) return true;
+          const cat = (t.category || '').toLowerCase();
+          const title = (t.actionItem || '').toLowerCase().trim();
+          if (cat === 'meeting note') return false;
+          if (sectionHeaders.includes(title)) return false;
+          return true;
+        });
+
+        // Sort
+        filtered.sort((a, b) => {
       // Completed at bottom
       if (a.status === 'Complete' && b.status !== 'Complete') return 1;
       if (a.status !== 'Complete' && b.status === 'Complete') return -1;
@@ -182,10 +201,10 @@ async function handleGet(req, res, token, sheetId) {
     });
 
         res.json({
-          sheet: projData.name + ' + Personal',
-          totalRows: merged.length,
-          tasks: merged
-        });
+                  sheet: projData.name + ' + Personal',
+                  totalRows: filtered.length,
+                  tasks: filtered
+                });
       } catch (err) {
     res.status(500).json({ error: err.message });
   }
