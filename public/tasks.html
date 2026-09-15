@@ -345,11 +345,11 @@ function render() {
     let linkedHtml = t.source === 'personal' && t.linkedRowId
       ? '<span class="linked-row" onclick="event.stopPropagation();jumpToLinkedRow(\'' + t.linkedRowId + '\')">&#128279;</span>'
       : '';
-    let deleteBtn = '<button class="task-delete" onclick="event.stopPropagation();deleteTask(this,' + t.rowId + ')" title="Archive/Delete">&#10005;</button>';
-    // Dispatch button — only on manual/approved rows
+    let deleteBtn = '<button class="task-delete" onclick="event.stopPropagation();deleteTask(this,' + t.rowId + ')" title="Delete">&#10005;</button>';
+    // Dispatch button — only on manual/approved rows (Confidence=high)
     let dispatchState = getDispatchState(t);
     let dispatchBtn = '';
-    let showDispatch = true;
+    let showDispatch = t.confidence === 'high';
     if (showDispatch) {
       let label = 'LUCI';
       let cls = 'task-dispatch';
@@ -394,7 +394,15 @@ function render() {
       document.getElementById('my-tasks-count').textContent = myTasks + ' mine' + (overdue ? '  |  🔴 ' + overdue + ' overdue' : '') + (dueWeek ? '  |  ' + dueWeek + ' this week' : '') + (unowned ? '  |  ' + unowned + ' unowned' : '');
 }
 
+function getActionItem(rowId) {
+  var t = allTasks.find(function(t) { return String(t.rowId) === String(rowId); });
+  return t ? (t.actionItem || '').substring(0, 50) : 'Unknown';
+}
+
 // ── DATA LOADING ──
+var rowSnapshots = {};
+var pendingWrites = {};
+
 function loadTasks() {
   const statusEl = document.getElementById('refresh-status');
   statusEl.textContent = 'Loading...';
@@ -403,6 +411,38 @@ function loadTasks() {
     .then(r => r.json())
     .then(data => {
       allTasks = data.tasks || [];
+      // Snapshot cell values for conflict detection
+      rowSnapshots = {};
+      allTasks.forEach(function(t) {
+        rowSnapshots[t.rowId] = {
+          actionItem: t.actionItem,
+          owner: t.owner,
+          status: t.status,
+          dueDate: t.dueDate,
+          project: t.project,
+          category: t.category,
+          responsibleFirm: t.responsibleFirm,
+          statusNote: t.statusNote
+        };
+      });
+      // Check pending writes for conflicts
+      var conflicts = [];
+      Object.keys(pendingWrites).forEach(function(rowId) {
+        var pw = pendingWrites[rowId];
+        var current = rowSnapshots[rowId];
+        if (!current) return;
+        Object.keys(pw.fields).forEach(function(field) {
+          var writtenVal = pw.fields[field];
+          var serverVal = current[field];
+          if (serverVal !== writtenVal && String(serverVal || '') !== String(writtenVal || '')) {
+            conflicts.push(pw.actionItem + ' (' + field + ')');
+          }
+        });
+      });
+      pendingWrites = {};
+      if (conflicts.length > 0) {
+        showToast('Conflict: ' + conflicts.join(', '), 4000);
+      }
       // Populate owner filter
       const owners = new Set(allTasks.map(t => t.owner).filter(Boolean));
       const sel = document.getElementById('owner-filter');
@@ -454,6 +494,7 @@ function toggleTask(el, rowId) {
 
   const newStatus = isDone ? 'Not Started' : 'Complete';
   const source = taskEl.dataset.source || 'project';
+  pendingWrites[rowId] = { fields: { status: newStatus } };
 
   // Write to API
   fetch('/api/tasks/' + rowId + '?source=' + source, {
@@ -543,6 +584,9 @@ function editStatusNote(el, rowId) {
     div.onclick = function(e) { e.stopPropagation(); editStatusNote(this, rowId); };
     input.replaceWith(div);
     
+    // Track for conflict detection
+    pendingWrites[rowId] = { actionItem: getActionItem(rowId), fields: { statusNote: newText } };
+    
     // Write to API
     const taskEl = input.closest('.task');
     const src = taskEl ? taskEl.dataset.source || 'project' : 'project';
@@ -579,6 +623,7 @@ function editTaskTitle(el, rowId) {
     div.textContent = newText || currentText;
     div.style.cursor = 'pointer';
     if (newText && newText !== currentText) {
+      pendingWrites[rowId] = { actionItem: getActionItem(rowId), fields: { actionItem: newText } };
       const taskEl = input.closest('.task');
       const src = taskEl ? taskEl.dataset.source || 'project' : 'project';
       fetch('/api/tasks/' + rowId + '?source=' + src, {
@@ -598,30 +643,79 @@ function editTaskTitle(el, rowId) {
   };
 }
 
-// ── DELETE TASK — permanently deletes row from Smartsheet ──
+// ── DELETE TASK — project + personal, 5-second undo toast ──
 function deleteTask(btnEl, rowId) {
   const taskEl = btnEl.closest('.task');
   const source = taskEl.dataset.source || 'project';
 
-  confirmAction(
-    'Permanently delete this task?',
-    'This cannot be undone. The row will be removed from Smartsheet.',
+  taskEl.classList.add('removing');
+
+  // Show undo toast with 5-second countdown
+  showUndoToast(
+    'Deleting row — click Undo to cancel',
     function() {
-      taskEl.classList.add('removing');
+      // UNDO: restore the row
+      taskEl.classList.remove('removing');
+    },
+    function() {
+      // TIMEOUT: actually delete
       fetch('/api/tasks/' + rowId + '?source=' + source, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'delete' })
       })
-        .then(r => {
-          if (!r.ok) { taskEl.classList.remove('removing'); return; }
+        .then(function(r) {
+          if (!r.ok) {
+            taskEl.classList.remove('removing');
+            showToast('Delete failed', 2000);
+            return;
+          }
           taskEl.remove();
-          allTasks = allTasks.filter(t => String(t.rowId) !== String(rowId));
+          allTasks = allTasks.filter(function(t) { return String(t.rowId) !== String(rowId); });
           render();
         })
-        .catch(function() { taskEl.classList.remove('removing'); });
+        .catch(function() {
+          taskEl.classList.remove('removing');
+          showToast('Delete failed', 2000);
+        });
     }
   );
+}
+
+// ── UNDO TOAST (5s auto-fire) ──
+var undoTimeout = null;
+function showUndoToast(message, onUndo, onTimeout) {
+  if (undoTimeout) { clearTimeout(undoTimeout); undoTimeout = null; }
+  var existing = document.querySelector('.undo-toast');
+  if (existing) existing.remove();
+
+  var toast = document.createElement('div');
+  toast.className = 'undo-toast';
+  toast.innerHTML = '<span>' + escapeHtml(message) + '</span><button id="undo-btn">Undo</button>';
+  document.body.appendChild(toast);
+
+  document.getElementById('undo-btn').onclick = function() {
+    clearTimeout(undoTimeout);
+    undoTimeout = null;
+    toast.remove();
+    if (onUndo) onUndo();
+  };
+
+  undoTimeout = setTimeout(function() {
+    toast.remove();
+    undoTimeout = null;
+    if (onTimeout) onTimeout();
+  }, 5000);
+}
+
+// ── SIMPLE TOAST (auto-dismiss, no undo) ──
+function showToast(message, duration) {
+  duration = duration || 3000;
+  var toast = document.createElement('div');
+  toast.className = 'undo-toast';
+  toast.innerHTML = '<span>' + escapeHtml(message) + '</span>';
+  document.body.appendChild(toast);
+  setTimeout(function() { toast.remove(); }, duration);
 }
 
 // ── CONFIRMATION DIALOG ──
@@ -713,6 +807,19 @@ function jumpToLinkedRow(linkedRowId) {
   }, 100);
 }
 
+// ── POLLING STATE: pause while editing ──
+var hasActiveInput = false;
+
+document.addEventListener('focusin', function() {
+  var tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+  if (tag === 'input' || tag === 'textarea' || document.activeElement?.contentEditable === 'true') {
+    hasActiveInput = true;
+  }
+});
+document.addEventListener('focusout', function() {
+  hasActiveInput = false;
+});
+
 // ── EVENT BINDING ──
 document.addEventListener('DOMContentLoaded', function() {
   // Tabs
@@ -770,8 +877,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   } catch(e) {}
   loadTasks();
-  // Auto-refresh every 60 seconds
+  // Auto-refresh every 60 seconds, skip while editing
   setInterval(function() {
+    if (hasActiveInput) return; // Don't overwrite what the user is typing
     const statusEl = document.getElementById('refresh-status');
     statusEl.textContent = '⟳';
     fetch('/api/tasks')
