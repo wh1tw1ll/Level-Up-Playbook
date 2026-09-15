@@ -31,7 +31,17 @@ body{display:flex;flex-direction:column}
 .filters input:focus{border-color:var(--accent)}
 .filters input::placeholder{color:var(--muted)}
 .filter-select{background:#2a2a2a;border:1px solid var(--border);border-radius:var(--radius);padding:3px 6px;color:var(--fg);font-size:13px;outline:none;cursor:pointer}
-.filter-count{font-size:13px;color:var(--muted);margin-left:auto;white-space:nowrap}
+.filter-count{font-size:12px;color:var(--muted);margin-left:auto;white-space:nowrap}
+/* Quick filter chips */
+.quick-chip{padding:3px 8px;border-radius:var(--radius);font-size:11px;font-weight:500;cursor:pointer;color:var(--muted);background:transparent;border:1px solid var(--border);transition:all .15s;font-family:var(--font);white-space:nowrap}
+.quick-chip:hover{color:var(--fg);background:var(--hover);border-color:#555}
+.quick-chip.active{color:var(--accent);background:rgba(190,209,198,0.12);border-color:var(--accent)}
+.quick-chip.hot{color:#e86060}
+.quick-chip.hot.active{background:rgba(232,96,96,0.15);border-color:var(--danger);color:var(--danger)}
+.quick-chip.overdue-chip.active{background:rgba(232,96,96,0.15);border-color:var(--danger);color:var(--danger)}
+.csv-btn{padding:3px 8px;border-radius:var(--radius);font-size:11px;cursor:pointer;color:var(--muted);background:transparent;border:1px solid var(--border);transition:all .15s;font-family:var(--font);white-space:nowrap}
+.csv-btn:hover{color:var(--accent);border-color:var(--accent)}
+.meta-tag.unowned{background:rgba(232,96,96,0.08);color:var(--danger);font-style:italic}
 /* Task List */
 .tasks{flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 0}
 .tasks:empty::after{content:'No tasks match filters.';display:block;padding:24px;text-align:center;color:var(--muted);font-size:13px}
@@ -142,6 +152,13 @@ body{display:flex;flex-direction:column}
 </div>
 <div class="filters">
   <input id="search-input" type="text" placeholder="Search actions..." autocomplete="off">
+  <button class="quick-chip overdue-chip" id="filter-overdue" onclick="toggleQuickFilter('overdue')">🔴 Overdue</button>
+  <button class="quick-chip" id="filter-week" onclick="toggleQuickFilter('week')">📅 This week</button>
+  <button class="quick-chip hot" id="filter-hot" onclick="toggleQuickFilter('hot')">🔥 Hot</button>
+  <button class="quick-chip" id="filter-mine" onclick="toggleQuickFilter('mine')">👤 Mine</button>
+  <select class="filter-select" id="category-filter">
+    <option value="">All Categories</option>
+  </select>
   <select class="filter-select" id="status-filter">
     <option value="">All</option>
     <option value="open" selected>Open</option>
@@ -150,6 +167,7 @@ body{display:flex;flex-direction:column}
   <select class="filter-select" id="owner-filter">
     <option value="">All Owners</option>
   </select>
+  <button class="csv-btn" onclick="exportCSV()">📋 CSV</button>
   <span class="filter-count" id="count-display">0 tasks</span>
 </div>
 <div class="tasks" id="task-list"></div>
@@ -162,10 +180,12 @@ body{display:flex;flex-direction:column}
 let allTasks = [];
 let myName = 'Whitney Williams';
 let currentProject = 'all';
+let currentCategory = '';
 let currentStatus = 'open';
 let currentOwner = '';
 let currentSource = 'all';
 let searchText = '';
+let quickFilters = { overdue: false, week: false, hot: false, mine: false };
 
 // ── HELPERS ──
 function daysUntil(d) {
@@ -203,25 +223,59 @@ function escapeHtml(s) {
   return d.innerHTML;
 }
 
-// ── FILTER + RENDER ──
-function render() {
-  const q = searchText.toLowerCase().trim();
-  const ownerVal = currentOwner;
+// ── QUICK FILTER TOGGLE ──
+function toggleQuickFilter(name) {
+  quickFilters[name] = !quickFilters[name];
+  document.getElementById('filter-' + name).classList.toggle('active');
+  render();
+}
 
-  // Filter
-  let filtered = allTasks.filter(t => {
+// ── CSV EXPORT ──
+function exportCSV() {
+  const rows = [['Action Item','Owner','Status','Due Date','Project','Category','Firm','Hot Topic']];
+  const filtered = getFilteredTasks();
+  for (const t of filtered) {
+    rows.push([
+      t.actionItem || '', t.owner || '', t.status || '', t.dueDate || '',
+      t.project || '', t.category || '', t.responsibleFirm || '',
+      t.hotTopic ? 'Yes' : ''
+    ]);
+  }
+  const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'luci-tasks-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ── GET FILTERED TASKS (reusable for render + CSV) ──
+function getFilteredTasks() {
+  const q = searchText.toLowerCase().trim();
+  return allTasks.filter(t => {
     if (t.status === 'Archived') return false;
     if (currentProject !== 'all' && t.project !== currentProject) return false;
     if (currentSource !== 'all' && t.source !== currentSource) return false;
+    if (currentCategory && t.category !== currentCategory) return false;
     if (currentStatus === 'open' && t.status !== 'Not Started' && t.status !== 'In Progress') return false;
     if (currentStatus === 'closed' && t.status !== 'Complete') return false;
-    if (ownerVal && t.owner !== ownerVal) return false;
+    if (currentOwner && t.owner !== currentOwner) return false;
+    if (quickFilters.mine && t.owner !== myName) return false;
+    if (quickFilters.hot && !t.hotTopic) return false;
+    if (quickFilters.overdue && !(t.status !== 'Complete' && isOverdue(t.dueDate))) return false;
+    if (quickFilters.week && !(t.status !== 'Complete' && isThisWeek(t.dueDate))) return false;
     if (q) {
       const text = ((t.actionItem || '') + ' ' + (t.notes || '') + ' ' + (t.responsibleFirm || '')).toLowerCase();
       if (!text.includes(q)) return false;
     }
     return true;
   });
+}
+
+// ── FILTER + RENDER ──
+function render() {
+  let filtered = getFilteredTasks();
 
   // Sort: my tasks first, then overdue, then this week, then by date
   filtered.sort((a, b) => {
@@ -273,9 +327,11 @@ function render() {
     div.className = cls;
     div.dataset.rowId = t.rowId;
     let discBadge = '';
-    if (t.discussionCount > 0) {
-      discBadge = '<span class="meta-tag disc" onclick="event.stopPropagation();toggleDiscussions(this,' + t.rowId + ')">\01F4AC ' + t.discussionCount + '</span>';
-    }
+        if (t.discussionCount > 0) {
+          discBadge = '<span class="meta-tag disc" onclick="event.stopPropagation();toggleDiscussions(this,' + t.rowId + ')">\uD83D\uDCAC ' + t.discussionCount + '</span>';
+        }
+        let hotBadge = t.hotTopic && !isComplete ? '<span class="meta-tag hot">HOT</span>' : '';
+        let unownedBadge = !t.owner && !isComplete ? '<span class="meta-tag unowned">no owner</span>' : '';
     let snHtml = '';
     if (t.statusNote) {
       snHtml = '<div class="status-note" onclick="event.stopPropagation();editStatusNote(this,' + t.rowId + ')">' + escapeHtml(t.statusNote) + '</div>';
@@ -318,6 +374,8 @@ function render() {
           (firm ? '<span class="meta-tag firm">' + escapeHtml(firm) + '</span>' : '') +
           (t.status ? '<span class="meta-tag ' + statusClass + '">' + escapeHtml(t.status) + '</span>' : '') +
           sourceBadge +
+          hotBadge +
+          unownedBadge +
           discBadge +
           linkedHtml +
         '</div>' +
@@ -351,6 +409,13 @@ function loadTasks() {
       sel.innerHTML = '<option value="">All Owners</option>';
       [...owners].sort().forEach(o => {
         sel.innerHTML += '<option value="' + escapeHtml(o) + '">' + escapeHtml(o) + '</option>';
+      });
+      // Populate category filter
+      const categories = new Set(allTasks.map(t => t.category).filter(Boolean));
+      const catSel = document.getElementById('category-filter');
+      catSel.innerHTML = '<option value="">All Categories</option>';
+      [...categories].sort().forEach(c => {
+        catSel.innerHTML += '<option value="' + escapeHtml(c) + '">' + escapeHtml(c) + '</option>';
       });
       // Populate project filter from data
       const projects = new Set(allTasks.map(t => t.project).filter(Boolean));
@@ -671,6 +736,12 @@ document.addEventListener('DOMContentLoaded', function() {
     render();
   });
 
+  // Category filter
+  document.getElementById('category-filter').addEventListener('change', function() {
+    currentCategory = this.value;
+    render();
+  });
+
   // Owner filter
   document.getElementById('owner-filter').addEventListener('change', function() {
     currentOwner = this.value;
@@ -698,6 +769,38 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   } catch(e) {}
   loadTasks();
+  // Auto-refresh every 60 seconds
+  setInterval(function() {
+    const statusEl = document.getElementById('refresh-status');
+    statusEl.textContent = '⟳';
+    fetch('/api/tasks')
+      .then(r => r.json())
+      .then(data => {
+        allTasks = data.tasks || [];
+        // Refresh filter dropdowns
+        const owners = new Set(allTasks.map(t => t.owner).filter(Boolean));
+        const sel = document.getElementById('owner-filter');
+        const curOwner = sel.value;
+        sel.innerHTML = '<option value="">All Owners</option>';
+        [...owners].sort().forEach(o => {
+          sel.innerHTML += '<option value="' + escapeHtml(o) + '">' + escapeHtml(o) + '</option>';
+        });
+        if (curOwner) sel.value = curOwner;
+        const categories = new Set(allTasks.map(t => t.category).filter(Boolean));
+        const catSel = document.getElementById('category-filter');
+        const curCat = catSel.value;
+        catSel.innerHTML = '<option value="">All Categories</option>';
+        [...categories].sort().forEach(c => {
+          catSel.innerHTML += '<option value="' + escapeHtml(c) + '">' + escapeHtml(c) + '</option>';
+        });
+        if (curCat) catSel.value = curCat;
+        render();
+        document.getElementById('updated-at').textContent = new Date().toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+        statusEl.textContent = '';
+        try { localStorage.setItem('luci_tasks_cache', JSON.stringify(data)); } catch(e) {}
+      })
+      .catch(function() { statusEl.textContent = ''; });
+  }, 60000);
 });
 </script>
 </body>
