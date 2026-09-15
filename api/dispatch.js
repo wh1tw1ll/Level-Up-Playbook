@@ -64,9 +64,9 @@ export default async function handler(req, res) {
     }
 
     // === TRUE TRIGGER: Notify LUNA via Telegram ===
-    const TELEGRAM_BOT = process.env.LUNA_TELEGRAM_BOT_TOKEN;
-    const TELEGRAM_CHAT = process.env.LUNA_TELEGRAM_CHAT_ID;
-    if (TELEGRAM_BOT && TELEGRAM_CHAT) {
+    const TELEGRAM_BOT = process.env.TELEGRAM_BOT_TOKEN;
+    const TELEGRAM_CHAT = process.env.LUCI_DISPATCH_CHAT_ID || '8947918104';
+    if (TELEGRAM_BOT) {
       // Build a message with the dispatched task
       const actVal = rowData.cells?.find(c => c.columnId === cols['Action ID']);
       const projVal = rowData.cells?.find(c => c.columnId === cols['Project']);
