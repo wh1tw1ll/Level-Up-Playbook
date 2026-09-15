@@ -415,9 +415,7 @@ async function handlePost(req, res, token, sheetId) {
                           const s = await getSheet();
                           const col = (s.columns || []).find(c => c.title === colTitles[field]);
                           if (!col) return;
-                          const isPicklist = col.type === 'PICKLIST' || col.type === 'MULTI_PICKLIST' || 
-              col.type === 'DATE' || col.type === 'CONTACT_LIST' || col.type === 'MULTI_CONTACT_LIST' ||
-              col.type === 'PRE_DEFINED_DROPDOWN' || col.type === 'MULTI_CONTACT_LIST' || col.type === 'ABSTRACT_DROPDOWN';
+                          const isPicklist = col.type !== 'TEXT_NUMBER';
                           if (isPicklist) {
                             cells.push({ columnId: col.id, objectValue: String(value), strict: false });
                           } else {
