@@ -1,8 +1,24 @@
 // Compare column types between working sheets and empty ones
+// Also check Action Tracker sheet columns
 export default async function handler(req, res) {
   const token = process.env.SMARTSHEET_TOKEN || '';
+  const r = {};
   
-  // Check a sheet WITH data (01 - Budget) vs WITHOUT (02 - Schedule)
+  // Action Tracker sheet columns
+  try {
+    const actionTrackerId = '4456864287772548';
+    const s = await (await fetch(`https://api.smartsheet.com/2.0/sheets/${actionTrackerId}`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })).json();
+    r['action_tracker_columns'] = (s.columns || []).map(c => ({
+      title: c.title,
+      type: c.type,
+      options: c.options || [],
+      symbol: c.symbol,
+      validation: c.validation || null
+    }));
+  } catch(e) { r['action_tracker_error'] = e.message; }
+  
   const checks = {
     "01_working": 6056924725333892,
     "02_empty": 2990378205532036,
