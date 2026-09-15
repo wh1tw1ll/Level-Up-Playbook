@@ -411,12 +411,17 @@ async function handlePost(req, res, token, sheetId) {
             };
 
             async function addCell(field, value) {
-              if (value === undefined || value === null || value === '') return;
-              const s = await getSheet();
-              const col = (s.columns || []).find(c => c.title === colTitles[field]);
-              if (!col) return;
-              cells.push({ columnId: col.id, value: String(value), strict: false });
-            }
+                          if (value === undefined || value === null || value === '') return;
+                          const s = await getSheet();
+                          const col = (s.columns || []).find(c => c.title === colTitles[field]);
+                          if (!col) return;
+                          const isPicklist = col.type === 'PICKLIST' || col.type === 'DATE' || col.type === 'CONTACT_LIST';
+                          if (isPicklist) {
+                            cells.push({ columnId: col.id, objectValue: String(value), strict: false });
+                          } else {
+                            cells.push({ columnId: col.id, value: String(value), strict: false });
+                          }
+                        }
 
             await Promise.all([
               newStatus && addCell('status', newStatus),
