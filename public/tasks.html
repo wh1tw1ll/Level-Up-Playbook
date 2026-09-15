@@ -122,7 +122,10 @@ body{display:flex;flex-direction:column}
   <div class="header-top">
     <img class="header-logo" src="/api/logo" alt="Level Up">
     <span class="header-title">Tasks</span>
-    <span class="header-subtitle"><span id="updated-at"></span></span>
+    <span class="header-subtitle">
+      <a href="/api/dova-dashboard" target="_blank" style="color:rgba(255,255,255,0.55);text-decoration:none;font-size:13px;margin-right:10px">📊 DOVA</a>
+      <span id="updated-at"></span>
+    </span>
   </div>
   <div class="tabs" id="project-tabs">
     <button class="tab active" data-project="all">All</button>
@@ -325,9 +328,12 @@ function render() {
   }
 
   // Counts
-  const myTasks = allTasks.filter(t => t.owner === myName && t.status !== 'Complete').length;
-  document.getElementById('count-display').textContent = filtered.length + ' tasks';
-  document.getElementById('my-tasks-count').textContent = myTasks + ' mine open';
+      const myTasks = allTasks.filter(t => t.owner === myName && t.status !== 'Complete').length;
+      const overdue = filtered.filter(t => isOverdue(t.dueDate) && t.status !== 'Complete').length;
+      const dueWeek = filtered.filter(t => isThisWeek(t.dueDate) && t.status !== 'Complete').length;
+      const unowned = filtered.filter(t => !t.owner && t.status !== 'Complete').length;
+      document.getElementById('count-display').textContent = filtered.length + ' tasks';
+      document.getElementById('my-tasks-count').textContent = myTasks + ' mine' + (overdue ? '  |  🔴 ' + overdue + ' overdue' : '') + (dueWeek ? '  |  ' + dueWeek + ' this week' : '') + (unowned ? '  |  ' + unowned + ' unowned' : '');
 }
 
 // ── DATA LOADING ──
