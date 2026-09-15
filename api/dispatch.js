@@ -1,8 +1,6 @@
 // api/dispatch.js — POST /api/dispatch/:rowId
-// Sets Status Note to 'Dispatched to LUNA'. That is the trigger.
-// No Telegram, no bot tokens, no external dependencies.
-// LUNA picks up dispatched tasks via cron and posts results
-// back through the notes thread.
+// Sets Status Note to 'Dispatched to LUCI'. LUCI (this Hermes agent)
+// picks up dispatched tasks and posts results back through chat.
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -44,7 +42,7 @@ export default async function handler(req, res) {
     const rowData = await rowResp.json();
 
     const nowStamp = new Date().toISOString().slice(0, 16);
-    const note = `Dispatched to LUNA ${nowStamp}`;
+    const note = `Dispatched to LUCI ${nowStamp}`;
 
     const updateResp = await fetch(
       `https://api.smartsheet.com/2.0/sheets/${sheetId}/rows/${rowId}`,
@@ -63,6 +61,43 @@ export default async function handler(req, res) {
     if (!updateResp.ok) {
       const err = await updateResp.text();
       return res.status(502).json({ error: 'Status Note update failed', detail: err });
+    }
+
+    // === TRUE TRIGGER: Notify LUNA via Telegram ===
+    const TELEGRAM_BOT = process.env.LUNA_TELEGRAM_BOT_TOKEN;
+    const TELEGRAM_CHAT = process.env.LUNA_TELEGRAM_CHAT_ID;
+    if (TELEGRAM_BOT && TELEGRAM_CHAT) {
+      // Build a message with the dispatched task
+      const actVal = rowData.cells?.find(c => c.columnId === cols['Action ID']);
+      const projVal = rowData.cells?.find(c => c.columnId === cols['Project']);
+      const ownerVal = rowData.cells?.find(c => c.columnId === cols['Owner']);
+      const dueVal = rowData.cells?.find(c => c.columnId === cols['Due Date']);
+      const firmVal = rowData.cells?.find(c => c.columnId === cols['Responsible Firm(s)']);
+      const catVal = rowData.cells?.find(c => c.columnId === cols['Category']);
+
+      const msg =
+`⚡ *DISPATCHED TO LUNA*
+Row #${rowData.rowNumber} | [${projVal?.displayValue || projVal?.value || '?'}]
+
+*${actVal?.displayValue || actVal?.value || '?'}*
+
+Owner: ${ownerVal?.displayValue || ownerVal?.value || '?'}
+Due: ${dueVal?.displayValue || dueVal?.value || 'TBD'}
+Firm: ${firmVal?.displayValue || firmVal?.value || '?'}
+Category: ${catVal?.displayValue || catVal?.value || '?'}
+Status: ${rowData.cells?.find(c => c.columnId === cols['Status'])?.displayValue || '?'}
+
+_Dispatched ${new Date().toLocaleString()}_`;
+
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT,
+          text: msg,
+          parse_mode: 'Markdown'
+        })
+      });
     }
 
     res.json({ success: true, dispatched: true, timestamp: nowStamp, rowId: rowData.id, sheetId });
