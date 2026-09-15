@@ -16,6 +16,7 @@ import chiefsHandler from '../lib/handlers/chiefs.js';
 import chiefsV3Handler from '../lib/handlers/chiefs-v3.js';
 import ssOpsHandler from './ss-ops.js';
 import tasksHandler from './tasks.js';
+import dispatchHandler from './dispatch.js';
 import dovaHandler from '../lib/handlers/dova.js';
 import dovaDashboardHandler from '../lib/handlers/dova-dashboard.js';
 import dovaSetupHandler from '../lib/handlers/dova-setup.js';
@@ -82,7 +83,9 @@ export default function handler(req, res) {
     case '/api/tasks':
               return tasksHandler(req, res);
             case '/api/dova':
-      return dovaHandler(req, res);
+                  return dovaHandler(req, res);
+                case '/api/dispatch/':
+                  return dispatchHandler(req, res);
     case '/api/dova-dashboard':
       return dovaDashboardHandler(req, res);
     case '/api/dova-setup':
@@ -96,11 +99,16 @@ export default function handler(req, res) {
     default:
           // Pass through tasks sub-routes (e.g. /api/tasks/12345/discussions)
           if (path.startsWith('/api/tasks/')) {
-            const origPath = req.query.path ? '/api/' + req.query.path : path;
-            req.url = origPath + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '');
-            return tasksHandler(req, res);
-          }
-          res.status(404).json({ error: 'Route not found', path });
+                      const origPath = req.query.path ? '/api/' + req.query.path : path;
+                      req.url = origPath + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '');
+                      return tasksHandler(req, res);
+                    }
+                    if (path.startsWith('/api/dispatch/')) {
+                      const origPath = req.query.path ? '/api/' + req.query.path : path;
+                      req.url = origPath + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '');
+                      return dispatchHandler(req, res);
+                    }
+                    res.status(404).json({ error: 'Route not found', path });
   }
 }
 
