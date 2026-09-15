@@ -26,50 +26,47 @@ body{display:flex;flex-direction:column}
 .tab:hover{color:var(--cool-gray);background:rgba(255,255,255,0.06)}
 .tab.active{color:var(--cool-gray);background:var(--bg)}
 /* Filters */
-.filters{flex:0 0 auto;display:flex;gap:4px;padding:4px 8px;align-items:center;border-bottom:1px solid var(--border)}
-.filters input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:4px 8px;color:var(--fg);font-size:14px;outline:none;min-width:0}
+.filters{flex:0 0 auto;display:flex;gap:6px;padding:4px 10px;align-items:center;border-bottom:1px solid var(--border)}
+.filters input{max-width:400px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:4px 10px;color:var(--fg);font-size:14px;outline:none;min-width:120px;height:28px}
 .filters input:focus{border-color:var(--accent)}
 .filters input::placeholder{color:var(--muted)}
-.filter-select{background:#2a2a2a;border:1px solid var(--border);border-radius:var(--radius);padding:3px 6px;color:var(--fg);font-size:13px;outline:none;cursor:pointer}
+.filter-select{background:#2a2a2a;border:1px solid var(--border);border-radius:var(--radius);padding:3px 8px;color:var(--fg);font-size:13px;outline:none;cursor:pointer;height:28px}
 .filter-count{font-size:12px;color:var(--muted);margin-left:auto;white-space:nowrap}
 /* Quick filter chips */
-.quick-chip{padding:3px 8px;border-radius:var(--radius);font-size:11px;font-weight:500;cursor:pointer;color:var(--muted);background:transparent;border:1px solid var(--border);transition:all .15s;font-family:var(--font);white-space:nowrap}
+.quick-chip{padding:3px 10px;border-radius:var(--radius);font-size:12px;font-weight:500;cursor:pointer;color:var(--muted);background:transparent;border:1px solid var(--border);transition:all .15s;font-family:var(--font);white-space:nowrap;height:28px;line-height:1}
 .quick-chip:hover{color:var(--fg);background:var(--hover);border-color:#555}
 .quick-chip.active{color:var(--accent);background:rgba(190,209,198,0.12);border-color:var(--accent)}
 .quick-chip.hot{color:#e86060}
 .quick-chip.hot.active{background:rgba(232,96,96,0.15);border-color:var(--danger);color:var(--danger)}
 .quick-chip.overdue-chip.active{background:rgba(232,96,96,0.15);border-color:var(--danger);color:var(--danger)}
-.csv-btn{padding:3px 8px;border-radius:var(--radius);font-size:11px;cursor:pointer;color:var(--muted);background:transparent;border:1px solid var(--border);transition:all .15s;font-family:var(--font);white-space:nowrap}
+.csv-btn{padding:3px 10px;border-radius:var(--radius);font-size:12px;cursor:pointer;color:var(--muted);background:transparent;border:1px solid var(--border);transition:all .15s;font-family:var(--font);white-space:nowrap;height:28px;line-height:1}
 .csv-btn:hover{color:var(--accent);border-color:var(--accent)}
-.meta-tag.unowned{background:rgba(232,96,96,0.08);color:var(--danger);font-style:italic}
+.meta-tag.unowned{font-style:italic;color:var(--danger)}
 /* Task List */
-.tasks{flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 0}
+.tasks{flex:1;overflow-y:auto;overflow-x:hidden;padding:0}
 .tasks:empty::after{content:'No tasks match filters.';display:block;padding:24px;text-align:center;color:var(--muted);font-size:13px}
-.task{display:flex;gap:6px;padding:5px 8px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;align-items:flex-start}
+.tasks.loading::after{content:'Loading...';display:block;padding:24px;text-align:center;color:var(--muted);font-size:13px}
+.task{display:flex;gap:8px;padding:4px 10px;border-bottom:1px solid rgba(240,239,239,0.08);cursor:pointer;transition:background .1s;align-items:flex-start}
 .task:hover{background:var(--hover)}
-.task.overdue{background:rgba(232,96,96,0.07)}
-.task.completed{opacity:0.5}
-.task.completed:hover{opacity:0.7}
-.task-check{flex:0 0 16px;margin-top:2px;width:14px;height:14px;border:1.5px solid var(--muted);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;transition:all .15s;cursor:pointer}
+.task.overdue{background:rgba(232,96,96,0.06)}
+.task.completed{opacity:0.4}
+.task.completed:hover{opacity:0.6}
+.task-check{flex:0 0 18px;margin-top:3px;width:16px;height:16px;border:1.5px solid var(--muted);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s;cursor:pointer}
 .task-check:hover{border-color:var(--accent)}
 .task-check.done{background:var(--success);border-color:var(--success);color:var(--bg)}
-.task-body{flex:1;min-width:0}
-.task-title{font-size:14px;font-weight:450;color:var(--fg);line-height:1.3;word-break:break-word;cursor:pointer}
-.completed .task-title{text-decoration:line-through}
-.task-meta{display:flex;gap:6px;margin-top:2px;flex-wrap:wrap;align-items:center}
-.meta-tag{font-size:12px;padding:1px 5px;border-radius:3px;white-space:nowrap;line-height:1.4}
-.meta-tag.owner{background:rgba(190,209,198,0.15);color:var(--accent)}
-.meta-tag.due{color:var(--muted)}
-.meta-tag.due.overdue-tag{color:var(--danger);font-weight:500}
-.meta-tag.due.soon{color:#e6c87c}
-.meta-tag.project{background:rgba(126,207,126,0.12);color:var(--success)}
-.meta-tag.firm{background:rgba(136,136,136,0.1);color:var(--muted)}
-.meta-tag.status{background:rgba(230,200,124,0.12);color:var(--warn)}
-.meta-tag.status.complete{background:rgba(126,207,126,0.12);color:var(--success)}
-.meta-tag.status.inactive{background:rgba(136,136,136,0.15);color:var(--muted)}
-.meta-tag.hot{background:var(--danger);color:var(--bg)}
-.meta-tag.disc{background:rgba(190,209,198,0.12);color:var(--accent);cursor:pointer}
-.meta-tag.disc:hover{background:rgba(190,209,198,0.25)}
+.task-body{max-width:1100px;flex:0 1 auto;min-width:0}
+.task-title{font-size:17px;font-weight:500;color:var(--fg);line-height:1.3;word-break:break-word;cursor:pointer;overflow:visible}
+.completed .task-title{text-decoration:line-through;opacity:0.6}
+.task-meta{display:flex;gap:8px;margin-top:0;flex-wrap:wrap;align-items:center;line-height:1.5}
+.meta-tag{font-size:14px;white-space:nowrap;color:rgba(240,239,239,0.65)}
+.meta-tag.overdue-tag{color:#e86060;font-weight:500}
+.meta-tag.soon{color:#e6c87c}
+.meta-tag.hot{background:var(--accent);color:var(--bg);padding:1px 6px;border-radius:3px;font-size:12px;font-weight:600}
+.meta-tag.unowned{font-style:italic;color:var(--danger)}
+.meta-tag.disc{color:var(--accent);cursor:pointer}
+.meta-tag.disc:hover{text-decoration:underline}
+/* Task actions (right pinned) */
+.task-actions{display:flex;gap:4px;align-items:center;margin-left:auto;flex:0 0 auto}
 .status-note{font-size:12px;color:var(--muted);margin:2px 0 0;display:flex;align-items:center;gap:4px}
 .status-note::before{content:'>';font-size:11px;margin-right:3px;color:#666}
 .status-note-input{background:#252525;border:1px solid var(--border);border-radius:var(--radius);padding:1px 6px;color:var(--fg);font-size:12px;width:100%;outline:none;margin-top:2px;font-family:var(--font)}
@@ -115,10 +112,6 @@ body{display:flex;flex-direction:column}
 .source-chip{padding:3px 8px;border-radius:var(--radius);font-size:11px;font-weight:500;cursor:pointer;color:var(--muted);background:transparent;border:none;transition:all .15s;font-family:var(--font);white-space:nowrap}
 .source-chip:hover{color:var(--fg);background:var(--hover)}
 .source-chip.active{color:var(--accent);background:rgba(190,209,198,0.12)}
-/* Source badge */
-.source-badge{font-size:10px;font-weight:600;padding:1px 5px;border-radius:3px;letter-spacing:0.3px;margin-left:auto;flex:0 0 auto;display:inline-flex;align-items:center;gap:2px}
-.source-badge.project{background:rgba(190,209,198,0.12);color:var(--accent)}
-.source-badge.personal{background:rgba(230,200,124,0.12);color:var(--warn)}
 /* Linked row indicator */
 .linked-row{font-size:10px;color:var(--accent);cursor:pointer;opacity:0.5;transition:opacity .15s}
 .linked-row:hover{opacity:1}
@@ -225,6 +218,13 @@ function escapeHtml(s) {
   return d.innerHTML;
 }
 
+function displayStatus(s) {
+  if (!s) return '';
+  if (s === 'Complete') return 'Closed';
+  if (s === 'Not Started' || s === 'In Progress') return 'Open';
+  return s;
+}
+
 // ── QUICK FILTER TOGGLE ──
 function toggleQuickFilter(name) {
   quickFilters[name] = !quickFilters[name];
@@ -318,11 +318,7 @@ function render() {
       else { dueLabel = formatDate(t.dueDate); }
     }
 
-    let statusLabel = t.status || '';
-    let statusClass = 'status';
-    if (t.status === 'Complete') statusClass += ' complete';
-    else if (t.status === 'Not Started') statusClass += ' inactive';
-
+    let statusLabel = displayStatus(t.status);
     let firm = t.responsibleFirm || '';
 
     const div = document.createElement('div');
@@ -341,9 +337,8 @@ function render() {
       snHtml = '<div class="status-note" onclick="event.stopPropagation();editStatusNote(this,' + t.rowId + ')" style="opacity:0.4;cursor:text">Add note...</div>';
     }
     div.dataset.source = t.source;
-    let sourceBadge = t.source === 'personal'
-      ? '<span class="meta-tag source-badge personal">PERSONAL</span>'
-      : '<span class="meta-tag source-badge project">PROJECT</span>';
+    // Source shown as plain text in metadata (no PROJECT badge on far right)
+    let sourceText = t.source === 'personal' ? 'Personal' : '';
     let linkedHtml = t.source === 'personal' && t.linkedRowId
       ? '<span class="linked-row" onclick="event.stopPropagation();jumpToLinkedRow(\'' + t.linkedRowId + '\')">&#128279;</span>'
       : '';
@@ -369,12 +364,12 @@ function render() {
         '<div class="task-title" onclick="event.stopPropagation();editTaskTitle(this,' + t.rowId + ')">' + escapeHtml(t.actionItem) + '</div>' +
         snHtml +
         '<div class="task-meta">' +
-          (t.owner ? '<span class="meta-tag owner">' + escapeHtml(t.owner) + '</span>' : '') +
+          (t.owner ? '<span class="meta-tag">' + escapeHtml(t.owner) + '</span>' : '') +
           (t.dueDate ? '<span class="meta-tag ' + dueClass + '">' + dueLabel + '</span>' : '') +
-          (t.project ? '<span class="meta-tag project">' + escapeHtml(t.project) + '</span>' : '') +
-          (firm ? '<span class="meta-tag firm">' + escapeHtml(firm) + '</span>' : '') +
-          (t.status ? '<span class="meta-tag ' + statusClass + '">' + escapeHtml(t.status) + '</span>' : '') +
-          sourceBadge +
+          (t.project ? '<span class="meta-tag">' + escapeHtml(t.project) + '</span>' : '') +
+          (firm ? '<span class="meta-tag">' + escapeHtml(firm) + '</span>' : '') +
+          (statusLabel ? '<span class="meta-tag">' + escapeHtml(statusLabel) + '</span>' : '') +
+          (sourceText ? '<span class="meta-tag">' + sourceText + '</span>' : '') +
           hotBadge +
           unownedBadge +
           discBadge +
@@ -382,7 +377,7 @@ function render() {
         '</div>' +
         '<div class="disc-thread" id="disc-' + t.rowId + '"></div>' +
               '</div>' +
-              dispatchBtnHtml + deleteBtn;
+              '<div class="task-actions">' + dispatchBtnHtml + deleteBtn + '</div>';
     list.appendChild(div);
   }
 
@@ -407,6 +402,7 @@ var pendingWrites = {};
 function loadTasks() {
   const statusEl = document.getElementById('refresh-status');
   statusEl.textContent = 'Loading...';
+  document.getElementById('task-list').classList.add('loading');
 
   fetch('/api/tasks')
     .then(r => r.json())
@@ -461,6 +457,7 @@ function loadTasks() {
       // Populate project filter from data
       const projects = new Set(allTasks.map(t => t.project).filter(Boolean));
       render();
+      document.getElementById('task-list').classList.remove('loading');
       const now = new Date().toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
       document.getElementById('updated-at').textContent = now;
       statusEl.textContent = '';
@@ -469,6 +466,7 @@ function loadTasks() {
     })
     .catch(err => {
       statusEl.textContent = 'Error loading';
+      document.getElementById('task-list').classList.remove('loading');
       // Try cache
       try {
         const cached = localStorage.getItem('luci_tasks_cache');
@@ -885,6 +883,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const data = JSON.parse(cached);
       allTasks = data.tasks || [];
       render();
+      document.getElementById('task-list').classList.remove('loading');
       document.getElementById('updated-at').textContent = 'cached';
     }
   } catch(e) {}
@@ -916,6 +915,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         if (curCat) catSel.value = curCat;
         render();
+        document.getElementById('task-list').classList.remove('loading');
         document.getElementById('updated-at').textContent = new Date().toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
         statusEl.textContent = '';
         try { localStorage.setItem('luci_tasks_cache', JSON.stringify(data)); } catch(e) {}
