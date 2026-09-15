@@ -5886,3 +5886,11 @@
 [2026-09-11 00:03:06] Playbook API response: status=ok, count=25, stored_at=2026-09-11T04:03:05.238Z
 [2026-09-11 00:03:06] Result: 25 actions synced to Playbook
 [2026-09-11 00:03:06] ============================================================
+[2026-09-15 10:51:11] ============================================================
+[2026-09-15 10:51:11] MFP Cron Sync starting (fallback mode)
+[2026-09-15 10:51:11] Cache: flagged-local.json (modified 2026-06-12 07:04:49), 25 actions
+[2026-09-15 10:51:11] Posting 25 actions to Playbook API...
+[2026-09-15 10:51:12] CRON FALLBACK: Pushed cached local backup (25 actions) to Playbook API
+[2026-09-15 10:51:12] Playbook API response: status=ok, count=25, stored_at=2026-09-15T14:51:12.613Z
+[2026-09-15 10:51:12] Result: 25 actions synced to Playbook
+[2026-09-15 10:51:12] ============================================================

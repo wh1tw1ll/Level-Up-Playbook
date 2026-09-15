@@ -129,7 +129,6 @@ body{display:flex;flex-direction:column}
     <button class="tab" data-project="DOVA">DOVA</button>
     <button class="tab" data-project="MFP">MFP</button>
     <button class="tab" data-project="Sphere">Sphere</button>
-    <button class="tab" data-project="SPH">SPH</button>
     <button class="tab" data-project="Business">Business</button>
   </div>
   <div class="source-chips">
@@ -287,17 +286,13 @@ function render() {
     let linkedHtml = t.source === 'personal' && t.linkedRowId
       ? '<span class="linked-row" onclick="event.stopPropagation();jumpToLinkedRow(\'' + t.linkedRowId + '\')">&#128279;</span>'
       : '';
-    let deleteBtn = t.source === 'personal'
-      ? '<button class="task-delete" onclick="event.stopPropagation();deleteTask(this,' + t.rowId + ')" title="Delete">&#10005;</button>'
-      : '';
+    let deleteBtn = '<button class="task-delete" onclick="event.stopPropagation();deleteTask(this,' + t.rowId + ')" title="Archive/Delete">&#10005;</button>';
     // Dispatch button — only on manual/approved rows
     let dispatchState = getDispatchState(t);
     let dispatchBtn = '';
-    let showDispatch = t.source === 'personal'
-      || (t.source === 'manual' && t.confidence === 'high')
-      || (t.source === 'project' && t.confidence === 'high');
+    let showDispatch = true;
     if (showDispatch) {
-      let label = 'LUNA';
+      let label = 'LUCI';
       let cls = 'task-dispatch';
       if (dispatchState.state === 'dispatched') { label = 'Sent'; cls += ' dispatched'; }
       else if (dispatchState.state === 'working') { label = 'Working'; cls += ' working'; }
@@ -620,7 +615,7 @@ function confirmAction(text, subtext, onConfirm) {
   overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
 }
 
-// ── DISPATCH TO LUNA ──
+// ── DISPATCH TO LUCI ──
 function getDispatchState(task) {
   // Parse dispatch state from status note
   var note = (task.statusNote || '').toLowerCase();

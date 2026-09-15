@@ -76,7 +76,7 @@ export default async function handler(req, res) {
       const catVal = rowData.cells?.find(c => c.columnId === cols['Category']);
 
       const msg =
-`⚡ *DISPATCHED TO LUNA*
+`⚡ *DISPATCHED TO LUCI*
 Row #${rowData.rowNumber} | [${projVal?.displayValue || projVal?.value || '?'}]
 
 *${actVal?.displayValue || actVal?.value || '?'}*
