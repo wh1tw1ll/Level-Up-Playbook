@@ -377,39 +377,56 @@ async function handlePost(req, res, token, sheetId) {
     }
 
     const newStatus = body.status;
-    const newActionItem = body.actionItem;
+        const newActionItem = body.actionItem;
+        const newOwner = body.owner;
+        const newCategory = body.category;
+        const newProject = body.project;
+        const newDueDate = body.dueDate;
+        const newFirm = body.responsibleFirm;
 
-    if (!newStatus && newActionItem === undefined) {
-      return res.status(400).json({ error: 'No fields to update. Provide status or actionItem.' });
-    }
+        if (!newStatus && newActionItem === undefined && !newOwner && !newCategory && !newProject && !newDueDate && !newFirm) {
+          return res.status(400).json({ error: 'No fields to update. Provide at least one field.' });
+        }
 
-    const sheetResp = await fetch(
-      `https://api.smartsheet.com/2.0/sheets/${sheetId}`,
-      { headers: { Authorization: 'Bearer ' + token } }
-    );
-    if (!sheetResp.ok) {
-      const err = await sheetResp.text();
-      return res.status(502).json({ error: 'Failed to fetch sheet metadata', detail: err });
-    }
+        // Lazy-fetch sheet metadata only when needed
+        let sheetData = null;
+        async function getSheet() {
+          if (sheetData) return sheetData;
+          const resp = await fetch(`https://api.smartsheet.com/2.0/sheets/${sheetId}`, { headers: { Authorization: 'Bearer ' + token } });
+          if (!resp.ok) throw new Error('Failed to fetch sheet metadata');
+          sheetData = await resp.json();
+          return sheetData;
+        }
 
-    const sheetData = await sheetResp.json();
-    const cells = [];
+            // Build cells from provided fields
+            const cells = [];
+            const colTitles = {
+              status: 'Status',
+              actionItem: 'Action ID',
+              owner: 'Owner',
+              category: 'Category',
+              project: 'Project',
+              dueDate: 'Due Date',
+              responsibleFirm: 'Responsible Firm(s)'
+            };
 
-    if (newStatus) {
-      const statusCol = (sheetData.columns || []).find(c => c.title === 'Status');
-      if (!statusCol) {
-        return res.status(500).json({ error: 'Status column not found in sheet' });
-      }
-      cells.push({ columnId: statusCol.id, value: newStatus, strict: false });
-    }
+            async function addCell(field, value) {
+              if (value === undefined || value === null || value === '') return;
+              const s = await getSheet();
+              const col = (s.columns || []).find(c => c.title === colTitles[field]);
+              if (!col) return;
+              cells.push({ columnId: col.id, value: String(value), strict: false });
+            }
 
-    if (newActionItem !== undefined) {
-      const actionCol = (sheetData.columns || []).find(c => c.title === 'Action ID');
-      if (!actionCol) {
-        return res.status(500).json({ error: 'Action ID column not found in sheet' });
-      }
-      cells.push({ columnId: actionCol.id, value: String(newActionItem), strict: false });
-    }
+            await Promise.all([
+              newStatus && addCell('status', newStatus),
+              newActionItem !== undefined && addCell('actionItem', newActionItem),
+              newOwner && addCell('owner', newOwner),
+              newCategory && addCell('category', newCategory),
+              newProject && addCell('project', newProject),
+              newDueDate && addCell('dueDate', newDueDate),
+              newFirm && addCell('responsibleFirm', newFirm)
+            ]);
 
     const updateResp = await fetch(
       `https://api.smartsheet.com/2.0/sheets/${sheetId}/rows/${rowId}`,
