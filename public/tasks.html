@@ -61,7 +61,7 @@ body{display:flex;flex-direction:column}
 .meta-tag.disc{background:rgba(190,209,198,0.12);color:var(--accent);cursor:pointer}
 .meta-tag.disc:hover{background:rgba(190,209,198,0.25)}
 .status-note{font-size:12px;color:var(--muted);margin:2px 0 0;display:flex;align-items:center;gap:4px}
-.status-note::before{content:'\01F4AC';font-size:10px}
+.status-note::before{content:'\u279C';font-size:10px;margin-right:2px}
 .status-note-input{background:#252525;border:1px solid var(--border);border-radius:var(--radius);padding:1px 6px;color:var(--fg);font-size:12px;width:100%;outline:none;margin-top:2px;font-family:var(--font)}
 .status-note-input:focus{border-color:var(--accent)}
 .disc-thread{font-size:12px;margin:3px 0 0;background:rgba(34,34,34,0.6);border:1px solid #333;border-radius:var(--radius);padding:5px 7px;display:none}
@@ -527,72 +527,29 @@ function editTaskTitle(el, rowId) {
   };
 }
 
-// ── DELETE TASK (personal: hard delete with undo toast, project: archive) ──
+// ── DELETE TASK — permanently deletes row from Smartsheet ──
 function deleteTask(btnEl, rowId) {
   const taskEl = btnEl.closest('.task');
   const source = taskEl.dataset.source || 'project';
 
-  if (source !== 'personal') {
-    // Project rows: soft archive (shouldn't happen but keep as safety)
-    confirmAction(
-      'Remove this task from view?',
-      'It stays in Smartsheet as "Archived" - never permanently deleted.',
-      function() {
-        taskEl.classList.add('removing');
-        fetch('/api/tasks/' + rowId + '?source=project', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'Archived' })
+  confirmAction(
+    'Permanently delete this task?',
+    'This cannot be undone. The row will be removed from Smartsheet.',
+    function() {
+      taskEl.classList.add('removing');
+      fetch('/api/tasks/' + rowId + '?source=' + source, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete' })
+      })
+        .then(r => {
+          if (!r.ok) { taskEl.classList.remove('removing'); return; }
+          taskEl.remove();
+          render();
         })
-          .then(r => {
-            if (!r.ok) { taskEl.classList.remove('removing'); }
-            else { setTimeout(function() { taskEl.remove(); render(); }, 260); }
-          })
-          .catch(function() { taskEl.classList.remove('removing'); });
-      }
-    );
-    return;
-  }
-
-  // Personal rows: hard delete with undo toast
-  const actionItem = taskEl.querySelector('.task-title')?.textContent || '';
-  taskEl.classList.add('removing');
-
-  fetch('/api/tasks/' + rowId + '?source=personal', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'delete' })
-  })
-    .then(r => {
-      if (!r.ok) {
-        taskEl.classList.remove('removing');
-        return;
-      }
-      taskEl.remove();
-      render();
-
-      // Show undo toast
-      const toast = document.createElement('div');
-      toast.className = 'undo-toast';
-      toast.innerHTML = '<span>Deleted</span><button id="undo-delete">Undo</button>';
-      document.body.appendChild(toast);
-
-      let undone = false;
-      document.getElementById('undo-delete').onclick = function() {
-        undone = true;
-        toast.remove();
-        // Re-add by refreshing the API data (row is gone, but we can't restore it)
-        loadTasks();
-      };
-
-      setTimeout(function() {
-        if (!undone) { toast.remove(); }
-      }, 5000);
-    })
-    .catch(function() {
-      taskEl.classList.remove('removing');
-    });
-}
+        .catch(function() { taskEl.classList.remove('removing'); });
+    }
+  );
 
 // ── CONFIRMATION DIALOG ──
 function confirmAction(text, subtext, onConfirm) {
