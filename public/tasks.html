@@ -616,6 +616,7 @@ function deleteTask(btnEl, rowId) {
         .then(r => {
           if (!r.ok) { taskEl.classList.remove('removing'); return; }
           taskEl.remove();
+          allTasks = allTasks.filter(t => String(t.rowId) !== String(rowId));
           render();
         })
         .catch(function() { taskEl.classList.remove('removing'); });
