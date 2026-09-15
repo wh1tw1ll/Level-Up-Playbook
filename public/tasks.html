@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LUCI — Tasks</title>
+<title>LUCI - Tasks</title>
 <link rel="icon" type="image/svg+xml" href="assets/LUCI_icon.svg">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -94,6 +94,8 @@ body{display:flex;flex-direction:column}
 .task-dispatch.working{background:rgba(230,200,124,0.2);border-color:var(--warn);color:var(--warn);cursor:default;animation:pulse 1.5s infinite}
 .task-dispatch.ready{background:rgba(126,207,126,0.12);border-color:var(--success);color:var(--success);cursor:default}
 .task-dispatch.failed{background:rgba(232,96,96,0.12);border-color:var(--danger);color:var(--danger);cursor:pointer}
+.task-dispatch.dispatch-disabled{opacity:0.35;cursor:not-allowed;border-color:#333;color:var(--muted)}
+.task-dispatch.dispatch-disabled:hover{background:transparent;border-color:#333;color:var(--muted)}
 @keyframes pulse{0%,100%{opacity:0.6}50%{opacity:1}}
 /* Confirm overlay */
 .confirm-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:100;display:flex;align-items:center;justify-content:center;animation:fadeIn .15s}
@@ -346,20 +348,19 @@ function render() {
       ? '<span class="linked-row" onclick="event.stopPropagation();jumpToLinkedRow(\'' + t.linkedRowId + '\')">&#128279;</span>'
       : '';
     let deleteBtn = '<button class="task-delete" onclick="event.stopPropagation();deleteTask(this,' + t.rowId + ')" title="Delete">&#10005;</button>';
-    // Dispatch button — only on manual/approved rows (Confidence=high)
-    let dispatchState = getDispatchState(t);
-    let dispatchBtn = '';
-    let showDispatch = t.confidence === 'high';
-    if (showDispatch) {
-      let label = 'LUCI';
-      let cls = 'task-dispatch';
-      if (dispatchState.state === 'dispatched') { label = 'Sent'; cls += ' dispatched'; }
-      else if (dispatchState.state === 'working') { label = 'Working'; cls += ' working'; }
-      else if (dispatchState.state === 'ready') { label = 'Ready'; cls += ' ready'; }
-      else if (dispatchState.state === 'failed') { label = 'Failed'; cls += ' failed'; }
-      dispatchBtn = '<button class="' + cls + '" onclick="event.stopPropagation();dispatchTask(this,' + t.rowId + ',\'' + (t.source || 'project') + '\')"' +
-        (dispatchState.disabled ? ' disabled' : '') + '>' + label + '</button>';
-    }
+    // Dispatch button - always visible, disabled with tooltip if auto-ingested
+            let dispatchState = getDispatchState(t);
+            let canDispatch = t.confidence === 'high';
+            let dLabel = 'LUCI';
+            let dCls = 'task-dispatch' + (canDispatch ? ' dispatchable' : ' dispatch-disabled');
+            if (dispatchState.state === 'dispatched') { dLabel = 'Sent'; dCls += ' dispatched'; }
+            else if (dispatchState.state === 'working') { dLabel = 'Working'; dCls += ' working'; }
+            else if (dispatchState.state === 'ready') { dLabel = 'Ready'; dCls += ' ready'; }
+            else if (dispatchState.state === 'failed') { dLabel = 'Failed'; dCls += ' failed'; }
+            let tip = canDispatch ? 'Dispatch to LUCI' : 'Auto-ingested - review in Smartsheet before dispatching';
+    let dispatchBtnHtml = '<button class="' + dCls + '" data-row-id="' + t.rowId + '" data-source="' + (t.source || 'project') + '" title="' + tip + '"' +
+      (dispatchState.disabled ? ' disabled' : '') +
+      (canDispatch ? '' : ' disabled') + '>' + dLabel + '</button>';
     div.innerHTML =
       '<div class="task-check' + (isComplete ? ' done' : '') + '" onclick="event.stopPropagation();toggleTask(this,' + t.rowId + ')">' +
         (isComplete ? '&#10003;' : '') +
@@ -381,7 +382,7 @@ function render() {
         '</div>' +
         '<div class="disc-thread" id="disc-' + t.rowId + '"></div>' +
               '</div>' +
-              dispatchBtn + deleteBtn;
+              dispatchBtnHtml + deleteBtn;
     list.appendChild(div);
   }
 
@@ -643,7 +644,7 @@ function editTaskTitle(el, rowId) {
   };
 }
 
-// ── DELETE TASK — project + personal, 5-second undo toast ──
+// ── DELETE TASK - project + personal, 5-second undo toast ──
 function deleteTask(btnEl, rowId) {
   const taskEl = btnEl.closest('.task');
   const source = taskEl.dataset.source || 'project';
@@ -652,7 +653,7 @@ function deleteTask(btnEl, rowId) {
 
   // Show undo toast with 5-second countdown
   showUndoToast(
-    'Deleting row — click Undo to cancel',
+    'Deleting row - click Undo to cancel',
     function() {
       // UNDO: restore the row
       taskEl.classList.remove('removing');
@@ -864,6 +865,17 @@ document.addEventListener('DOMContentLoaded', function() {
       currentSource = this.dataset.source;
       render();
     });
+  });
+
+  // Delegated dispatch click handler
+  document.getElementById('task-list').addEventListener('click', function(e) {
+    var btn = e.target.closest('.task-dispatch.dispatchable');
+    if (!btn) return;
+    if (btn.disabled) return;
+    e.stopPropagation();
+    var rowId = btn.dataset.rowId;
+    var source = btn.dataset.source || 'project';
+    dispatchTask(btn, rowId, source);
   });
 
   // Initial load from cache then fetch
