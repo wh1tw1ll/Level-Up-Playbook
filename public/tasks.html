@@ -438,11 +438,11 @@ function renderSourceLink(sourceRef) {
   var s = sourceRef.trim();
   if (s.toLowerCase().startsWith('granola:')) {
     var title = s.substring(8).trim();
-    return '<a class="meta-tag source granola" href="#" onclick="event.stopPropagation();alert('Granola note: ' + escapeHtml(title) + '')" title="' + escapeHtml(s) + '">📝 ' + escapeHtml(title.substring(0, 30)) + (title.length > 30 ? '...' : '') + '</a>';
+    return '<a class="meta-tag source granola" href="#" onclick="event.stopPropagation();alert(\'Granola note: ' + escapeHtml(title) + '\')" title="' + escapeHtml(s) + '">📝 ' + escapeHtml(title.substring(0, 30)) + (title.length > 30 ? '...' : '') + '</a>';
   }
   if (s.toLowerCase().startsWith('email:')) {
     var subj = s.substring(6).trim();
-    return '<a class="meta-tag source email" href="#" onclick="event.stopPropagation();alert('Email: ' + escapeHtml(subj) + '')" title="' + escapeHtml(s) + '">✉️ ' + escapeHtml(subj.substring(0, 30)) + (subj.length > 30 ? '...' : '') + '</a>';
+    return '<a class="meta-tag source email" href="#" onclick="event.stopPropagation();alert(\'Email: ' + escapeHtml(subj) + '\')" title="' + escapeHtml(s) + '">✉️ ' + escapeHtml(subj.substring(0, 30)) + (subj.length > 30 ? '...' : '') + '</a>';
   }
   if (s.toLowerCase().startsWith('manual') || s.toLowerCase().includes('added manually')) {
     return '<span class="meta-tag source manual">📋 Manual</span>';
