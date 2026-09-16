@@ -126,7 +126,7 @@ export default async function handler(req, res) {
   setCors(res, 'https://level-up-playbook.vercel.app');
   if (handleOptions(req, res)) return;
 
-  const fresh = await authenticateRequest(req, res, 'Calendars.Read Calendars.Read.Shared Calendars.ReadBasic');
+  const fresh = await authenticateRequest(req, res, 'Calendars.Read Calendars.Read.Shared');
   if (!fresh) return;
 
   try {
