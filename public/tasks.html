@@ -1659,7 +1659,7 @@ document.addEventListener('DOMContentLoaded', function() {
           const detailId = 'prep-detail-' + eventId;
 
           // Card with tighter padding (6px vs 10px) — clickable to toggle detail
-          html += '<div class="' + cardClass + '" style="padding:6px 10px;margin-bottom:6px;cursor:pointer" onclick="togglePrepDetail(\x27 + eventId + \x27)">';
+          html += '<div class="' + cardClass + '" style="padding:6px 10px;margin-bottom:6px;cursor:pointer" data-event-id="' + eventId + '">';
           html += '<div class="prep-header" style="margin-bottom:3px">';
           html += '  <div class="prep-title" style="font-size:14px">' + escapeHtml(ev.subject) + projectBadge + '</div>';
           html += '  <div class="prep-time" style="font-size:12px">' + escapeHtml(ev.timeET || '') + '</div>';
@@ -1840,6 +1840,14 @@ document.addEventListener('DOMContentLoaded', function() {
       })
       .catch(function() { statusEl.textContent = ''; });
   }, 60000);
+
+  // Delegated click handler for prep cards (replaces inline onclick — avoids escaping issues)
+  document.addEventListener('click', function(e) {
+    var card = e.target.closest('[data-event-id]');
+    if (!card) return;
+    var eventId = card.getAttribute('data-event-id');
+    if (eventId) togglePrepDetail(eventId);
+  });
 });
 </script>
 </body>
