@@ -900,8 +900,9 @@ function editStatusNote(el, rowId) {
 // ── TASK TITLE (inline edit) ──
 function editTaskTitle(el, rowId) {
   const currentText = el.textContent;
-  const input = document.createElement('textarea');
-  input.style.cssText = 'background:#252525;border:1px solid #555;border-radius:var(--radius);padding:2px 6px;color:#d4d4d4;font-size:14px;width:100%;outline:none;font-family:var(--font);resize:vertical;min-height:28px';
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.style.cssText = 'background:#252525;border:1px solid #555;border-radius:var(--radius);padding:2px 6px;color:#d4d4d4;font-size:15.5px;width:100%;outline:none;font-family:var(--font)';
   input.value = currentText.trim() === 'Add note...' ? '' : currentText;
   input.placeholder = 'Edit task text...';
   el.replaceWith(input);
