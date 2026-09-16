@@ -23,6 +23,7 @@ import dovaSetupHandler from '../lib/handlers/dova-setup.js';
 import dovaSeedHandler from '../lib/handlers/dova-seed.js';
 import dovaWorkspaceHandler from '../lib/handlers/dova-workspace.js';
 import dovaUpdateSchedule from '../lib/handlers/dova-update-schedule.js';
+import extractFromNote from './extract-from-note.js';
 
 // Module-level flagged store cache (survives warm instances)
 let _flaggedCache = null;
@@ -95,8 +96,10 @@ export default function handler(req, res) {
     case '/api/dova-workspace':
       return dovaWorkspaceHandler(req, res);
     case '/api/dova-update-schedule':
-      return dovaUpdateSchedule(req, res);
-    default:
+          return dovaUpdateSchedule(req, res);
+        case '/api/extract-from-note':
+          return extractFromNote(req, res);
+        default:
           // Pass through tasks sub-routes (e.g. /api/tasks/12345/discussions)
           if (path.startsWith('/api/tasks/')) {
                       const origPath = req.query.path ? '/api/' + req.query.path : path;
