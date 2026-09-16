@@ -93,7 +93,12 @@ export default async function handler(req, res) {
   if (smIdx >= 0) cells.splice(smIdx, 1);
 
   // Strip debug info and build clean cell array
-  const cleanCells = cells.map(c => ({ columnId: c.columnId, value: c.value, objectValue: c.objectValue }));
+  const cleanCells = cells.map(c => {
+    const cell = { columnId: c.columnId };
+    if (c.objectValue !== undefined) cell.objectValue = c.objectValue;
+    else if (c.value !== undefined) cell.value = c.value;
+    return cell;
+  });
 
   if (cleanCells.length === 0) {
     return res.status(400).json({ error: 'No valid data to promote' });
