@@ -26,6 +26,7 @@ import extractFromNote from './extract-from-note.js';
 import prepHandler from './prep.js';
 import stageHandler from './stage.js';
 import promoteHandler from './promote.js';
+import debugPromote from './debug-promote.js';
  
  // Module-level flagged store cache (survives warm instances)
 let _flaggedCache = null;
@@ -104,8 +105,10 @@ export default function handler(req, res) {
                                                 case '/api/stage':
                                                                                   return stageHandler(req, res);
                                                                                 case '/api/promote':
-                                                                                  return promoteHandler(req, res);
-                                                                        default:
+                                                                                                                                                                  return promoteHandler(req, res);
+                                                                                                                                                                case '/api/debug-promote':
+                                                                                                                                                                  return debugPromote(req, res);
+                                                                                                                                                        default:
           // Pass through tasks sub-routes (e.g. /api/tasks/12345/discussions)
           if (path.startsWith('/api/tasks/')) {
                       const origPath = req.query.path ? '/api/' + req.query.path : path;
