@@ -57,6 +57,44 @@ body{display:flex;flex-direction:column}
 .task-body{max-width:1100px;flex:0 1 auto;min-width:0}
 .task-title{font-size:15.5px;font-weight:500;color:var(--fg);line-height:1.3;word-break:break-word;cursor:pointer;overflow:visible}
 .completed .task-title{text-decoration:line-through;opacity:0.6}
+/* Check-complete animation */
+.task.completed .task-meta,
+.task.completed .task-actions,
+.task.completed .status-note,
+.task.completed .note-suggestion {
+  transition: opacity 0.2s;
+  opacity: 0.4;
+}
+@keyframes collapseUp {
+  from { max-height: 200px; padding-top: 4px; padding-bottom: 4px; opacity: 0.4; margin-bottom: 0; border-bottom-width: 1px; }
+  to { max-height: 0; padding-top: 0; padding-bottom: 0; opacity: 0; margin-bottom: 0; border-bottom-width: 0; }
+}
+.task.collapsing {
+  animation: collapseUp 0.3s ease-out forwards;
+  overflow: hidden;
+  pointer-events: none;
+}
+.task.collapsed {
+  max-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+/* Count animation */
+@keyframes countFlash {
+  from { color: var(--accent); transform: scale(1.1); }
+  to { color: inherit; transform: scale(1); }
+}
+.count-flash {
+  animation: countFlash 0.3s ease-out;
+}
+.completed-today {
+  color: var(--accent);
+  font-weight: 500;
+}
 .task-meta{display:flex;gap:8px;margin-top:0;flex-wrap:wrap;align-items:center;line-height:1.5}
 .meta-tag{font-size:14px;white-space:nowrap;color:rgba(240,239,239,0.65)}
 .meta-tag.owner{background:rgba(190,209,198,0.15);color:var(--accent);padding:1px 5px;border-radius:3px}
@@ -147,6 +185,39 @@ body{display:flex;flex-direction:column}
 .undo-toast button{font-size:12px;padding:2px 8px;border-radius:var(--radius);border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;font-family:var(--font)}
 .undo-toast button:hover{background:rgba(190,209,198,0.15)}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+/* Prep View */
+.prep-view{display:none;flex:1;overflow-y:auto;padding:8px 10px}
+.prep-view.active{display:block}
+.prep-loading{padding:24px;text-align:center;color:var(--muted);font-size:13px}
+.prep-error{padding:24px;text-align:center;color:var(--danger);font-size:13px}
+.prep-empty{padding:24px;text-align:center;color:var(--muted);font-size:13px}
+.prep-card{background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:10px;padding:10px 12px;transition:border-color .15s}
+.prep-card:hover{border-color:#555}
+.prep-card.has-note{border-left:3px solid var(--accent)}
+.prep-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;gap:8px}
+.prep-date{font-size:11px;color:var(--muted);font-weight:500;white-space:nowrap}
+.prep-time{font-size:13px;color:var(--muted);white-space:nowrap}
+.prep-title{font-size:15px;font-weight:600;color:var(--fg);margin:0 0 4px}
+.prep-meta{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:6px}
+.prep-meta span{white-space:nowrap}
+.prep-organizer{color:var(--accent)}
+.prep-attendee-count{color:#888}
+.prep-loc{color:#888;max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prep-divider{border:none;border-top:1px solid var(--border);margin:8px 0}
+.prep-section-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.prep-summary{font-size:13px;color:var(--fg);line-height:1.5;max-height:200px;overflow:hidden;position:relative}
+.prep-summary.expanded{max-height:none}
+.prep-summary-expand{font-size:11px;color:var(--accent);cursor:pointer;margin-top:2px;display:inline-block}
+.prep-summary-expand:hover{text-decoration:underline}
+.prep-action-item{padding:3px 0;font-size:13px;color:var(--fg);display:flex;gap:6px;align-items:flex-start}
+.prep-action-assignee{background:rgba(190,209,198,0.12);color:var(--accent);padding:0 5px;border-radius:3px;font-size:11px;font-weight:500;white-space:nowrap;flex-shrink:0}
+.prep-action-text{color:var(--fg);line-height:1.3}
+.prep-no-note{font-size:12px;color:var(--muted);font-style:italic;padding:4px 0}
+.prep-view-note-btn{font-size:11px;padding:2px 8px;border-radius:3px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;font-family:var(--font);margin-top:4px}
+.prep-view-note-btn:hover{background:rgba(190,209,198,0.12)}
+.prep-day-header{font-size:14px;font-weight:600;color:var(--fg);margin:12px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.prep-day-header.today{color:var(--accent)}
+.prep-attendee-list{font-size:12px;color:var(--muted);margin-bottom:6px;line-height:1.4}
 </style>
 </head>
 <body>
@@ -156,6 +227,7 @@ body{display:flex;flex-direction:column}
     <span class="header-title">Tasks</span>
     <span class="header-subtitle">
       <a href="https://dova-dashboard-ten.vercel.app/" target="_blank" style="color:rgba(255,255,255,0.55);text-decoration:none;font-size:13px;margin-right:10px">📊 DOVA</a>
+      <span style="cursor:pointer;font-size:13px;color:rgba(255,255,255,0.4);margin-right:8px" onclick="toggleSound()" id="sound-toggle" title="Toggle completion sound">🔇</span>
       <span id="updated-at"></span>
     </span>
   </div>
@@ -163,8 +235,8 @@ body{display:flex;flex-direction:column}
     <button class="tab active" data-project="all">All</button>
     <button class="tab" data-project="DOVA">DOVA</button>
     <button class="tab" data-project="MFP">MFP</button>
-    <button class="tab" data-project="Sphere">Sphere</button>
     <button class="tab" data-project="Business">Business</button>
+    <button class="tab" id="prep-tab" data-project="prep">Prep</button>
   </div>
   <div class="source-chips">
     <button class="source-chip active" data-source="all">All</button>
@@ -193,8 +265,11 @@ body{display:flex;flex-direction:column}
   <span class="filter-count" id="count-display">0 tasks</span>
 </div>
 <div class="tasks" id="task-list"></div>
+<div class="prep-view" id="prep-view"></div>
 <div class="status-bar">
   <span id="my-tasks-count"></span>
+  <span id="completed-today-count"></span>
+  <span id="context-message"></span>
   <span id="refresh-status"></span>
 </div>
 <script>
@@ -249,6 +324,86 @@ function displayStatus(s) {
   if (!s) return '';
   if (s === 'Complete') return 'Closed';
   return s;
+}
+
+// ── SOUND ──
+let audioCtx = null;
+let soundEnabled = false;
+try { soundEnabled = localStorage.getItem('luci_sound') === 'on'; } catch(e) {}
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  try { localStorage.setItem('luci_sound', soundEnabled ? 'on' : 'off'); } catch(e) {}
+  document.getElementById('sound-toggle').textContent = soundEnabled ? '🔊' : '🔇';
+}
+function playClick() {
+  if (!soundEnabled) return;
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = 800;
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.08);
+  } catch(e) {}
+}
+// Init sound toggle display
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    document.getElementById('sound-toggle').textContent = soundEnabled ? '🔊' : '🔇';
+  }, 0);
+});
+
+// ── DAILY COMPLETION COUNT ──
+function getCompletedToday() {
+  try {
+    const stored = JSON.parse(localStorage.getItem('luci_completed_daily') || '{"date":"","count":0}');
+    const today = new Date().toISOString().slice(0, 10);
+    if (stored.date !== today) {
+      stored.date = today;
+      stored.count = 0;
+      localStorage.setItem('luci_completed_daily', JSON.stringify(stored));
+    }
+    return stored.count;
+  } catch(e) { return 0; }
+}
+function incrementCompletedToday() {
+  let c = getCompletedToday() + 1;
+  try {
+    localStorage.setItem('luci_completed_daily', JSON.stringify({ date: new Date().toISOString().slice(0, 10), count: c }));
+  } catch(e) {}
+  return c;
+}
+function decrementCompletedToday() {
+  let c = Math.max(0, getCompletedToday() - 1);
+  try {
+    localStorage.setItem('luci_completed_daily', JSON.stringify({ date: new Date().toISOString().slice(0, 10), count: c }));
+  } catch(e) {}
+  return c;
+}
+function updateCompletedTodayDisplay(animate) {
+  const c = getCompletedToday();
+  const el = document.getElementById('completed-today-count');
+  if (c > 0) {
+    el.textContent = c + ' closed today';
+    el.className = 'completed-today' + (animate ? ' count-flash' : '');
+    if (animate) setTimeout(function() { el.className = 'completed-today'; }, 300);
+  } else {
+    el.textContent = '';
+    el.className = '';
+  }
+}
+function setContextMessage(msg, duration) {
+  const el = document.getElementById('context-message');
+  el.textContent = msg || '';
+  el.className = 'count-flash';
+  if (duration) {
+    setTimeout(function() { el.textContent = ''; }, duration);
+  }
 }
 
 // ── TASK TYPE INFERENCE ──
@@ -435,6 +590,7 @@ function render() {
       const unowned = filtered.filter(t => !t.owner && t.status !== 'Complete').length;
       document.getElementById('count-display').textContent = filtered.length + ' tasks';
       document.getElementById('my-tasks-count').textContent = myTasks + ' mine' + (overdue ? '  |  🔴 ' + overdue + ' overdue' : '') + (dueWeek ? '  |  ' + dueWeek + ' this week' : '') + (unowned ? '  |  ' + unowned + ' unowned' : '');
+      updateCompletedTodayDisplay(false);
 }
 
 function getActionItem(rowId) {
@@ -556,108 +712,183 @@ function cycleStatus(el, rowId) {
   }).catch(function() { loadTasks(); });
 }
 
-// ── TOGGLE TASK with undo toast on completion ──
+// ── TOGGLE TASK with animation on complete ──
 function toggleTask(el, rowId) {
-  const taskEl = el.closest('.task');
-  const isDone = el.classList.contains('done');
-
-  // Find current raw status from allTasks
-  const task = allTasks.find(function(t) { return String(t.rowId) === String(rowId); });
+  var taskEl = el.closest('.task');
+  var isDone = el.classList.contains('done');
+  var task = allTasks.find(function(t) { return String(t.rowId) === String(rowId); });
   if (!task) return;
-  const rawStatus = task.status || 'Not Started';
-  const isClosed = rawStatus === 'Complete' || isDone;
+  var rawStatus = task.status || 'Not Started';
+  var isClosed = rawStatus === 'Complete' || isDone;
+  var becomingComplete = !isClosed;
+  var prevStatus = rawStatus;
 
-  // Compute next status
-  const newStatus = isClosed ? 'Not Started' : 'Complete';
-  const prevStatus = rawStatus;
-
-  // Optimistic UI
-  if (isClosed) {
+  // ---- REOPENING ----
+  if (!becomingComplete) {
     el.classList.remove('done');
     el.innerHTML = '';
     taskEl.classList.remove('completed');
-  } else {
-    el.classList.add('done');
-    el.innerHTML = '&#10003;';
-    taskEl.classList.add('completed');
-  }
+    var meta = taskEl.querySelector('.task-meta');
+    var actions = taskEl.querySelector('.task-actions');
+    var sn = taskEl.querySelector('.status-note');
+    var ns = taskEl.querySelector('.note-suggestion');
+    if (meta) meta.style.opacity = '';
+    if (actions) actions.style.opacity = '';
+    if (sn) sn.style.opacity = '';
+    if (ns) ns.style.opacity = '';
 
-  // If toggling to Complete, show undo toast and delay the API revert timer
-  const becomingComplete = !isClosed;
-  if (!becomingComplete) {
-    // Toggling back to Not Started — write immediately, no undo needed
-    const source = taskEl.dataset.source || 'project';
+    var source = taskEl.dataset.source || 'project';
     fetch('/api/tasks/' + rowId + '?source=' + source, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus })
+      body: JSON.stringify({ status: 'Not Started' })
     })
       .then(function(r) {
         if (!r.ok) {
-          if (isDone) { el.classList.add('done'); el.innerHTML = '&#10003;'; taskEl.classList.add('completed'); }
-          else { el.classList.remove('done'); el.innerHTML = ''; taskEl.classList.remove('completed'); }
-          showToast('Toggle failed', 2000);
+          el.classList.add('done'); el.innerHTML = '&#10003;'; taskEl.classList.add('completed');
+          showToast('Revert failed', 2000);
         } else {
-          task.status = newStatus;
+          task.status = 'Not Started';
           loadTasks();
         }
       })
       .catch(function() {
-        if (isDone) { el.classList.add('done'); el.innerHTML = '&#10003;'; taskEl.classList.add('completed'); }
-        else { el.classList.remove('done'); el.innerHTML = ''; taskEl.classList.remove('completed'); }
+        el.classList.add('done'); el.innerHTML = '&#10003;'; taskEl.classList.add('completed');
       });
     return;
   }
 
-  // Toggling to Complete — write API, show undo toast
-  const source = taskEl.dataset.source || 'project';
-  fetch('/api/tasks/' + rowId + '?source=' + source, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status: 'Complete' })
-  })
-    .then(function(r) {
-      if (!r.ok) {
-        // Revert optimistic UI
+  // ---- COMPLETING: animated sequence ----
+  playClick();
+
+  // Step 1: Fill checkbox (CSS handles 150ms transition)
+  el.classList.add('done');
+  el.innerHTML = '&#10003;';
+  taskEl.classList.remove('overdue');
+
+  // Step 2: After checkbox fills, add strikethrough + fade
+  setTimeout(function() {
+    taskEl.classList.add('completed');
+    var meta = taskEl.querySelector('.task-meta');
+    var actions = taskEl.querySelector('.task-actions');
+    var sn = taskEl.querySelector('.status-note');
+    var ns = taskEl.querySelector('.note-suggestion');
+    if (meta) meta.style.opacity = '0.4';
+    if (actions) actions.style.opacity = '0.4';
+    if (sn) sn.style.opacity = '0.4';
+    if (ns) ns.style.opacity = '0.4';
+
+    // Step 3: Call API during the hold
+    var source = taskEl.dataset.source || 'project';
+    fetch('/api/tasks/' + rowId + '?source=' + source, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'Complete' })
+    })
+      .then(function(r) {
+        if (!r.ok) {
+          el.classList.remove('done');
+          el.innerHTML = '';
+          taskEl.classList.remove('completed');
+          if (meta) meta.style.opacity = '';
+          if (actions) actions.style.opacity = '';
+          if (sn) sn.style.opacity = '';
+          if (ns) ns.style.opacity = '';
+          showToast('Toggle failed', 2000);
+          return;
+        }
+        task.status = 'Complete';
+
+        // Step 4: Hold 600ms total from when completed class was added
+        setTimeout(function() {
+          // Step 5: Collapse upward (CSS animation 300ms)
+          taskEl.classList.add('collapsing');
+
+          // Step 6: After collapse, update counts and show undo toast
+          setTimeout(function() {
+            taskEl.classList.remove('collapsing');
+            taskEl.classList.add('collapsed');
+
+            // Update daily count
+            var count = incrementCompletedToday();
+            updateCompletedTodayDisplay(true);
+
+            // Context message: check if last overdue cleared
+            var myTasks = allTasks.filter(function(t) { return t.owner === 'Whitney Williams' && t.status !== 'Complete'; });
+            var stillOverdue = myTasks.filter(function(t) { return isOverdue(t.dueDate); });
+            if (stillOverdue.length === 0) {
+              setContextMessage('No overdue items', 3000);
+            }
+            // Check if project cleared
+            var thisProj = task.project;
+            if (thisProj) {
+              var openInProj = myTasks.filter(function(t) { return t.project === thisProj; });
+              if (openInProj.length === 0) {
+                if (stillOverdue.length === 0) {
+                  setContextMessage('No overdue items | ' + thisProj + ' clear', 3000);
+                } else {
+                  setContextMessage(thisProj + ' clear', 3000);
+                }
+              }
+            }
+
+            // Update footer count
+            var myCount = myTasks.length;
+            document.getElementById('my-tasks-count').textContent = myCount + ' mine';
+
+            // Step 7: Show undo toast (5s)
+            showUndoToast(
+              'Marked closed',
+              function() {
+                // UNDO: restore row
+                taskEl.classList.remove('collapsed');
+                decrementCompletedToday();
+                updateCompletedTodayDisplay(true);
+                el.classList.remove('done');
+                el.innerHTML = '';
+                taskEl.classList.remove('completed');
+                if (meta) meta.style.opacity = '';
+                if (actions) actions.style.opacity = '';
+                if (sn) sn.style.opacity = '';
+                if (ns) ns.style.opacity = '';
+
+                fetch('/api/tasks/' + rowId + '?source=' + source, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ status: prevStatus })
+                })
+                  .then(function(r2) {
+                    if (r2.ok) {
+                      task.status = prevStatus;
+                      loadTasks();
+                    } else {
+                      showToast('Undo failed', 2000);
+                      loadTasks();
+                    }
+                  })
+                  .catch(function() { loadTasks(); });
+              },
+              function() {
+                // TIMEOUT: remove row from DOM permanently
+                taskEl.remove();
+                var idx = allTasks.indexOf(task);
+                if (idx > -1) allTasks.splice(idx, 1);
+                render();
+              }
+            );
+          }, 320); // after collapse animation
+        }, 600); // hold duration
+      })
+      .catch(function() {
         el.classList.remove('done');
         el.innerHTML = '';
         taskEl.classList.remove('completed');
-        showToast('Toggle failed', 2000);
-        return;
-      }
-      task.status = 'Complete';
-      // Show undo toast with 5-second window
-      showUndoToast(
-        'Task completed \u2014 Undo to revert',
-        function() {
-          // UNDO: revert back to previous status
-          fetch('/api/tasks/' + rowId + '?source=' + source, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: prevStatus })
-          })
-            .then(function(r2) {
-              if (r2.ok) {
-                task.status = prevStatus;
-                loadTasks();
-              } else {
-                showToast('Undo failed', 2000);
-                loadTasks();
-              }
-            })
-            .catch(function() { loadTasks(); });
-        },
-        function() {
-          // TIMEOUT: keep completion, refresh
-          loadTasks();
-        }
-      );
-    })
-    .catch(function() {
-      el.classList.remove('done');
-      el.innerHTML = '';
-      taskEl.classList.remove('completed');
-    });
+        if (meta) meta.style.opacity = '';
+        if (actions) actions.style.opacity = '';
+        if (sn) sn.style.opacity = '';
+        if (ns) ns.style.opacity = '';
+      });
+  }, 150); // after checkbox fill
 }
 
 // ── DISCUSSIONS ──
@@ -1111,9 +1342,28 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('project-tabs').addEventListener('click', function(e) {
     const tab = e.target.closest('.tab');
     if (!tab) return;
+    const project = tab.dataset.project;
+
+    // Prep view is special — switch between task view and prep view
+    if (project === 'prep') {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('task-list').style.display = 'none';
+      document.querySelector('.filters').style.display = 'none';
+      document.querySelector('.source-chips').style.display = 'none';
+      document.getElementById('prep-view').classList.add('active');
+      loadPrepView();
+      return;
+    }
+
+    // Show task view
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
-    currentProject = tab.dataset.project;
+    document.getElementById('task-list').style.display = '';
+    document.querySelector('.filters').style.display = '';
+    document.querySelector('.source-chips').style.display = '';
+    document.getElementById('prep-view').classList.remove('active');
+    currentProject = project;
     render();
   });
 
@@ -1175,6 +1425,127 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   } catch(e) {}
   loadTasks();
+  // ── PREP VIEW ──
+  function loadPrepView() {
+    const v = document.getElementById('prep-view');
+    v.innerHTML = '<div class="prep-loading">Loading meeting prep...</div>';
+
+    fetch('/api/prep')
+      .then(r => {
+        if (r.status === 401) throw new AuthRequiredError();
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(data => {
+        if (!data.events || data.events.length === 0) {
+          v.innerHTML = '<div class="prep-empty">No upcoming meetings in the next 14 days.</div>';
+          return;
+        }
+        renderPrepView(v, data.events);
+      })
+      .catch(err => {
+        if (err instanceof AuthRequiredError) {
+          v.innerHTML = '<div class="prep-error">' +
+            'Calendar access requires Microsoft sign-in. ' +
+            '<a href="/auth/login" class="prep-view-note-btn" style="text-decoration:none;display:inline-block;margin-top:8px">' +
+            'Sign in with Microsoft</a></div>';
+          return;
+        }
+        v.innerHTML = '<div class="prep-error">Failed to load: ' + escapeHtml(err.message) + '</div>';
+      });
+  }
+
+  function AuthRequiredError() { this.name = 'AuthRequiredError'; }
+  AuthRequiredError.prototype = new Error();
+
+  function renderPrepView(container, events) {
+      // Group events by day using dateET (already Eastern Time)
+      const groups = {};
+
+      for (const ev of events) {
+        const day = (ev.dateET || '').split(',')[0].trim(); // Use dateET for grouping
+        if (!day) continue;
+        if (!groups[day]) groups[day] = [];
+        groups[day].push(ev);
+      }
+
+      let html = '';
+      const todayStr = new Date().toLocaleDateString('en-US', { timeZone: 'America/New_York', weekday: 'short', month: 'short', day: 'numeric' });
+      const dayOrder = ['Today', 'Tomorrow'];
+
+      for (const [dayLabel, dayEvents] of Object.entries(groups)) {
+        // Filter by project if a tab is selected (when Prep tab shows from project tab)
+        // Right now Prep is its own tab, so show all
+
+        const isToday = dayLabel.startsWith('Today');
+        html += '<div class="prep-day-header' + (isToday ? ' today' : '') + '">' + escapeHtml(dayLabel) + '</div>';
+        html += '<div style="margin-bottom:6px">'; // Tighter group spacing
+
+        for (const ev of dayEvents) {
+          const hasNote = ev.hasGranolaNote;
+          const isOneOff = !ev.isRecurring;
+          const cardClass = 'prep-card' + (hasNote ? ' has-note' : '');
+          const projectBadge = ev.project ? ' <span class="meta-tag project" style="font-size:10px;padding:0 4px">' + escapeHtml(ev.project) + '</span>' : '';
+
+          // Card with tighter padding (6px vs 10px)
+          html += '<div class="' + cardClass + '" style="padding:6px 10px;margin-bottom:6px">';
+          html += '<div class="prep-header" style="margin-bottom:3px">';
+          html += '  <div class="prep-title" style="font-size:14px">' + escapeHtml(ev.subject) + projectBadge + '</div>';
+          html += '  <div class="prep-time" style="font-size:12px">' + escapeHtml(ev.timeET || '') + '</div>';
+          html += '</div>';
+
+          // Meta line (tighter)
+          html += '<div class="prep-meta" style="margin-bottom:4px;font-size:11px">';
+          if (ev.location) html += '<span class="prep-loc">' + escapeHtml(ev.location) + '</span>';
+          html += '</div>';
+
+          if (hasNote) {
+            // Granola summary (collapsed)
+            if (ev.summaryPreview) {
+              const truncated = ev.summaryPreview.length > 350;
+              const display = truncated ? escapeHtml(ev.summaryPreview.substring(0, 350)) + '...' : escapeHtml(ev.summaryPreview);
+              html += '<div class="prep-summary" id="prep-sum-' + escapeHtml(ev.granolaNoteId || 'x') + '" style="max-height:150px">' + display + '</div>';
+              if (truncated) {
+                html += '<span class="prep-summary-expand" onclick="document.getElementById(\'prep-sum-\' + escapeHtml(\'' + escapeHtml(ev.granolaNoteId || 'x') + '\')).classList.toggle(\'expanded\');this.textContent=this.textContent==\'Show more\'?\'Show less\':\'Show more\'">Show more</span>';
+              }
+            }
+
+            // Note age warning
+            if (ev.granolaStaleDays && ev.granolaStaleDays > 30) {
+              html += '<div style="font-size:11px;color:var(--warn);margin-top:2px">Note from ' + escapeHtml(ev.granolaNoteDate || '') + ' (' + ev.granolaStaleDays + ' days ago)</div>';
+            }
+
+            // Action items
+            if (ev.actionItems && ev.actionItems.length > 0) {
+              html += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">Open Action Items</div>';
+              for (const item of ev.actionItems) {
+                html += '<div class="prep-action-item" style="font-size:12px;padding:2px 0">';
+                html += '  <span class="prep-action-assignee" style="font-size:10px">' + escapeHtml(item.assignees[0]) + '</span>';
+                html += '  <span class="prep-action-text">' + escapeHtml(item.text) + '</span>';
+                html += '</div>';
+              }
+            }
+
+            // View note button
+            if (ev.granolaWebUrl) {
+              html += '<a href="' + escapeHtml(ev.granolaWebUrl) + '" target="_blank" class="prep-view-note-btn" style="text-decoration:none;display:inline-block;font-size:10px">View in Granola</a>';
+            }
+          } else if (isOneOff) {
+            // One-off: no note expected, no nag line
+          } else if (ev.neverHadNote) {
+            // Recurring series that has never had notes: single line, no error
+            html += '<div class="prep-no-note" style="font-size:11px;padding:2px 0;font-style:italic;color:var(--muted)">No meeting notes for this series.</div>';
+          } else {
+            // Shouldn't happen — series was unknown
+          }
+
+          html += '</div>';
+        }
+        html += '</div>';
+      }
+
+      container.innerHTML = html;
+    }
   // Auto-refresh every 60 seconds, skip while editing
   setInterval(function() {
     if (hasActiveInput) return; // Don't overwrite what the user is typing
