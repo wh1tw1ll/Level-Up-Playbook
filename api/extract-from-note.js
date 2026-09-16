@@ -100,11 +100,11 @@ function extract(text, parentProject, parentFirm) {
       } else if (pattern.source.includes('check|look')) {
         action = `Check on ${match[1]}`;
         party = '';
-      } else if (pattern.source.includes('he|she|they')) {
-        // Need to infer the party from context — use the last name before the pattern
-        action = match[1] || '';
-        party = '';
-      } else if (pattern.source.includes('going\\s+to') || pattern.source.includes('will\\s+')) {
+      } else if (pattern.source.includes('talk')) {
+              // Talked to X, he needs Y
+              party = match[1];
+              action = match[2] || '';
+            } else if (pattern.source.includes('remind')) {
         party = match[1];
         action = match[2];
         // Check for timing
