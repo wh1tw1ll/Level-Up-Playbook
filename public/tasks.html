@@ -229,6 +229,24 @@ function displayStatus(s) {
   return s;
 }
 
+// ── TASK TYPE INFERENCE ──
+function getTaskType(text) {
+  if (!text) return 'DO';
+  var t = text.trim().toLowerCase();
+  // DRAFT: actions about sending, emailing, responding, reaching out
+  var draftStart = /^(send|email|respond|reply|circulate|forward|follow\s+up|reach\s+out|confirm\s+with|write|draft|compose|contact|call|message|text)\b/;
+  var draftAny = /\b(send|email|respond|reply|reach\s+out|contact|call|message|text)\b/;
+  // TRACK: actions about monitoring, verifying, confirming facts
+  var trackStart = /^(track|monitor|review|verify|confirm\s+that|add\s+to|update)\b/;
+  var trackAny = /\b(track|monitor|review|verify|confirm)\b/;
+
+  if (draftStart.test(t)) return 'DRAFT';
+  if (trackStart.test(t)) return 'TRACK';
+  if (draftAny.test(t)) return 'DRAFT';
+  if (trackAny.test(t)) return 'TRACK';
+  return 'DO';
+}
+
 // ── QUICK FILTER TOGGLE ──
 function toggleQuickFilter(name) {
   quickFilters[name] = !quickFilters[name];
@@ -342,8 +360,9 @@ function render() {
       snHtml = '<div class="status-note" onclick="event.stopPropagation();editStatusNote(this,' + t.rowId + ')" style="opacity:0.4;cursor:text">Add note...</div>';
     }
     div.dataset.source = t.source;
-    // Source shown as plain text in metadata (no PROJECT badge on far right)
+    // Source shown as plain text in metadata
     let sourceText = t.source === 'personal' ? 'Personal' : '';
+    let typeLabel = getTaskType(t.actionItem);
     let linkedHtml = t.source === 'personal' && t.linkedRowId
       ? '<span class="linked-row" onclick="event.stopPropagation();jumpToLinkedRow(\'' + t.linkedRowId + '\')">&#128279;</span>'
       : '';
@@ -358,7 +377,7 @@ function render() {
             else if (dispatchState.state === 'ready') { dLabel = 'Ready'; dCls += ' ready'; }
             else if (dispatchState.state === 'failed') { dLabel = 'Failed'; dCls += ' failed'; }
             let tip = canDispatch ? 'Dispatch to LUCI' : 'Auto-ingested - review in Smartsheet before dispatching';
-    let dispatchBtnHtml = '<button class="' + dCls + '" data-row-id="' + t.rowId + '" data-source="' + (t.source || 'project') + '" title="' + tip + '"' +
+    let dispatchBtnHtml = '<button class="' + dCls + '" data-row-id="' + t.rowId + '" data-source="' + (t.source || 'project') + '" data-type="' + typeLabel + '" title="' + tip + '"' +
       (dispatchState.disabled ? ' disabled' : '') +
       (canDispatch ? '' : ' disabled') + '>' + dLabel + '</button>';
     div.innerHTML =
@@ -375,6 +394,7 @@ function render() {
           (firm ? '<span class="meta-tag firm">' + escapeHtml(firm) + '</span>' : '') +
           (statusLabel ? '<span class="meta-tag ' + statusClass + '" onclick="event.stopPropagation();cycleStatus(this,' + t.rowId + ')">' + escapeHtml(statusLabel) + '</span>' : '') +
           (sourceText ? '<span class="meta-tag">' + sourceText + '</span>' : '') +
+          (typeLabel ? '<span class="meta-tag">' + typeLabel + '</span>' : '') +
           hotBadge +
           unownedBadge +
           discBadge +
@@ -817,7 +837,7 @@ function getDispatchState(task) {
   return { state: state, disabled: disabled };
 }
 
-function dispatchTask(btn, rowId, source) {
+function dispatchTask(btn, rowId, source, type) {
   var state = getDispatchState({ statusNote: btn.parentElement.querySelector('.status-note') ? btn.parentElement.querySelector('.status-note').textContent : '' });
   if (state.state === 'dispatched' || state.state === 'working') return; // Already in flight
 
@@ -826,7 +846,7 @@ function dispatchTask(btn, rowId, source) {
   btn.className = 'task-dispatch dispatched';
   btn.disabled = true;
 
-  fetch('/api/dispatch/' + rowId + '?source=' + source, {
+  fetch('/api/dispatch/' + rowId + '?source=' + source + '&type=' + (type || 'DO'), {
     method: 'POST'
   })
     .then(function(r) { return r.json(); })
@@ -930,7 +950,8 @@ document.addEventListener('DOMContentLoaded', function() {
     e.stopPropagation();
     var rowId = btn.dataset.rowId;
     var source = btn.dataset.source || 'project';
-    dispatchTask(btn, rowId, source);
+    var type = btn.dataset.type || 'DO';
+    dispatchTask(btn, rowId, source, type);
   });
 
   // Initial load from cache then fetch

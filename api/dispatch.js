@@ -1,6 +1,7 @@
 // api/dispatch.js — POST /api/dispatch/:rowId
-// Sets Status Note to 'Dispatched to LUCI'. LUCI (this Hermes agent)
-// picks up dispatched tasks and posts results back through chat.
+// Sets Status Note to indicate dispatch state.
+// Handles DRAFT type: sends rich draft request context to Telegram.
+// Handles TRACK/DO: current behavior.
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -18,6 +19,7 @@ export default async function handler(req, res) {
     if (!rowId) return res.status(400).json({ error: 'Missing rowId in URL' });
 
     const source = url.searchParams.get('source') || 'project';
+    const type = url.searchParams.get('type') || 'DO';
     const sheetId = source === 'personal'
       ? '2802755367554948'
       : '4456864287772548';
@@ -42,7 +44,113 @@ export default async function handler(req, res) {
     const rowData = await rowResp.json();
 
     const nowStamp = new Date().toISOString().slice(0, 16);
-    const note = `Dispatched to LUCI ${nowStamp}`;
+
+    // Helper: get cell value by column title
+    function getCell(title) {
+      const c = rowData.cells?.find(cell => cell.columnId === cols[title]);
+      return c?.displayValue || c?.value || null;
+    }
+
+    const actionItem = getCell('Action ID') || '?';
+    const projectVal = getCell('Project') || '?';
+    const ownerVal = getCell('Owner') || 'Unassigned';
+    const dueVal = getCell('Due Date') || null;
+    const firmVal = getCell('Responsible Firm(s)') || null;
+    const statusVal = getCell('Status') || '?';
+    const statusNote = getCell('Status Note') || '';
+    const confidence = getCell('Confidence') || '';
+
+    // Fetch discussions/notes for the row
+    let notes = [];
+    try {
+      const discResp = await fetch(
+        `https://api.smartsheet.com/2.0/sheets/${sheetId}/rows/${rowId}/discussions`,
+        { headers: { Authorization: 'Bearer ' + ssToken } }
+      );
+      if (discResp.ok) {
+        const discData = await discResp.json();
+        const discussions = discData.data || [];
+        for (const d of discussions) {
+          const dResp = await fetch(
+            `https://api.smartsheet.com/2.0/sheets/${sheetId}/discussions/${d.id}`,
+            { headers: { Authorization: 'Bearer ' + ssToken } }
+          );
+          if (dResp.ok) {
+            const dData = await dResp.json();
+            for (const c of dData.comments || []) {
+              notes.push({
+                author: c.createdBy?.name || c.createdBy?.email || '?',
+                text: c.text || '',
+                createdAt: c.createdAt || ''
+              });
+            }
+          }
+        }
+      }
+    } catch(e) { /* notes are optional */ }
+
+    // === NOTIFY VIA TELEGRAM ===
+    const TELEGRAM_BOT = process.env.TELEGRAM_BOT_TOKEN;
+    const TELEGRAM_CHAT = process.env.LUCI_DISPATCH_CHAT_ID || '8947918104';
+
+    let msg;
+    if (type === 'DRAFT' && TELEGRAM_BOT) {
+      // Format as draft request with full context
+      const dueLine = dueVal ? `Due: ${dueVal}` : '';
+      const firmLine = firmVal ? `Firm: ${firmVal}` : '';
+      const statusLine = statusNote ? `Status note: ${statusNote}` : '';
+      const confidenceLine = confidence ? `Confidence: ${confidence}` : '';
+
+      let notesBlock = '';
+      if (notes.length > 0) {
+        notesBlock = '\n\nNotes:';
+        for (const n of notes) {
+          notesBlock += `\n[${n.author}]: ${n.text.substring(0, 300)}`;
+        }
+      }
+
+      msg =
+`📝 DRAFT REQUEST | ${type} | [${source === 'personal' ? 'Personal' : projectVal}]
+Row #${rowData.rowNumber}
+
+${actionItem}
+
+Owner: ${ownerVal}
+${dueLine}${dueLine ? '' : ''}
+${firmLine}
+Status: ${statusVal}
+${confidenceLine}
+${statusLine}${notesBlock}
+
+_Dispatched ${new Date().toLocaleString()}_
+
+I need: an email draft posted to this row's notes thread. Follow writing rules:
+- Direct, plain sentences. Lead with the ask.
+- Named accountability, specific dates
+- No filler, no em dashes
+- Subject: PROJECT | Brief topic
+- Draft, never send`;
+    } else {
+      // Current behavior for TRACK/DO
+      msg =
+`⚡ ${type === 'TRACK' ? 'TRACK' : 'DISPATCHED'} | [${source === 'personal' ? 'Personal' : projectVal}]
+Row #${rowData.rowNumber}
+
+${actionItem}
+
+Owner: ${ownerVal}
+Due: ${dueVal || 'TBD'}
+Firm: ${firmVal || '?'}
+Category: ${getCell('Category') || '?'}
+Status: ${statusVal}
+
+_Dispatched ${new Date().toLocaleString()}_`;
+    }
+
+    // Update Status Note
+    const note = type === 'DRAFT'
+      ? `Draft requested ${nowStamp}`
+      : `Dispatched to LUCI ${nowStamp}`;
 
     const updateResp = await fetch(
       `https://api.smartsheet.com/2.0/sheets/${sheetId}/rows/${rowId}`,
@@ -63,32 +171,7 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: 'Status Note update failed', detail: err });
     }
 
-    // === TRUE TRIGGER: Notify LUNA via Telegram ===
-    const TELEGRAM_BOT = process.env.TELEGRAM_BOT_TOKEN;
-    const TELEGRAM_CHAT = process.env.LUCI_DISPATCH_CHAT_ID || '8947918104';
     if (TELEGRAM_BOT) {
-      // Build a message with the dispatched task
-      const actVal = rowData.cells?.find(c => c.columnId === cols['Action ID']);
-      const projVal = rowData.cells?.find(c => c.columnId === cols['Project']);
-      const ownerVal = rowData.cells?.find(c => c.columnId === cols['Owner']);
-      const dueVal = rowData.cells?.find(c => c.columnId === cols['Due Date']);
-      const firmVal = rowData.cells?.find(c => c.columnId === cols['Responsible Firm(s)']);
-      const catVal = rowData.cells?.find(c => c.columnId === cols['Category']);
-
-      const msg =
-`⚡ *DISPATCHED TO LUCI*
-Row #${rowData.rowNumber} | [${projVal?.displayValue || projVal?.value || '?'}]
-
-*${actVal?.displayValue || actVal?.value || '?'}*
-
-Owner: ${ownerVal?.displayValue || ownerVal?.value || '?'}
-Due: ${dueVal?.displayValue || dueVal?.value || 'TBD'}
-Firm: ${firmVal?.displayValue || firmVal?.value || '?'}
-Category: ${catVal?.displayValue || catVal?.value || '?'}
-Status: ${rowData.cells?.find(c => c.columnId === cols['Status'])?.displayValue || '?'}
-
-_Dispatched ${new Date().toLocaleString()}_`;
-
       await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -97,10 +180,10 @@ _Dispatched ${new Date().toLocaleString()}_`;
           text: msg,
           parse_mode: 'Markdown'
         })
-      });
+      }).catch(() => {});
     }
 
-    res.json({ success: true, dispatched: true, timestamp: nowStamp, rowId: rowData.id, sheetId });
+    res.json({ success: true, dispatched: true, timestamp: nowStamp, rowId: rowData.id, sheetId, type });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
