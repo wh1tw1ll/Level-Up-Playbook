@@ -74,7 +74,7 @@ export default async function handler(req, res) {
     if (pType === 'DATE') {
       cellObj.value = String(val);
     } else if (pType === 'CONTACT_LIST') {
-      cellObj.value = String(val);
+      cellObj.objectValue = { name: String(val) };
     } else if (pType === 'PICKLIST' || pType === 'MULTI_PICKLIST') {
       cellObj.value = String(val);
     } else if (pType === 'CHECKBOX') {
