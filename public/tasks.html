@@ -226,7 +226,6 @@ function escapeHtml(s) {
 function displayStatus(s) {
   if (!s) return '';
   if (s === 'Complete') return 'Closed';
-  if (s === 'Not Started' || s === 'In Progress') return 'Open';
   return s;
 }
 
@@ -374,7 +373,7 @@ function render() {
           (t.dueDate ? '<span class="meta-tag ' + dueClass + '">' + dueLabel + '</span>' : '') +
           (t.project ? '<span class="meta-tag project">' + escapeHtml(t.project) + '</span>' : '') +
           (firm ? '<span class="meta-tag firm">' + escapeHtml(firm) + '</span>' : '') +
-          (statusLabel ? '<span class="meta-tag ' + statusClass + '">' + escapeHtml(statusLabel) + '</span>' : '') +
+          (statusLabel ? '<span class="meta-tag ' + statusClass + '" onclick="event.stopPropagation();cycleStatus(this,' + t.rowId + ')">' + escapeHtml(statusLabel) + '</span>' : '') +
           (sourceText ? '<span class="meta-tag">' + sourceText + '</span>' : '') +
           hotBadge +
           unownedBadge +
@@ -487,17 +486,57 @@ function loadTasks() {
     });
 }
 
+// ── CYCLE STATUS (inline, 3-state) ──
+function cycleStatus(el, rowId) {
+  const task = allTasks.find(function(t) { return String(t.rowId) === String(rowId); });
+  if (!task) return;
+  const raw = task.status || '';
+  var next;
+  if (raw === 'Not Started' || !raw) next = 'In Progress';
+  else if (raw === 'In Progress') next = 'Complete';
+  else next = 'Not Started';
+
+  // Optimistic update in local data
+  task.status = next;
+  render();
+
+  // Write to API
+  const taskEl = document.querySelector('.task[data-row-id="' + rowId + '"]');
+  const source = taskEl ? taskEl.dataset.source || 'project' : 'project';
+  pendingWrites[rowId] = { fields: { status: next } };
+  fetch('/api/tasks/' + rowId + '?source=' + source, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: next })
+  }).then(function(r) {
+    if (r.ok) { loadTasks(); }
+    else { showToast('Status update failed', 2000); loadTasks(); }
+  }).catch(function() { loadTasks(); });
+}
+
 // ── TOGGLE TASK (optimistic) ──
 function toggleTask(el, rowId) {
   const taskEl = el.closest('.task');
   const isDone = el.classList.contains('done');
 
-  // Optimistic UI
-  el.classList.toggle('done');
-  el.innerHTML = isDone ? '' : '&#10003;';
-  taskEl.classList.toggle('completed');
+  // Find current raw status from allTasks
+  const task = allTasks.find(function(t) { return String(t.rowId) === String(rowId); });
+  const rawStatus = task ? task.status : '';
+  const isClosed = rawStatus === 'Complete' || isDone;
 
-  const newStatus = isDone ? 'Not Started' : 'Complete';
+  // Compute next status
+  const newStatus = isClosed ? 'Not Started' : 'Complete';
+
+  // Optimistic UI: checkbox shows done/not-done state
+  if (isClosed) {
+    el.classList.remove('done');
+    el.innerHTML = '';
+    taskEl.classList.remove('completed');
+  } else {
+    el.classList.add('done');
+    el.innerHTML = '&#10003;';
+    taskEl.classList.add('completed');
+  }
   const source = taskEl.dataset.source || 'project';
   pendingWrites[rowId] = { fields: { status: newStatus } };
 
@@ -510,9 +549,15 @@ function toggleTask(el, rowId) {
     .then(r => {
       if (!r.ok) {
         // Revert optimistic UI on failure
-        el.classList.toggle('done');
-        el.innerHTML = isDone ? '&#10003;' : '';
-        taskEl.classList.toggle('completed');
+        if (isDone) {
+          el.classList.add('done');
+          el.innerHTML = '&#10003;';
+          taskEl.classList.add('completed');
+        } else {
+          el.classList.remove('done');
+          el.innerHTML = '';
+          taskEl.classList.remove('completed');
+        }
         console.error('Toggle failed');
       } else {
         // Refresh to get up-to-date data
@@ -521,9 +566,15 @@ function toggleTask(el, rowId) {
     })
     .catch(() => {
       // Revert on network error
-      el.classList.toggle('done');
-      el.innerHTML = isDone ? '&#10003;' : '';
-      taskEl.classList.toggle('completed');
+      if (isDone) {
+        el.classList.add('done');
+        el.innerHTML = '&#10003;';
+        taskEl.classList.add('completed');
+      } else {
+        el.classList.remove('done');
+        el.innerHTML = '';
+        taskEl.classList.remove('completed');
+      }
     });
 }
 
