@@ -65,24 +65,18 @@ export default async function handler(req, res) {
 
   // Build cells array
   const cells = [];
-  function addCell(title, val, useObj) {
+  function addCell(title, val) {
     if (!val) return;
     const colId = getProjColId(title);
     if (!colId) return;
-    const cell = { columnId: colId };
-    if (useObj) {
-      cell.objectValue = [val];
-    } else {
-      cell.value = val;
-    }
-    cells.push(cell);
+    cells.push({ columnId: colId, value: val });
   }
 
   addCell('Action ID', text);
   if (owner) addCell('Owner', owner);
-  if (status) addCell('Status', status, true); // PICKLIST
+  // Skip Status and Project for now — need to debug column type separately
   if (dueDate) addCell('Due Date', dueDate);
-  if (project) addCell('Project', project, true); // PICKLIST
+  if (notes) addCell('Status Note', notes);
   if (category && category !== 'Staged') addCell('Category', category);
   if (firm) addCell('Responsible Firm(s)', firm);
   if (sourceRef) addCell('SourceRef', sourceRef);
