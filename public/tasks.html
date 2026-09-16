@@ -220,7 +220,7 @@ body{display:flex;flex-direction:column}
 .prep-section-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
 .prep-summary{font-size:13px;color:var(--fg);line-height:1.5;max-height:200px;overflow:hidden;position:relative}
 .prep-summary.expanded{max-height:none}
-.prep-summary-expand{font-size:11px;color:var(--accent);cursor:pointer;margin-top:2px;display:inline-block}
+                html += `<span class="prep-summary-expand" onclick="event.stopPropagation();document.getElementById('prep-sum-' + eventId).classList.toggle('expanded');this.textContent=this.textContent=='Show more'?'Show less':'Show more'">Show more</span>`;
 .prep-summary-expand:hover{text-decoration:underline}
 .prep-action-item{padding:3px 0;font-size:13px;color:var(--fg);display:flex;gap:6px;align-items:flex-start}
 .prep-action-assignee{background:rgba(190,209,198,0.12);color:var(--accent);padding:0 5px;border-radius:3px;font-size:11px;font-weight:500;white-space:nowrap;flex-shrink:0}
@@ -586,7 +586,7 @@ function render() {
     let sourceText = t.source === 'personal' ? 'Personal' : t.source === 'staged' ? 'Staged' : '';
     let typeLabel = getTaskType(t.actionItem);
     let linkedHtml = t.source === 'personal' && t.linkedRowId
-      ? '<span class="linked-row" onclick="event.stopPropagation();jumpToLinkedRow('' + t.linkedRowId + '')">&#128279;</span>'
+      ? '<span class="linked-row" onclick="event.stopPropagation();jumpToLinkedRow(' + t.linkedRowId + ')">&#128279;</span>'
       : '';
     let deleteBtn = '<button class="task-delete" onclick="event.stopPropagation();deleteTask(this,' + t.rowId + ')" title="Delete">&#10005;</button>';
     // Dispatch button - always visible, disabled with tooltip if auto-ingested
@@ -1656,7 +1656,7 @@ document.addEventListener('DOMContentLoaded', function() {
           const detailId = 'prep-detail-' + eventId;
 
           // Card with tighter padding (6px vs 10px) — clickable to toggle detail
-          html += '<div class="' + cardClass + '" style="padding:6px 10px;margin-bottom:6px;cursor:pointer" onclick="togglePrepDetail('' + eventId + '')">';
+          html += '<div class="' + cardClass + '" style="padding:6px 10px;margin-bottom:6px;cursor:pointer" onclick="togglePrepDetail(eventId)">';
           html += '<div class="prep-header" style="margin-bottom:3px">';
           html += '  <div class="prep-title" style="font-size:14px">' + escapeHtml(ev.subject) + projectBadge + '</div>';
           html += '  <div class="prep-time" style="font-size:12px">' + escapeHtml(ev.timeET || '') + '</div>';
@@ -1675,7 +1675,7 @@ document.addEventListener('DOMContentLoaded', function() {
               const display = truncated ? escapeHtml(ev.summaryPreview.substring(0, 350)) + '...' : escapeHtml(ev.summaryPreview);
               html += '<div class="prep-summary" id="prep-sum-' + eventId + '" style="max-height:150px">' + display + '</div>';
               if (truncated) {
-                html += '<span class="prep-summary-expand" onclick="event.stopPropagation();document.getElementById('prep-sum-' + eventId + '').classList.toggle('expanded');this.textContent=this.textContent=='Show more'?'Show less':'Show more'">Show more</span>';
+                html += `<span class="prep-summary-expand" onclick="event.stopPropagation();document.getElementById('prep-sum-' + eventId).classList.toggle('expanded');this.textContent=this.textContent=='Show more'?'Show less':'Show more'">Show more</span>`;
               }
             }
 
