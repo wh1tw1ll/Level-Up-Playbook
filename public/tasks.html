@@ -167,6 +167,12 @@ body{display:flex;flex-direction:column}
 .task-dispatch.failed{background:rgba(232,96,96,0.12);border-color:var(--danger);color:var(--danger);cursor:pointer}
 .task-dispatch.dispatch-disabled{opacity:0.35;cursor:not-allowed;border-color:#333;color:var(--muted)}
 .task-dispatch.dispatch-disabled:hover{background:transparent;border-color:#333;color:var(--muted)}
+/* Promote button for staged items */
+.task-promote{flex:0 0 auto;margin-top:2px;font-size:11px;padding:1px 5px;border-radius:3px;cursor:pointer;border:1px solid var(--accent);background:rgba(190,209,198,0.08);color:var(--accent);transition:all .15s;font-family:var(--font);white-space:nowrap}
+.task-promote:hover{background:rgba(190,209,198,0.2)}
+.task-promote.working{opacity:0.5;cursor:default;animation:pulse 1.5s infinite}
+.task-promote.promoted{background:rgba(126,207,126,0.12);border-color:var(--success);color:var(--success);cursor:default;opacity:0.6}
+.task-promote.failed{background:rgba(232,96,96,0.12);border-color:var(--danger);color:var(--danger);cursor:pointer}
 @keyframes pulse{0%,100%{opacity:0.6}50%{opacity:1}}
 /* Confirm overlay */
 .confirm-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:100;display:flex;align-items:center;justify-content:center;animation:fadeIn .15s}
@@ -257,6 +263,7 @@ body{display:flex;flex-direction:column}
     <button class="source-chip active" data-source="all">All</button>
     <button class="source-chip" data-source="project">Project</button>
     <button class="source-chip" data-source="personal">Personal</button>
+    <button class="source-chip" data-source="staged">Staged</button>
   </div>
 </div>
 <div class="filters">
@@ -576,7 +583,7 @@ function render() {
     }
     div.dataset.source = t.source;
     // Source shown as plain text in metadata
-    let sourceText = t.source === 'personal' ? 'Personal' : '';
+    let sourceText = t.source === 'personal' ? 'Personal' : t.source === 'staged' ? 'Staged' : '';
     let typeLabel = getTaskType(t.actionItem);
     let linkedHtml = t.source === 'personal' && t.linkedRowId
       ? '<span class="linked-row" onclick="event.stopPropagation();jumpToLinkedRow('' + t.linkedRowId + '')">&#128279;</span>'
@@ -595,6 +602,10 @@ function render() {
     let dispatchBtnHtml = '<button class="' + dCls + '" data-row-id="' + t.rowId + '" data-source="' + (t.source || 'project') + '" data-type="' + typeLabel + '" title="' + tip + '"' +
       (dispatchState.disabled ? ' disabled' : '') +
       (canDispatch ? '' : ' disabled') + '>' + dLabel + '</button>';
+    let promoteBtnHtml = '';
+    if (t.source === 'staged') {
+      promoteBtnHtml = '<button class="task-promote" onclick="event.stopPropagation();promoteTask(this,' + t.rowId + ')" title="Promote to Project log">&#8593;</button>';
+    }
     div.innerHTML =
       '<div class="task-check' + (isComplete ? ' done' : '') + '" onclick="event.stopPropagation();toggleTask(this,' + t.rowId + ')">' +
         (isComplete ? '&#10003;' : '') +
@@ -618,7 +629,7 @@ function render() {
         '</div>' +
         '<div class="disc-thread" id="disc-' + t.rowId + '"></div>' +
               '</div>' +
-              '<div class="task-actions">' + dispatchBtnHtml + deleteBtn + '</div>';
+              '<div class="task-actions">' + promoteBtnHtml + dispatchBtnHtml + deleteBtn + '</div>';
     list.appendChild(div);
   }
 
@@ -1372,6 +1383,38 @@ function jumpToLinkedRow(linkedRowId) {
 
 // ── POLLING STATE: pause while editing ──
 var hasActiveInput = false;
+
+// ── PROMOTE: Move staged item to Project log ──
+function promoteTask(btnEl, rowId) {
+  if (btnEl.classList.contains('working') || btnEl.classList.contains('promoted')) return;
+  btnEl.classList.add('working');
+  btnEl.textContent = '...';
+
+  fetch('/api/promote', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ rowId: String(rowId) })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.status === 'promoted') {
+      btnEl.classList.remove('working');
+      btnEl.classList.add('promoted');
+      btnEl.textContent = '\u2713';
+      setContextMessage('Promoted to Project log', 3000);
+      // Reload after a brief delay
+      setTimeout(function() { loadTasks(); }, 1500);
+    } else {
+      throw new Error(data.error || 'Promotion failed');
+    }
+  })
+  .catch(function(err) {
+    btnEl.classList.remove('working');
+    btnEl.classList.add('failed');
+    btnEl.textContent = '!';
+    setContextMessage('Promote failed: ' + err.message, 4000);
+  });
+}
 
 document.addEventListener('focusin', function() {
   var tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
