@@ -37,7 +37,7 @@ const commitmentPatterns = [
 
 // Simple action verb detection
 function hasActionVerb(text) {
-  const verbs = /\b(send|provide|review|update|submit|confirm|follow\s+up|call|email|check|look|get|ask|coordinate|schedule|prepare|draft|share|forward|circulate|resolve|clarify|add|track|monitor|verify|reach\s+out|respond|reply|deliver|complete|finish|handle|manage|need|provide|discuss|align|route|make|work|give|bring|discuss|coordinate|prepare|share|report|collect|gather|document|research|investigate|resolve|close|move|push|build|create|set|establish|confirm|send|forward|circulate|distribute|submit|file|order|arrange|set.up|put|place|write|draw|design|sign|approve|authorize|release|deploy|launch|run|execute|perform|conduct|lead|organize|plan|develop|implement|test|validate|check|certify|inspect|audit)\b/i;
+  const verbs = /\b(send|provid|review|updat|submi|confir|follow|call|email|check|look|get|ask|coordinat|schedul|prepar|draft|share|forward|circulat|resolv|clarif|add|track|monitor|verif|reach|respond|repl|deliver|complet|finish|handl|manag|need|discuss|align|rout|mak|work|giv|bring|coordinat|prepar|report|collect|gather|document|research|investigat|resolv|clos|mov|push|build|creat|set|establish|confirm|send|forward|circulat|distribut|submi|file|order|arrang|set up|put|place|writ|draw|design|sign|approv|authoriz|release|deploy|launch|run|execut|perform|conduct|lead|organiz|plan|develop|implement|test|validat|check|certif|inspect|audit)[a-z]*\b/i;
   return verbs.test(text);
 }
 
