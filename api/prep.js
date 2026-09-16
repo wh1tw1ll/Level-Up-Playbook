@@ -118,8 +118,137 @@ async function graphGet(path, token) {
 }
 
 // ============================================================
-// MAIN HANDLER
+// SMARTSHEET TASKS
 // ============================================================
+
+async function fetchOpenTasks() {
+  const token = process.env.SMARTSHEET_TOKEN;
+  if (!token) return [];
+  try {
+    const sheets = [
+      { id: '4456864287772548', source: 'project' },
+      { id: '2802755367554948', source: 'personal' }
+    ];
+    let all = [];
+    for (const s of sheets) {
+      const res = await fetch(`https://api.smartsheet.com/2.0/sheets/${s.id}?rows=500`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const cols = {};
+      for (const c of data.columns || []) cols[c.title] = c.id;
+      for (const row of data.rows || []) {
+        const cells = {};
+        for (const c of row.cells || []) {
+          for (const [title, id] of Object.entries(cols)) {
+            if (c.columnId === id) cells[title] = c.displayValue || c.value || '';
+          }
+        }
+        const status = String(cells.Status || '');
+        if (['Complete', 'Archived', 'Closed'].includes(status)) continue;
+        const title = String(cells['Action ID'] || '').substring(0, 150);
+        if (title.length < 5) continue;
+        all.push({
+          rowId: row.id,
+          actionItem: title,
+          status,
+          owner: String(cells.Owner || ''),
+          project: String(cells.Project || ''),
+          category: String(cells.Category || ''),
+          dueDate: String(cells['Due Date'] || ''),
+          statusNote: String(cells['Status Note'] || ''),
+          source: s.source
+        });
+      }
+    }
+    return all;
+  } catch (e) { return []; }
+}
+
+// ============================================================
+// OWNER NORMALIZATION
+// ============================================================
+
+function normalizeOwner(owner) {
+  if (!owner) return 'Unassigned';
+  const o = owner.trim();
+  const map = {
+    'whitney': 'Whitney Williams',
+    'charlie': 'Charlie Tiwana',
+    'greg, whitney': 'Greg Wieting, Whitney Williams',
+    'sam kalscheur; whitney williams': 'Whitney Williams, Sam Kalscheur',
+  };
+  const key = o.toLowerCase();
+  return map[key] || o;
+}
+
+// ============================================================
+// SERIES-BASED TASK MATCHING VIA SOURCEREF
+// ============================================================
+
+function buildSeriesReverseMap() {
+  // Map granolaNoteTitle -> seriesMasterId from KNOWN_MAP
+  const map = {};
+  for (const [seriesId, entry] of Object.entries(KNOWN_MAP)) {
+    if (entry.granolaNoteTitle) {
+      map[entry.granolaNoteTitle.toLowerCase()] = seriesId;
+    }
+    if (entry.seriesTitle) {
+      map[entry.seriesTitle.toLowerCase()] = seriesId;
+    }
+  }
+  return map;
+}
+
+function matchTasksToSeries(allOpenTasks, seriesReverseMap) {
+  // Returns: { seriesMasterId -> { owedItems: [], whitneyItems: [] } }
+  const result = {};
+  
+  for (const task of allOpenTasks) {
+    if (['Complete', 'Archived', 'Closed'].includes(task.status)) continue;
+    
+    const sourceRef = (task.sourceRef || '').trim();
+    let matchedSeriesId = null;
+    
+    // Strategy A: SourceRef points to a Granola note
+    if (sourceRef && sourceRef.toLowerCase().startsWith('granola:')) {
+      // Extract meeting name from SourceRef: "Granola: Meeting Name (Date)"
+      const meetingName = sourceRef.replace(/^granola:\s*/i, '').replace(/\s*\(.*\)\s*$/, '').trim().toLowerCase();
+      matchedSeriesId = seriesReverseMap[meetingName] || null;
+    }
+    
+    // Strategy B: Explicit tag (not implemented yet — future use)
+    // Strategy C: No match — skip
+    
+    if (!matchedSeriesId) continue;
+    
+    // Normalize owner
+    const normalizedOwner = normalizeOwner(task.owner);
+    const ownerLower = normalizedOwner.toLowerCase();
+    
+    if (!result[matchedSeriesId]) {
+      result[matchedSeriesId] = { owedItems: [], whitneyItems: [] };
+    }
+    
+    // Check if Whitney owns this
+    const isWhitney = ownerLower.includes('whitney williams') || ownerLower.includes('whitney');
+    
+    if (isWhitney) {
+      result[matchedSeriesId].whitneyItems.push({
+        ...task,
+        owner: normalizedOwner
+      });
+    } else {
+      result[matchedSeriesId].owedItems.push({
+        ...task,
+        owner: normalizedOwner
+      });
+    }
+  }
+  
+  return result;
+}
 
 export default async function handler(req, res) {
   const { setCors, handleOptions, authenticateRequest } = await import('../lib/auth.js');
@@ -166,6 +295,13 @@ export default async function handler(req, res) {
 
     // Build series map
     const seriesMap = { ...KNOWN_MAP };
+
+    // Fetch open tasks from Smartsheet for prep sections
+    const allOpenTasks = await fetchOpenTasks();
+
+    // Build series reverse map ONCE and match tasks via SourceRef
+    const seriesReverseMap = buildSeriesReverseMap();
+    const seriesTaskMap = matchTasksToSeries(allOpenTasks, seriesReverseMap);
 
     // Process each event
     const enrichedEvents = [];
@@ -231,8 +367,33 @@ export default async function handler(req, res) {
         : '';
       const dateET = event.start?.dateTime ? formatDateET(event.start.dateTime) : '';
 
-      enrichedEvents.push({
-        subject: event.subject,
+      // Get series-matched tasks for this event (via SourceRef)
+      const seriesItems = event.seriesMasterId ? seriesTaskMap[event.seriesMasterId] : null;
+      let owedItems = seriesItems?.owedItems || [];
+      let whitneyItems = seriesItems?.whitneyItems || [];
+
+      // Fallback: if no SourceRef-matched items, populate from Granola note's Next Steps
+      if (owedItems.length === 0 && whitneyItems.length === 0 && noteInfo?.actionItems && noteInfo.actionItems.length > 0) {
+        for (const item of noteInfo.actionItems) {
+          const isWhitney = item.assignees.some(a => a.toLowerCase().includes('whitney'));
+          const task = {
+            actionItem: item.text,
+            owner: item.assignees[0],
+            status: 'Not Started',
+            dueDate: '',
+            sourceRef: noteInfo.granolaNoteTitle || '',
+            source: 'project'
+          };
+          if (isWhitney) {
+            whitneyItems.push(task);
+          } else {
+            owedItems.push(task);
+          }
+        }
+      }
+      
+            enrichedEvents.push({
+              subject: event.subject,
         start: event.start,
         end: event.end,
         location: event.location,
@@ -256,7 +417,9 @@ export default async function handler(req, res) {
         summaryMarkdown: noteInfo?.summaryMarkdown || '',
         actionItems: noteInfo?.actionItems || [],
         pastNotes,
-        attendees: noteInfo?.attendees || []
+        attendees: noteInfo?.attendees || [],
+        owedItems,
+        whitneyItems
       });
     }
 

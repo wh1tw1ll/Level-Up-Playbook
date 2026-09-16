@@ -108,6 +108,13 @@ body{display:flex;flex-direction:column}
 .meta-tag.unowned{font-style:italic;color:var(--danger)}
 .meta-tag.disc{background:rgba(190,209,198,0.12);color:var(--accent);cursor:pointer;padding:1px 5px;border-radius:3px}
 .meta-tag.disc:hover{background:rgba(190,209,198,0.25)}
+.meta-tag.source{cursor:pointer;padding:1px 5px;border-radius:3px;text-decoration:none}
+.meta-tag.source.granola{background:rgba(190,209,198,0.12);color:var(--accent)}
+.meta-tag.source.granola:hover{background:rgba(190,209,198,0.25)}
+.meta-tag.source.email{background:rgba(126,207,126,0.12);color:var(--success)}
+.meta-tag.source.email:hover{background:rgba(126,207,126,0.25)}
+.meta-tag.source.manual{background:rgba(136,136,136,0.1);color:var(--muted);cursor:default}
+.meta-tag.source.unknown{color:var(--muted);opacity:0.5;cursor:default}
 /* Task actions (right pinned) */
 .task-actions{display:flex;gap:4px;align-items:center;margin-left:auto;flex:0 0 auto}
 .status-note{font-size:12px;color:var(--muted);margin:2px 0 0;display:flex;align-items:center;gap:4px}
@@ -406,6 +413,24 @@ function setContextMessage(msg, duration) {
   }
 }
 
+// ── SOURCE LINK ──
+function renderSourceLink(sourceRef) {
+  if (!sourceRef) return null;
+  var s = sourceRef.trim();
+  if (s.toLowerCase().startsWith('granola:')) {
+    var title = s.substring(8).trim();
+    return '<a class="meta-tag source granola" href="#" onclick="event.stopPropagation();alert(\'Granola note: ' + escapeHtml(title) + '\')" title="' + escapeHtml(s) + '">📝 ' + escapeHtml(title.substring(0, 30)) + (title.length > 30 ? '...' : '') + '</a>';
+  }
+  if (s.toLowerCase().startsWith('email:')) {
+    var subj = s.substring(6).trim();
+    return '<a class="meta-tag source email" href="#" onclick="event.stopPropagation();alert(\'Email: ' + escapeHtml(subj) + '\')" title="' + escapeHtml(s) + '">✉️ ' + escapeHtml(subj.substring(0, 30)) + (subj.length > 30 ? '...' : '') + '</a>';
+  }
+  if (s.toLowerCase().startsWith('manual') || s.toLowerCase().includes('added manually')) {
+    return '<span class="meta-tag source manual">📋 Manual</span>';
+  }
+  return '<span class="meta-tag source unknown">' + escapeHtml(s.substring(0, 20)) + '</span>';
+}
+
 // ── TASK TYPE INFERENCE ──
 function getTaskType(text) {
   if (!text) return 'DO';
@@ -572,6 +597,7 @@ function render() {
           (statusLabel ? '<span class="meta-tag ' + statusClass + '" onclick="event.stopPropagation();cycleStatus(this,' + t.rowId + ')">' + escapeHtml(statusLabel) + '</span>' : '') +
           (sourceText ? '<span class="meta-tag">' + sourceText + '</span>' : '') +
           (typeLabel ? '<span class="meta-tag">' + typeLabel + '</span>' : '') +
+          renderSourceLink(t.sourceRef) +
           hotBadge +
           unownedBadge +
           discBadge +
@@ -1176,7 +1202,12 @@ function deleteTask(btnEl, rowId) {
     'Delete "' + actionItem + '"?',
     'This cannot be undone. The row will be removed from the sheet.',
     function() {
-      // Confirmed — delete immediately
+      // Optimistic: remove from DOM immediately
+      taskEl.remove();
+      allTasks = allTasks.filter(function(t) { return String(t.rowId) !== String(rowId); });
+      render();
+
+      // Fire API in background
       fetch('/api/tasks/' + rowId + '?source=' + source, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1184,15 +1215,11 @@ function deleteTask(btnEl, rowId) {
       })
         .then(function(r) {
           if (!r.ok) {
-            showToast('Delete failed', 2000);
-            return;
+            showToast('Delete failed — row may still exist', 3000);
           }
-          taskEl.remove();
-          allTasks = allTasks.filter(function(t) { return String(t.rowId) !== String(rowId); });
-          render();
         })
         .catch(function() {
-          showToast('Delete failed', 2000);
+          showToast('Delete failed — row may still exist', 3000);
         });
     }
   );
@@ -1336,6 +1363,50 @@ document.addEventListener('focusout', function() {
   hasActiveInput = false;
 });
 
+// ── PREP: Toggle detail section (global — needed by inline onclick) ──
+function togglePrepDetail(eventId) {
+  const el = document.getElementById('prep-detail-' + eventId);
+  if (el) {
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  }
+}
+
+// ── PREP: Copy & Print (global — needed by inline onclick) ──
+function copyPrepPrint(eventId, subject, project) {
+  const card = document.querySelector('[onclick*="' + eventId + '"]');
+  if (!card) return;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  let text = project + ' | ' + subject + ' Agenda ' + dateStr + '\n';
+  text += '='.repeat(40) + '\n\n';
+  const detailEl = document.getElementById('prep-detail-' + eventId);
+  if (detailEl) {
+    const labels = detailEl.querySelectorAll('.prep-section-label');
+    for (const label of labels) {
+      text += label.textContent + '\n';
+      let next = label.nextElementSibling;
+      while (next && !next.classList.contains('prep-section-label') && !next.matches('button')) {
+        if (next.style && next.style.margin) {
+          text += '  ' + next.textContent.trim() + '\n';
+        }
+        next = next.nextElementSibling;
+      }
+      text += '\n';
+    }
+  }
+  navigator.clipboard.writeText(text).then(function() {
+    showToast('Copied to clipboard', 1500);
+  }).catch(function() {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    showToast('Copied to clipboard', 1500);
+  });
+}
+
 // ── EVENT BINDING ──
 document.addEventListener('DOMContentLoaded', function() {
   // Tabs
@@ -1459,11 +1530,11 @@ document.addEventListener('DOMContentLoaded', function() {
   AuthRequiredError.prototype = new Error();
 
   function renderPrepView(container, events) {
-      // Group events by day using dateET (already Eastern Time)
+      // Group events by day using full dateET (already Eastern Time, e.g. "Mon, Sep 22")
       const groups = {};
 
       for (const ev of events) {
-        const day = (ev.dateET || '').split(',')[0].trim(); // Use dateET for grouping
+        const day = ev.dateET || '';
         if (!day) continue;
         if (!groups[day]) groups[day] = [];
         groups[day].push(ev);
@@ -1471,14 +1542,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
       let html = '';
       const todayStr = new Date().toLocaleDateString('en-US', { timeZone: 'America/New_York', weekday: 'short', month: 'short', day: 'numeric' });
-      const dayOrder = ['Today', 'Tomorrow'];
 
       for (const [dayLabel, dayEvents] of Object.entries(groups)) {
-        // Filter by project if a tab is selected (when Prep tab shows from project tab)
-        // Right now Prep is its own tab, so show all
-
+        // Sort day keys chronologically — Today and Tomorrow first, then by date
         const isToday = dayLabel.startsWith('Today');
-        html += '<div class="prep-day-header' + (isToday ? ' today' : '') + '">' + escapeHtml(dayLabel) + '</div>';
+        const isTomorrow = dayLabel.startsWith('Tomorrow');
+        let displayDay = dayLabel;
+        if (!isToday && !isTomorrow) {
+          // Extract just the date part for display
+          const parts = dayLabel.split(',');
+          if (parts.length >= 2) {
+            // Show "Monday | Sep 22" — full weekday + numeric date
+            const weekday = new Date(dayEvents[0].start?.dateTime || dayLabel)
+              .toLocaleDateString('en-US', { timeZone: 'America/New_York', weekday: 'long' });
+            displayDay = weekday + '  |  ' + parts.slice(1).join(',').trim();
+          }
+        }
+        html += '<div class="prep-day-header' + (isToday ? ' today' : '') + '">' + escapeHtml(displayDay) + '</div>';
         html += '<div style="margin-bottom:6px">'; // Tighter group spacing
 
         for (const ev of dayEvents) {
@@ -1486,9 +1566,11 @@ document.addEventListener('DOMContentLoaded', function() {
           const isOneOff = !ev.isRecurring;
           const cardClass = 'prep-card' + (hasNote ? ' has-note' : '');
           const projectBadge = ev.project ? ' <span class="meta-tag project" style="font-size:10px;padding:0 4px">' + escapeHtml(ev.project) + '</span>' : '';
+          const eventId = escapeHtml(ev.eventId || 'no-id');
+          const detailId = 'prep-detail-' + eventId;
 
-          // Card with tighter padding (6px vs 10px)
-          html += '<div class="' + cardClass + '" style="padding:6px 10px;margin-bottom:6px">';
+          // Card with tighter padding (6px vs 10px) — clickable to toggle detail
+          html += '<div class="' + cardClass + '" style="padding:6px 10px;margin-bottom:6px;cursor:pointer" onclick="togglePrepDetail(\'' + eventId + '\')">';
           html += '<div class="prep-header" style="margin-bottom:3px">';
           html += '  <div class="prep-title" style="font-size:14px">' + escapeHtml(ev.subject) + projectBadge + '</div>';
           html += '  <div class="prep-time" style="font-size:12px">' + escapeHtml(ev.timeET || '') + '</div>';
@@ -1497,6 +1579,7 @@ document.addEventListener('DOMContentLoaded', function() {
           // Meta line (tighter)
           html += '<div class="prep-meta" style="margin-bottom:4px;font-size:11px">';
           if (ev.location) html += '<span class="prep-loc">' + escapeHtml(ev.location) + '</span>';
+          if (ev.attendees && ev.attendees.length > 0) html += '<span style="color:var(--muted)">' + ev.attendees.length + ' attendees</span>';
           html += '</div>';
 
           if (hasNote) {
@@ -1504,9 +1587,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (ev.summaryPreview) {
               const truncated = ev.summaryPreview.length > 350;
               const display = truncated ? escapeHtml(ev.summaryPreview.substring(0, 350)) + '...' : escapeHtml(ev.summaryPreview);
-              html += '<div class="prep-summary" id="prep-sum-' + escapeHtml(ev.granolaNoteId || 'x') + '" style="max-height:150px">' + display + '</div>';
+              html += '<div class="prep-summary" id="prep-sum-' + eventId + '" style="max-height:150px">' + display + '</div>';
               if (truncated) {
-                html += '<span class="prep-summary-expand" onclick="document.getElementById(\'prep-sum-\' + escapeHtml(\'' + escapeHtml(ev.granolaNoteId || 'x') + '\')).classList.toggle(\'expanded\');this.textContent=this.textContent==\'Show more\'?\'Show less\':\'Show more\'">Show more</span>';
+                html += '<span class="prep-summary-expand" onclick="event.stopPropagation();document.getElementById(\'prep-sum-' + eventId + '\').classList.toggle(\'expanded\');this.textContent=this.textContent==\'Show more\'?\'Show less\':\'Show more\'">Show more</span>';
               }
             }
 
@@ -1515,7 +1598,7 @@ document.addEventListener('DOMContentLoaded', function() {
               html += '<div style="font-size:11px;color:var(--warn);margin-top:2px">Note from ' + escapeHtml(ev.granolaNoteDate || '') + ' (' + ev.granolaStaleDays + ' days ago)</div>';
             }
 
-            // Action items
+            // Action items from Granola
             if (ev.actionItems && ev.actionItems.length > 0) {
               html += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">Open Action Items</div>';
               for (const item of ev.actionItems) {
@@ -1533,13 +1616,80 @@ document.addEventListener('DOMContentLoaded', function() {
           } else if (isOneOff) {
             // One-off: no note expected, no nag line
           } else if (ev.neverHadNote) {
-            // Recurring series that has never had notes: single line, no error
             html += '<div class="prep-no-note" style="font-size:11px;padding:2px 0;font-style:italic;color:var(--muted)">No meeting notes for this series.</div>';
-          } else {
-            // Shouldn't happen — series was unknown
           }
 
-          html += '</div>';
+          // ⬇ DETAIL SECTIONS (hidden by default, toggled on click) ⬇
+          html += '<div id="' + detailId + '" style="display:none;margin-top:8px;border-top:1px solid var(--border);padding-top:8px">';
+
+          // OWED TO ME — from open items in this series where owner is NOT Whitney, grouped by firm
+          if (ev.owedItems && ev.owedItems.length > 0) {
+            html += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">OWED TO ME</div>';
+            // Group by owner/firm
+            const groups = {};
+            for (const item of ev.owedItems) {
+              const key = item.owner || 'Unassigned';
+              if (!groups[key]) groups[key] = [];
+              groups[key].push(item);
+            }
+            for (const [owner, items] of Object.entries(groups)) {
+              const ownerDisplay = owner === 'Unassigned' ? '—' : owner;
+              html += '<div style="margin:2px 0">';
+              html += '  <span style="font-size:11px;font-weight:500;color:var(--accent)">' + escapeHtml(ownerDisplay) + '</span>';
+              for (const item of items) {
+                const dueLabel = item.dueDate ? ' | due ' + item.dueDate : '';
+                html += '  <div style="font-size:12px;padding:1px 0 1px 12px;color:var(--fg)">' + escapeHtml(item.actionItem) + (dueLabel ? '<span style="color:var(--muted);font-size:11px">' + dueLabel + '</span>' : '') + '</div>';
+              }
+              html += '</div>';
+            }
+          }
+
+          // WHAT I OWE — Whitney-owned items
+          if (ev.whitneyItems && ev.whitneyItems.length > 0) {
+            html += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">WHAT I OWE</div>';
+            for (const item of ev.whitneyItems) {
+              const dueLabel = item.dueDate ? ' | due ' + item.dueDate : '';
+              html += '<div style="font-size:12px;padding:1px 0;color:var(--fg)">' + escapeHtml(item.actionItem) + (dueLabel ? '<span style="color:var(--muted);font-size:11px">' + dueLabel + '</span>' : '') + '</div>';
+            }
+          }
+
+          // CARRIED OVER — items in past notes that are still open in tracker
+          if (ev.pastNotes && ev.pastNotes.length > 0) {
+            const allSeriesItems = (ev.owedItems || []).concat(ev.whitneyItems || []);
+            if (allSeriesItems.length > 0) {
+            const carriedItems = [];
+            for (const pn of ev.pastNotes) {
+              if (!pn.actionItems) continue;
+              for (const ai of pn.actionItems) {
+                // Check if this action item text appears in series-matched items
+                const stillOpen = allSeriesItems.some(oi =>
+                  oi.actionItem.toLowerCase().includes(ai.text.toLowerCase().substring(0, 30))
+                );
+                if (stillOpen) {
+                  const existing = carriedItems.find(c => c.text === ai.text);
+                  if (!existing) {
+                    carriedItems.push({ text: ai.text, assignee: ai.assignees[0], firstSeen: pn.date });
+                  }
+                }
+              }
+            }
+            if (carriedItems.length > 0) {
+              html += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">CARRIED OVER</div>';
+              for (const ci of carriedItems) {
+                html += '<div class="prep-action-item" style="font-size:12px;padding:2px 0">';
+                html += '  <span class="prep-action-assignee" style="font-size:10px">' + escapeHtml(ci.assignee) + '</span>';
+                html += '  <span class="prep-action-text">' + escapeHtml(ci.text) + '</span>';
+                html += '</div>';
+              }
+            }
+            } // close allSeriesItems if
+          }
+
+          // COPY & PRINT button
+          html += '<button class="prep-view-note-btn" style="margin-top:6px" onclick="event.stopPropagation();copyPrepPrint(\'' + eventId + '\', \'' + escapeHtml(ev.subject) + '\', \'' + escapeHtml(ev.project) + '\')">Copy & Print</button>';
+
+          html += '</div>'; // end detail section
+          html += '</div>'; // end card
         }
         html += '</div>';
       }
