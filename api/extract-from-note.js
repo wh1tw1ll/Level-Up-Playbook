@@ -6,40 +6,43 @@
 const SHEET_ID_PROJECT = '4456864287772548';
 const SHEET_ID_PERSONAL = '2802755367554948';
 
-// Commitment detection patterns
+// Commitment detection patterns (all lowercase input)
 // A commitment = named party + specific action + trigger/when
 const commitmentPatterns = [
-  // "X to Y by Z" — strongest signal
-  /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+to\s+(.+?)(?:\s+by\s+|before\s+|for\s+)(.+?)(?:\.|$)/i,
-  // "X needs to Y" or "X needs Y"
-  /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+need(?:s|ed)?\s+(?:to\s+)?(.+?)(?:\.|$)/i,
-  // "X will Y" 
-  /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+will\s+(.+?)(?:\.|$)/i,
-  // "X going to Y"
-  /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(?:is\s+)?going\s+to\s+(.+?)(?:\.|$)/i,
-  // Removed: standalone "he/she/they need" pattern — too noisy without named party
-  // "Talked to X, he needs Y"
-  /talk(?:ed|ing)?\s+(?:to|with)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)[,.]?(?:\s+and\s+)?\s*(?:he|she|they)\s+(?:need(?:s|ed)?|said|wants?)\s+(.+?)(?:\.|$)/i,
-  // "Remind me to Y"
-  /remind\s+(?:me|us)\s+to\s+(.+?)(?:\.|$)/i,
-  // "I need to Y by Z"
-  /[Ii]\s+need\s+to\s+(.+?)(?:\s+by\s+|before\s+)(.+?)(?:\.|$)/,
-  // "Confirm X with Y by Z"
-  /confirm\s+(.+?)\s+with\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)(?:\s+by\s+|before\s+)?(.+?)?(?:\.|$)/i,
-  // "Check on X" or "Look into X"
-  /(?:check|look)\s+(?:on|into)\s+(.+?)(?:\.|$)/i,
-  // "Follow up with X on Y"
-  /follow\s+up\s+with\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(?:on\s+)?(.+?)(?:\.|$)/i,
-  // "Send X to Y"
-  /send\s+(.+?)\s+to\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)(?:\.|$)/i,
-  // "Get X from Y" or "Ask Y for X"
-  /(?:get|ask)\s+(.+?)\s+(?:from|for)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)(?:\.|$)/i,
+  // "x to y by z" — strongest signal
+  /([a-z]+(?:\s+[a-z]+)?)\s+to\s+(.+?)(?:\s+by\s+|before\s+|for\s+)(.+?)(?:\.|$)/,
+  // "x needs to y" or "x needs y"
+  /([a-z]+(?:\s+[a-z]+)?)\s+need(?:s|ed)?\s+(?:to\s+)?(.+?)(?:\.|$)/,
+  // "x will y"
+  /([a-z]+(?:\s+[a-z]+)?)\s+will\s+(.+?)(?:\.|$)/,
+  // "x going to y"
+  /([a-z]+(?:\s+[a-z]+)?)\s+(?:is\s+)?going\s+to\s+(.+?)(?:\.|$)/,
+  // "talked to x, he needs y"
+  /talk(?:ed|ing)?\s+(?:to|with)\s+([a-z]+(?:\s+[a-z]+)?)[,.]?(?:\s+and\s+)?\s*(?:he|she|they)\s+(?:need(?:s|ed)?|said|wants?)\s+(.+?)(?:\.|$)/,
+  // "remind me/us to y"
+  /remind\s+(?:me|us)\s+to\s+(.+?)(?:\.|$)/,
+  // "i need to y by z"
+  /i\s+need\s+to\s+(.+?)(?:\s+by\s+|before\s+)(.+?)(?:\.|$)/,
+  // "confirm x with y by z"
+  /confirm\s+(.+?)\s+with\s+([a-z]+(?:\s+[a-z]+)?)(?:\s+by\s+|before\s+)?(.+?)?(?:\.|$)/,
+  // "check on x" or "look into x"
+  /(?:check|look)\s+(?:on|into)\s+(.+?)(?:\.|$)/,
+  // "follow up with x on y"
+  /follow\s+up\s+with\s+([a-z]+(?:\s+[a-z]+)?)\s+(?:on\s+)?(.+?)(?:\.|$)/,
+  // "send x to y"
+  /send\s+(.+?)\s+to\s+([a-z]+(?:\s+[a-z]+)?)(?:\.|$)/,
+  // "get x from y" or "ask y for x"
+  /(?:get|ask)\s+(.+?)\s+(?:from|for)\s+([a-z]+(?:\s+[a-z]+)?)(?:\.|$)/,
 ];
 
 // Simple action verb detection
 function hasActionVerb(text) {
   const verbs = /\b(send|provide|review|update|submit|confirm|follow\s+up|call|email|check|look|get|ask|coordinate|schedule|prepare|draft|share|forward|circulate|resolve|clarify|add|track|monitor|verify|reach\s+out|respond|reply|deliver|complete|finish|handle|manage|need|provide|discuss|align|route|make|work|give|bring|discuss|coordinate|prepare|share|report|collect|gather|document|research|investigate|resolve|close|move|push|build|create|set|establish|confirm|send|forward|circulate|distribute|submit|file|order|arrange|set.up|put|place|write|draw|design|sign|approve|authorize|release|deploy|launch|run|execute|perform|conduct|lead|organize|plan|develop|implement|test|validate|check|certify|inspect|audit)\b/i;
   return verbs.test(text);
+}
+
+function titleCase(s) {
+  return s.replace(/\b[a-z]/g, function(c) { return c.toUpperCase(); });
 }
 
 // Infer type like the widget's getTaskType
@@ -58,10 +61,11 @@ function inferType(text) {
 
 function extract(text, parentProject, parentFirm) {
   if (!text || text.trim().length < 15) return null; // Too short
+  const lowerText = text.toLowerCase();
 
   // Try commitment patterns first — they're specific enough
   for (const pattern of commitmentPatterns) {
-    const match = pattern.exec(text);
+    const match = pattern.exec(lowerText);
     if (match) {
       // Quick action verb check for patterns that might be loose
       if (!hasActionVerb(text)) continue;
@@ -127,11 +131,12 @@ function extract(text, parentProject, parentFirm) {
       // Build proposed task text
       let taskText = action.trim();
       if (party) {
-        taskText = `${party} ${action}`.trim();
+        taskText = `${titleCase(party)} ${action}`.trim();
       }
       if (timing && !taskText.toLowerCase().includes(timing.toLowerCase())) {
-        taskText += ` by ${timing}`;
+        taskText += ` by ${titleCase(timing)}`;
       }
+      taskText = titleCase(taskText);
 
       return {
         actionItem: taskText.substring(0, 500),
