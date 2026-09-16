@@ -69,14 +69,14 @@ export default async function handler(req, res) {
     if (!val) return;
     const colId = getProjColId(title);
     if (!colId) return;
-    cells.push({ columnId: colId, value: val });
+    cells.push({ columnId: colId, objectValue: val });
   }
 
   addCell('Action ID', text);
   if (owner) addCell('Owner', owner);
-  // Skip Status and Project for now — need to debug column type separately
+  if (status) addCell('Status', status);
   if (dueDate) addCell('Due Date', dueDate);
-  if (notes) addCell('Status Note', notes);
+  if (project) addCell('Project', project);
   if (category && category !== 'Staged') addCell('Category', category);
   if (firm) addCell('Responsible Firm(s)', firm);
   if (sourceRef) addCell('SourceRef', sourceRef);

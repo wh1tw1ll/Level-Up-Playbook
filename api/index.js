@@ -26,6 +26,7 @@ import extractFromNote from './extract-from-note.js';
 import prepHandler from './prep.js';
 import stageHandler from './stage.js';
 import promoteHandler from './promote.js';
+import columnTypesHandler from './column-types.js';
  
  // Module-level flagged store cache (survives warm instances)
 let _flaggedCache = null;
