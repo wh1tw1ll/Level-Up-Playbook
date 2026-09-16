@@ -9,7 +9,9 @@ const SHEET_ID_PERSONAL = '2802755367554948';
 // Commitment detection patterns (all lowercase input)
 // A commitment = named party + specific action + trigger/when
 const commitmentPatterns = [
-  // "x to y by z" — strongest signal
+  // "talked to x, (and) he needs y" — most specific, must come before generic
+  /talk(?:ed|ing)?\s+(?:to|with)\s+([a-z]+(?:\s+[a-z]+)?)[,.]?(?:\s+and\s+)?\s*(?:he|she|they)\s+(?:need(?:s|ed)?|said|wants?)\s+(.+?)(?:\.|$)/,
+  // "x to y by z" — strongest signal for direct commitments
   /([a-z]+(?:\s+[a-z]+)?)\s+to\s+(.+?)(?:\s+by\s+|before\s+|for\s+)(.+?)(?:\.|$)/,
   // "x needs to y" or "x needs y"
   /([a-z]+(?:\s+[a-z]+)?)\s+need(?:s|ed)?\s+(?:to\s+)?(.+?)(?:\.|$)/,
@@ -17,8 +19,6 @@ const commitmentPatterns = [
   /([a-z]+(?:\s+[a-z]+)?)\s+will\s+(.+?)(?:\.|$)/,
   // "x going to y"
   /([a-z]+(?:\s+[a-z]+)?)\s+(?:is\s+)?going\s+to\s+(.+?)(?:\.|$)/,
-  // "talked to x, he needs y"
-  /talk(?:ed|ing)?\s+(?:to|with)\s+([a-z]+(?:\s+[a-z]+)?)[,.]?(?:\s+and\s+)?\s*(?:he|she|they)\s+(?:need(?:s|ed)?|said|wants?)\s+(.+?)(?:\.|$)/,
   // "remind me/us to y"
   /remind\s+(?:me|us)\s+to\s+(.+?)(?:\.|$)/,
   // "i need to y by z"
@@ -42,7 +42,7 @@ function hasActionVerb(text) {
 }
 
 function titleCase(s) {
-  return s.replace(/\b[a-z]/g, function(c) { return c.toUpperCase(); });
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 // Infer type like the widget's getTaskType
