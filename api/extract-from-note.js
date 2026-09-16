@@ -20,7 +20,7 @@ const commitmentPatterns = [
   // "he/she needs Y" with context
   /\b(?:he|she|they)\s+need(?:s|ed)?\s+(?:to\s+)?(.+?)(?:\.|$)/i,
   // "Talked to X, he needs Y"
-  /talk(?:ed|ing)?\s+(?:to|with)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)[,.]?\s+(?:he|she|they)\s+(?:need(?:s|ed)?|said|wants?)\s+(.+?)(?:\.|$)/i,
+  /talk(?:ed|ing)?\s+(?:to|with)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)[,.]?(?:\s+and\s+)?\s*(?:he|she|they)\s+(?:need(?:s|ed)?|said|wants?)\s+(.+?)(?:\.|$)/i,
   // "Remind me to Y"
   /remind\s+(?:me|us)\s+to\s+(.+?)(?:\.|$)/i,
   // "I need to Y by Z"
