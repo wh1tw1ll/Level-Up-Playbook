@@ -39,7 +39,7 @@ const commitmentPatterns = [
 
 // Simple action verb detection
 function hasActionVerb(text) {
-  const verbs = /\b(send|provide|review|update|submit|confirm|follow\s+up|call|email|check|look|get|ask|coordinate|schedule|prepare|draft|share|forward|circulate|resolve|clarify|add|track|monitor|verify|reach\s+out|respond|reply|deliver|complete|finish|handle|manage)\b/i;
+  const verbs = /\b(send|provide|review|update|submit|confirm|follow\s+up|call|email|check|look|get|ask|coordinate|schedule|prepare|draft|share|forward|circulate|resolve|clarify|add|track|monitor|verify|reach\s+out|respond|reply|deliver|complete|finish|handle|manage|need|provide|discuss|align|route|make|work|give|bring|discuss|coordinate|prepare|share|report|collect|gather|document|research|investigate|resolve|close|move|push|build|create|set|establish|confirm|send|forward|circulate|distribute|submit|file|order|arrange|set.up|put|place|write|draw|design|sign|approve|authorize|release|deploy|launch|run|execute|perform|conduct|lead|organize|plan|develop|implement|test|validate|check|certify|inspect|audit)\b/i;
   return verbs.test(text);
 }
 
@@ -60,12 +60,12 @@ function inferType(text) {
 function extract(text, parentProject, parentFirm) {
   if (!text || text.trim().length < 15) return null; // Too short
 
-  // Check for action verb first — filter out pure observations
-  if (!hasActionVerb(text)) return null;
-
+  // Try commitment patterns first — they're specific enough
   for (const pattern of commitmentPatterns) {
     const match = pattern.exec(text);
     if (match) {
+      // Quick action verb check for patterns that might be loose
+      if (!hasActionVerb(text)) continue;
       // Extract named party and action
       let party = '';
       let action = '';
