@@ -71,7 +71,7 @@ export default async function handler(req, res) {
     if (!colId) return;
     const cell = { columnId: colId };
     if (useObj) {
-      cell.objectValue = { value: val };
+      cell.objectValue = [val];
     } else {
       cell.value = val;
     }
