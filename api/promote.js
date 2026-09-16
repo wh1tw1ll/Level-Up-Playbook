@@ -63,20 +63,26 @@ export default async function handler(req, res) {
   const sourceRef = getCellValue('SourceRef');
   const notes = getCellValue('Status Note');
 
-  // Build cells array — always use value (string format), skip empty
+  // Build cells array
   const cells = [];
-  function addCell(title, val) {
+  function addCell(title, val, useObj) {
     if (!val) return;
     const colId = getProjColId(title);
     if (!colId) return;
-    cells.push({ columnId: colId, value: val });
+    const cell = { columnId: colId };
+    if (useObj) {
+      cell.objectValue = { value: val };
+    } else {
+      cell.value = val;
+    }
+    cells.push(cell);
   }
 
   addCell('Action ID', text);
   if (owner) addCell('Owner', owner);
-  if (status) addCell('Status', status);
+  if (status) addCell('Status', status, true); // PICKLIST
   if (dueDate) addCell('Due Date', dueDate);
-  if (project) addCell('Project', project);
+  if (project) addCell('Project', project, true); // PICKLIST
   if (category && category !== 'Staged') addCell('Category', category);
   if (firm) addCell('Responsible Firm(s)', firm);
   if (sourceRef) addCell('SourceRef', sourceRef);
