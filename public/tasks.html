@@ -434,7 +434,7 @@ function setContextMessage(msg, duration) {
 
 // ── SOURCE LINK ──
 function renderSourceLink(sourceRef) {
-  if (!sourceRef) return null;
+  if (!sourceRef) return '';
   var s = sourceRef.trim();
   if (s.toLowerCase().startsWith('granola:')) {
     var title = s.substring(8).trim();
