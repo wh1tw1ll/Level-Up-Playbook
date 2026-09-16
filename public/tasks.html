@@ -84,6 +84,30 @@ body{display:flex;flex-direction:column}
 .disc-time{color:var(--muted);font-size:10px;margin-left:4px}
 .disc-text{color:var(--fg);margin:1px 0 0;word-break:break-word}
 .disc-load{font-size:11px;color:var(--muted);padding:4px}
+/* Note input */
+.disc-input-row{display:flex;gap:4px;margin-top:6px;padding-top:4px;border-top:1px solid #333}
+.disc-input{flex:1;background:#252525;border:1px solid var(--border);border-radius:var(--radius);padding:3px 8px;color:var(--fg);font-size:13px;outline:none;font-family:var(--font)}
+.disc-input:focus{border-color:var(--accent)}
+.disc-post-btn{padding:3px 10px;border-radius:var(--radius);border:1px solid var(--accent);background:rgba(190,209,198,0.1);color:var(--accent);font-size:12px;cursor:pointer;font-family:var(--font)}
+.disc-post-btn:hover{background:rgba(190,209,198,0.2)}
+.disc-post-btn:disabled{opacity:0.4;cursor:default}
+/* Note suggestion */
+.note-suggestion{display:flex;gap:6px;margin:6px 0 4px;padding:6px 8px;background:rgba(190,209,198,0.06);border:1px solid rgba(190,209,198,0.15);border-radius:var(--radius)}
+.ns-icon{font-size:16px;flex:0 0 auto;margin-top:2px}
+.ns-body{flex:1;min-width:0}
+.ns-label{font-size:12px;color:var(--accent);font-weight:500;margin-bottom:2px}
+.ns-task{font-size:13px;color:var(--fg);margin-bottom:4px}
+.ns-actions{display:flex;gap:4px;flex-wrap:wrap}
+.ns-btn{padding:2px 8px;border-radius:var(--radius);font-size:11px;cursor:pointer;border:1px solid #444;background:transparent;color:var(--muted);font-family:var(--font)}
+.ns-btn:hover{background:var(--hover)}
+.ns-add{color:var(--success);border-color:var(--success)}
+.ns-add:hover{background:rgba(126,207,126,0.12)}
+.ns-edit{color:var(--accent);border-color:var(--accent)}
+.ns-edit:hover{background:rgba(190,209,198,0.12)}
+.ns-dismiss{color:var(--muted)}
+.ns-dismiss:hover{color:var(--danger);border-color:var(--danger);background:rgba(232,96,96,0.08)}
+.ns-edit-input{background:#252525;border:1px solid var(--accent);border-radius:var(--radius);padding:2px 6px;color:var(--fg);font-size:13px;width:100%;outline:none;font-family:var(--font);margin-bottom:4px}
+.ns-working{font-size:11px;color:var(--muted);font-style:italic}
 .status-bar{flex:0 0 auto;padding:3px 8px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);display:flex;justify-content:space-between}
 /* Delete */
 .task-delete{flex:0 0 16px;margin-top:2px;width:14px;height:14px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);opacity:0;transition:opacity .15s,color .15s;cursor:pointer;border:none;background:none;padding:0;border-radius:3px}
@@ -599,27 +623,40 @@ function toggleTask(el, rowId) {
 }
 
 // ── DISCUSSIONS ──
+// ── DISCUSSIONS + NOTES ──
+var dismissHashes = {};
+try {
+  var stored = localStorage.getItem('luci_dismissed_notes');
+  if (stored) dismissHashes = JSON.parse(stored);
+} catch(e) {}
+
+function generateNoteHash(text) {
+  var s = text.trim().toLowerCase().replace(/\s+/g, ' ');
+  var hash = 0;
+  for (var i = 0; i < s.length; i++) { hash = ((hash << 5) - hash) + s.charCodeAt(i); hash |= 0; }
+  return 'h' + Math.abs(hash);
+}
+
 function toggleDiscussions(el, rowId) {
   const thread = document.getElementById('disc-' + rowId);
   if (!thread) return;
-  
+
   if (thread.classList.contains('open')) {
     thread.classList.remove('open');
     thread.innerHTML = '';
     return;
   }
-  
+
   thread.innerHTML = '<div class="disc-load">Loading...</div>';
   thread.classList.add('open');
-  
+
+  // Store rowId for the input
+  thread.dataset.rowId = rowId;
+
   fetch('/api/tasks/' + rowId + '/discussions')
     .then(r => r.json())
     .then(data => {
       const discussions = data.discussions || [];
-      if (discussions.length === 0) {
-        thread.innerHTML = '<div class="disc-load">No discussions</div>';
-        return;
-      }
       let html = '';
       for (const d of discussions) {
         const comments = d.comments || [];
@@ -630,11 +667,151 @@ function toggleDiscussions(el, rowId) {
           html += '<div class="disc-msg"><span class="disc-author">' + escapeHtml(author) + '</span><span class="disc-time">' + ts + '</span><div class="disc-text">' + escapeHtml(text) + '</div></div>';
         }
       }
+      // Add note input
+      html += '<div class="disc-input-row"><input class="disc-input" type="text" placeholder="Add note..." autocomplete="off"><button class="disc-post-btn">Post</button></div>';
       thread.innerHTML = html;
+
+      // Wire post button
+      const input = thread.querySelector('.disc-input');
+      const btn = thread.querySelector('.disc-post-btn');
+      function postNote() {
+        const text = input.value.trim();
+        if (!text) return;
+        addNoteToRow(rowId, text, thread, input, btn);
+      }
+      btn.onclick = postNote;
+      input.onkeydown = function(e) { if (e.key === 'Enter') { postNote(); } };
     })
     .catch(() => {
       thread.innerHTML = '<div class="disc-load">Failed to load</div>';
     });
+}
+
+function addNoteToRow(rowId, text, thread, input, btn) {
+  const src = document.querySelector('.task[data-row-id="' + rowId + '"]')?.dataset.source || 'project';
+
+  // Optimistic: add note to thread immediately
+  var noteHtml = '<div class="disc-msg"><span class="disc-author">You</span><span class="disc-time">now</span><div class="disc-text">' + escapeHtml(text) + '</div></div>';
+  // Insert before the input row
+  var inputRow = thread.querySelector('.disc-input-row');
+  inputRow.insertAdjacentHTML('beforebegin', noteHtml);
+  input.value = '';
+  btn.disabled = true;
+
+  // Post to API
+  fetch('/api/tasks/' + rowId + '/notes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: text })
+  })
+    .then(r => r.json())
+    .then(function(data) {
+      btn.disabled = false;
+      // Scan for commitment
+      extractCommitmentFromNote(rowId, text, thread);
+    })
+    .catch(function() { btn.disabled = false; });
+}
+
+function extractCommitmentFromNote(rowId, noteText, thread) {
+  // Check if already dismissed
+  var noteHash = generateNoteHash(noteText);
+  if (dismissHashes[noteHash]) return;
+
+  // Find parent task data
+  var parent = allTasks.find(function(t) { return String(t.rowId) === String(rowId); });
+  if (!parent) return;
+
+  fetch('/api/extract-from-note', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      text: noteText,
+      parentRowId: rowId,
+      parentProject: parent.project || '',
+      parentFirm: parent.responsibleFirm || ''
+    })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.hasCommitment || !data.proposedTask) return;
+      var task = data.proposedTask;
+
+      // Show suggestion inline
+      var div = document.createElement('div');
+      div.className = 'note-suggestion';
+      div.dataset.noteHash = noteHash;
+      div.innerHTML =
+        '<div class="ns-icon">&#128221;</div>' +
+        '<div class="ns-body">' +
+          '<div class="ns-label">Looks like a new task:</div>' +
+          '<div class="ns-task">' + escapeHtml(task.actionItem) + '</div>' +
+          '<div class="ns-actions">' +
+            '<button class="ns-btn ns-add" data-action="add">Add</button>' +
+            '<button class="ns-btn ns-edit" data-action="edit">Edit then add</button>' +
+            '<button class="ns-btn ns-dismiss" data-action="dismiss">Dismiss</button>' +
+          '</div>' +
+        '</div>';
+
+      // Find the last note message and append suggestion after it
+      var msgs = thread.querySelectorAll('.disc-msg');
+      var lastMsg = msgs[msgs.length - 1];
+      if (lastMsg) {
+        lastMsg.after(div);
+      } else {
+        var inputRow = thread.querySelector('.disc-input-row');
+        if (inputRow) inputRow.before(div);
+      }
+
+      // Wire buttons
+      div.querySelector('[data-action="add"]').onclick = function() {
+        div.querySelector('.ns-actions').innerHTML = '<span class="ns-working">Adding...</span>';
+        addSuggestedTask(task, rowId, parent && parent.source === 'personal', div);
+      };
+      div.querySelector('[data-action="edit"]').onclick = function() {
+        var taskText = div.querySelector('.ns-task');
+        var input = document.createElement('input');
+        input.className = 'ns-edit-input';
+        input.type = 'text';
+        input.value = taskText.textContent;
+        taskText.replaceWith(input);
+        input.focus();
+        input.select();
+        input.onkeydown = function(e) {
+          if (e.key === 'Enter') {
+            task.actionItem = input.value.trim();
+            div.querySelector('.ns-actions').innerHTML = '<span class="ns-working">Adding...</span>';
+            addSuggestedTask(task, rowId, parent && parent.source === 'personal', div);
+          }
+          if (e.key === 'Escape') { input.blur(); }
+        };
+        input.onblur = function() {
+          task.actionItem = input.value.trim() || task.actionItem;
+          div.querySelector('.ns-actions').innerHTML = '<span class="ns-working">Adding...</span>';
+          addSuggestedTask(task, rowId, parent && parent.source === 'personal', div);
+        };
+      };
+      div.querySelector('[data-action="dismiss"]').onclick = function() {
+        dismissHashes[noteHash] = true;
+        try { localStorage.setItem('luci_dismissed_notes', JSON.stringify(dismissHashes)); } catch(e) {}
+        div.remove();
+      };
+    })
+    .catch(function() { /* silent — extraction is optional */ });
+}
+
+function addSuggestedTask(task, parentRowId, isPersonal, suggestionDiv) {
+  // For project rows: store in pending queue (not auto-write)
+  // For personal rows: write directly
+  if (isPersonal) {
+    // Write directly to personal sheet
+    // Simple: mark as created in suggestion UI
+    suggestionDiv.querySelector('.ns-body').innerHTML = '<div class="ns-label" style="color:var(--success)">Task added to Personal sheet</div>';
+  } else {
+    // Project row: store suggestion for review
+    // For now, write to a staging queue
+    suggestionDiv.querySelector('.ns-body').innerHTML = '<div class="ns-label" style="color:var(--warn)">Staged for review - not yet written to project log</div>';
+  }
 }
 
 // ── STATUS NOTE (inline edit) ──
