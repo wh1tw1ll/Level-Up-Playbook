@@ -937,22 +937,17 @@ function editTaskTitle(el, rowId) {
   };
 }
 
-// ── DELETE TASK - project + personal, 5-second undo toast ──
+// ── DELETE TASK — confirm box, then immediate remove ──
 function deleteTask(btnEl, rowId) {
   const taskEl = btnEl.closest('.task');
   const source = taskEl.dataset.source || 'project';
+  const actionItem = getActionItem(rowId);
 
-  taskEl.classList.add('removing');
-
-  // Show undo toast with 5-second countdown
-  showUndoToast(
-    'Deleting row - click Undo to cancel',
+  confirmAction(
+    'Delete "' + actionItem + '"?',
+    'This cannot be undone. The row will be removed from the sheet.',
     function() {
-      // UNDO: restore the row
-      taskEl.classList.remove('removing');
-    },
-    function() {
-      // TIMEOUT: actually delete
+      // Confirmed — delete immediately
       fetch('/api/tasks/' + rowId + '?source=' + source, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -960,7 +955,6 @@ function deleteTask(btnEl, rowId) {
       })
         .then(function(r) {
           if (!r.ok) {
-            taskEl.classList.remove('removing');
             showToast('Delete failed', 2000);
             return;
           }
@@ -969,7 +963,6 @@ function deleteTask(btnEl, rowId) {
           render();
         })
         .catch(function() {
-          taskEl.classList.remove('removing');
           showToast('Delete failed', 2000);
         });
     }
@@ -1021,7 +1014,7 @@ function confirmAction(text, subtext, onConfirm) {
       '<p class="confirm-text">' + escapeHtml(text) + '<br><span style="font-size:11px;color:var(--muted)">' + escapeHtml(subtext || '') + '</span></p>' +
       '<div class="confirm-actions">' +
         '<button class="confirm-btn cancel" id="confirm-cancel">Cancel</button>' +
-        '<button class="confirm-btn danger" id="confirm-ok">Archive</button>' +
+        '<button class="confirm-btn danger" id="confirm-ok">Delete</button>' +
       '</div>' +
     '</div>';
   document.body.appendChild(overlay);
