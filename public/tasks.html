@@ -14,7 +14,7 @@ body{display:flex;flex-direction:column}
 /* Header */
 .header{flex:0 0 auto;padding:0;background:var(--teal);border-bottom:1px solid rgba(255,255,255,0.08)}
 .header-top{display:flex;align-items:center;gap:8px;padding:6px 10px}
-.header-logo{height:60px;width:auto}
+.header-logo{height:120px;width:auto}
 .header-title{font-weight:600;font-size:16px;color:var(--cool-gray);letter-spacing:-0.3px}
 .header-subtitle{font-size:13px;color:rgba(255,255,255,0.55);margin-left:auto}
 .header-subtitle span{cursor:pointer}
@@ -51,11 +51,11 @@ body{display:flex;flex-direction:column}
 .task.overdue{background:rgba(232,96,96,0.06)}
 .task.completed{opacity:0.4}
 .task.completed:hover{opacity:0.6}
-.task-check{flex:0 0 18px;margin-top:3px;width:16px;height:16px;border:1.5px solid var(--muted);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s;cursor:pointer}
+.task-check{flex:0 0 22px;margin-top:3px;width:20px;height:20px;border:1.5px solid var(--muted);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;transition:all .15s;cursor:pointer}
 .task-check:hover{border-color:var(--accent)}
 .task-check.done{background:var(--success);border-color:var(--success);color:var(--bg)}
 .task-body{max-width:1100px;flex:0 1 auto;min-width:0}
-.task-title{font-size:17px;font-weight:500;color:var(--fg);line-height:1.3;word-break:break-word;cursor:pointer;overflow:visible}
+.task-title{font-size:15.5px;font-weight:500;color:var(--fg);line-height:1.3;word-break:break-word;cursor:pointer;overflow:visible}
 .completed .task-title{text-decoration:line-through;opacity:0.6}
 .task-meta{display:flex;gap:8px;margin-top:0;flex-wrap:wrap;align-items:center;line-height:1.5}
 .meta-tag{font-size:14px;white-space:nowrap;color:rgba(240,239,239,0.65)}
@@ -558,20 +558,22 @@ function cycleStatus(el, rowId) {
   }).catch(function() { loadTasks(); });
 }
 
-// ── TOGGLE TASK (optimistic) ──
+// ── TOGGLE TASK with undo toast on completion ──
 function toggleTask(el, rowId) {
   const taskEl = el.closest('.task');
   const isDone = el.classList.contains('done');
 
   // Find current raw status from allTasks
   const task = allTasks.find(function(t) { return String(t.rowId) === String(rowId); });
-  const rawStatus = task ? task.status : '';
+  if (!task) return;
+  const rawStatus = task.status || 'Not Started';
   const isClosed = rawStatus === 'Complete' || isDone;
 
   // Compute next status
   const newStatus = isClosed ? 'Not Started' : 'Complete';
+  const prevStatus = rawStatus;
 
-  // Optimistic UI: checkbox shows done/not-done state
+  // Optimistic UI
   if (isClosed) {
     el.classList.remove('done');
     el.innerHTML = '';
@@ -581,44 +583,82 @@ function toggleTask(el, rowId) {
     el.innerHTML = '&#10003;';
     taskEl.classList.add('completed');
   }
-  const source = taskEl.dataset.source || 'project';
-  pendingWrites[rowId] = { fields: { status: newStatus } };
 
-  // Write to API
+  // If toggling to Complete, show undo toast and delay the API revert timer
+  const becomingComplete = !isClosed;
+  if (!becomingComplete) {
+    // Toggling back to Not Started — write immediately, no undo needed
+    const source = taskEl.dataset.source || 'project';
+    fetch('/api/tasks/' + rowId + '?source=' + source, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus })
+    })
+      .then(function(r) {
+        if (!r.ok) {
+          if (isDone) { el.classList.add('done'); el.innerHTML = '&#10003;'; taskEl.classList.add('completed'); }
+          else { el.classList.remove('done'); el.innerHTML = ''; taskEl.classList.remove('completed'); }
+          showToast('Toggle failed', 2000);
+        } else {
+          task.status = newStatus;
+          loadTasks();
+        }
+      })
+      .catch(function() {
+        if (isDone) { el.classList.add('done'); el.innerHTML = '&#10003;'; taskEl.classList.add('completed'); }
+        else { el.classList.remove('done'); el.innerHTML = ''; taskEl.classList.remove('completed'); }
+      });
+    return;
+  }
+
+  // Toggling to Complete — write API, show undo toast
+  const source = taskEl.dataset.source || 'project';
   fetch('/api/tasks/' + rowId + '?source=' + source, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status: newStatus })
+    body: JSON.stringify({ status: 'Complete' })
   })
-    .then(r => {
+    .then(function(r) {
       if (!r.ok) {
-        // Revert optimistic UI on failure
-        if (isDone) {
-          el.classList.add('done');
-          el.innerHTML = '&#10003;';
-          taskEl.classList.add('completed');
-        } else {
-          el.classList.remove('done');
-          el.innerHTML = '';
-          taskEl.classList.remove('completed');
-        }
-        console.error('Toggle failed');
-      } else {
-        // Refresh to get up-to-date data
-        loadTasks();
-      }
-    })
-    .catch(() => {
-      // Revert on network error
-      if (isDone) {
-        el.classList.add('done');
-        el.innerHTML = '&#10003;';
-        taskEl.classList.add('completed');
-      } else {
+        // Revert optimistic UI
         el.classList.remove('done');
         el.innerHTML = '';
         taskEl.classList.remove('completed');
+        showToast('Toggle failed', 2000);
+        return;
       }
+      task.status = 'Complete';
+      // Show undo toast with 5-second window
+      showUndoToast(
+        'Task completed \u2014 Undo to revert',
+        function() {
+          // UNDO: revert back to previous status
+          fetch('/api/tasks/' + rowId + '?source=' + source, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: prevStatus })
+          })
+            .then(function(r2) {
+              if (r2.ok) {
+                task.status = prevStatus;
+                loadTasks();
+              } else {
+                showToast('Undo failed', 2000);
+                loadTasks();
+              }
+            })
+            .catch(function() { loadTasks(); });
+        },
+        function() {
+          // TIMEOUT: keep completion, refresh
+          loadTasks();
+        }
+      );
+    })
+    .catch(function() {
+      el.classList.remove('done');
+      el.innerHTML = '';
+      taskEl.classList.remove('completed');
     });
 }
 
