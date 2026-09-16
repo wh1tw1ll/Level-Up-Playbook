@@ -268,6 +268,9 @@ body{display:flex;flex-direction:column}
   <select class="filter-select" id="owner-filter">
     <option value="">All Owners</option>
   </select>
+  <select class="filter-select" id="series-filter">
+    <option value="">All Series</option>
+  </select>
   <button class="csv-btn" onclick="exportCSV()">📋 CSV</button>
   <span class="filter-count" id="count-display">0 tasks</span>
 </div>
@@ -287,6 +290,7 @@ let currentProject = 'all';
 let currentCategory = '';
 let currentStatus = 'open';
 let currentOwner = '';
+let currentSeries = '';
 let currentSource = 'all';
 let searchText = '';
 let quickFilters = { overdue: false, week: false, hot: false, mine: false };
@@ -487,6 +491,7 @@ function getFilteredTasks() {
     if (currentStatus === 'open' && t.status !== 'Not Started' && t.status !== 'In Progress') return false;
     if (currentStatus === 'closed' && t.status !== 'Complete') return false;
     if (currentOwner && t.owner !== currentOwner) return false;
+    if (currentSeries && t.seriesMasterId !== currentSeries) return false;
     if (quickFilters.mine && t.owner !== myName) return false;
     if (quickFilters.hot && !t.hotTopic) return false;
     if (quickFilters.overdue && !(t.status !== 'Complete' && isOverdue(t.dueDate))) return false;
@@ -685,6 +690,13 @@ function loadTasks() {
       });
       // Populate project filter from data
       const projects = new Set(allTasks.map(t => t.project).filter(Boolean));
+      // Populate series filter
+      const seriesIds = new Set(allTasks.map(t => t.seriesMasterId).filter(Boolean));
+      const seriesSel = document.getElementById('series-filter');
+      seriesSel.innerHTML = '<option value="">All Series</option>';
+      [...seriesIds].sort().forEach(s => {
+        seriesSel.innerHTML += '<option value="' + escapeHtml(s) + '">' + escapeHtml(s.substring(0, 20)) + '...</option>';
+      });
       render();
       document.getElementById('task-list').classList.remove('loading');
       const now = new Date().toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
@@ -1459,6 +1471,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // Owner filter
   document.getElementById('owner-filter').addEventListener('change', function() {
     currentOwner = this.value;
+    render();
+  });
+
+  // Series filter
+  document.getElementById('series-filter').addEventListener('change', function() {
+    currentSeries = this.value;
     render();
   });
 

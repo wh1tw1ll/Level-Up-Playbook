@@ -158,7 +158,8 @@ async function handleGet(req, res, token, sheetId, showNotes = false) {
           statusNote: resolved['Status Note'] || null,
           source: source,
           sourceRef: resolved['SourceRef'] || null,
-          linkedRowId: resolved['LinkedRowId'] || null,
+                    seriesMasterId: resolved['SeriesMasterId'] || null,
+                    linkedRowId: resolved['LinkedRowId'] || null,
           confidence: resolved['Confidence'] || null,
           discussionCount: commentCount,
         };
