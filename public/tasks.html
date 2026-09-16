@@ -225,6 +225,14 @@ body{display:flex;flex-direction:column}
 .prep-day-header{font-size:14px;font-weight:600;color:var(--fg);margin:12px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
 .prep-day-header.today{color:var(--accent)}
 .prep-attendee-list{font-size:12px;color:var(--muted);margin-bottom:6px;line-height:1.4}
+/* Prep detail tabs */
+.prep-detail-tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.prep-detail-tab{padding:4px 12px;border-radius:3px 3px 0 0;font-size:11px;font-weight:500;cursor:pointer;color:var(--muted);background:transparent;border:none;transition:all .15s;font-family:var(--font)}
+.prep-detail-tab:hover{color:var(--fg);background:rgba(255,255,255,0.04)}
+.prep-detail-tab.active{color:var(--accent);background:rgba(190,209,198,0.08);border-bottom:2px solid var(--accent)}
+.prep-tab-pane{display:none}
+.prep-tab-pane.active{display:block}
+.prep-notes-content{font-size:12px;color:var(--fg);line-height:1.5;white-space:pre-wrap;max-height:400px;overflow-y:auto;padding:4px 0}
 </style>
 </head>
 <body>
@@ -423,11 +431,11 @@ function renderSourceLink(sourceRef) {
   var s = sourceRef.trim();
   if (s.toLowerCase().startsWith('granola:')) {
     var title = s.substring(8).trim();
-    return '<a class="meta-tag source granola" href="#" onclick="event.stopPropagation();alert(\'Granola note: ' + escapeHtml(title) + '\')" title="' + escapeHtml(s) + '">📝 ' + escapeHtml(title.substring(0, 30)) + (title.length > 30 ? '...' : '') + '</a>';
+    return '<a class="meta-tag source granola" href="#" onclick="event.stopPropagation();alert('Granola note: ' + escapeHtml(title) + '')" title="' + escapeHtml(s) + '">📝 ' + escapeHtml(title.substring(0, 30)) + (title.length > 30 ? '...' : '') + '</a>';
   }
   if (s.toLowerCase().startsWith('email:')) {
     var subj = s.substring(6).trim();
-    return '<a class="meta-tag source email" href="#" onclick="event.stopPropagation();alert(\'Email: ' + escapeHtml(subj) + '\')" title="' + escapeHtml(s) + '">✉️ ' + escapeHtml(subj.substring(0, 30)) + (subj.length > 30 ? '...' : '') + '</a>';
+    return '<a class="meta-tag source email" href="#" onclick="event.stopPropagation();alert('Email: ' + escapeHtml(subj) + '')" title="' + escapeHtml(s) + '">✉️ ' + escapeHtml(subj.substring(0, 30)) + (subj.length > 30 ? '...' : '') + '</a>';
   }
   if (s.toLowerCase().startsWith('manual') || s.toLowerCase().includes('added manually')) {
     return '<span class="meta-tag source manual">📋 Manual</span>';
@@ -571,7 +579,7 @@ function render() {
     let sourceText = t.source === 'personal' ? 'Personal' : '';
     let typeLabel = getTaskType(t.actionItem);
     let linkedHtml = t.source === 'personal' && t.linkedRowId
-      ? '<span class="linked-row" onclick="event.stopPropagation();jumpToLinkedRow(\'' + t.linkedRowId + '\')">&#128279;</span>'
+      ? '<span class="linked-row" onclick="event.stopPropagation();jumpToLinkedRow('' + t.linkedRowId + '')">&#128279;</span>'
       : '';
     let deleteBtn = '<button class="task-delete" onclick="event.stopPropagation();deleteTask(this,' + t.rowId + ')" title="Delete">&#10005;</button>';
     // Dispatch button - always visible, disabled with tooltip if auto-ingested
@@ -1383,6 +1391,23 @@ function togglePrepDetail(eventId) {
   }
 }
 
+// ── PREP: Switch tab (global — needed by inline onclick) ──
+function switchPrepTab(eventId, tabName) {
+  const detail = document.getElementById('prep-detail-' + eventId);
+  if (!detail) return;
+  // Deactivate all tabs in this detail
+  const tabs = detail.querySelectorAll('.prep-detail-tab');
+  tabs.forEach(function(t) { t.classList.remove('active'); });
+  // Activate the clicked tab
+  const clicked = detail.querySelector('.prep-detail-tab[data-tab="' + tabName + '"]');
+  if (clicked) clicked.classList.add('active');
+  // Toggle panes
+  const panes = detail.querySelectorAll('.prep-tab-pane');
+  panes.forEach(function(p) { p.classList.remove('active'); });
+  const target = detail.querySelector('#prep-tab-' + tabName + '-' + eventId);
+  if (target) target.classList.add('active');
+}
+
 // ── PREP: Copy & Print (global — needed by inline onclick) ──
 function copyPrepPrint(eventId, subject, project) {
   const card = document.querySelector('[onclick*="' + eventId + '"]');
@@ -1588,7 +1613,7 @@ document.addEventListener('DOMContentLoaded', function() {
           const detailId = 'prep-detail-' + eventId;
 
           // Card with tighter padding (6px vs 10px) — clickable to toggle detail
-          html += '<div class="' + cardClass + '" style="padding:6px 10px;margin-bottom:6px;cursor:pointer" onclick="togglePrepDetail(\'' + eventId + '\')">';
+          html += '<div class="' + cardClass + '" style="padding:6px 10px;margin-bottom:6px;cursor:pointer" onclick="togglePrepDetail('' + eventId + '')">';
           html += '<div class="prep-header" style="margin-bottom:3px">';
           html += '  <div class="prep-title" style="font-size:14px">' + escapeHtml(ev.subject) + projectBadge + '</div>';
           html += '  <div class="prep-time" style="font-size:12px">' + escapeHtml(ev.timeET || '') + '</div>';
@@ -1607,7 +1632,7 @@ document.addEventListener('DOMContentLoaded', function() {
               const display = truncated ? escapeHtml(ev.summaryPreview.substring(0, 350)) + '...' : escapeHtml(ev.summaryPreview);
               html += '<div class="prep-summary" id="prep-sum-' + eventId + '" style="max-height:150px">' + display + '</div>';
               if (truncated) {
-                html += '<span class="prep-summary-expand" onclick="event.stopPropagation();document.getElementById(\'prep-sum-' + eventId + '\').classList.toggle(\'expanded\');this.textContent=this.textContent==\'Show more\'?\'Show less\':\'Show more\'">Show more</span>';
+                html += '<span class="prep-summary-expand" onclick="event.stopPropagation();document.getElementById('prep-sum-' + eventId + '').classList.toggle('expanded');this.textContent=this.textContent=='Show more'?'Show less':'Show more'">Show more</span>';
               }
             }
 
@@ -1638,76 +1663,97 @@ document.addEventListener('DOMContentLoaded', function() {
           }
 
           // ⬇ DETAIL SECTIONS (hidden by default, toggled on click) ⬇
-          html += '<div id="' + detailId + '" style="display:none;margin-top:8px;border-top:1px solid var(--border);padding-top:8px">';
+                    html += '<div id="' + detailId + '" style="display:none;margin-top:8px;border-top:1px solid var(--border);padding-top:8px">';
 
-          // OWED TO ME — from open items in this series where owner is NOT Whitney, grouped by firm
-          if (ev.owedItems && ev.owedItems.length > 0) {
-            html += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">OWED TO ME</div>';
-            // Group by owner/firm
-            const groups = {};
-            for (const item of ev.owedItems) {
-              const key = item.owner || 'Unassigned';
-              if (!groups[key]) groups[key] = [];
-              groups[key].push(item);
-            }
-            for (const [owner, items] of Object.entries(groups)) {
-              const ownerDisplay = owner === 'Unassigned' ? '—' : owner;
-              html += '<div style="margin:2px 0">';
-              html += '  <span style="font-size:11px;font-weight:500;color:var(--accent)">' + escapeHtml(ownerDisplay) + '</span>';
-              for (const item of items) {
-                const dueLabel = item.dueDate ? ' | due ' + item.dueDate : '';
-                html += '  <div style="font-size:12px;padding:1px 0 1px 12px;color:var(--fg)">' + escapeHtml(item.actionItem) + (dueLabel ? '<span style="color:var(--muted);font-size:11px">' + dueLabel + '</span>' : '') + '</div>';
-              }
-              html += '</div>';
-            }
-          }
+                    // Tab bar
+                    html += '<div class="prep-detail-tabs">';
+                    html += '  <button class="prep-detail-tab active" data-tab="agenda" onclick="event.stopPropagation();switchPrepTab(\'' + eventId + '\',\'agenda\')">AGENDA</button>';
+                    html += '  <button class="prep-detail-tab" data-tab="notes" onclick="event.stopPropagation();switchPrepTab(\'' + eventId + '\',\'notes\')">NOTES</button>';
+                    html += '</div>';
 
-          // WHAT I OWE — Whitney-owned items
-          if (ev.whitneyItems && ev.whitneyItems.length > 0) {
-            html += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">WHAT I OWE</div>';
-            for (const item of ev.whitneyItems) {
-              const dueLabel = item.dueDate ? ' | due ' + item.dueDate : '';
-              html += '<div style="font-size:12px;padding:1px 0;color:var(--fg)">' + escapeHtml(item.actionItem) + (dueLabel ? '<span style="color:var(--muted);font-size:11px">' + dueLabel + '</span>' : '') + '</div>';
-            }
-          }
+                    // AGENDA tab pane
+                    html += '<div class="prep-tab-pane active" id="prep-tab-agenda-' + eventId + '">';
 
-          // CARRIED OVER — items in past notes that are still open in tracker
-          if (ev.pastNotes && ev.pastNotes.length > 0) {
-            const allSeriesItems = (ev.owedItems || []).concat(ev.whitneyItems || []);
-            if (allSeriesItems.length > 0) {
-            const carriedItems = [];
-            for (const pn of ev.pastNotes) {
-              if (!pn.actionItems) continue;
-              for (const ai of pn.actionItems) {
-                // Check if this action item text appears in series-matched items
-                const stillOpen = allSeriesItems.some(oi =>
-                  oi.actionItem.toLowerCase().includes(ai.text.toLowerCase().substring(0, 30))
-                );
-                if (stillOpen) {
-                  const existing = carriedItems.find(c => c.text === ai.text);
-                  if (!existing) {
-                    carriedItems.push({ text: ai.text, assignee: ai.assignees[0], firstSeen: pn.date });
-                  }
-                }
-              }
-            }
-            if (carriedItems.length > 0) {
-              html += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">CARRIED OVER</div>';
-              for (const ci of carriedItems) {
-                html += '<div class="prep-action-item" style="font-size:12px;padding:2px 0">';
-                html += '  <span class="prep-action-assignee" style="font-size:10px">' + escapeHtml(ci.assignee) + '</span>';
-                html += '  <span class="prep-action-text">' + escapeHtml(ci.text) + '</span>';
-                html += '</div>';
-              }
-            }
-            } // close allSeriesItems if
-          }
+                    // OWED TO ME
+                    if (ev.owedItems && ev.owedItems.length > 0) {
+                      html += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">OWED TO ME</div>';
+                      const ownerGroups = {};
+                      for (const item of ev.owedItems) {
+                        const key = item.owner || 'Unassigned';
+                        if (!ownerGroups[key]) ownerGroups[key] = [];
+                        ownerGroups[key].push(item);
+                      }
+                      for (const [owner, items] of Object.entries(ownerGroups)) {
+                        const ownerDisplay = owner === 'Unassigned' ? '---' : owner;
+                        html += '<div style="margin:2px 0">';
+                        html += '  <span style="font-size:11px;font-weight:500;color:var(--accent)">' + escapeHtml(ownerDisplay) + '</span>';
+                        for (const item of items) {
+                          const dueLabel = item.dueDate ? ' | due ' + item.dueDate : '';
+                          html += '  <div style="font-size:12px;padding:1px 0 1px 12px;color:var(--fg)">' + escapeHtml(item.actionItem) + (dueLabel ? '<span style="color:var(--muted);font-size:11px">' + dueLabel + '</span>' : '') + '</div>';
+                        }
+                        html += '</div>';
+                      }
+                    }
 
-          // COPY & PRINT button
-          html += '<button class="prep-view-note-btn" style="margin-top:6px" onclick="event.stopPropagation();copyPrepPrint(\'' + eventId + '\', \'' + escapeHtml(ev.subject) + '\', \'' + escapeHtml(ev.project) + '\')">Copy & Print</button>';
+                    // WHAT I OWE
+                    if (ev.whitneyItems && ev.whitneyItems.length > 0) {
+                      html += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">WHAT I OWE</div>';
+                      for (const item of ev.whitneyItems) {
+                        const dueLabel = item.dueDate ? ' | due ' + item.dueDate : '';
+                        html += '<div style="font-size:12px;padding:1px 0;color:var(--fg)">' + escapeHtml(item.actionItem) + (dueLabel ? '<span style="color:var(--muted);font-size:11px">' + dueLabel + '</span>' : '') + '</div>';
+                      }
+                    }
 
-          html += '</div>'; // end detail section
-          html += '</div>'; // end card
+                    // CARRIED OVER
+                    if (ev.pastNotes && ev.pastNotes.length > 0) {
+                      const allSeriesItems = (ev.owedItems || []).concat(ev.whitneyItems || []);
+                      if (allSeriesItems.length > 0) {
+                      const carriedItems = [];
+                      for (const pn of ev.pastNotes) {
+                        if (!pn.actionItems) continue;
+                        for (const ai of pn.actionItems) {
+                          const stillOpen = allSeriesItems.some(oi =>
+                            oi.actionItem.toLowerCase().includes(ai.text.toLowerCase().substring(0, 30))
+                          );
+                          if (stillOpen) {
+                            const existing = carriedItems.find(c => c.text === ai.text);
+                            if (!existing) {
+                              carriedItems.push({ text: ai.text, assignee: ai.assignees[0], firstSeen: pn.date });
+                            }
+                          }
+                        }
+                      }
+                      if (carriedItems.length > 0) {
+                        html += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">CARRIED OVER</div>';
+                        for (const ci of carriedItems) {
+                          html += '<div class="prep-action-item" style="font-size:12px;padding:2px 0">';
+                          html += '  <span class="prep-action-assignee" style="font-size:10px">' + escapeHtml(ci.assignee) + '</span>';
+                          html += '  <span class="prep-action-text">' + escapeHtml(ci.text) + '</span>';
+                          html += '</div>';
+                        }
+                      }
+                      }
+                    }
+
+                    // COPY & PRINT button
+                    html += '<button class="prep-view-note-btn" style="margin-top:6px" onclick="event.stopPropagation();copyPrepPrint(\'' + eventId + '\', \'' + escapeHtml(ev.subject) + '\', \'' + escapeHtml(ev.project) + '\')">Copy & Print</button>';
+
+                    html += '</div>'; // end AGENDA pane
+
+                    // NOTES tab pane
+                    html += '<div class="prep-tab-pane" id="prep-tab-notes-' + eventId + '">';
+                    if (ev.summaryMarkdown) {
+                      html += '<div class="prep-notes-content">' + escapeHtml(ev.summaryMarkdown) + '</div>';
+                      if (ev.granolaWebUrl) {
+                        html += '<a href="' + escapeHtml(ev.granolaWebUrl) + '" target="_blank" class="prep-view-note-btn" style="text-decoration:none;display:inline-block;font-size:10px;margin-top:4px">View in Granola</a>';
+                      }
+                    } else {
+                      html += '<div class="prep-no-note" style="font-size:11px;padding:2px 0;font-style:italic;color:var(--muted)">No meeting notes for this meeting.</div>';
+                    }
+                    html += '</div>'; // end NOTES pane
+
+                    html += '</div>'; // end detail section
+                    html += '</div>'; // end card
         }
         html += '</div>';
       }
