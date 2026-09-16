@@ -49,9 +49,15 @@ export default async function handler(req, res) {
     return c ? c.id : null;
   }
 
-  // Map personal cell values to project column IDs
+  // Map personal cell values to project column IDs with type-aware formatting
   const cells = [];
   const personalCells = rowData.cells || [];
+
+  // Build column type lookup
+  const personalColType = {};
+  const projectColType = {};
+  for (const c of personalCols) personalColType[c.id] = c.type;
+  for (const c of projectCols) projectColType[c.id] = c.type;
 
   for (const cell of personalCells) {
     const col = personalCols.find(c => c.id === cell.columnId);
@@ -59,10 +65,24 @@ export default async function handler(req, res) {
     if (col.title === 'Confidence' || col.title === 'Source' || col.title === 'LinkedRowId') continue;
     const projectColId = findColId(projectCols, col.title);
     if (!projectColId) continue;
-    const val = cell.value !== undefined && cell.value !== null ? String(cell.value) : null;
-    if (val && val.trim()) {
-      cells.push({ columnId: projectColId, value: val.trim() });
+    const val = cell.value !== undefined && cell.value !== null ? cell.value : null;
+    if (val === null || val === '') continue;
+
+    const pType = projectColType[projectColId];
+    const cellObj = { columnId: projectColId };
+
+    if (pType === 'DATE') {
+      cellObj.value = String(val);
+    } else if (pType === 'CONTACT_LIST') {
+      cellObj.value = String(val);
+    } else if (pType === 'PICKLIST' || pType === 'MULTI_PICKLIST') {
+      cellObj.value = String(val);
+    } else if (pType === 'CHECKBOX') {
+      cellObj.value = val === true || val === 'true' || val === '1' || val === 'Yes';
+    } else {
+      cellObj.value = String(val);
     }
+    cells.push(cellObj);
   }
 
   // Remove SeriesMasterId from cells (use SourceRef for matching instead)
