@@ -77,7 +77,7 @@ export default async function handler(req, res) {
     } else if (pType === 'DATE') {
       cellObj.value = String(val);
     } else if (pType === 'PICKLIST' || pType === 'MULTI_PICKLIST') {
-      cellObj.value = String(val);
+      cellObj.objectValue = String(val);
     } else if (pType === 'CHECKBOX') {
       cellObj.value = val === true || val === 'true' || val === '1' || val === 'Yes';
     } else if (pType === 'DURATION' || pType === 'PREDECESSOR') {
