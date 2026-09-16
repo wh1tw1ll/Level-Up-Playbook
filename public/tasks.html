@@ -1428,9 +1428,12 @@ document.addEventListener('focusout', function() {
 
 // ── PREP: Toggle detail section (global — needed by inline onclick) ──
 function togglePrepDetail(eventId) {
+  console.log('togglePrepDetail called with:', eventId);
   const el = document.getElementById('prep-detail-' + eventId);
+  console.log('Element found:', !!el, 'looking for:', 'prep-detail-' + eventId);
   if (el) {
     el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    console.log('Toggled display to:', el.style.display);
   }
 }
 
