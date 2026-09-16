@@ -63,36 +63,39 @@ export default async function handler(req, res) {
     const col = personalCols.find(c => c.id === cell.columnId);
     if (!col) continue;
     if (col.title === 'Confidence' || col.title === 'Source' || col.title === 'LinkedRowId') continue;
-    const projectColId = findColId(projectCols, col.title);
-    if (!projectColId) continue;
+    const projectCol = projectCols.find(c => c.title === col.title);
+    if (!projectCol) continue;
+    const projectColId = projectCol.id;
     const val = cell.value !== undefined && cell.value !== null ? cell.value : null;
     if (val === null || val === '') continue;
 
-    const pType = projectColType[projectColId];
+    const pType = projectCol.type;
     const cellObj = { columnId: projectColId };
 
-    if (pType === 'DATE') {
-      cellObj.value = String(val);
-    } else if (pType === 'CONTACT_LIST') {
+    if (pType === 'CONTACT_LIST') {
       cellObj.objectValue = { name: String(val) };
+    } else if (pType === 'DATE') {
+      cellObj.value = String(val);
     } else if (pType === 'PICKLIST' || pType === 'MULTI_PICKLIST') {
       cellObj.value = String(val);
     } else if (pType === 'CHECKBOX') {
       cellObj.value = val === true || val === 'true' || val === '1' || val === 'Yes';
+    } else if (pType === 'DURATION' || pType === 'PREDECESSOR') {
+      cellObj.value = String(val);
     } else {
       cellObj.value = String(val);
     }
-    cells.push(cellObj);
+    cells.push({ column: col.title, type: pType, ...cellObj });
   }
 
-  // Remove SeriesMasterId from cells (use SourceRef for matching instead)
-  const smId = findColId(projectCols, 'SeriesMasterId');
-  if (smId) {
-    const idx = cells.findIndex(c => c.columnId === smId);
-    if (idx >= 0) cells.splice(idx, 1);
-  }
+  // Remove SeriesMasterId from cells
+  const smIdx = cells.findIndex(c => c.column === 'SeriesMasterId');
+  if (smIdx >= 0) cells.splice(smIdx, 1);
 
-  if (cells.length === 0) {
+  // Strip debug info and build clean cell array
+  const cleanCells = cells.map(c => ({ columnId: c.columnId, value: c.value, objectValue: c.objectValue }));
+
+  if (cleanCells.length === 0) {
     return res.status(400).json({ error: 'No valid data to promote' });
   }
 
@@ -103,12 +106,16 @@ export default async function handler(req, res) {
       Authorization: 'Bearer ' + token,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ cells, toBottom: true })
+    body: JSON.stringify({ cells: cleanCells, toBottom: true })
   });
 
   const writeData = await writeResp.json();
   if (!writeResp.ok) {
-    return res.status(502).json({ error: 'Failed to promote', detail: writeData });
+    return res.status(502).json({
+      error: 'Failed to promote',
+      detail: writeData,
+      cellDebug: cells.map(c => ({ column: c.column, type: c.type, value: c.value, objectValue: c.objectValue }))
+    });
   }
 
   // Update personal row status to "Complete" (promoted)
