@@ -87,19 +87,6 @@ export default async function handler(req, res) {
       case '/api/dova-seed': return dovaSeedHandler(req, res);
       case '/api/dova-workspace': return dovaWorkspaceHandler(req, res);
             case '/api/dova-update-schedule': return dovaUpdateSchedule(req, res);
-                  case '/api/dova-check': {
-                    // Read-only: verify DOVA Action Tracker state
-                    const sheet = await smartsheet.getSheetWithColumns('4456864287772548');
-                    const mfp_ids = ['681604480106372','1878666626334596','8871184769351556','6227519655772036','1980685789822852','6516512704298884','217533263773572','2283146245177220','7061586198527876'];
-                    const found = (sheet.rows||[]).filter(r => mfp_ids.includes(String(r.id))).map(r => ({id:r.id, cat: (r.cells||[]).find(c => c.columnId === (sheet.columns||[]).find(x=>x.title==='Category')?.id)?.displayValue || ''}));
-                    const cats = {};
-                    for (const r of (sheet.rows||[])) {
-                      const c = (r.cells||[]).find(c => c.columnId === (sheet.columns||[]).find(x=>x.title==='Category')?.id)?.displayValue || '';
-                      if (c === 'Meeting Note') cats['Meeting Note'] = (cats['Meeting Note']||0)+1;
-                    }
-                    res.json({rowCount: (sheet.rows||[]).length, mfpStillInDOVA: found.length, mfpRows: found, meetingNoteCount: cats['Meeting Note'] || 0, catOptions: (sheet.columns||[]).find(x=>x.title==='Category')?.options || []});
-                    return;
-                  }
                   case '/api/chiefs':
                         case '/api/chiefs/admin': return chiefsHandler(req, res);
             case '/api/chiefs-v3': return chiefsV3Handler(req, res);
