@@ -97,7 +97,7 @@ export default async function handler(req, res) {
                       const c = (r.cells||[]).find(c => c.columnId === (sheet.columns||[]).find(x=>x.title==='Category')?.id)?.displayValue || '';
                       if (c === 'Meeting Note') cats['Meeting Note'] = (cats['Meeting Note']||0)+1;
                     }
-                    res.json({rowCount: (sheet.rows||[]).length, mfpStillInDOVA: found.length, mfpRows: found, meetingNoteCount: cats['Meeting Note'] || 0});
+                    res.json({rowCount: (sheet.rows||[]).length, mfpStillInDOVA: found.length, mfpRows: found, meetingNoteCount: cats['Meeting Note'] || 0, catOptions: (sheet.columns||[]).find(x=>x.title==='Category')?.options || []});
                     return;
                   }
                   case '/api/chiefs':
