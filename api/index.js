@@ -164,8 +164,12 @@ export default async function handler(req, res) {
                                                                                                       mfpCells.push({columnId: mfpCol.id, objectValue: {displayValue: raw}});
                                                                                                     }
                                                 }
-                                                if (!mfpCells.length) { moveResults.push({rid, error:'no mappable cells'}); continue; }
-                                                await smartsheet.addRow(MFP, mfpCells);
+                                                if (!mfpCells.length) { moveResults.push({rid, error:'no mappable cells', debugColTypes: (row.cells||[]).map(c => mfpColMap[(sheet.columns||[]).find(x=>x.id===c.columnId)?.title]?.type).filter(Boolean)}); continue; }
+                                                                                                // Debug: log first row's payload keys
+                                                                                                if (moveResults.length === 0) {
+                                                                                                  moveResults.push({rid: rid + '_debug', cellCount: mfpCells.length, cellTypes: mfpCells.map(c => ({colId: c.columnId, hasObj: !!c.objectValue, hasVal: !!c.value}))});
+                                                                                                }
+                                                                                                const addResult = await smartsheet.addRow(MFP, mfpCells);
                                                 await smartsheet.deleteRows(DOVA, [rid]);
                                                 moveResults.push({rid, status:'moved'});
                                               } catch(e) { moveResults.push({rid, error:e.message}); }
