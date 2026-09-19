@@ -86,13 +86,13 @@ export default async function handler(req, res) {
       case '/api/dova-setup': return dovaSetupHandler(req, res);
       case '/api/dova-seed': return dovaSeedHandler(req, res);
       case '/api/dova-workspace': return dovaWorkspaceHandler(req, res);
-      case '/api/dova-update-schedule': return dovaUpdateSchedule(req, res);
-            // batch-update and dova-classify removed after use
+            case '/api/dova-update-schedule': return dovaUpdateSchedule(req, res);
+            // cleanup and fix endpoints — deployed temporarily, removed after use
             case '/api/chiefs':
-      case '/api/chiefs/admin': return chiefsHandler(req, res);
-      case '/api/chiefs-v3': return chiefsV3Handler(req, res);
+            case '/api/chiefs/admin': return chiefsHandler(req, res);
+            case '/api/chiefs-v3': return chiefsV3Handler(req, res);
 
-      case '/api/sync/flagged-store': {
+            case '/api/sync/flagged-store': {
         if (req.method === 'POST') {
           _flaggedCache = {
             actions: req.body?.actions || [],
