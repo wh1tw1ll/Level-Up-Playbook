@@ -22,7 +22,6 @@ import dovaSetupHandler from '../lib/handlers/dova-setup.js';
 import dovaSeedHandler from '../lib/handlers/dova-seed.js';
 import dovaWorkspaceHandler from '../lib/handlers/dova-workspace.js';
 import dovaUpdateSchedule from '../lib/handlers/dova-update-schedule.js';
-import dovaClassifyHandler from './dova-classify.js';
 import prepHandler from '../lib/handlers/prep.js';
 import stageHandler from '../lib/handlers/stage.js';
 import promoteHandler from '../lib/handlers/promote.js';
@@ -88,17 +87,8 @@ export default async function handler(req, res) {
       case '/api/dova-seed': return dovaSeedHandler(req, res);
       case '/api/dova-workspace': return dovaWorkspaceHandler(req, res);
       case '/api/dova-update-schedule': return dovaUpdateSchedule(req, res);
-            case '/api/dova-classify': return dovaClassifyHandler(req, res);
-                  case '/api/batch-update': {
-        if (req.method !== 'POST') return res.status(405).json({error: 'POST required'});
-        const { sheetId, rows } = req.body || {};
-        if (!sheetId || !rows) return res.status(400).json({error: 'sheetId and rows required'});
-        try { const result = await smartsheet.updateRows(sheetId, rows); res.json(result); }
-        catch (e) { res.status(500).json({error: e.message}); }
-        return;
-      }
-
-      case '/api/chiefs':
+            // batch-update and dova-classify removed after use
+            case '/api/chiefs':
       case '/api/chiefs/admin': return chiefsHandler(req, res);
       case '/api/chiefs-v3': return chiefsV3Handler(req, res);
 
