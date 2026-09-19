@@ -167,6 +167,8 @@ body{display:flex;flex-direction:column}
 .task-dispatch.failed{background:rgba(232,96,96,0.12);border-color:var(--danger);color:var(--danger);cursor:pointer}
 .task-dispatch.dispatch-disabled{opacity:0.35;cursor:not-allowed;border-color:#333;color:var(--muted)}
 .task-dispatch.dispatch-disabled:hover{background:transparent;border-color:#333;color:var(--muted)}
+.task-draft-btn{flex:0 0 auto;font-size:11px;padding:1px 5px;border-radius:3px;cursor:pointer;border:1px solid #555;background:transparent;color:var(--muted);transition:all .15s;font-family:var(--font);line-height:1.4}
+.task-draft-btn:hover{background:rgba(126,207,126,0.12);border-color:var(--success);color:var(--success)}
 /* Promote button for staged items */
 .task-promote{flex:0 0 auto;margin-top:2px;font-size:11px;padding:1px 5px;border-radius:3px;cursor:pointer;border:1px solid var(--accent);background:rgba(190,209,198,0.08);color:var(--accent);transition:all .15s;font-family:var(--font);white-space:nowrap}
 .task-promote:hover{background:rgba(190,209,198,0.2)}
@@ -207,6 +209,11 @@ body{display:flex;flex-direction:column}
 .prep-card{background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:10px;padding:10px 12px;transition:border-color .15s}
 .prep-card:hover{border-color:#555}
 .prep-card.has-note{border-left:3px solid var(--accent)}
+.prep-card-past{opacity:0.85}
+.prep-card-past:hover{opacity:1;border-color:var(--accent)}
+.prep-past-section{margin-top:16px}
+.prep-past-header{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:600;padding:8px 10px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;user-select:none}
+.prep-past-header:hover{border-color:var(--accent)}
 .prep-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;gap:8px}
 .prep-date{font-size:11px;color:var(--muted);font-weight:500;white-space:nowrap}
 .prep-time{font-size:13px;color:var(--muted);white-space:nowrap}
@@ -454,9 +461,9 @@ function renderSourceLink(sourceRef) {
 function getTaskType(text) {
   if (!text) return 'DO';
   var t = text.trim().toLowerCase();
-  // DRAFT: actions about sending, emailing, responding, reaching out
-  var draftStart = /^(send|email|respond|reply|circulate|forward|follow\s+up|reach\s+out|confirm\s+with|write|draft|compose|contact|call|message|text)\b/;
-  var draftAny = /\b(send|email|respond|reply|reach\s+out|contact|call|message|text)\b/;
+  // DRAFT: actions about drafting, writing, or sending
+  var draftStart = /^(draft|write|compose|send|email|respond|reply|circulate|forward|follow\s+up|reach\s+out|confirm\s+with|contact|call|message|text)\b/;
+  var draftAny = /\b(send|email|respond|reply|contact|call|message|text)\b/;
   // TRACK: actions about monitoring, verifying, confirming facts
   var trackStart = /^(track|monitor|review|verify|confirm\s+that|add\s+to|update)\b/;
   var trackAny = /\b(track|monitor|review|verify|confirm)\b/;
@@ -591,7 +598,7 @@ function render() {
     let deleteBtn = '<button class="task-delete" onclick="event.stopPropagation();deleteTask(this,' + t.rowId + ')" title="Delete">&#10005;</button>';
     // Dispatch button - always visible, disabled with tooltip if auto-ingested
             let dispatchState = getDispatchState(t);
-            let canDispatch = t.confidence === 'high';
+            let canDispatch = true;
             let dLabel = 'LUCI';
             let dCls = 'task-dispatch' + (canDispatch ? ' dispatchable' : ' dispatch-disabled');
             if (dispatchState.state === 'dispatched') { dLabel = 'Sent'; dCls += ' dispatched'; }
@@ -602,6 +609,11 @@ function render() {
     let dispatchBtnHtml = '<button class="' + dCls + '" data-row-id="' + t.rowId + '" data-source="' + (t.source || 'project') + '" data-type="' + typeLabel + '" title="' + tip + '"' +
       (dispatchState.disabled ? ' disabled' : '') +
       (canDispatch ? '' : ' disabled') + '>' + dLabel + '</button>';
+    // Explicit Draft button (only if auto-detect isn't already DRAFT)
+    let draftBtnHtml = '';
+    if (dispatchState.state === 'idle' && canDispatch && typeLabel !== 'DRAFT') {
+      draftBtnHtml = '<button class="task-draft-btn" data-row-id="' + t.rowId + '" data-source="' + (t.source || 'project') + '" data-type="DRAFT" title="Request email draft">&#9993;</button>';
+    }
     let promoteBtnHtml = '';
     if (t.source === 'staged') {
       promoteBtnHtml = '<button class="task-promote" onclick="event.stopPropagation();promoteTask(this,' + t.rowId + ')" title="Promote to Project log">&#8593;</button>';
@@ -629,7 +641,7 @@ function render() {
         '</div>' +
         '<div class="disc-thread" id="disc-' + t.rowId + '"></div>' +
               '</div>' +
-              '<div class="task-actions">' + promoteBtnHtml + dispatchBtnHtml + deleteBtn + '</div>';
+              '<div class="task-actions">' + promoteBtnHtml + dispatchBtnHtml + draftBtnHtml + deleteBtn + '</div>';
     list.appendChild(div);
   }
 
@@ -1573,6 +1585,17 @@ document.addEventListener('DOMContentLoaded', function() {
     dispatchTask(btn, rowId, source, type);
   });
 
+  // Delegated Draft button click handler
+  document.getElementById('task-list').addEventListener('click', function(e) {
+    var btn = e.target.closest('.task-draft-btn');
+    if (!btn) return;
+    if (btn.disabled) return;
+    e.stopPropagation();
+    var rowId = btn.dataset.rowId;
+    var source = btn.dataset.source || 'project';
+    dispatchTask(btn, rowId, source, 'DRAFT');
+  });
+
   // Initial load from cache then fetch
   try {
     const cached = localStorage.getItem('luci_tasks_cache');
@@ -1619,193 +1642,272 @@ document.addEventListener('DOMContentLoaded', function() {
   AuthRequiredError.prototype = new Error();
 
   function renderPrepView(container, events) {
-      // Group events by day using full dateET (already Eastern Time, e.g. "Mon, Sep 22")
-      const groups = {};
+      // Split: past this week vs today/upcoming
+      const now = new Date();
+      const todayET = now.toLocaleDateString('en-US', { timeZone: 'America/New_York' });
+      const futureEvents = [];
+      const pastEvents = [];
 
       for (const ev of events) {
-        const day = ev.dateET || '';
-        if (!day) continue;
-        if (!groups[day]) groups[day] = [];
-        groups[day].push(ev);
+        if (!ev.start?.dateTime) continue;
+        const eventDate = new Date(ev.start.dateTime).toLocaleDateString('en-US', { timeZone: 'America/New_York' });
+        if (eventDate < todayET) {
+          // Past — only if within the last 7 days
+          const msAgo = now - new Date(ev.start.dateTime);
+          if (msAgo < 7 * 86400000) pastEvents.push(ev);
+        } else {
+          futureEvents.push(ev);
+        }
       }
 
       let html = '';
-      const todayStr = new Date().toLocaleDateString('en-US', { timeZone: 'America/New_York', weekday: 'short', month: 'short', day: 'numeric' });
 
-      for (const [dayLabel, dayEvents] of Object.entries(groups)) {
-        // Sort day keys chronologically — Today and Tomorrow first, then by date
-        const isToday = dayLabel.startsWith('Today');
-        const isTomorrow = dayLabel.startsWith('Tomorrow');
-        let displayDay = dayLabel;
-        if (!isToday && !isTomorrow) {
-          // Extract just the date part for display
-          const parts = dayLabel.split(',');
-          if (parts.length >= 2) {
-            // Show "Monday | Sep 22" — full weekday + numeric date
-            const weekday = new Date(dayEvents[0].start?.dateTime || dayLabel)
-              .toLocaleDateString('en-US', { timeZone: 'America/New_York', weekday: 'long' });
-            displayDay = weekday + '  |  ' + parts.slice(1).join(',').trim();
-          }
+      // ── TODAY & UPCOMING ──
+      if (futureEvents.length > 0) {
+        // Group by day
+        const groups = {};
+        for (const ev of futureEvents) {
+          const day = ev.dateET || '';
+          if (!day) continue;
+          if (!groups[day]) groups[day] = [];
+          groups[day].push(ev);
         }
-        html += '<div class="prep-day-header' + (isToday ? ' today' : '') + '">' + escapeHtml(displayDay) + '</div>';
-        html += '<div style="margin-bottom:6px">'; // Tighter group spacing
 
-        for (const ev of dayEvents) {
-          const hasNote = ev.hasGranolaNote;
-          const isOneOff = !ev.isRecurring;
-          const cardClass = 'prep-card' + (hasNote ? ' has-note' : '');
-          const projectBadge = ev.project ? ' <span class="meta-tag project" style="font-size:10px;padding:0 4px">' + escapeHtml(ev.project) + '</span>' : '';
-          const eventId = escapeHtml(ev.eventId || 'no-id');
-          const detailId = 'prep-detail-' + eventId;
+        html += '<div class="prep-section-label" style="font-size:12px;font-weight:600;margin-bottom:8px">UPCOMING</div>';
 
-          // Card with tighter padding (6px vs 10px) — clickable to toggle detail
-          html += '<div class="' + cardClass + '" style="padding:6px 10px;margin-bottom:6px;cursor:pointer" data-event-id="' + eventId + '">';
-          html += '<div class="prep-header" style="margin-bottom:3px">';
-          html += '  <div class="prep-title" style="font-size:14px">' + escapeHtml(ev.subject) + projectBadge + '</div>';
-          html += '  <div class="prep-time" style="font-size:12px">' + escapeHtml(ev.timeET || '') + '</div>';
-          html += '</div>';
-
-          // Meta line (tighter)
-          html += '<div class="prep-meta" style="margin-bottom:4px;font-size:11px">';
-          if (ev.location) html += '<span class="prep-loc">' + escapeHtml(ev.location) + '</span>';
-          if (ev.attendees && ev.attendees.length > 0) html += '<span style="color:var(--muted)">' + ev.attendees.length + ' attendees</span>';
-          html += '</div>';
-
-          if (hasNote) {
-            // Granola summary (collapsed)
-            if (ev.summaryPreview) {
-              const truncated = ev.summaryPreview.length > 350;
-              const display = truncated ? escapeHtml(ev.summaryPreview.substring(0, 350)) + '...' : escapeHtml(ev.summaryPreview);
-              html += '<div class="prep-summary" id="prep-sum-' + eventId + '" style="max-height:150px">' + display + '</div>';
-              if (truncated) {
-                html += `<span class="prep-summary-expand" onclick="event.stopPropagation();document.getElementById('prep-sum-' ${eventId}).classList.toggle('expanded');this.textContent=this.textContent=='Show more'?'Show less':'Show more'">Show more</span>`;
-              }
+        for (const [dayLabel, dayEvents] of Object.entries(groups)) {
+          const isToday = dayLabel.startsWith('Today');
+          const isTomorrow = dayLabel.startsWith('Tomorrow');
+          let displayDay = dayLabel;
+          if (!isToday && !isTomorrow) {
+            const parts = dayLabel.split(',');
+            if (parts.length >= 2) {
+              const weekday = new Date(dayEvents[0].start?.dateTime || dayLabel)
+                .toLocaleDateString('en-US', { timeZone: 'America/New_York', weekday: 'long' });
+              displayDay = weekday + '  |  ' + parts.slice(1).join(',').trim();
             }
-
-            // Note age warning
-            if (ev.granolaStaleDays && ev.granolaStaleDays > 30) {
-              html += '<div style="font-size:11px;color:var(--warn);margin-top:2px">Note from ' + escapeHtml(ev.granolaNoteDate || '') + ' (' + ev.granolaStaleDays + ' days ago)</div>';
-            }
-
-            // Action items from Granola
-            if (ev.actionItems && ev.actionItems.length > 0) {
-              html += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">Open Action Items</div>';
-              for (const item of ev.actionItems) {
-                html += '<div class="prep-action-item" style="font-size:12px;padding:2px 0">';
-                html += '  <span class="prep-action-assignee" style="font-size:10px">' + escapeHtml(item.assignees[0]) + '</span>';
-                html += '  <span class="prep-action-text">' + escapeHtml(item.text) + '</span>';
-                html += '</div>';
-              }
-            }
-
-            // View note button
-            if (ev.granolaWebUrl) {
-              html += '<a href="' + escapeHtml(ev.granolaWebUrl) + '" target="_blank" class="prep-view-note-btn" style="text-decoration:none;display:inline-block;font-size:10px">View in Granola</a>';
-            }
-          } else if (isOneOff) {
-            // One-off: no note expected, no nag line
-          } else if (ev.neverHadNote) {
-            html += '<div class="prep-no-note" style="font-size:11px;padding:2px 0;font-style:italic;color:var(--muted)">No meeting notes for this series.</div>';
           }
+          html += '<div class="prep-day-header' + (isToday ? ' today' : '') + '">' + escapeHtml(displayDay) + '</div>';
+          html += '<div style="margin-bottom:6px">';
 
-          // ⬇ DETAIL SECTIONS (hidden by default, toggled on click) ⬇
-                    html += '<div id="' + detailId + '" style="display:none;margin-top:8px;border-top:1px solid var(--border);padding-top:8px">';
-
-                    // Tab bar
-                    html += '<div class="prep-detail-tabs">';
-                    html += '  <button class="prep-detail-tab active" data-tab="agenda" onclick="event.stopPropagation();switchPrepTab(\'' + eventId + '\',\'agenda\')">AGENDA</button>';
-                    html += '  <button class="prep-detail-tab" data-tab="notes" onclick="event.stopPropagation();switchPrepTab(\'' + eventId + '\',\'notes\')">NOTES</button>';
-                    html += '</div>';
-
-                    // AGENDA tab pane
-                    html += '<div class="prep-tab-pane active" id="prep-tab-agenda-' + eventId + '">';
-
-                    // OWED TO ME
-                    if (ev.owedItems && ev.owedItems.length > 0) {
-                      html += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">OWED TO ME</div>';
-                      const ownerGroups = {};
-                      for (const item of ev.owedItems) {
-                        const key = item.owner || 'Unassigned';
-                        if (!ownerGroups[key]) ownerGroups[key] = [];
-                        ownerGroups[key].push(item);
-                      }
-                      for (const [owner, items] of Object.entries(ownerGroups)) {
-                        const ownerDisplay = owner === 'Unassigned' ? '---' : owner;
-                        html += '<div style="margin:2px 0">';
-                        html += '  <span style="font-size:11px;font-weight:500;color:var(--accent)">' + escapeHtml(ownerDisplay) + '</span>';
-                        for (const item of items) {
-                          const dueLabel = item.dueDate ? ' | due ' + item.dueDate : '';
-                          html += '  <div style="font-size:12px;padding:1px 0 1px 12px;color:var(--fg)">' + escapeHtml(item.actionItem) + (dueLabel ? '<span style="color:var(--muted);font-size:11px">' + dueLabel + '</span>' : '') + '</div>';
-                        }
-                        html += '</div>';
-                      }
-                    }
-
-                    // WHAT I OWE
-                    if (ev.whitneyItems && ev.whitneyItems.length > 0) {
-                      html += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">WHAT I OWE</div>';
-                      for (const item of ev.whitneyItems) {
-                        const dueLabel = item.dueDate ? ' | due ' + item.dueDate : '';
-                        html += '<div style="font-size:12px;padding:1px 0;color:var(--fg)">' + escapeHtml(item.actionItem) + (dueLabel ? '<span style="color:var(--muted);font-size:11px">' + dueLabel + '</span>' : '') + '</div>';
-                      }
-                    }
-
-                    // CARRIED OVER
-                    if (ev.pastNotes && ev.pastNotes.length > 0) {
-                      const allSeriesItems = (ev.owedItems || []).concat(ev.whitneyItems || []);
-                      if (allSeriesItems.length > 0) {
-                      const carriedItems = [];
-                      for (const pn of ev.pastNotes) {
-                        if (!pn.actionItems) continue;
-                        for (const ai of pn.actionItems) {
-                          const stillOpen = allSeriesItems.some(oi =>
-                            oi.actionItem.toLowerCase().includes(ai.text.toLowerCase().substring(0, 30))
-                          );
-                          if (stillOpen) {
-                            const existing = carriedItems.find(c => c.text === ai.text);
-                            if (!existing) {
-                              carriedItems.push({ text: ai.text, assignee: ai.assignees[0], firstSeen: pn.date });
-                            }
-                          }
-                        }
-                      }
-                      if (carriedItems.length > 0) {
-                        html += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">CARRIED OVER</div>';
-                        for (const ci of carriedItems) {
-                          html += '<div class="prep-action-item" style="font-size:12px;padding:2px 0">';
-                          html += '  <span class="prep-action-assignee" style="font-size:10px">' + escapeHtml(ci.assignee) + '</span>';
-                          html += '  <span class="prep-action-text">' + escapeHtml(ci.text) + '</span>';
-                          html += '</div>';
-                        }
-                      }
-                      }
-                    }
-
-                    // COPY & PRINT button
-                    html += '<button class="prep-view-note-btn" style="margin-top:6px" onclick="event.stopPropagation();copyPrepPrint(\'' + eventId + '\', \'' + escapeHtml(ev.subject) + '\', \'' + escapeHtml(ev.project) + '\')">Copy & Print</button>';
-
-                    html += '</div>'; // end AGENDA pane
-
-                    // NOTES tab pane
-                    html += '<div class="prep-tab-pane" id="prep-tab-notes-' + eventId + '">';
-                    if (ev.summaryMarkdown) {
-                      html += '<div class="prep-notes-content">' + escapeHtml(ev.summaryMarkdown) + '</div>';
-                      if (ev.granolaWebUrl) {
-                        html += '<a href="' + escapeHtml(ev.granolaWebUrl) + '" target="_blank" class="prep-view-note-btn" style="text-decoration:none;display:inline-block;font-size:10px;margin-top:4px">View in Granola</a>';
-                      }
-                    } else {
-                      html += '<div class="prep-no-note" style="font-size:11px;padding:2px 0;font-style:italic;color:var(--muted)">No meeting notes for this meeting.</div>';
-                    }
-                    html += '</div>'; // end NOTES pane
-
-                    html += '</div>'; // end detail section
-                    html += '</div>'; // end card
+          for (const ev of dayEvents) {
+            html += renderPrepCard(ev);
+          }
+          html += '</div>';
         }
-        html += '</div>';
+      }
+
+      // ── EARLIER THIS WEEK (rendered BEFORE upcoming) ──
+            if (pastEvents.length > 0) {
+              html += '<div class="prep-past-section">';
+              html += '<div class="prep-past-header" id="prep-past-header" style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:600;padding:8px 10px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:8px">';
+              html += '  <span id="prep-past-chevron">&#9654;</span>';
+              html += '  <span>Earlier This Week (' + pastEvents.length + ' meeting' + (pastEvents.length !== 1 ? 's' : '') + ')</span>';
+              html += '</div>';
+              html += '<div id="prep-past-body" style="display:none">';
+
+              // Group past events by day (descending — most recent first)
+              const pastGroups = {};
+              for (const ev of pastEvents) {
+                const day = ev.dateET || '';
+                if (!day) continue;
+                if (!pastGroups[day]) pastGroups[day] = [];
+                pastGroups[day].push(ev);
+              }
+              // Sort days descending
+              const pastDays = Object.keys(pastGroups).sort(function(a, b) {
+                const dateA = new Date(pastGroups[a][0]?.start?.dateTime || 0);
+                const dateB = new Date(pastGroups[b][0]?.start?.dateTime || 0);
+                return dateB - dateA;
+              });
+
+              for (const dayLabel of pastDays) {
+                const dayEvents = pastGroups[dayLabel];
+                const parts = dayLabel.split(',');
+                let displayDay = dayLabel;
+                if (parts.length >= 2) {
+                  displayDay = parts.slice(1).join(',').trim();
+                }
+                html += '<div class="prep-day-header" style="font-size:11px;opacity:0.7;padding:4px 0">' + escapeHtml(displayDay) + '</div>';
+
+                for (const ev of dayEvents) {
+                  ev._isPast = true;
+                  html += renderPrepCard(ev);
+                }
+              }
+
+              html += '</div>'; // end past-body
+              html += '</div>'; // end past-section
+            }
+
+            // ── TODAY & UPCOMING ──
+      // ── NO MEETINGS ──
+      if (futureEvents.length === 0 && pastEvents.length === 0) {
+        html = '<div class="prep-empty">No meetings in the next 14 days.</div>';
       }
 
       container.innerHTML = html;
+
+    // Wire "Earlier This Week" toggle click
+    var pastHeader = document.getElementById('prep-past-header');
+    if (pastHeader) {
+      pastHeader.addEventListener('click', function(e) {
+        var body = document.getElementById('prep-past-body');
+        var chevron = document.getElementById('prep-past-chevron');
+        if (!body) return;
+        var visible = body.style.display !== 'none';
+        body.style.display = visible ? 'none' : 'block';
+        if (chevron) chevron.innerHTML = visible ? '&#9654;' : '&#9660;';
+      });
     }
+  }
+
+    // ── RENDER A SINGLE PREP CARD ──
+    function renderPrepCard(ev) {
+      const hasNote = ev.hasGranolaNote;
+      const isOneOff = !ev.isRecurring;
+      const isPast = ev._isPast;
+      const cardClass = 'prep-card' + (hasNote ? ' has-note' : '') + (isPast ? ' prep-card-past' : '');
+      const projectBadge = ev.project ? ' <span class="meta-tag project" style="font-size:10px;padding:0 4px">' + escapeHtml(ev.project) + '</span>' : '';
+      const eventId = escapeHtml(ev.eventId || 'no-id');
+      const detailId = 'prep-detail-' + eventId;
+
+      let h = '<div class="' + cardClass + '" style="padding:6px 10px;margin-bottom:6px;cursor:pointer" data-event-id="' + eventId + '">';
+      h += '<div class="prep-header" style="margin-bottom:3px">';
+      h += '  <div class="prep-title" style="font-size:14px">' + escapeHtml(ev.subject) + projectBadge + '</div>';
+      h += '  <div class="prep-time" style="font-size:12px">' + escapeHtml(isPast ? ev.dateET : (ev.timeET || '')) + '</div>';
+      h += '</div>';
+
+      h += '<div class="prep-meta" style="margin-bottom:4px;font-size:11px">';
+      if (ev.location) h += '<span class="prep-loc">' + escapeHtml(ev.location) + '</span>';
+      if (ev.attendees && ev.attendees.length > 0) h += '<span style="color:var(--muted)">' + ev.attendees.length + ' attendees</span>';
+      h += '</div>';
+
+      if (hasNote) {
+        if (ev.summaryPreview) {
+          const truncated = ev.summaryPreview.length > 350;
+          const display = truncated ? escapeHtml(ev.summaryPreview.substring(0, 350)) + '...' : escapeHtml(ev.summaryPreview);
+          h += '<div class="prep-summary" id="prep-sum-' + eventId + '" style="max-height:150px">' + display + '</div>';
+          if (truncated) {
+            h += '<span class="prep-summary-expand" onclick="event.stopPropagation();void function(){var el=document.getElementById(\'prep-sum-' + eventId + '\');el.classList.toggle(\'expanded\');this.textContent=this.textContent==\'Show more\'?\'Show less\':\'Show more\';}()">Show more</span>';
+          }
+        }
+        if (ev.granolaStaleDays && ev.granolaStaleDays > 30) {
+          h += '<div style="font-size:11px;color:var(--warn);margin-top:2px">Note from ' + escapeHtml(ev.granolaNoteDate || '') + ' (' + ev.granolaStaleDays + ' days ago)</div>';
+        }
+        if (ev.actionItems && ev.actionItems.length > 0) {
+          h += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">Open Action Items</div>';
+          for (const item of ev.actionItems) {
+            h += '<div class="prep-action-item" style="font-size:12px;padding:2px 0">';
+            h += '  <span class="prep-action-assignee" style="font-size:10px">' + escapeHtml(item.assignees[0]) + '</span>';
+            h += '  <span class="prep-action-text">' + escapeHtml(item.text) + '</span>';
+            h += '</div>';
+          }
+        }
+        if (ev.granolaWebUrl) {
+          h += '<a href="' + escapeHtml(ev.granolaWebUrl) + '" target="_blank" class="prep-view-note-btn" style="text-decoration:none;display:inline-block;font-size:10px">View in Granola</a>';
+        }
+      } else if (isOneOff) {
+        // one-off: no note expected
+      } else if (ev.neverHadNote) {
+        h += '<div class="prep-no-note" style="font-size:11px;padding:2px 0;font-style:italic;color:var(--muted)">No meeting notes for this series.</div>';
+      }
+
+      // Detail sections
+      h += '<div id="' + detailId + '" style="display:none;margin-top:8px;border-top:1px solid var(--border);padding-top:8px">';
+      h += '<div class="prep-detail-tabs">';
+      h += '  <button class="prep-detail-tab active" data-tab="agenda" onclick="event.stopPropagation();switchPrepTab(\'' + eventId + '\',\'agenda\')">AGENDA</button>';
+      h += '  <button class="prep-detail-tab" data-tab="notes" onclick="event.stopPropagation();switchPrepTab(\'' + eventId + '\',\'notes\')">NOTES</button>';
+      h += '</div>';
+
+      h += '<div class="prep-tab-pane active" id="prep-tab-agenda-' + eventId + '">';
+      if (ev.owedItems && ev.owedItems.length > 0) {
+        h += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">OWED TO ME</div>';
+        const ownerGroups = {};
+        for (const item of ev.owedItems) {
+          const key = item.owner || 'Unassigned';
+          if (!ownerGroups[key]) ownerGroups[key] = [];
+          ownerGroups[key].push(item);
+        }
+        for (const [owner, items] of Object.entries(ownerGroups)) {
+          const ownerDisplay = owner === 'Unassigned' ? '---' : owner;
+          h += '<div style="margin:2px 0">';
+          h += '  <span style="font-size:11px;font-weight:500;color:var(--accent)">' + escapeHtml(ownerDisplay) + '</span>';
+          for (const item of items) {
+            const dueLabel = item.dueDate ? ' | due ' + item.dueDate : '';
+            h += '  <div style="font-size:12px;padding:1px 0 1px 12px;color:var(--fg)">' + escapeHtml(item.actionItem) + (dueLabel ? '<span style="color:var(--muted);font-size:11px">' + dueLabel + '</span>' : '') + '</div>';
+          }
+          h += '</div>';
+        }
+      }
+
+      if (ev.whitneyItems && ev.whitneyItems.length > 0) {
+        h += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">WHAT I OWE</div>';
+        for (const item of ev.whitneyItems) {
+          const dueLabel = item.dueDate ? ' | due ' + item.dueDate : '';
+          h += '<div style="font-size:12px;padding:1px 0;color:var(--fg)">' + escapeHtml(item.actionItem) + (dueLabel ? '<span style="color:var(--muted);font-size:11px">' + dueLabel + '</span>' : '') + '</div>';
+        }
+      }
+
+      if (ev.pastNotes && ev.pastNotes.length > 0) {
+        const allSeriesItems = (ev.owedItems || []).concat(ev.whitneyItems || []);
+        if (allSeriesItems.length > 0) {
+          const carriedItems = [];
+          for (const pn of ev.pastNotes) {
+            if (!pn.actionItems) continue;
+            for (const ai of pn.actionItems) {
+              const stillOpen = allSeriesItems.some(oi =>
+                oi.actionItem.toLowerCase().includes(ai.text.toLowerCase().substring(0, 30))
+              );
+              if (stillOpen) {
+                const existing = carriedItems.find(c => c.text === ai.text);
+                if (!existing) {
+                  carriedItems.push({ text: ai.text, assignee: ai.assignees[0], firstSeen: pn.date });
+                }
+              }
+            }
+          }
+          if (carriedItems.length > 0) {
+            h += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">CARRIED OVER</div>';
+            for (const ci of carriedItems) {
+              h += '<div class="prep-action-item" style="font-size:12px;padding:2px 0">';
+              h += '  <span class="prep-action-assignee" style="font-size:10px">' + escapeHtml(ci.assignee) + '</span>';
+              h += '  <span class="prep-action-text">' + escapeHtml(ci.text) + '</span>';
+              h += '</div>';
+            }
+          }
+        }
+      }
+
+      h += '<button class="prep-view-note-btn" style="margin-top:6px" onclick="event.stopPropagation();copyPrepPrint(\'' + eventId + '\', \'' + escapeHtml(ev.subject) + '\', \'' + escapeHtml(ev.project) + '\')">Copy & Print</button>';
+      h += '</div>'; // end AGENDA pane
+
+      h += '<div class="prep-tab-pane" id="prep-tab-notes-' + eventId + '">';
+      if (ev.summaryMarkdown) {
+        h += '<div class="prep-notes-content">' + escapeHtml(ev.summaryMarkdown) + '</div>';
+        if (ev.granolaWebUrl) {
+          h += '<a href="' + escapeHtml(ev.granolaWebUrl) + '" target="_blank" class="prep-view-note-btn" style="text-decoration:none;display:inline-block;font-size:10px;margin-top:4px">View in Granola</a>';
+        }
+      } else {
+        h += '<div class="prep-no-note" style="font-size:11px;padding:2px 0;font-style:italic;color:var(--muted)">No meeting notes for this meeting.</div>';
+      }
+      h += '</div>'; // end NOTES pane
+
+      h += '</div>'; // end detail section
+      h += '</div>'; // end card
+      return h;
+    }
+
+    // Toggle "Earlier This Week" past meetings section
+    function togglePastPrep() {
+      const body = document.getElementById('prep-past-body');
+      const chevron = document.getElementById('prep-past-chevron');
+      if (!body) return;
+      const visible = body.style.display !== 'none';
+      body.style.display = visible ? 'none' : 'block';
+      if (chevron) chevron.innerHTML = visible ? '&#9654;' : '&#9660;';
+    }
+
   // Auto-refresh every 60 seconds, skip while editing
   setInterval(function() {
     if (hasActiveInput) return; // Don't overwrite what the user is typing

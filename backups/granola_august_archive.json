@@ -1,0 +1,253 @@
+{
+  "generated_at": "2026-09-17",
+  "source": "Granola cron dedup analysis",
+  "august_count": 49,
+  "september_count": 113,
+  "august_items": [
+    {
+      "text": "Review and align on the 20 \"ready to present\" contractors",
+      "note": "Wholesale masks dashboard \u2014 contractor payment grouping and closeout tracker",
+      "date": "2026-08-31"
+    },
+    {
+      "text": "Agree on A/B/C/D (or 1/2/3/4/5) tier criteria and assignments",
+      "note": "Wholesale masks dashboard \u2014 contractor payment grouping and closeout tracker",
+      "date": "2026-08-31"
+    },
+    {
+      "text": "Vet cash flow scenarios with Lemartech",
+      "note": "Wholesale masks dashboard \u2014 contractor payment grouping and closeout tracker",
+      "date": "2026-08-31"
+    },
+    {
+      "text": "Add Incur and Levelup attribution to the relevant dashboard slide",
+      "note": "Wholesale masks dashboard \u2014 contractor payment grouping and closeout tracker",
+      "date": "2026-08-31"
+    },
+    {
+      "text": "Send Level Up boilerplate and/or a prior press release to SRK",
+      "note": "Level Up x SRK",
+      "date": "2026-08-27"
+    },
+    {
+      "text": "Share the Level Up deck and job site photos with SRK",
+      "note": "Level Up x SRK",
+      "date": "2026-08-27"
+    },
+    {
+      "text": "SRK to deliver first press release draft by mid-September",
+      "note": "Level Up x SRK",
+      "date": "2026-08-27"
+    },
+    {
+      "text": "Raise site plan alignment as first item on 3:30 PM call with Don and Sam today",
+      "note": "DOVA | Entitlements Touch Base (Agenda to Come)",
+      "date": "2026-08-27"
+    },
+    {
+      "text": "Send recap of Don and Sam call to Matt and Phil by end of day",
+      "note": "DOVA | Entitlements Touch Base (Agenda to Come)",
+      "date": "2026-08-27"
+    },
+    {
+      "text": "Email Charlie and Josh to approve HCP cultural process scope (15k T\\&M)",
+      "note": "DOVA | Entitlements Touch Base (Agenda to Come)",
+      "date": "2026-08-27"
+    },
+    {
+      "text": "Route unsigned HCP 15k EWA to Cause Peer for signature",
+      "note": "DOVA | Entitlements Touch Base (Agenda to Come)",
+      "date": "2026-08-27"
+    },
+    {
+      "text": "Propose a later Caltrans trigger inspection milestone to Matt",
+      "note": "DOVA | Entitlements Touch Base (Agenda to Come)",
+      "date": "2026-08-27"
+    },
+    {
+      "text": "Send pared-down schedule PDF to Matt and Phil for markup",
+      "note": "DOVA | Entitlements Touch Base (Agenda to Come)",
+      "date": "2026-08-27"
+    },
+    {
+      "text": "Check LTA for northbound right-turn pocket requirement at Kilgore and Trade Center",
+      "note": "DOVA | Entitlements Touch Base (Agenda to Come)",
+      "date": "2026-08-27"
+    },
+    {
+      "text": "Arrange intro meeting with Public Works",
+      "note": "DOVA | Entitlements Touch Base (Agenda to Come)",
+      "date": "2026-08-27"
+    },
+    {
+      "text": "Set up recurring weekly touch base with Matt and Phil",
+      "note": "DOVA | Entitlements Touch Base (Agenda to Come)",
+      "date": "2026-08-27"
+    },
+    {
+      "text": "Call Jason Palmer to revert interim agreement to clean version",
+      "note": "DOVA | P&W Interim Agreement Chat",
+      "date": "2026-08-25"
+    },
+    {
+      "text": "Send Sam a summary email and clean draft for quick review",
+      "note": "DOVA | P&W Interim Agreement Chat",
+      "date": "2026-08-25"
+    },
+    {
+      "text": "Email Charlie summarizing the outcome",
+      "note": "DOVA | P&W Interim Agreement Chat",
+      "date": "2026-08-25"
+    },
+    {
+      "text": "Confirm WDID number status",
+      "note": "Project scope, traffic approvals, and entitlements roadmap",
+      "date": "2026-08-17"
+    },
+    {
+      "text": "Follow up on HCP guest user access",
+      "note": "Project scope, traffic approvals, and entitlements roadmap",
+      "date": "2026-08-17"
+    },
+    {
+      "text": "Book 2-hour working session with Phil to finalize entitlements schedule",
+      "note": "Project scope, traffic approvals, and entitlements roadmap",
+      "date": "2026-08-17"
+    },
+    {
+      "text": "Schedule follow-up call tomorrow to work through remaining COA and schedule questions",
+      "note": "Project scope, traffic approvals, and entitlements roadmap",
+      "date": "2026-08-17"
+    },
+    {
+      "text": "Finalize and distribute baseline schedule",
+      "note": "DOVA | Permit Package Alignment",
+      "date": "2026-08-14"
+    },
+    {
+      "text": "Reach out to public works contact",
+      "note": "DOVA | Permit Package Alignment",
+      "date": "2026-08-14"
+    },
+    {
+      "text": "Confirm public works assistant spelling with Philip",
+      "note": "DOVA | Permit Package Alignment",
+      "date": "2026-08-14"
+    },
+    {
+      "text": "Coordinate DST meeting",
+      "note": "DOVA | Permit Package Alignment",
+      "date": "2026-08-14"
+    },
+    {
+      "text": "Share Kroll backup files and decks via Titan",
+      "note": "Kroll Meeting",
+      "date": "2026-08-14"
+    },
+    {
+      "text": "Review Baker's Building G change order in Procore",
+      "note": "Kroll Meeting",
+      "date": "2026-08-14"
+    },
+    {
+      "text": "Schedule mid-week check-in to review progress",
+      "note": "Kroll Meeting",
+      "date": "2026-08-14"
+    },
+    {
+      "text": "Share sub negotiation timetable once finalized",
+      "note": "Kroll Meeting",
+      "date": "2026-08-14"
+    },
+    {
+      "text": "Discuss HCP status with KozPure",
+      "note": "DOVA | Schedule & Phased Permitting Review",
+      "date": "2026-08-13"
+    },
+    {
+      "text": "Coordinate DST meeting timing and attendees with Don and Jeremiah",
+      "note": "DOVA | Schedule & Phased Permitting Review",
+      "date": "2026-08-13"
+    },
+    {
+      "text": "Wood Rogers to send Public Works contacts Albert Stricker and Quoc Nahm",
+      "note": "DOVA | Schedule & Phased Permitting Review",
+      "date": "2026-08-13"
+    },
+    {
+      "text": "Discuss HCP status with KozPure",
+      "note": "DOVA | Schedule & Phased Permitting Review",
+      "date": "2026-08-13"
+    },
+    {
+      "text": "Coordinate DST meeting timing and attendees with Don and Jeremiah",
+      "note": "DOVA | Schedule & Phased Permitting Review",
+      "date": "2026-08-13"
+    },
+    {
+      "text": "Wood Rogers to send Public Works contacts Albert Stricker and Quoc Nahm",
+      "note": "DOVA | Schedule & Phased Permitting Review",
+      "date": "2026-08-13"
+    },
+    {
+      "text": "Grant John access to Procore",
+      "note": "Stadium project \u2014 change order closeout and contractor settlement strategy with John",
+      "date": "2026-08-11"
+    },
+    {
+      "text": "Schedule working session with John to review documents and get him up to speed",
+      "note": "Stadium project \u2014 change order closeout and contractor settlement strategy with John",
+      "date": "2026-08-11"
+    },
+    {
+      "text": "Coordinate Crawl walkthrough with John",
+      "note": "Stadium project \u2014 change order closeout and contractor settlement strategy with John",
+      "date": "2026-08-11"
+    },
+    {
+      "text": "Send grading/earthwork docket to Whitney",
+      "note": "Site work scope and civil services budget with contractor",
+      "date": "2026-08-10"
+    },
+    {
+      "text": "Obtain and review the outstanding agreement from Charlie",
+      "note": "Site work scope and civil services budget with contractor",
+      "date": "2026-08-10"
+    },
+    {
+      "text": "Reconnect with contractor to confirm full scope and budget coverage",
+      "note": "Site work scope and civil services budget with contractor",
+      "date": "2026-08-10"
+    },
+    {
+      "text": "Send grading/earthwork docket to Whitney",
+      "note": "Site work scope and civil services budget with contractor",
+      "date": "2026-08-10"
+    },
+    {
+      "text": "Obtain and review the outstanding agreement from Charlie",
+      "note": "Site work scope and civil services budget with contractor",
+      "date": "2026-08-10"
+    },
+    {
+      "text": "Reconnect with contractor to confirm full scope and budget coverage",
+      "note": "Site work scope and civil services budget with contractor",
+      "date": "2026-08-10"
+    },
+    {
+      "text": "Share agenda doc and request additions from the team",
+      "note": "Project coordination \u2014 ISP alignment, dads structure, and sponsor strategy",
+      "date": "2026-08-10"
+    },
+    {
+      "text": "Schedule the external meeting (virtual) for end of this week or early next week",
+      "note": "Project coordination \u2014 ISP alignment, dads structure, and sponsor strategy",
+      "date": "2026-08-10"
+    },
+    {
+      "text": "Follow up on Devin's outreach to Jason",
+      "note": "Project coordination \u2014 ISP alignment, dads structure, and sponsor strategy",
+      "date": "2026-08-10"
+    }
+  ]
+}
