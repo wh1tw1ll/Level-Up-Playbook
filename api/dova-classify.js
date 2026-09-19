@@ -106,8 +106,8 @@ export default async function handler(req, res) {
     const updateBatches = [];
     for (const cls of classifications) {
       const cells = [];
-      if (cls.category) cells.push({ columnId: CATEGORY_COL, objectValue: { displayValue: cls.category } });
-      if (cls.discipline) cells.push({ columnId: DISCIPLINE_COL, objectValue: { displayValue: cls.discipline } });
+      if (cls.category) cells.push({ columnId: CATEGORY_COL, value: cls.category });
+      if (cls.discipline) cells.push({ columnId: DISCIPLINE_COL, value: cls.discipline });
       updateBatches.push({ id: cls.rowId, cells });
     }
 
