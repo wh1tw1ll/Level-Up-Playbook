@@ -106,8 +106,8 @@ export default async function handler(req, res) {
     const updateBatches = [];
     for (const cls of classifications) {
       const cells = [];
-      if (cls.category) cells.push({ columnId: CATEGORY_COL, value: cls.category });
-      if (cls.discipline) cells.push({ columnId: DISCIPLINE_COL, value: cls.discipline });
+      if (cls.category) cells.push({ columnId: CATEGORY_COL, objectValue: { displayValue: cls.category } });
+      if (cls.discipline) cells.push({ columnId: DISCIPLINE_COL, objectValue: { displayValue: cls.discipline } });
       updateBatches.push({ id: cls.rowId, cells });
     }
 
@@ -185,14 +185,8 @@ export default async function handler(req, res) {
             }
             if (!rawValue || rawValue === '' || rawValue === 'null' || rawValue === 'undefined') continue;
 
-            // Smartsheet: PICKLIST uses plain "value", MULTI_PICKLIST uses "objectValue"
-            if (mfpCol.type === 'MULTI_PICKLIST') {
-              mfpCells.push({ columnId: mfpCol.id, objectValue: { displayValue: String(rawValue) } });
-            } else if (mfpCol.type === 'PICKLIST') {
-              mfpCells.push({ columnId: mfpCol.id, value: String(rawValue) });
-            } else {
-              mfpCells.push({ columnId: mfpCol.id, value: rawValue });
-            }
+            // Smartsheet: MULTI_PICKLIST and PICKLIST both need objectValue in addRow
+                        mfpCells.push({ columnId: mfpCol.id, objectValue: { displayValue: String(rawValue) } });
           }
 
         if (mfpCells.length === 0) {
