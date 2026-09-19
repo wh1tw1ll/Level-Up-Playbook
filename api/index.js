@@ -87,8 +87,61 @@ export default async function handler(req, res) {
       case '/api/dova-seed': return dovaSeedHandler(req, res);
       case '/api/dova-workspace': return dovaWorkspaceHandler(req, res);
             case '/api/dova-update-schedule': return dovaUpdateSchedule(req, res);
-            // cleanup and fix endpoints — deployed temporarily, removed after use
-            case '/api/chiefs':
+                  case '/api/dova-fix': {
+                    // One-shot: Category Title Case, FF&E fix, Wood Rodgers fix
+                    if (req.method !== 'POST') return res.status(405).json({error:'POST only'});
+                    try {
+                      const DOVA = '4456864287772548';
+                      const sheet = await smartsheet.getSheetWithColumns(DOVA);
+                      const cols = {};
+                      for (const c of sheet.columns || []) cols[c.title] = c;
+                      const CAT = cols['Category']?.id;
+                      const DISC = cols['Discipline']?.id;
+                      const FIRM = cols['Responsible Firm(s)']?.id;
+                      const r = {};
+
+                      // Check MFP rows
+                      const MFP_IDS = ['681604480106372','1878666626334596','8871184769351556','6227519655772036',
+                        '1980685789822852','6516512704298884','217533263773572','2283146245177220','7061586198527876'];
+                      r.mfpStillInDOVA = (sheet.rows||[]).filter(row => MFP_IDS.includes(String(row.id))).map(row => row.id);
+
+                      // Update Category picklist to Title Case
+                      const upMap = {'DESIGN & PLANS':'Design & Plans','ENTITLEMENTS':'Entitlements',
+                        'UTILITIES & INFRASTRUCTURE':'Utilities & Infrastructure','FINANCIAL':'Financial',
+                        'SCHEDULE':'Schedule','LEGAL & CONTRACTS':'Legal & Contracts','PROCUREMENT':'Procurement',
+                        'GENERAL COORDINATION':'General Coordination'};
+                      const oldOpts = cols['Category']?.options || [];
+                      await smartsheet.updateColumn(DOVA, CAT, {type:'MULTI_PICKLIST', options: oldOpts.map(o => upMap[o] || o), index: cols['Category'].index});
+                      r.catOptions = 'updated';
+
+                      // Fix rows
+                      const toFix = [];
+                      for (const row of (sheet.rows||[])) {
+                        const cell = (row.cells||[]).find(c => c.columnId === CAT);
+                        const v = cell?.displayValue || cell?.value || '';
+                        if (upMap[v] && v !== upMap[v]) toFix.push({id:row.id, cells:[{columnId:CAT, value:upMap[v]}]});
+                      }
+                      if (toFix.length) await smartsheet.updateRows(DOVA, toFix);
+                      r.rowsFixed = toFix.length;
+
+                      // Fix 450092 Discipline
+                      await smartsheet.updateRow(DOVA, '4500923152465796', [{columnId: DISC, value: 'FF&E'}]);
+                      r.ffeFixed = true;
+
+                      // Fix Firm picklist
+                      const firmOpts = cols['Responsible Firm(s)']?.options || [];
+                      const newFirm = firmOpts.map(o => o === 'Wood Rogers' ? 'Wood Rodgers' : o);
+                      if (JSON.stringify(firmOpts) !== JSON.stringify(newFirm)) {
+                        await smartsheet.updateColumn(DOVA, FIRM, {type:'MULTI_PICKLIST', options: newFirm, index: cols['Responsible Firm(s)'].index});
+                      }
+                      r.firmOptions = {was: firmOpts.includes('Wood Rogers'), now: newFirm.includes('Wood Rodgers')};
+
+                      r.rowCount = (sheet.rows||[]).length;
+                      res.json({success:true, r});
+                    } catch(e) { res.status(500).json({error:e.message}); }
+                    return;
+                  }
+                  case '/api/chiefs':
             case '/api/chiefs/admin': return chiefsHandler(req, res);
             case '/api/chiefs-v3': return chiefsV3Handler(req, res);
 
