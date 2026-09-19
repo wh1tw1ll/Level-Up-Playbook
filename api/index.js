@@ -155,7 +155,7 @@ export default async function handler(req, res) {
                                                   if (!mfpCol) continue;
                                                   const raw = cell.displayValue || (typeof cell.value === 'string' ? cell.value : '');
                                                   if (!raw) continue;
-                                                  mfpCells.push({columnId: mfpCol.id, value: raw});
+                                                  mfpCells.push({columnId: mfpCol.id, objectValue: {displayValue: raw}});
                                                 }
                                                 if (!mfpCells.length) { moveResults.push({rid, error:'no mappable cells'}); continue; }
                                                 await smartsheet.addRow(MFP, mfpCells);
