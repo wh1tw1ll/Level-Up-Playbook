@@ -22,6 +22,7 @@ import dovaSetupHandler from '../lib/handlers/dova-setup.js';
 import dovaSeedHandler from '../lib/handlers/dova-seed.js';
 import dovaWorkspaceHandler from '../lib/handlers/dova-workspace.js';
 import dovaUpdateSchedule from '../lib/handlers/dova-update-schedule.js';
+import dovaClassifyHandler from './dova-classify.js';
 import prepHandler from '../lib/handlers/prep.js';
 import stageHandler from '../lib/handlers/stage.js';
 import promoteHandler from '../lib/handlers/promote.js';
@@ -87,6 +88,16 @@ export default async function handler(req, res) {
       case '/api/dova-seed': return dovaSeedHandler(req, res);
       case '/api/dova-workspace': return dovaWorkspaceHandler(req, res);
       case '/api/dova-update-schedule': return dovaUpdateSchedule(req, res);
+            case '/api/dova-classify': return dovaClassifyHandler(req, res);
+                  case '/api/batch-update': {
+        if (req.method !== 'POST') return res.status(405).json({error: 'POST required'});
+        const { sheetId, rows } = req.body || {};
+        if (!sheetId || !rows) return res.status(400).json({error: 'sheetId and rows required'});
+        try { const result = await smartsheet.updateRows(sheetId, rows); res.json(result); }
+        catch (e) { res.status(500).json({error: e.message}); }
+        return;
+      }
+
       case '/api/chiefs':
       case '/api/chiefs/admin': return chiefsHandler(req, res);
       case '/api/chiefs-v3': return chiefsV3Handler(req, res);
@@ -280,6 +291,195 @@ export default async function handler(req, res) {
                 return res.status(500).json({ error: e.message });
               }
             }
+
+      case '/api/admin/delete-sheet': {
+        // POST — delete a sheet by ID
+        if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+        try {
+          const { sheetId } = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
+          if (!sheetId) return res.status(400).json({ error: 'sheetId required' });
+          await smartsheet.deleteSheet(String(sheetId));
+          return res.json({ success: true, deleted: sheetId });
+        } catch(e) { return res.status(500).json({ error: e.message }); }
+      }
+
+      case '/api/admin/add-source-confidence': {
+        // POST — Add Source and Confidence columns to DOVA tracker,
+        // update Confidence picklist on both sheets, normalize legacy 'staged' values
+        if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+        try {
+          const results = [];
+          const DOVA = '4456864287772548';
+          const PERSONAL = '2802755367554948';
+
+          // 1. Add Source column to DOVA (if missing)
+          const dovaSheet = await smartsheet.getSheetWithColumns(DOVA);
+          if (!(dovaSheet.columns||[]).find(c => c.title === 'Source')) {
+            await smartsheet.addColumn(DOVA, {
+              title: 'Source', type: 'PICKLIST',
+              options: ['Manual', 'Email', 'Granola', 'Notes'],
+              index: 0,
+            });
+            results.push('Added Source column to DOVA');
+          } else {
+            results.push('Source column already exists on DOVA');
+          }
+
+          // 2. Add Confidence column to DOVA (if missing)
+          if (!(dovaSheet.columns||[]).find(c => c.title === 'Confidence')) {
+            await smartsheet.addColumn(DOVA, {
+              title: 'Confidence', type: 'PICKLIST',
+              options: ['High', 'Medium', 'Low', 'None'],
+              index: 0,
+            });
+            results.push('Added Confidence column to DOVA');
+          } else {
+            results.push('Confidence column already exists on DOVA');
+          }
+
+          // 3. Update Confidence picklist on Personal log (add Medium and None)
+          const persSheet = await smartsheet.getSheetWithColumns(PERSONAL);
+          const confCol = (persSheet.columns||[]).find(c => c.title === 'Confidence');
+          if (confCol) {
+            const currentOps = new Set(confCol.options || []);
+            if (!currentOps.has('Medium') || !currentOps.has('None')) {
+              const newOps = ['High', 'Medium', 'Low', 'None'];
+              // Smartsheet doesn't allow modifying picklist options via API — need to delete and recreate
+              // Instead, normalize the existing values and handle via the app layer
+              results.push('Confidence picklist needs Medium/None — app-layer handling required');
+            } else {
+              results.push('Confidence picklist already has Medium/None');
+            }
+          } else {
+            results.push('No Confidence column on Personal log');
+          }
+
+          // 4. Update Source picklist on Personal log to add Granola
+          const srcCol = (persSheet.columns||[]).find(c => c.title === 'Source');
+          if (srcCol) {
+            const currentSrc = new Set(srcCol.options || []);
+            if (!currentSrc.has('Granola')) {
+              results.push('Source picklist needs Granola — app-layer handling required');
+            } else {
+              results.push('Source picklist already has Granola');
+            }
+          }
+
+          // 5. Normalize legacy 'staged' Source values on Personal log — deferred to separate run
+                    // (normalization loop removed to keep this within 60s Vercel limit)
+                    results.push('Normalize staged values: deferred to /api/admin/normalize-sources');
+
+          return res.json({ success: true, results });
+        } catch(e) { return res.status(500).json({ error: e.message }); }
+      }
+
+      case '/api/admin/normalize-sources': {
+        // POST — normalize legacy 'staged' Source values on Personal log to Manual/Granola
+        if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+        try {
+          const PERSONAL = '2802755367554948';
+          const persSheet = await smartsheet.getSheetWithColumns(PERSONAL);
+          const srcCol = (persSheet.columns||[]).find(c => c.title === 'Source');
+          const srcRefCol = (persSheet.columns||[]).find(c => c.title === 'SourceRef');
+          if (!srcCol) return res.json({ success: false, error: 'No Source column on Personal log' });
+
+          const batch = [];
+          for (const row of persSheet.rows || []) {
+            const srcCell = (row.cells||[]).find(c => c.columnId === srcCol.id);
+            if (srcCell && (srcCell.displayValue === 'staged' || String(srcCell.value || '') === 'staged')) {
+              const srcRefCell = srcRefCol ? (row.cells||[]).find(c => c.columnId === srcRefCol.id) : null;
+              const target = (srcRefCell?.displayValue || '').includes('granola') ? 'Granola' : 'Manual';
+              batch.push({ id: row.id, cells: [{ columnId: srcCol.id, value: target }] });
+              if (batch.length >= 100) break;
+            }
+          }
+          let result = '0 normalized';
+          if (batch.length > 0) {
+            await smartsheet.updateRows(PERSONAL, batch);
+            result = `Normalized ${batch.length} rows`;
+          }
+          return res.json({ success: true, normalized: batch.length, result });
+        } catch(e) { return res.status(500).json({ error: e.message }); }
+      }
+
+      case '/api/admin/update-picklists': {
+        // POST — update picklist options on Personal log (Source + Confidence)
+        if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+        try {
+          const PERSONAL = '2802755367554948';
+          const persSheet = await smartsheet.getSheetWithColumns(PERSONAL);
+          const results = [];
+
+          // Smartsheet API doesn't allow modifying picklist options on existing columns directly.
+          // We need to delete and recreate the column. App-layer handling for now.
+          const confCol = (persSheet.columns||[]).find(c => c.title === 'Confidence');
+          if (confCol && !((confCol.options||[]).includes('Medium'))) {
+            // Delete and recreate with new options
+            const confIdx = confCol.index;
+            await smartsheet.deleteColumn(PERSONAL, confCol.id);
+            await smartsheet.addColumn(PERSONAL, {
+              title: 'Confidence', type: 'PICKLIST',
+              options: ['High', 'Medium', 'Low', 'None'],
+              index: confIdx,
+            });
+            results.push('Recreated Confidence column with Medium/None');
+          } else results.push('Confidence already has Medium/None or not found');
+
+          const srcCol = (persSheet.columns||[]).find(c => c.title === 'Source');
+          if (srcCol && !((srcCol.options||[]).includes('Granola'))) {
+            const srcIdx = srcCol.index;
+            await smartsheet.deleteColumn(PERSONAL, srcCol.id);
+            await smartsheet.addColumn(PERSONAL, {
+              title: 'Source', type: 'PICKLIST',
+              options: ['Manual', 'Email', 'Granola', 'Notes'],
+              index: srcIdx,
+            });
+            results.push('Recreated Source column with Granola');
+          } else results.push('Source already has Granola or not found');
+
+          return res.json({ success: true, results });
+        } catch(e) { return res.status(500).json({ error: e.message }); }
+      }
+
+      case '/api/admin/request-blank-project-tri': {
+        // POST — create Context Requests row with 199 blank Project rows for LUCI triage
+        if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+        try {
+          const DOVA = '4456864287772548';
+          const dovaSheet = await smartsheet.getSheetWithColumns(DOVA);
+          const aCol = (dovaSheet.columns||[]).find(c => c.title === 'Action ID');
+          if (!aCol) return res.json({ error: 'No Action ID column' });
+          const blankRows = (dovaSheet.rows||[]).filter(r => {
+            const c = (r.cells||[]).find(x => x.columnId === aCol.id);
+            const proj = (r.cells||[]).find(x => (dovaSheet.columns||[]).find(c2 => c2.id === x.columnId)?.title === 'Project');
+            return !proj || !(proj.displayValue||proj.value||'');
+          });
+          const scope = blankRows.map(r => {
+            const aid = (r.cells||[]).find(x => x.columnId === aCol.id);
+            return `${r.id}: ${aid?.displayValue||aid?.value||''}`;
+          }).join('\n');
+
+          // Find Context Requests sheet
+          const home = await smartsheet.getHome();
+          const cr = (home.sheets||[]).filter(s => s.name === 'Context Requests');
+          if (cr.length === 0) return res.json({ error: 'Context Requests sheet not found' });
+          const crId = cr[0].id;
+          const crSheet = await smartsheet.getSheetWithColumns(crId);
+          const colMap = {};
+          for (const c of crSheet.columns||[]) colMap[c.title] = c.id;
+
+          await smartsheet.addRow(crId, [
+            { columnId: colMap['RequestId'], value: `BLANK-PROJECT-${Date.now()}` },
+            { columnId: colMap['RequestedAt'], value: new Date().toISOString().split('T')[0] },
+            { columnId: colMap['RequestType'], value: 'Other' },
+            { columnId: colMap['Scope'], value: scope },
+            { columnId: colMap['Question'], value: 'Please classify Project for these 199 rows (rowId: Action ID). Return rowId, Project for each. Anything unsure leave blank.' },
+            { columnId: colMap['Status'], value: 'Open' },
+          ]);
+
+          return res.json({ success: true, blankRowCount: blankRows.length, scopeSize: scope.length, sheetId: crId });
+        } catch(e) { return res.status(500).json({ error: e.message }); }
+      }
 
       case '/api/admin/clean': {
               // POST — comprehensive DOVA tracker cleanup (batch-optimized)
