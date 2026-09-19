@@ -592,7 +592,63 @@ export default async function handler(req, res) {
             }
 
       case '/api/prep-map': return prepMapHandler(req, res);
-      case '/api/extract-from-note': return extractFromNote(req, res);
+            case '/api/extract-from-note': return extractFromNote(req, res);
+
+            // ── V6 SCAN: discover Category stragglers + Status options ──
+            case '/api/admin/scan-stragglers': {
+              // GET — scans DOVA for old Category values and Status column options
+              try {
+                const sheet = await smartsheet.getSheetWithColumns('4456864287772548');
+                const catCol = (sheet.columns||[]).find(c => c.title === 'Category');
+                const statusCol = (sheet.columns||[]).find(c => c.title === 'Status');
+                const stragglers = [];
+                for (const r of (sheet.rows||[])) {
+                  const catCell = (r.cells||[]).find(c => c.columnId === catCol?.id);
+                  const cat = (catCell?.displayValue || catCell?.value || '').toString().trim();
+                  if (['Design', 'Legal & Insurance', 'Meeting Note'].includes(cat)) {
+                    stragglers.push({ rowId: r.id, rowNumber: r.rowNumber, category: cat });
+                  }
+                }
+                return res.json({
+                  stragglerCount: stragglers.length,
+                  stragglers,
+                  statusOptions: statusCol?.options || [],
+                  catOptions: catCol?.options || [],
+                });
+              } catch(e) { return res.status(500).json({ error: e.message }); }
+            }
+
+            // ── V6 FIX: update Category stragglers ──
+            case '/api/admin/fix-stragglers': {
+              // POST — updates "Design"→"Design & Plans", "Legal & Insurance"→"Legal & Contracts", "Meeting Note"→"General Coordination"
+              if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+              try {
+                const DOVA = '4456864287772548';
+                const sheet = await smartsheet.getSheetWithColumns(DOVA);
+                const catCol = (sheet.columns||[]).find(c => c.title === 'Category');
+                if (!catCol) return res.status(400).json({ error: 'Category column not found' });
+                const catId = catCol.id;
+                const mapping = {
+                  'Design': 'Design & Plans',
+                  'Legal & Insurance': 'Legal & Contracts',
+                  'Meeting Note': 'General Coordination',
+                };
+                const batch = [];
+                for (const r of (sheet.rows||[])) {
+                  const catCell = (r.cells||[]).find(c => c.columnId === catId);
+                  const cat = (catCell?.displayValue || catCell?.value || '').toString().trim();
+                  if (mapping[cat]) {
+                    batch.push({ id: r.id, cells: [{ columnId: catId, value: mapping[cat] }] });
+                  }
+                }
+                let updated = 0;
+                if (batch.length > 0) {
+                  await smartsheet.updateRows(DOVA, batch);
+                  updated = batch.length;
+                }
+                return res.json({ success: true, updated, details: batch.map(b => ({ rowId: b.id, setTo: b.cells[0].value })) });
+              } catch(e) { return res.status(500).json({ error: e.message }); }
+            }
 
       // ── DOVA DASHBOARD (dynamically imported, CJS module) ──
             case '/api/dova-dashboard': {
