@@ -154,8 +154,15 @@ export default async function handler(req, res) {
                                                   const mfpCol = mfpColMap[dovaCol.title];
                                                   if (!mfpCol) continue;
                                                   const raw = cell.displayValue || (typeof cell.value === 'string' ? cell.value : '');
-                                                  if (!raw) continue;
-                                                  mfpCells.push({columnId: mfpCol.id, objectValue: {displayValue: raw}});
+                                                                                                    if (!raw) continue;
+                                                                                                    // Column type handling for addRow
+                                                                                                    const colType = mfpCol.type || '';
+                                                                                                    if (colType === 'MULTI_CONTACT_LIST') continue; // can't set contacts via addRow
+                                                                                                    if (colType === 'DATE' || colType === 'ABSTRACT_DATETIME' || colType === 'TEXT_NUMBER') {
+                                                                                                      mfpCells.push({columnId: mfpCol.id, value: raw});
+                                                                                                    } else {
+                                                                                                      mfpCells.push({columnId: mfpCol.id, objectValue: {displayValue: raw}});
+                                                                                                    }
                                                 }
                                                 if (!mfpCells.length) { moveResults.push({rid, error:'no mappable cells'}); continue; }
                                                 await smartsheet.addRow(MFP, mfpCells);
