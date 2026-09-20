@@ -17,6 +17,7 @@ import chiefsV3Handler from '../lib/handlers/chiefs-v3.js';
 import ssOpsHandler from '../lib/handlers/ss-ops.js';
 import tasksHandler from '../lib/handlers/tasks.js';
 import dispatchHandler from '../lib/handlers/dispatch.js';
+import adminBatch from '../lib/handlers/admin-batch.js';
 import dovaHandler from '../lib/handlers/dova.js';
 import dovaSetupHandler from '../lib/handlers/dova-setup.js';
 import dovaSeedHandler from '../lib/handlers/dova-seed.js';
@@ -135,7 +136,8 @@ export default async function handler(req, res) {
       case '/api/stage': return stageHandler(req, res);
       case '/api/promote': return promoteHandler(req, res);
       case '/api/ss-ops': return ssOpsHandler(req, res);
-      case '/api/dova': return dovaHandler(req, res);
+            case '/api/admin/batch': return adminBatch(req, res);
+            case '/api/dova': return dovaHandler(req, res);
       case '/api/dova-setup': return dovaSetupHandler(req, res);
       case '/api/dova-seed': return dovaSeedHandler(req, res);
       case '/api/dova-workspace': return dovaWorkspaceHandler(req, res);
