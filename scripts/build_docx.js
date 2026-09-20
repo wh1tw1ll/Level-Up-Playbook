@@ -3,6 +3,9 @@ const {Document,Packer,Paragraph,TextRun,Table,TableRow,TableCell,WidthType,Bord
   AlignmentType,ImageRun,PageBreak,ShadingType,VerticalAlign,Footer,PageOrientation}=require('docx');
 
 const spec=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+// Override logo path with local file — the spec's path is a Linux container path, not valid here
+const LOCAL_LOGO = 'C:\\Users\\HermesAdmin\\agenda\\dova_logo_sm.png';
+if (fs.existsSync(LOCAL_LOGO)) spec.logo = LOCAL_LOGO;
 const OUT=process.argv[3];
 const F='Aptos';
 const INK='181818', GREY='6B6B6B', LGREY='8A8A8A', TEAL='184655', RULE='C8C8C8', HAIR='D8D8D8';

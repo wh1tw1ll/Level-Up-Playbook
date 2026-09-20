@@ -246,17 +246,11 @@ export default async function handler(req, res) {
                           return handleClientActions(req, res);
                         }
                   case '/api/logo': {
-              // Serves logo image (formerly logo.js)
-              const { existsSync, readFileSync } = await import('fs');
-              const { join: pathJoin } = await import('path');
-              const p = pathJoin(process.cwd(), 'public', 'assets', 'level-up-logo.png');
-              if (existsSync(p)) {
-                const img = readFileSync(p);
-                res.setHeader('Content-Type', 'image/png');
-                return res.status(200).send(img);
-              }
-              return res.status(404).json({ error: 'Logo not found' });
-            }
+                                // Serves logo image — assets are statically served by Vercel CDN
+                                // Serverless bundle may not include assets/, so redirect to static path
+                                res.writeHead(302, { Location: '/assets/level-up-logo.png' });
+                                return res.end();
+                              }
 
       // ── NEW PHASE 1 ROUTES ──
 
