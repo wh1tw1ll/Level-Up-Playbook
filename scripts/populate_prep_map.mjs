@@ -55,7 +55,7 @@ function refreshToken() {
   return new Promise((resolve, reject) => {
     const body = 'client_id=d43fa6d5-ac58-4c6a-a0a1-083a1573ab03&refresh_token='
       + encodeURIComponent(msalTokens.refresh_token)
-      + '&grant_type=refresh_token&scope=openid%20profile%20email%20offline_access%20Calendars.Read%20User.Read';
+      + '&grant_type=refresh_token&scope=openid%20profile%20email%20offline_access%20Calendars.Read%20User.Read%20Files.Read.All%20Files.ReadWrite.All%20Sites.Read.All%20Sites.ReadWrite.All';
     const req = https.request('https://login.microsoftonline.com/8222d14d-0869-42d3-8b7f-858c65b89c0e/oauth2/v2.0/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
