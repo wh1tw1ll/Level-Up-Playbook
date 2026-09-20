@@ -66,6 +66,14 @@ const AUTH_BYPASS_ROUTES = new Set([
   '/api/check-auth',
 ]);
 
+// Routes accessible with password-only (no Microsoft sign-in required)
+// These have been hardened to only return DOVA-filtered data
+const PASSWORD_ALLOWED_ROUTES = new Set([
+  '/api/client/actions',
+  '/api/actions',
+  '/api/logo',
+]);
+
 function requireSiteAuth(req, res, parsedPath) {
   // OAuth routes (req.query.provider) are always allowed
   if (req.query.provider) return true;
@@ -89,7 +97,14 @@ function requireSiteAuth(req, res, parsedPath) {
   if (siteAuth) {
     try {
       const data = JSON.parse(decodeURIComponent(siteAuth));
-      if (data.authed && data.expires_at && Date.now() < data.expires_at) return true;
+      if (data.authed && data.expires_at && Date.now() < data.expires_at) {
+        // Password-only access: only allow routes in PASSWORD_ALLOWED_ROUTES
+        if (PASSWORD_ALLOWED_ROUTES.has(parsedPath)) return true;
+        // All other routes require Microsoft OAuth
+        res.setHeader('Content-Type', 'application/json');
+        res.status(401).json({ error: 'Microsoft sign-in required for this route. Visit / to sign in.' });
+        return false;
+      }
     } catch (_) {}
   }
 
