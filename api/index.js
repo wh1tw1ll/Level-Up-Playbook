@@ -32,6 +32,7 @@ import guardedWrite from '../lib/guarded-write.js';
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { parseCookies } from '../lib/auth.js';
 
 // Module-level flagged store cache (survives warm instances)
 let _flaggedCache = null;
@@ -55,6 +56,54 @@ function getCellValue(row, colId) {
     || '';
 }
 
+// ── AUTH GUARD — every route except verify-password, check-auth, and OAuth ──
+const AUTH_BYPASS_ROUTES = new Set([
+  '/api/verify-password',
+  '/api/check-auth',
+]);
+
+function requireSiteAuth(req, res, parsedPath) {
+  // OAuth routes (req.query.provider) are always allowed
+  if (req.query.provider) return true;
+  
+  // Auth bypass routes are always allowed
+  if (AUTH_BYPASS_ROUTES.has(parsedPath)) return true;
+
+  const cookies = parseCookies(req);
+
+  // Check lu_session (Microsoft OAuth — strongest)
+  const session = cookies['lu_session'];
+  if (session) {
+    try {
+      const data = JSON.parse(decodeURIComponent(session));
+      if (data.authenticated && data.expires_at && Date.now() < data.expires_at) return true;
+    } catch (_) {}
+  }
+
+  // Check lu_site_auth (password gate)
+  const siteAuth = cookies['lu_site_auth'];
+  if (siteAuth) {
+    try {
+      const data = JSON.parse(decodeURIComponent(siteAuth));
+      if (data.authed && data.expires_at && Date.now() < data.expires_at) return true;
+    } catch (_) {}
+  }
+
+  // Also check lu_auth (non-HttpOnly Microsoft refresh token cookie)
+  const luAuth = cookies['lu_auth'];
+  if (luAuth) {
+    try {
+      const data = JSON.parse(decodeURIComponent(luAuth));
+      if (data.refresh_token && data.expires_at && Date.now() < data.expires_at) return true;
+    } catch (_) {}
+  }
+
+  res.setHeader('Content-Type', 'application/json');
+  res.status(401).json({ error: 'Authentication required. Visit / to sign in.' });
+  return false;
+}
+// ── END AUTH GUARD ──
+
 // ── ROUTER ──
 
 export default async function handler(req, res) {
@@ -70,6 +119,10 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
+
+  // ── AUTH GUARD — gate every route except bypass list ──
+  if (!requireSiteAuth(req, res, path)) return;
+  // ── END AUTH GUARD ──
 
   try {
     switch (path) {
