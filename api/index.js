@@ -45,6 +45,9 @@ const SHEETS = {
   personal: '2802755367554948',
   project: '4456864287772548',
 };
+const DOVA_SHEET = '4456864287772548';
+const PROJECT_COL_TITLE = 'Project';
+const PROJECT_COL_VALUE = 'DOVA';
 // prepmap discovered dynamically via the prep-map handler
 
 function findColId(cols, title) {
@@ -104,6 +107,57 @@ function requireSiteAuth(req, res, parsedPath) {
   return false;
 }
 // ── END AUTH GUARD ──
+
+// ── HANDLER: /api/client/actions — client-facing DOVA filter ──
+// Only serves rows from the DOVA Action Tracker where Project == "DOVA"
+// Fails closed: returns empty array on any error
+async function handleClientActions(req, res) {
+  try {
+    const sheet = await smartsheet.getSheetWithColumns(DOVA_SHEET);
+    const projectCol = (sheet.columns || []).find(c => c.title === PROJECT_COL_TITLE);
+    if (!projectCol) {
+      // Fail closed: no Project column means we cannot verify DOVA status
+      return res.json({ sheet: 'actions', rows: [], filtered: true, error: 'Project column not found on sheet' });
+    }
+
+    const columns = (sheet.columns || []).map(c => ({
+      id: c.id, title: c.title, type: c.type, options: c.options || null, primary: c.primary || false,
+    }));
+
+    const rows = (sheet.rows || [])
+      .filter(r => {
+        const cell = (r.cells || []).find(c => c.columnId === projectCol.id);
+        if (!cell) return false;
+        const val = (cell.displayValue || cell.value || '').toString().trim();
+        return val === PROJECT_COL_VALUE;
+      })
+      .map(r => {
+        const cells = {};
+        for (const c of r.cells || []) {
+          const col = columns.find(col => col.id === c.columnId);
+          if (col) {
+            cells[col.title] = c.displayValue ?? (typeof c.value === 'string' ? c.value : null) ?? null;
+          }
+        }
+        return { rowId: r.id, rowNumber: r.rowNumber, cells, createdAt: r.createdAt, modifiedAt: r.modifiedAt };
+      });
+
+    return res.json({
+      sheet: 'actions',
+      sheetId: DOVA_SHEET,
+      columns,
+      rowCount: rows.length,
+      rows,
+      filtered: true,
+      filter: { column: PROJECT_COL_TITLE, value: PROJECT_COL_VALUE },
+    });
+  } catch (e) {
+    console.error('Client actions error:', e.message);
+    // Fail closed
+    return res.json({ sheet: 'actions', rows: [], rowCount: 0, filtered: true, error: e.message });
+  }
+}
+// ── END HANDLER: /api/client/actions ──
 
 // ── ROUTER ──
 
@@ -169,11 +223,14 @@ export default async function handler(req, res) {
 
       // ── SERVING ──
             case '/api/actions': {
-              const html = readFileSync(join(process.cwd(), 'public', 'tasks.html'), 'utf-8');
-              res.setHeader('Content-Type', 'text/html; charset=utf-8');
-              return res.status(200).send(html);
-            }
-      case '/api/logo': {
+                          const html = readFileSync(join(process.cwd(), 'public', 'tasks.html'), 'utf-8');
+                          res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                          return res.status(200).send(html);
+                        }
+                  case '/api/client/actions': {
+                          return handleClientActions(req, res);
+                        }
+                  case '/api/logo': {
               // Serves logo image (formerly logo.js)
               const { existsSync, readFileSync } = await import('fs');
               const { join: pathJoin } = await import('path');
