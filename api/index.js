@@ -249,7 +249,7 @@ export default async function handler(req, res) {
               // Serves logo image (formerly logo.js)
               const { existsSync, readFileSync } = await import('fs');
               const { join: pathJoin } = await import('path');
-              const p = pathJoin(process.cwd(), 'public', 'level-up-logo.png');
+              const p = pathJoin(process.cwd(), 'public', 'assets', 'level-up-logo.png');
               if (existsSync(p)) {
                 const img = readFileSync(p);
                 res.setHeader('Content-Type', 'image/png');
