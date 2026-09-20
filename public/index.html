@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LUCI — Level Up Central Intelligence</title>
+<link rel="icon" type="image/svg+xml" href="assets/LUCI_icon.svg">
+<script>
+(function(){
+  var t;try{t=localStorage.getItem('lu_theme')}catch(e){}
+  if(!t) t=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // Sync theme button icon immediately to avoid flash
+  document.documentElement.setAttribute('data-btn-theme', t === 'dark' ? '☾' : '☀');
+})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800&family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=20260612-dash-fix">
+</head>
+<body>
+
+<!-- ===== TOPBAR ===== -->
+<div class="sticky-header">
+<header class="topbar">
+  <a class="topbar-logo-link" href="#" onclick="goHome();return false" title="LUCI Home">
+        <img class="topbar-logo" src="assets/LUCI_lockup_ink.svg?v=1"
+             data-light="assets/LUCI_lockup_ink.svg?v=1"
+             data-dark="assets/LUCI_lockup_cream.svg?v=1"
+             alt="LUCI">
+      </a>
+            <span class="topbar-byline">by <strong>Level Up</strong></span>
+            <button id="theme-btn" class="topbar-btn" onclick="toggleTheme()" title="Toggle theme" style="opacity:0"></button>
+      <div id="auth-user-info" class="topbar-user" style="display:none">
+    <span id="auth-user-name"></span>
+    <button class="topbar-btn" onclick="signOut()">Sign out</button>
+  </div>
+  <button id="auth-signin-btn" class="topbar-btn primary" onclick="signInWithMicrosoft()">
+        <svg width="14" height="14" viewBox="0 0 21 21"><rect width="10" height="10" fill="#F25022"/><rect x="11" width="10" height="10" fill="#7FBA00"/><rect y="11" width="10" height="10" fill="#00A4EF"/><rect x="11" y="11" width="10" height="10" fill="#FFB900"/></svg>
+        Sign in
+      </button>
+    <button id="procore-connect-btn" class="topbar-btn" onclick="window.location.href='/procore/login'" title="Connect Procore">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+          Procore
+        </button>
+          </header>
+  
+          <!-- ===== HELP BUTTON ===== -->
+          <button id="help-btn" class="help-btn" onclick="summonLuna()" title="Summon LUNA">
+            <span id="help-btn-icon" class="help-btn-icon">⬡</span>
+            <span class="help-btn-label">Help</span>
+          </button>
+
+<!-- ===== NAV TABS ===== -->
+<nav class="nav" id="main-nav">
+  <button class="nav-tab nav-luna-tab" id="nav-luna" onclick="goHome()" title="Back to LUCI Home">
+      <span class="nav-luna-icon">⬡</span> LUCI
+  </button>
+  <button class="nav-tab" id="nav-playbook" onclick="setView('playbook')">Playbook<span class="sync-badge" data-for="playbook"></span></button>
+    <button class="nav-tab" id="nav-projects" onclick="setView('projects')">Projects<span class="sync-badge" data-for="projects"></span></button>
+          </nav>
+
+<!-- ===== PLAYBOOK SUB-NAV ===== -->
+<nav class="subnav" id="subnav-playbook" style="display:none">
+  <button class="subnav-tab active" data-pbview="sections" onclick="setPlaybookView('sections')">Sections</button>
+  <button class="subnav-tab" data-pbview="templates" onclick="setPlaybookView('templates')">Templates</button>
+  <button class="subnav-tab" data-pbview="guide" onclick="setPlaybookView('guide')">Phase Reading Guide</button>
+  <button class="subnav-tab" data-pbview="decision" onclick="setPlaybookView('decision')">What Do I Do?</button>
+  </nav>
+  </div>
+
+<!-- ===== LUNA HERO VIEW (default home) ===== -->
+<div id="view-luna" class="view active">
+  <div class="luna-hero">
+      <div class="luna-hero-wordmark-wrap">
+              <img class="luna-hero-lockup" src="assets/LUCI_lockup_ink.svg"
+                   data-light="assets/LUCI_lockup_ink.svg"
+                   data-dark="assets/LUCI_lockup_cream.svg"
+                   alt="LUCI">
+            </div>
+            <div class="luna-hero-subtitle">Level Up Central Intelligence</div>
+    <div id="luna-reminders" class="luna-reminders"></div>
+        <div id="luna-briefing" class="luna-briefing"></div>
+        <div class="luna-hero-search-row">
+      <input id="luna-hero-input" class="luna-hero-input" type="text" placeholder="Ask anything about the playbook, projects, budget, punch list, change orders..." autocomplete="off" onkeydown="if(event.key==='Enter')heroSearch()" oninput="heroSearchType(this.value)">
+      <button class="luna-hero-btn" onclick="heroSearch()">Ask</button>
+    </div>
+    <div id="luna-hero-dropdown" class="luna-hero-dropdown"></div>
+    <div class="luna-hero-quicks">
+          <button class="luna-hero-quick" onclick="heroQuick('What does an owner&rsquo;s rep do and how do I get started on a new project?')">🏗 Owner&rsquo;s rep 101</button>
+          <button class="luna-hero-quick" onclick="heroQuick('What are the critical milestones in a sports venue development timeline?')">🏟 Stadium development milestones</button>
+          <button class="luna-hero-quick" onclick="heroQuick('How do I review, challenge, and negotiate a change order?')">📋 Change order review guide</button>
+          <button class="luna-hero-quick" onclick="heroQuick('What are the top risks on sports projects and how do I mitigate them?')">⚠ Top project risks</button>
+          <button class="luna-hero-quick" onclick="heroQuick('What is the current status of Miami Freedom Park Stadium?')">🔴 MFP project status</button>
+          <button class="luna-hero-quick" onclick="heroQuick('How do I set up project governance and decision-making authority?')">👥 Governance setup</button>
+          <button class="luna-hero-quick" onclick="heroQuick('What is the punch list closeout process and best practices?')">✅ Punch list closeout</button>
+          <button class="luna-hero-quick" onclick="heroQuick('What documents do I need at each project phase?')">📁 Documents by phase</button>
+        </div>
+    <div id="luna-hero-results" class="luna-hero-results"></div>
+        <div class="luna-status-bar">
+      <span>Search playbook, projects, budget, templates, and more</span>
+      <span class="luna-status-freq">Data: static as of Jun 8</span>
+    </div>
+    <div class="luna-hero-footer">LUCI — Level Up Central Intelligence</div>
+  </div>
+</div>
+
+<!-- ===== PLAYBOOK VIEW ===== -->
+<div id="view-playbook" class="view">
+  <div id="pb-sections-view" class="pb-subview active">
+      <div class="pb-search-row">
+        <div class="pb-search-wrap">
+          <input id="pb-search-input" class="pb-search-input" type="text" placeholder="Search playbook sections, topics, templates..." autocomplete="off" onkeydown="if(event.key==='Enter')pbSearch()" oninput="pbSearchType(this.value)">
+          <div id="pb-hero-dropdown" class="pb-hero-dropdown"></div>
+        </div>
+        <button class="pb-search-btn" onclick="pbSearch()">Search</button>
+        <span id="pb-search-count" class="pb-search-count"></span>
+      </div>
+      <div class="shell">
+      <aside class="sidebar" id="playbook-sidebar">
+        <button class="sidebar-toggle" onclick="toggleSidebar()">☰ Filters</button>
+        <div id="sidebar-content">
+          <div class="sidebar-section">
+            <div class="sidebar-label">Phase</div>
+            <div id="phase-pills"></div>
+          </div>
+          <div class="sidebar-section">
+            <div class="sidebar-label">Topics</div>
+            <div id="topic-chips"></div>
+          </div>
+          <div class="sidebar-section">
+            <button class="topbar-btn" style="background:var(--cool);color:var(--charcoal);width:100%;justify-content:center" onclick="clearFilters()">Clear Filters</button>
+          </div>
+        </div>
+      </aside>
+      <main class="content-area">
+        <div id="results-meta" class="results-meta"></div>
+        <div id="sections-container"></div>
+      </main>
+    </div>
+  </div>
+  <div id="pb-templates-view" class="pb-subview">
+    <div class="view-header" style="padding:24px 24px 0">
+      <div class="view-title"><span>📑</span> Templates &amp; Downloads</div>
+    </div>
+    <div id="templates-grid" class="mfp-grid" style="padding:0 24px 24px"></div>
+  </div>
+  <div id="pb-guide-view" class="pb-subview">
+    <div class="view-header" style="padding:24px 24px 0">
+      <div class="view-title"><span>📖</span> Phase Reading Guide</div>
+    </div>
+    <div id="pg-body-inline" style="padding:0 24px 24px;max-width:800px"></div>
+  </div>
+  <div id="pb-decision-view" class="pb-subview">
+    <div class="view-header" style="padding:24px 24px 0">
+      <div class="view-title"><span>🔀</span> What Do I Do?</div>
+    </div>
+    <div id="dt-body-inline" style="padding:0 24px 24px;max-width:700px"></div>
+  </div>
+</div>
+
+<!-- ===== PROJECTS VIEW ===== -->
+<div id="view-projects" class="view">
+  <div class="view-header">
+    <div class="view-title"><span>📂</span> Projects</div>
+  </div>
+  <div class="mfp-grid" id="projects-grid"></div>
+</div>
+
+<!-- ===== ACTION ITEMS VIEW REMOVED — only in Briefing side panel ===== -->
+
+|<!-- ===== MFP FULL DASHBOARD ===== -->
+|<div id="view-mfp-dashboard" class="view">
+|  <div class="view-header mfp-header">
+|    <button class="back-btn" onclick="setView('projects')">← Projects</button>
+|    <div class="view-title"><span class="mfp-mark">🏟</span> MIAMI FREEDOM PARK STADIUM</div>
+|  </div>
+|  <div id="mfp-dashboard" class="mfp-dashboard">
+|    <div class="mfp-skeleton"><div class="mfp-loader"></div>Loading Command Center...</div>
+|  </div>
+|</div>
+|
+|<!-- ===== SECONDARY VIEWS ===== -->
+|<div id="view-mfp" class="view">
+  <div class="view-header">
+    <button class="back-btn" onclick="setView('projects')">← Projects</button>
+    <div class="view-title"><span>🏟</span> Miami Freedom Park Stadium</div>
+  </div>
+  <div id="mfp-content"></div>
+</div>
+
+<!-- ===== KC CHIEFS DASHBOARD ===== -->
+<div id="view-chiefs" class="view">
+  <div class="view-header chiefs-header">
+    <button class="back-btn" onclick="setView('projects')">← Projects</button>
+    <div class="view-title"><span class="chiefs-mark">▲</span> KC CHIEFS TRAINING FACILITY</div>
+  </div>
+  <div id="chiefs-dashboard" class="chiefs-dashboard">
+    <div class="chiefs-skeleton"><div class="chiefs-loader"></div>Loading Command Center...</div>
+  </div>
+  </div>
+
+  <!-- ===== DOVA ARENA DASHBOARD ===== -->
+  <div id="view-dova" class="view">
+    <div class="view-header dova-header">
+      <button class="back-btn" onclick="setView('projects')">← Projects</button>
+      <div class="view-title"><span>🏗</span> DOVA ARENA</div>
+    </div>
+    <div id="dova-dashboard" class="dova-dashboard">
+      <div class="dova-skeleton"><div class="dova-loader"></div>Loading Command Center...</div>
+    </div>
+  </div>
+
+  <!-- ===== LEGACY VIEWS (for shares/links) ===== -->
+<div id="view-templates" class="view"></div>
+<div id="view-home" class="view"></div>
+
+<!-- ===== MODALS ===== -->
+<div id="modal-phase-guide" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-phase-guide')">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <div class="modal-title">📖 Phase Reading Guide</div>
+      <button class="chat-close" onclick="closeModal('modal-phase-guide')">×</button>
+    </div>
+    <div class="modal-body" id="pg-body"></div>
+  </div>
+</div>
+
+<div id="modal-decision" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-decision')">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <div class="modal-title">🔀 What Do I Do?</div>
+      <button class="chat-close" onclick="closeModal('modal-decision')">×</button>
+    </div>
+    <div class="modal-body" id="dt-body"></div>
+  </div>
+</div>
+
+<div id="modal-template-preview" class="modal-overlay"></div>
+
+<!-- ===== LUNA CLIPPY ===== -->
+<div id="luna-clippy" class="luna-clippy" onclick="clippyClick()" title="Ask LUCI">
+  <button id="clippy-dismiss" class="clippy-dismiss" onclick="event.stopPropagation();dismissLuna()" title="Dismiss LUCI">×</button>
+  <div id="clippy-suggestion" class="clippy-suggestion" style="display:none">
+    <span id="clippy-suggestion-text" class="clippy-suggestion-text"></span>
+  </div>
+  <img id="luna-clippy-icon" class="luna-clippy-icon"
+         src="assets/LUCI_icon.svg"
+         data-light="assets/LUCI_icon.svg"
+         data-dark="assets/LUCI_icon.svg"
+         alt="LUCI" draggable="false">
+  <div class="clippy-tab" id="clippy-tab" style="display:none"></div>
+</div>
+<div id="clippy-tab-standalone" class="clippy-tab-standalone" style="display:none" title="Open LUCI">
+  <span class="clippy-tab-eye">👁</span>
+</div>
+<div id="chat-drawer" class="chat-drawer">
+  <div class="chat-header" id="chat-header-drag">
+    <div class="chat-header-title">LUCI — Project Intelligence</div>
+    <div style="display:flex;gap:4px">
+      <button class="chat-close" onclick="toggleChatSize()" title="Toggle size">⛶</button>
+      <button class="chat-close" onclick="toggleChat()">×</button>
+    </div>
+  </div>
+  <div id="chat-quicks" class="chat-quicks">
+      <button class="chat-quick" onclick="quickChat('What are the top risks on sports projects?')">Top sports project risks</button>
+          <button class="chat-quick" onclick="quickChat('How do I set up project governance?')">Set up governance</button>
+          <button class="chat-quick" onclick="quickChat('Punch list closeout best practices')">Punch list closeout</button>
+          <button class="chat-quick" onclick="quickChat('Change order review checklist')">CO review checklist</button>
+    </div>
+  <div id="chat-messages" class="chat-messages"></div>
+  <div class="chat-input-row">
+      <input id="chat-input" class="chat-input" type="text" placeholder="Ask anything about the playbook or MFP..." autocomplete="off">
+      <button id="chat-send" class="chat-send" onclick="sendChat()">Send</button>
+    </div>
+    <div class="chat-resize-handle" id="chat-resize-handle"></div>
+  </div>
+
+  <!-- ===== REMINDERS SIDE PANEL ===== -->
+  <div id="reminder-panel" class="reminder-panel" style="display:none">
+    <div class="reminder-panel-header">
+      <span class="reminder-panel-title">Today's Briefing</span>
+      <button class="chat-close" onclick="closeReminderPanel()" title="Close panel">×</button>
+    </div>
+    <div class="reminder-panel-tabs">
+        <button class="reminder-tab active" data-rtab="actions" onclick="switchReminderTab('actions')">Actions</button>
+        <button class="reminder-tab" data-rtab="meetings" onclick="switchReminderTab('meetings')">Meetings</button>
+        <button class="reminder-tab" data-rtab="reminders" onclick="switchReminderTab('reminders')">Reminders</button>
+      </div>
+      <div id="reminder-panel-actions" class="reminder-panel-body"></div>
+      <div id="reminder-panel-meetings" class="reminder-panel-body" style="display:none"></div>
+      <div id="reminder-panel-reminders" class="reminder-panel-body" style="display:none"></div>
+    <div class="reminder-panel-footer">
+      <span id="reminder-panel-footer-text">Loading...</span>
+    </div>
+  </div>
+  <div id="reminder-toggle" class="reminder-toggle" onclick="openReminderPanel()" title="Open daily briefing">
+    <span id="reminder-toggle-count" class="reminder-toggle-count">!</span>
+    <span class="reminder-toggle-text">Briefing</span>
+  </div>
+
+  <!-- ===== PASSWORD GATE ===== -->
+<div id="password-overlay" class="password-overlay open">
+  <div class="password-modal">
+    <div class="password-modal-logo">
+          <img src="assets/LUCI_lockup_ink.svg?v=1" data-light="assets/LUCI_lockup_ink.svg?v=1" data-dark="assets/LUCI_lockup_cream.svg?v=1" alt="LUCI" style="height:40px">
+        </div>
+        <div class="password-modal-title">LUCI — Level Up Central Intelligence</div>
+        <div class="password-modal-desc">Enter the team password to access the playbook, project intelligence, and LUCI search.</div>
+    <div class="password-input-row">
+          <input id="password-input" class="password-input" type="password" placeholder="Enter team password..." autocomplete="off">
+          <button id="password-btn" class="password-btn">Unlock</button>
+        </div>
+        <div id="password-error" class="password-error" style="display:none"></div>
+          </div>
+        </div>
+
+<script>
+(function(){
+  'use strict';
+  var btn = document.getElementById('password-btn');
+  var inp = document.getElementById('password-input');
+  var err = document.getElementById('password-error');
+  var overlay = document.getElementById('password-overlay');
+  if (!btn || !inp) return;
+  
+  function hideOverlay() {
+          overlay.classList.remove('open');
+          overlay.style.display = 'none';
+          // Check for direct view link
+          var params = new URLSearchParams(window.location.search);
+          var view = params.get('view');
+          if (view) {
+            setTimeout(function() {
+              if (window.setView) window.setView(view);
+            }, 100);
+          }
+        }
+  
+  // ── Password verification ──────────────────────────────────────────
+  function verify() {
+    var pw = inp.value.trim();
+    if (!pw) { err.textContent = 'Please enter a password.'; err.style.display = 'block'; return; }
+    btn.disabled = true;
+    btn.textContent = 'Checking...';
+    err.style.display = 'none';
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/verify-password', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.withCredentials = true;
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        var data = JSON.parse(xhr.responseText);
+        if (data.valid) { hideOverlay(); }
+      } else if (xhr.status === 401) {
+        err.textContent = 'Incorrect password';
+        err.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Unlock';
+        inp.value = '';
+        inp.focus();
+      } else {
+        err.textContent = 'Server error (' + xhr.status + ')';
+        err.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Unlock';
+      }
+    };
+    xhr.onerror = function() {
+      err.textContent = 'Network error';
+      err.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Unlock';
+    };
+    xhr.send(JSON.stringify({ password: pw }));
+  }
+  
+  btn.addEventListener('click', verify);
+  inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') verify(); });
+  inp.focus();
+  
+  // ── Auth check on page load (handles Microsoft sign-in redirect) ───
+      // Try the Vercel route first, then fall back to direct API path
+      var authXhr = new XMLHttpRequest();
+      var authPath = '/auth/me';
+      authXhr.open('GET', authPath, true);
+      authXhr.withCredentials = true;
+      authXhr.onload = function() {
+              if (authXhr.status === 200) {
+                var data = JSON.parse(authXhr.responseText);
+                if (data.authenticated) { hideOverlay(); }
+              }
+            };
+            authXhr.onerror = function() {
+              // Fallback: try /api/auth/me directly
+              var fallback = new XMLHttpRequest();
+              fallback.open('GET', '/api/auth/me', true);
+              fallback.withCredentials = true;
+              fallback.onload = function() {
+                if (fallback.status === 200) {
+                  var fd = JSON.parse(fallback.responseText);
+                  if (fd.authenticated) { hideOverlay(); }
+                }
+              };
+              fallback.send();
+            };
+
+            // Handle direct view links after auth
+            (function checkViewLink() {
+              var params = new URLSearchParams(window.location.search);
+              var view = params.get('view');
+              if (view) {
+                // Watch for setView to become available
+                var iv = setInterval(function() {
+                  if (window.setView) {
+                    clearInterval(iv);
+                    setTimeout(function() { window.setView(view); }, 200);
+                  }
+                }, 200);
+                setTimeout(function() { clearInterval(iv); }, 10000);
+              }
+            })();
+      authXhr.send();
+
+    // ── Show auth error from URL (Microsoft sign-in failure) ───
+    var urlParams = new URLSearchParams(window.location.search);
+    var authErr = urlParams.get('auth_error');
+    if (authErr) {
+      var passwordErr = document.getElementById('password-error');
+      if (passwordErr) {
+        passwordErr.textContent = 'Sign-in failed: ' + decodeURIComponent(authErr).substring(0, 200);
+        passwordErr.style.display = 'block';
+      }
+      // Clean the URL without reloading
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  
+  // ── Close modal fallback (in case app.js hasn't loaded) ────────────
+  window.closeModal = window.closeModal || function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('open');
+  };
+})();
+</script>
+
+        <!-- ===== FOOTER ===== -->
+<div class="site-footer">
+  <span>© 2026 Level Up Project Development — LUCI Playbook</span>
+  <span class="footer-status">
+    <span id="footer-status-text">JS OK</span>
+    <span>·</span>
+    <a href="#" onclick="goHome();return false">Home</a>
+    <a href="#" onclick="setView('playbook');return false">Playbook</a>
+    <a href="#" onclick="setView('projects');return false">Projects</a>
+  </span>
+  </div>
+
+  <!-- ===== DATA SCRIPTS ===== -->
+      <script src="data/templates.js?v=20260610-clippy"></script>
+      <script src="data/mfp_context.js?v=20260610-clippy"></script>
+      <script src="data/mfp_financials.js?v=20260610-clippy"></script>
+      <script src="data/contracts_master.js?v=20260610-contract"></script>
+      <script src="data/contract_terms.js?v=20260610-contract"></script>
+      <script src="data/mfp_cowatchdog.js?v=20260610-clippy"></script>
+            <script src="data/contracts_kb.js?v=1"></script>
+                        <script src="data/kb.js?v=20260610-clippy"></script>
+                  <script src="app.js?v=20260612-dash-fix"></script>
+                  <!-- ES module infrastructure (available as window.LU.store, .api, .cache, .settings) -->
+                  <script type="module">
+                                      import { store } from '/js/core/store.js';
+                                                                              import settings from '/js/core/settings.js';
+                                                                              import api from '/js/core/api.js';
+                                                                              import cache from '/js/core/cache.js';
+                                                                              import { load, getCached, preloadAll, warm, bootLoader } from '/js/core/data.js';
+                                                                              import commandPalette from '/js/core/command-palette.js';
+                                                                              window.LU = { store, settings, api, cache, data: { load, getCached, preloadAll, warm, bootLoader }, commandPalette };
+
+                                                                              // Init command palette
+                                                                              commandPalette.init();
+
+                                      // Sync badge updater — reacts to store 'syncBadges' changes
+                                      store.on('syncBadges', (badges) => {
+                                        document.querySelectorAll('.sync-badge').forEach(el => {
+                                          const key = el.getAttribute('data-for');
+                                          const state = badges[key];
+                                          if (!state) { el.className = 'sync-badge'; return; }
+                                          el.className = 'sync-badge ' + (state.fresh ? 'fresh' : (state.age < 3600000 ? 'stale' : 'error'));
+                                        });
+                                      });
+
+                                      // Touch financials on load so badge is fresh
+                                      Promise.all([load('mfp_financials'), load('mfp_context')]).then(() => {
+                                        if (window.LU) {
+                                          // Initialize cache manager
+                                          import('/js/core/cache-manager.js').then(m => {
+                                            m.default.init();
+                                            m.default.touch('financials');
+                                            m.default.touch('contracts');
+                                          });
+                                        }
+                                      });
+                                    </script>
+
+                                                      <!-- ===== COMMAND PALETTE (Ctrl+K) ===== -->
+                                                      <div id="cmd-palette" class="cp-overlay closed">
+                                                        <div class="cp-modal">
+                                                          <div class="cp-header">
+                                                            <span class="cp-kbd">Ctrl+K</span>
+                                                            <input id="cmd-palette-input" type="text" class="cp-input" placeholder="Search commands, data, people..." autocomplete="off" spellcheck="false" />
+                                                            <button class="cp-close" onclick="window.LU?.commandPalette?.close()" title="Close (Esc)">✕</button>
+                                                          </div>
+                                                          <div id="cmd-palette-results" class="cp-results"></div>
+                                                          <div class="cp-footer">
+                                                            <span>↑↓ Navigate</span>
+                                                            <span>↵ Select</span>
+                                                            <span>Esc Close</span>
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                                                                      <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+                                                                                                      </body>
+</html>

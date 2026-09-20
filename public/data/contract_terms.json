@@ -1,0 +1,262 @@
+{
+  "CMA_Lemartec": {
+    "type": "Construction Manager (CM as Agent)",
+    "parties": "Inter Miami Stadium, LLC (Owner) vs Lemartec Corporation (CM)",
+    "effective": "March 31, 2025",
+    "scope": "Full executive leadership, supervision, CM services for new Inter Miami CF MLS Stadium. CM acts as Owner's agent managing Trade Contractors retained directly by Owner.",
+    "amount": "2.95% Fee Rate on total construction costs (1.5% on OFOI). Insurance Costs: $87,207 lump sum. Owner's Contingency: $15,500,000. No GMP.",
+    "key_personnel": "Christopher McBride (Owner's Rep)",
+    "architect": "Arquitechtonica (AOR), MANICA Architecture (Design Architect)",
+    "ld": "NONE — No liquidated damages provision found",
+    "warranty": "CM causes all Trade Contractors to provide 1-year warranty from TCO. CM assigns all warranties to Owner.",
+    "retainage": "10% on CM's Fee until 50% complete, then 0%. No retainage on GC/GR/Insurance costs.",
+    "insurance": "OCIP covers enrolled Trade Contractors. CM maintains own: CGL $1M/$2M, Auto $1M, WC stat, Excess $5M, Prof Liab $1M, Cyber $2M.",
+    "indemnification": "CM indemnifies for claims from gross negligence/willful misconduct/violation of law. NOT for Indemnitees' own negligence. Florida Statue 725.06 compliant.",
+    "termination": "For cause: 10 days notice, 10 day cure. For convenience: 10 days notice, paid for services + demob (excl severance). By CM: 20 business days after 10 business days non-payment.",
+    "waiver_consequential": "MUTUAL. Includes lost profits, loss of use, financing, reputation, business interruption.",
+    "liability_cap": "CM's aggregate liability capped at amount of CM's Fee paid (except insured risks).",
+    "dispute_resolution": "Referenced to Supplemental Conditions (Exhibit F). AAA arbitration in Miami-Dade, Florida law.",
+    "notable": [
+      "No performance bond required (Section 14.3)",
+      "No GMP — CM does not guarantee budget or schedule",
+      "CM NOT responsible for Trade Contractor acts/omissions",
+      "City of Miami has audit rights per Definitive Documents",
+      "MFP Builders, LLC acknowledged as Owner's agent"
+    ],
+    "exhibits": "A (Drawings), B (Schedule), C (Budget), D (Staffing/GC Costs), E (Site Diagram), F (Supplemental Conditions), G (Trade Contract Form), H (OCIP Manual)",
+    "pages": 352
+  },
+  "MANICA": {
+    "type": "Design Architect",
+    "parties": "Miami Freedom Park, LLC (Developer) vs MANICA Architecture, PA (Design Architect)",
+    "effective": "July 27, 2023",
+    "scope": "Overall design concept/aesthetic for MFP Stadium (~25,000 seats, expandable). Programming, schematic design, design development, construction documents, CA support. Coordinates with AOR (Arquitechtonica). 'Simple, but elegant' design.",
+    "amount": "Fixed Fee: $5,289,750 (SD 31%=$1,653,750, DD 50%=$2,646,000, CD 19%=$990,000). Travel cap: $495,000.",
+    "ld": "NONE",
+    "standard_of_care": "Professional care among internationally recognized firms. Compared to 7 Comparable Facilities: Allianz Field, BMO Stadium, Exploria Stadium, TQL Stadium, Nashville Fairgrounds, Q2 Stadium, New Columbus Crew Stadium.",
+    "insurance": "WC stat+$1M, CGL $1M/$2M, Auto $1M, Prof Liab $5M/$5M (7 years post-completion), Excess $5M, Valuable Papers $1M. A:X Best's rating.",
+    "indemnification": "General (10.5): defends/indemnifies for negligent acts. Professional (10.6): for errors/omissions in professional services. Full extent permitted by law.",
+    "termination": "Convenience: 7 days notice, pays services rendered ONLY (no anticipated profit). Cause: 5 day cure. By architect: 30 days after non-payment or 365 day suspension.",
+    "waiver_consequential": "MUTUAL. Exceptions: breach of confidentiality or indemnification obligations.",
+    "dispute_resolution": "Binding AAA arbitration (Commercial/Construction). 11 arbitrators, each strikes 3, alternating until 1. Miami hearing within 30 days. No consequential/punitive damages. Each party bears own costs.",
+    "ip_ownership": "Developer owns ALL design documents, copyrights, IP in perpetuity. Architect has revocable license only during term.",
+    "notable": [
+      "Work for hire — Developer owns all IP",
+      "Exculpation clause — Developer's members/officers no personal liability",
+      "Comparable Facilities defined (7 specific MLS stadiums)",
+      "BIM Execution Manual (Revit 2023, BIM 360)",
+      "CAA ICON was Developer's Representative"
+    ],
+    "exhibits": "A (Program), A-1 (Legal), D (Schedule/Payment), E (Consultants), F (Hourly Rates), G (Basic Services), G-1 (Responsibility Matrix), H-1/H-2 (Liens), I (Social Media), J (BIM Manual), K (Line of Work)",
+    "pages": 128
+  },
+  "ARQ_AOR": {
+    "type": "Architect of Record",
+    "parties": "Miami Freedom Park, LLC (Developer) vs Arquitechtonica International Corp. (AOR)",
+    "effective": "July 27, 2023",
+    "scope": "Complete architectural and engineering design, CA. Full liability for code compliance and life safety. Coordinates with MANICA (Design Architect). Optional parking garage up to 1,850,000 sq ft (~4,900 cars).",
+    "amount": "Fixed Fee: $14,331,425 (CS 11%=$1,633,862, DD 23%=$3,220,382, CD 45%=$6,425,274, Const 21%=~$3,051,907). Travel cap: $400,000.",
+    "ld": "NONE",
+    "standard_of_care": "Same as MANICA — internationally recognized firms, same 7 Comparable Facilities.",
+    "insurance": "Higher than MANICA: Prof Liab $10M/$10M (double). CGL $1M/$2M, Auto $1M, WC stat+$1M, Valuable Papers $1M. 30 days cancellation notice.",
+    "indemnification": "Same structure as MANICA. General (10.5) and Professional (10.6) indemnification.",
+    "termination": "Identical to MANICA: Convenience 7 days, Cause 5 days cure, by AOR 30 days non-payment or 365 day suspension.",
+    "waiver_consequential": "MUTUAL. Same exceptions as MANICA.",
+    "dispute_resolution": "Binding AAA arbitration. Identical process to MANICA. 11 arbitrators, Miami hearing within 30 days.",
+    "ip_ownership": "Same as MANICA — Developer owns all IP.",
+    "notable": [
+      "Florida Chapter 558.0035 — individual employees/agents cannot be held individually liable",
+      "7.5% CBE-A/E participation (Miami-Dade certified firms)",
+      "Living wage requirements per Definitive Agreements",
+      "Developer may pay AOR's consultants directly by joint check (Section 7.5)",
+      "Devon McCorkle (Developer), Timothy Reedy (AOR CEO)"
+    ],
+    "exhibits": "Same as MANICA + B (AOR's Consultants), G (Basic Services for Parking Garage)",
+    "pages": 154
+  },
+  "Baker_Concrete": {
+    "contract": "19069-SC-003",
+    "scope": "Cast-in-place concrete — formwork, rebar, foundations, slabs, bowl walls, rakers, columns, shear walls, topping slabs, embeds. Excludes grand staircases.",
+    "amount": "$51,490,000",
+    "retainage": "10% of each progress payment. No cap.",
+    "ld": {
+      "rate1": "$30,000/calendar day (first 30 days)",
+      "rate2": "$50,000/calendar day (thereafter)",
+      "grace": "14 calendar days",
+      "cap": "10% of Trade Contract Price ($5,149,000 max)",
+      "bonus": "$25,000/day early completion for upper rakers top-out before 5/12/25"
+    },
+    "warranty": "First-class workmanship, strict contract compliance. Survives termination.",
+    "payment": "Monthly via Procore (20th), AIA G702/G703, 10% retainage. 'No damages for delay' clause — sole remedy is time extension (except Compensable Delays).",
+    "insurance": "CGL $1M/$2M, Auto $1M, WC stat, Employers Liab $1M, Umbrella $5M, Builders Risk (special causes). Required 10 years post-completion.",
+    "indemnification": "Broad form — indemnifies Owner, CM, Inter Miami, City of Miami. Even if partly caused by Indemnitees' own negligence (except gross negligence or design defects).",
+    "termination": "18+ default triggers incl >7 days behind schedule. Owner may take over work. Contractor liable for all excess completion costs.",
+    "waiver_consequential": "ONE-SIDED — Owner not liable to Baker for lost profits, loss of use, business interruption. Does NOT waive Baker's liability to Owner.",
+    "dispute_resolution": "Binding AAA arbitration, Miami-Dade, Florida law. Jury trial waived.",
+    "notable": [
+      "Waiver of mechanic's lien rights (3 business day cure)",
+      "$200 back charge for missed job meetings",
+      "Exclusive LD incentive (unique among all contracts)",
+      "14-day Compensable Delay waiver before LD accrual"
+    ],
+    "pages": 182,
+    "ld_exhibit_status": "Fully executed"
+  },
+  "Qualico_Steel": {
+    "contract": "19069-SC-001",
+    "scope": "Structural steel — West Stack and Bowl. Shop drawings (5,878 hrs), connection design, temporary supports, crane foundations, embeds, welding. Excludes misc steel, canopy structures.",
+    "amount": "$12,754,688 (incl $126,285 bond)",
+    "retainage": "10%, CAPPED AT $235,000",
+    "ld": {
+      "rate1": "$30,000/calendar day (first 30 days)",
+      "rate2": "$50,000/calendar day (thereafter)",
+      "grace": "15 work days after 36-week timeline exceeded",
+      "cap": "5% ($637,734) — PRELIMINARY/TO BE NEGOTIATED",
+      "milestones": "West Stack Erection = 35 weeks after LOI. Subroof/Level 175 = 31 weeks after LOI"
+    },
+    "warranty": "First-class workmanship, strict contract compliance.",
+    "payment": "Monthly via Procore. NO no-damages-for-delay — can seek delay compensation. OH&P on changes = 15% explicitly stated.",
+    "insurance": "Same as Baker. 100% Payment & Performance Bond required.",
+    "indemnification": "Same base as Baker. Amendment strengthens — explicit indemnity for law violation penalties and ALL liens/claims.",
+    "termination": "Same base as Baker. Amendment clarifies: completion costs include 15% OH&P markup. If costs exceed balance, pay difference immediately.",
+    "waiver_consequential": "ONE-SIDED (same as Baker).",
+    "notable": [
+      "Retainage capped at $235K (better than uncapped Baker)",
+      "Exhibit 14 is DRAFT — 5% cap and terms 'to be negotiated'",
+      "Unit pricing: West steel $6,956.60/ton, Subroof $7,951.63/ton",
+      "Can seek delay compensation (not strict no-damages-for-delay)"
+    ],
+    "pages": 154,
+    "ld_exhibit_status": "DRAFT - terms not fully finalized"
+  },
+  "Metromont": {
+    "contract": "19069-SC-003",
+    "scope": "Precast Concrete",
+    "amount": "$13,296,238 (per Procore) / $13,831,721 (per contract Exhibit 1)",
+    "retainage": "10% flat",
+    "ld": {
+      "rate1": "$30,000/calendar day (first 30 days) — PSS MODIFIED",
+      "rate2": "$50,000/calendar day (thereafter) — PSS MODIFIED",
+      "cap": "NONE — base 3% cap removed by PSS modification"
+    },
+    "warranty": "First-class workmanship, strict contract compliance.",
+    "payment": "Standard monthly via Procore. Lien waiver cure: 3 business days.",
+    "termination": "Standard per base agreement. Set off with 5 days notice.",
+    "waiver_consequential": "MUTUAL (PSS-modified from one-way).",
+    "notable": [
+      "PSS modification removed LD cap — dramatically higher exposure than other trades",
+      "Base rate was $15K/day with 3% cap — PSS changed to $30K/$50K with NO cap",
+      "Lien waiver cure period only 3 business days (shortest among contracts reviewed)"
+    ],
+    "pages": 154,
+    "ld_exhibit_status": "PSS-Executed (base overridden)"
+  },
+  "Hill_York": {
+    "contract": "19069-SC-021",
+    "scope": "Mechanical Services (HVAC)",
+    "amount": "$26,900,000",
+    "retainage": "10% until 50% complete, then 5%",
+    "ld": {
+      "rate": "$15,000/calendar day",
+      "cap": "3% of Trade Contract Price ($807,000)"
+    },
+    "warranty": "First-class workmanship, strict contract compliance.",
+    "payment": "Standard monthly via Procore. Set off with 5 days cure opportunity.",
+    "termination": "Standard per base agreement.",
+    "waiver_consequential": "MUTUAL (PSS-modified).",
+    "notable": [
+      "Retainage steps down at 50% completion (favorable to Hill York)",
+      "$15K/day with 3% cap — moderate LD exposure",
+      "Set off requires 5 days cure opportunity (unusual)"
+    ],
+    "pages": 160,
+    "ld_exhibit_status": "Fully executed"
+  },
+  "Right_Way_Plumbing": {
+    "contract": "19069-SC-014",
+    "scope": "Plumbing Services",
+    "amount": "$19,889,328",
+    "retainage": "10% (custom: revision=12.5%, new scope=20%)",
+    "ld": {
+      "rate": "$15,000/calendar day",
+      "grace": "30 calendar days",
+      "cap": "2% of Trade Contract Price (~$397,787)"
+    },
+    "warranty": "First-class workmanship, strict contract compliance.",
+    "payment": "Standard monthly via Procore. No-damages-for-delay clause.",
+    "termination": "Standard. Default termination with 20% markup on completion costs.",
+    "waiver_consequential": "MUTUAL (Amendment-modified). Exceptions: gross negligence, indemnification, confidentiality breach, insured losses.",
+    "notable": [
+      "Best LD terms among all contracts — 30-day grace + 2% cap",
+      "Amendment made waiver of consequential damages mutual",
+      "Custom retainage: 12.5% revisions, 20% new scope"
+    ],
+    "pages": 392,
+    "ld_exhibit_status": "Fully executed + Amendment"
+  },
+  "Venur": {
+    "contract": "19069-SC-017",
+    "scope": "Framing and Drywall Installation",
+    "amount": "$16,015,189",
+    "retainage": "10%",
+    "ld": {
+      "rate1": "$10,000/calendar day (first 30 days)",
+      "rate2": "$15,000/calendar day (thereafter)",
+      "cap": "NONE — no cap found"
+    },
+    "warranty": "First-class workmanship, strict contract compliance.",
+    "payment": "Standard monthly via Procore.",
+    "termination": "Standard per base agreement.",
+    "waiver_consequential": "ONE-SIDED (no amendment) — Owner waives, Venur does NOT.",
+    "notable": [
+      "No LD cap — immediate accrual after 30-day initial rate, then $15K/day unlimited",
+      "No amendment executed — original one-way waiver remains",
+      "Worst LD terms among reviewed contracts"
+    ],
+    "pages": 380,
+    "ld_exhibit_status": "Fully executed, no amendment"
+  },
+  "Decktight_Roofing": {
+    "contract": "19069-SC-012",
+    "scope": "Roofing and Gutter Installation",
+    "amount": "$3,739,640",
+    "retainage": "10%",
+    "ld": {
+      "rate1": "$2,500/calendar day (first 30 days)",
+      "rate2": "$4,000/calendar day (thereafter)"
+    },
+    "payment": "Standard monthly via Procore.",
+    "pages": 150,
+    "ld_exhibit_status": "Fully executed"
+  },
+  "Modern_Heavy": {
+    "contract": "19069-SC-014",
+    "scope": "Roof Canopy Structural Steel",
+    "amount": "$9,585,352",
+    "ld": {
+      "rate1": "$30,000/day (first 30 days)",
+      "rate2": "$50,000/day (thereafter)"
+    },
+    "notes": "From earlier contract KB. Only partially executed PO found — no full trade agreement on file.",
+    "ld_exhibit_status": "Partial PO only — full agreement not found"
+  },
+  "Standard_Template": {
+    "ld": {
+      "rate1": "$1,000/calendar day (first 30 days)",
+      "rate2": "$1,500/calendar day (thereafter)"
+    },
+    "warranty": "1 year after Substantial Completion (Article 12.2.2.1)",
+    "retainage": "10% of each progress payment (Section 13.1)",
+    "insurance": "CGL $1M/$2M, Auto $1M, WC statutory, Excess/Umbrella",
+    "termination": "Owner termination for convenience at any time; payment within 30 days",
+    "waiver_consequential": "ONE-SIDED (base form) — may be modified by PSS or Amendment",
+    "notable": [
+      "Waiver of consequential damages (Article 36)",
+      "Waiver of jury trial (Article 33)",
+      "Waiver of lien rights within 3 business days (Article 16)",
+      "24-hour defective work correction (Article 22)",
+      "Time is of the essence (Article 31)",
+      "AAA binding arbitration in Miami-Dade, Florida law"
+    ]
+  }
+}
