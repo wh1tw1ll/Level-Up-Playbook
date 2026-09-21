@@ -673,6 +673,10 @@ function loadTasks() {
     .then(r => r.json())
     .then(data => {
       allTasks = data.tasks || [];
+      if (data.truncated) {
+        document.getElementById('refresh-status').textContent = '⚠ Partial: ' + data.rowCount + ' of ' + data.totalInSheet + ' rows';
+        document.getElementById('refresh-status').style.color = '#e6c87c';
+      }
       // Snapshot cell values for conflict detection
       rowSnapshots = {};
       allTasks.forEach(function(t) {
@@ -748,6 +752,7 @@ function loadTasks() {
           render();
           document.getElementById('updated-at').textContent = 'cached';
           statusEl.textContent = 'Offline (cached)';
+          if (data.truncated) statusEl.textContent += ' ⚠ Partial: ' + data.rowCount + ' of ' + data.totalInSheet;
         }
       } catch(e) {}
     });
