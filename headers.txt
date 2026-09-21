@@ -1,0 +1,16 @@
+HTTP/1.1 200 OK
+Access-Control-Allow-Headers: Content-Type
+Access-Control-Allow-Methods: GET, POST, OPTIONS
+Access-Control-Allow-Origin: *
+Cache-Control: no-cache, no-store, must-revalidate
+Content-Length: 16
+Content-Type: application/json; charset=utf-8
+Date: Mon, 21 Sep 2026 02:56:48 GMT
+Etag: W/"10-oV4hJxRVSENxc/wX8+mA4/Pe4tA"
+Server: Vercel
+Set-Cookie: lu_site_auth=%7B%22authed%22%3Atrue%2C%22expires_at%22%3A1790564208587%7D; Path=/; Secure; SameSite=Lax; Max-Age=604800
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Fresh-Deploy: 20260921
+X-Vercel-Cache: MISS
+X-Vercel-Id: iad1::iad1::j7cp7-1789959408561-bcb1da3b87b1
+

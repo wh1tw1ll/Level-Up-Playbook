@@ -18,7 +18,7 @@
     { "source": "/procore/data", "destination": "/api/oauth?provider=procore&action=data" },
     { "source": "/procore/discover", "destination": "/api/oauth?provider=procore&action=discover" },
     { "source": "/actions", "destination": "/tasks.html" },
-        { "source": "/api/(.*)", "destination": "/api/index?path=$1" }
+    { "source": "/api/(.*)", "destination": "/api/index?path=$1" }
   ],
   "functions": {
     "api/index.js": {
