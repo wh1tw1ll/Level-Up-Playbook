@@ -82,7 +82,13 @@ function buildFullKB() {
 // Synchronous KB init — runs immediately since data is preloaded
 var kbLoaded = false;
 function initKB() {
-  if (kbLoaded || !KB.length) return;
+  if (kbLoaded) return;
+  // Re-read from window — data scripts may have loaded after this file
+  var data = window.__KB || [];
+  if (!data.length) return;
+  KB = data;
+  CONTRACT_KB = window.__CONTRACT_KB || [];
+  TEMPLATES = window.__TEMPLATES || {};
   buildFullKB();
   var set = {};
   KB.forEach(function(s) { (s.topics || []).forEach(function(t) { set[t] = true; }); });
