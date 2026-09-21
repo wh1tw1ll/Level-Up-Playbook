@@ -71,36 +71,34 @@ function requireSiteAuth(req, res, parsedPath) {
   // Auth bypass routes are always allowed
   if (AUTH_BYPASS_ROUTES.has(parsedPath)) return true;
   const cookies = parseCookies(req);
-  // Check lu_session (Microsoft OAuth — strongest)
-    const session = cookies['lu_session'];
-    if (session) {
-      try {
-        const data = JSON.parse(decodeURIComponent(session));
-        // Accept with or without expires_at — the cookie's Max-Age handles expiration
-        if (data.authenticated && data.name) return true;
-      } catch (_) {}
-    }
-  // Check lu_site_auth (password gate)
-  const siteAuth = cookies['lu_site_auth'];
-  if (siteAuth) {
+  // Check lu_session (Microsoft OAuth session — non-HttpOnly, set by callback JS or writeRefreshCookies)
+  const session = cookies['lu_session'];
+  if (session) {
     try {
-      const data = JSON.parse(decodeURIComponent(siteAuth));
-      if (data.authed && data.expires_at && Date.now() < data.expires_at) {
-        // Password-only access: only allow routes in PASSWORD_ALLOWED_ROUTES
-        if (PASSWORD_ALLOWED_ROUTES.has(parsedPath)) return true;
-        // All other routes require Microsoft OAuth
-        res.setHeader('Content-Type', 'application/json');
-        res.status(401).json({ error: 'Microsoft sign-in required for this route. Visit / to sign in.' });
-        return false;
-      }
+      const data = JSON.parse(decodeURIComponent(session));
+      if (data.authenticated && data.name) return true;
     } catch (_) {}
   }
-  // Also check lu_auth (non-HttpOnly Microsoft refresh token cookie)
+  // Check lu_auth (HttpOnly Microsoft refresh token — most durable, survives ad-blockers / JS failures)
+  // MUST be checked BEFORE lu_site_auth to avoid password cookie blocking valid Microsoft sessions
   const luAuth = cookies['lu_auth'];
   if (luAuth) {
     try {
       const data = JSON.parse(decodeURIComponent(luAuth));
       if (data.refresh_token && data.expires_at && Date.now() < data.expires_at) return true;
+    } catch (_) {}
+  }
+  // Check lu_site_auth (password gate — least privileged, only grants route-restricted access)
+  const siteAuth = cookies['lu_site_auth'];
+  if (siteAuth) {
+    try {
+      const data = JSON.parse(decodeURIComponent(siteAuth));
+      if (data.authed && data.expires_at && Date.now() < data.expires_at) {
+        if (PASSWORD_ALLOWED_ROUTES.has(parsedPath)) return true;
+        res.setHeader('Content-Type', 'application/json');
+        res.status(401).json({ error: 'Microsoft sign-in required for this route. Visit / to sign in.' });
+        return false;
+      }
     } catch (_) {}
   }
   res.setHeader('Content-Type', 'application/json');
