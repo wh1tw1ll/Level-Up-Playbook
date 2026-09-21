@@ -761,11 +761,11 @@ export default async function handler(req, res) {
               } catch(e) { return res.status(500).json({ error: e.message }); }
             }
 
-      // ── DOVA DASHBOARD (dynamically imported, CJS module) ──
-            case '/api/dova-dashboard': {
-              const { default: ddHandler } = await import('../lib/handlers/dova-dashboard.js');
-              return ddHandler(req, res);
-            }
+      // ── DOVA DASHBOARD (redirect to embedded view in app) ──
+                  case '/api/dova-dashboard': {
+                    res.writeHead(302, { Location: '/?view=dova' });
+                    return res.end();
+                  }
 
             // ── PASS-THROUGH ROUTES ──
             default:
