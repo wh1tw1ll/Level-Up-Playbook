@@ -1120,6 +1120,8 @@ function init() {
       if (!luUser || !luUser.authenticated) {
         tryRefresh();
       }
+      // Initialize KB now that data scripts have loaded
+      initKB();
       // Initialize daily briefing/side panel
       initDailyBriefing();
 
@@ -1514,5 +1516,4 @@ function dismissBriefing() {
   if (el) el.innerHTML = '';
 }
 
-// ── BOOT ──────────────────────────────────────────────────────────
-init();
+// init() is called from index.html after data scripts load
