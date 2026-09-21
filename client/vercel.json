@@ -1,0 +1,11 @@
+{
+  "name": "dova-client",
+  "version": 2,
+  "builds": [
+    { "src": "index.html", "use": "@vercel/static" }
+  ],
+  "rewrites": [
+    { "source": "/api/client/actions", "destination": "https://level-up-playbook.vercel.app/api/client/actions" },
+    { "source": "/api/dova", "destination": "https://level-up-playbook.vercel.app/api/dova?sheet=BS" }
+  ]
+}

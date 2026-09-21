@@ -767,6 +767,19 @@ export default async function handler(req, res) {
                     return res.end();
                   }
 
+            // ── ADMIN: ADD EXTRACTIONID COLUMN (one-time) ──
+                  case '/api/admin/add-extraction-id': {
+                    if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+                    try {
+                      const DOVA = '4456864287772548';
+                      const sheet = await smartsheet.getSheetWithColumns(DOVA);
+                      const hasCol = (sheet.columns||[]).find(c => c.title === 'ExtractionId');
+                      if (hasCol) return res.json({ success: true, message: 'ExtractionId column already exists' });
+                      await smartsheet.addColumn(DOVA, { title: 'ExtractionId', type: 'TEXT_NUMBER' });
+                      return res.json({ success: true, message: 'ExtractionId column added' });
+                    } catch(e) { return res.status(500).json({ error: e.message }); }
+                  }
+
             // ── PASS-THROUGH ROUTES ──
             default:
               if (path === '/api/tasks' || path.startsWith('/api/tasks/')) {

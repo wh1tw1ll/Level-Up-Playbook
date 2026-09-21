@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DOVA Arena — Project Dashboard</title>
+<link rel="icon" type="image/svg+xml" href="assets/LUCI_icon.svg">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{--bg:#181818;--fg:#d4d4d4;--accent:#BED1C6;--card:#222;--border:#333;--success:#7ecf7e;--warn:#e6c87c;--danger:#e86060;--muted:#888;--hover:#2a2a2a;--teal:#184655;--radius:6px;--font:"DM Sans","Aptos",system-ui,sans-serif}
+body{margin:0;font-family:var(--font);background:var(--bg);color:var(--fg);font-size:15px}
+.header{background:var(--teal);padding:12px 20px;display:flex;align-items:center;gap:12px}
+.header-logo{height:40px;width:auto}
+.header-title{font-weight:600;font-size:18px;color:#F0EFEF}
+.container{max-width:900px;margin:0 auto;padding:24px}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+.kpi-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.kpi-val{font-size:22px;font-weight:700;color:var(--fg)}
+.kpi-val.gold{color:var(--warn)}
+.kpi-val.red{color:var(--danger)}
+.kpi-val.green{color:var(--success)}
+.section-title{font-size:14px;font-weight:700;color:var(--fg);margin-bottom:8px;padding-top:16px;border-top:1px solid var(--border)}
+.task{display:flex;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);font-size:14px;line-height:1.4}
+.task:hover{background:var(--hover)}
+.task-text{flex:1;min-width:0}
+.task-meta{font-size:12px;color:var(--muted);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap}
+.overdue{color:var(--danger)!important;font-weight:600}
+.loading{padding:60px;text-align:center;color:var(--muted)}
+.loader{display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error{color:var(--danger);padding:20px;text-align:center}
+</style>
+</head>
+<body>
+<div class="header">
+  <img class="header-logo" src="https://level-up-playbook.vercel.app/assets/level-up-logo.png" alt="Level Up">
+  <span class="header-title">DOVA Arena — Project Dashboard</span>
+  <span style="margin-left:auto;font-size:12px;color:rgba(255,255,255,0.5)" id="update-time"></span>
+</div>
+<div class="container">
+  <div id="kpi-row" class="kpi-row"></div>
+  <div id="content"></div>
+</div>
+
+<script>
+// Client-facing dashboard - reads only /api/client/actions and /api/dova (Budget Snapshot)
+// No internal sheet IDs, no access to /api/tasks. Data is server-side filtered to DOVA only.
+
+var API = 'https://level-up-playbook.vercel.app';
+
+function fmt(n) {
+  if (n == null || n === '') return '—';
+  var v = parseFloat(String(n).replace(/[$,]/g, ''));
+  if (isNaN(v)) return n;
+  return '$' + (v / 1000000).toFixed(0) + 'M';
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function isOverdue(d) {
+  if (!d) return false;
+  return new Date(d + 'T12:00:00') < new Date();
+}
+
+fetch(API + '/api/client/actions')
+  .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(function(data) {
+    var rows = data.rows || [];
+    var open = rows.filter(function(r) { return r.Status !== 'Complete'; });
+    var overdue = open.filter(function(r) { return isOverdue(r['Due Date']); });
+    var inProgress = open.filter(function(r) { return r.Status === 'In Progress'; });
+
+    document.getElementById('kpi-row').innerHTML = ''
+      + '<div class="kpi"><div class="kpi-label">Open Items</div><div class="kpi-val gold">' + open.length + '</div></div>'
+      + '<div class="kpi"><div class="kpi-label">Overdue</div><div class="kpi-val red">' + overdue.length + '</div></div>'
+      + '<div class="kpi"><div class="kpi-label">In Progress</div><div class="kpi-val golden">' + inProgress.length + '</div></div>'
+      + '<div class="kpi"><div class="kpi-label">Total</div><div class="kpi-val">' + rows.length + '</div></div>';
+
+    var html = '<div class="section-title">📋 Open Action Items (' + open.length + ')</div>';
+    if (open.length) {
+      open.slice(0, 50).forEach(function(r) {
+        var od = isOverdue(r['Due Date']);
+        html += '<div class="task">'
+          + '<span style="color:' + (od ? '#c0392b' : r.Status === 'In Progress' ? '#e67e22' : 'var(--muted)') + '">' + (od ? '⚠' : r.Status === 'In Progress' ? '◐' : '○') + '</span>'
+          + '<div class="task-text">'
+          + '<div>' + escapeHtml(r['Action ID']) + '</div>'
+          + '<div class="task-meta">'
+          + (r.Owner ? '<span>👤 ' + escapeHtml(r.Owner) + '</span>' : '')
+          + (r['Due Date'] ? '<span class="' + (od ? 'overdue' : '') + '">📅 ' + escapeHtml(r['Due Date']) + '</span>' : '')
+          + (r['Responsible Firm(s)'] ? '<span>🏢 ' + escapeHtml(r['Responsible Firm(s)']) + '</span>' : '')
+          + (r.HotTopic ? '<span style="color:var(--danger)">🔥</span>' : '')
+          + '</div></div></div>';
+      });
+      if (open.length > 50) {
+        html += '<div style="padding:12px;text-align:center;color:var(--muted);font-size:13px">+' + (open.length - 50) + ' more items</div>';
+      }
+    } else {
+      html += '<div style="padding:40px;text-align:center;color:var(--muted)">✅ All caught up — no open action items.</div>';
+    }
+
+    document.getElementById('content').innerHTML = html;
+    document.getElementById('update-time').textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  })
+  .catch(function(e) {
+    document.getElementById('content').innerHTML = '<div class="error">⚠ Could not load data: ' + escapeHtml(e.message) + '</div>';
+  });
+</script>
+</body>
+</html>
