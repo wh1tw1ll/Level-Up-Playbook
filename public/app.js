@@ -1507,153 +1507,153 @@ function renderReminderActions() {
   var el = document.getElementById('reminder-panel-actions');
   if (!el) return;
   var footer = document.getElementById('reminder-panel-footer-text');
-  if (footer) footer.textContent = 'Updating...';
+  if (footer) footer.textContent = 'Loading from Smartsheet...';
 
-  loadSTORE().then(function(rows) {
-    // Filter: open DOVA items OR any open item assigned to Whitney
-    var relevant = rows.filter(function(r) {
-      if (r.status === 'Complete') return false;
-      var proj = (r.project || '').toLowerCase();
-      if (proj === 'dova') return true;
-      if (isWhitney() && proj !== 'mfp') return true;
-      return false;
-    });
+  // Direct fetch — never falls back to localStorage
+  fetch('/api/tasks')
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(data) {
+      var rows = data.tasks || [];
+      // Filter: DOVA only, not Complete, overdue or due today
+      var relevant = rows.filter(function(r) {
+        return (r.project || '').toLowerCase() === 'dova'
+            && r.status !== 'Complete'
+            && (isOverdue(r) || isDueToday(r));
+      });
 
-    // Flagged emails (separate source, still fetched)
-    var flaggedEmails = [];
-    try {
-      var xhr = new XMLHttpRequest();
-      xhr.open('GET', '/api/outlook/flagged', false);
-      xhr.withCredentials = true;
-      xhr.send();
-      if (xhr.status === 200) {
-        var fd = JSON.parse(xhr.responseText);
-        flaggedEmails = fd.actions || [];
+      // FALL THROUGH to existing render logic (filtered list only)
+      var flaggedEmails = [];
+      try {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/api/outlook/flagged', false);
+        xhr.withCredentials = true;
+        xhr.send();
+        if (xhr.status === 200) {
+          var fd = JSON.parse(xhr.responseText);
+          flaggedEmails = fd.actions || [];
+        }
+      } catch(e) {}
+
+      var mfpKeywords = ['mfp','freedom park','stadium','lemartec','punch','change order','cost recovery','arq','miller','baker','hvac','scoreboard','commissioning','closeout','pco','invoice','draw','pay app','retainage','tco','permitting','boldyn','das','seating','concession'];
+      var mfpItems = [], levelUpItems = [];
+
+      function classify(text, item) {
+        var txt = (text || '').toLowerCase();
+        var isMFP = mfpKeywords.some(function(kw) { return txt.indexOf(kw) >= 0; });
+        (isMFP ? mfpItems : levelUpItems).push(item);
       }
-    } catch(e) {}
 
-    // Separate MFP vs other using same keyword set
-    var mfpKeywords = ['mfp','freedom park','stadium','lemartec','punch','change order','cost recovery','arq','miller','baker','hvac','scoreboard','commissioning','closeout','pco','invoice','draw','pay app','retainage','tco','permitting','boldyn','das','seating','concession'];
-    var mfpItems = [], levelUpItems = [];
-
-    function classify(text, item) {
-      var txt = (text || '').toLowerCase();
-      var isMFP = mfpKeywords.some(function(kw) { return txt.indexOf(kw) >= 0; });
-      (isMFP ? mfpItems : levelUpItems).push(item);
-    }
-
-    relevant.forEach(function(r) {
-      classify(r.actionItem, {
-        text: r.actionItem,
-        rowId: r.rowId,
-        source: r.source,
-        priority: r.hotTopic ? 'urgent' : 'medium',
-        status: r.status === 'In Progress' ? 'in_progress' : r.status === 'Complete' ? 'completed' : 'open',
-        done: r.status === 'Complete',
-        dueDate: r.dueDate,
-        owner: r.owner,
-        ts: Date.now(),
+      relevant.forEach(function(r) {
+        classify(r.actionItem || r.title || '', {
+          text: r.actionItem || r.title || '',
+          rowId: r.rowId,
+          source: r.source || 'project',
+          priority: r.priority || (isOverdue(r) ? 'urgent' : 'medium'),
+          status: r.status === 'In Progress' ? 'in_progress' : 'open',
+          done: false,
+          dueDate: r.dueDate,
+          owner: r.owner,
+          ts: Date.now(),
+        });
       });
+
+      flaggedEmails.forEach(function(email) {
+        var accountTag = email.account ? ' [' + email.account.split('@')[0] + ']' : '';
+        var displayText = email.text || email.subject;
+        classify(email.subject + ' ' + (email.preview || ''), {
+          text: '\uD83D\uDCE7 ' + displayText + accountTag,
+          priority: email.priority || 'medium',
+          ts: new Date(email.receivedDate || email.flaggedDate).getTime(),
+          author: email.from || '',
+          source: 'flagged',
+          preview: email.preview || '',
+          rowId: null,
+          status: 'open',
+          done: false,
+        });
+      });
+
+      function sortGroup(arr) {
+        arr.sort(function(a,b) {
+          var rank = { urgent:0, high:1, medium:2, low:3 };
+          var ar = rank[a.priority]||2, br = rank[b.priority]||2;
+          if (ar !== br) return ar - br;
+          return (b.ts || 0) - (a.ts || 0);
+        });
+      }
+      sortGroup(mfpItems);
+      sortGroup(levelUpItems);
+
+      var html = '';
+      var toggleIcon = document.getElementById('reminder-toggle-count');
+      var totalOpen = mfpItems.length + levelUpItems.length;
+
+      html += '<div style="font-size:11px;color:var(--muted);padding:6px 2px 8px;border-bottom:1px solid var(--border);margin-bottom:6px;display:flex;align-items:center;gap:6px">'
+        + '<span style="font-size:16px">\uD83D\uDCCB</span>'
+        + '<span style="flex:1">DOVA actions due/overdue. <strong>Click</strong> to cycle: Open \u2192 In Progress \u2192 Complete</span>'
+        + '<button onclick="refreshPanelActions()" style="background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:11px;padding:3px 8px;color:var(--muted);font-family:inherit" title="Refresh from server">\u21BB Refresh</button>'
+        + '</div>';
+
+      if (mfpItems.length > 0) {
+        html += '<div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px">\uD83D\uDD34 MFP / Team (' + mfpItems.length + ')</div>';
+        mfpItems.slice(0, 25).forEach(function(item) {
+          var st = item.done ? 'completed' : item.status === 'in_progress' ? 'in_progress' : 'open';
+          var statusIcon = st === 'completed' ? '\u2713' : st === 'in_progress' ? '\u25D0' : '\u25CB';
+          var priColor = item.priority === 'urgent' ? '#c0392b' : item.priority === 'high' ? '#e67e22' : '#95a5a6';
+          var date = item.ts ? new Date(item.ts).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
+          html += '<div class="rp-item status-' + st + '">'
+            + '<button class="rp-status-btn ' + st + '" onclick="panelToggleAction(\'' + (item.source || 'project') + '\',' + (item.rowId || item.ts) + ')" title="Click to cycle status">' + statusIcon + '</button>'
+            + '<div class="rp-item-text" style="flex:1;min-width:0">'
+            + '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:2px">'
+            + '<span style="background:' + priColor + ';color:#fff;font-size:9px;font-weight:700;padding:0 6px;border-radius:8px;text-transform:uppercase">' + (item.priority || 'medium') + '</span>'
+            + '<span style="font-size:9px;color:' + (st === 'in_progress' ? '#e67e22' : st === 'completed' ? '#27ae60' : 'var(--muted)') + ';font-weight:600">' + st.replace('_',' ') + '</span>'
+            + (item.dueDate ? '<span style="font-size:10px;color:' + (new Date(item.dueDate+'T12:00:00') < new Date() ? '#c0392b' : 'var(--muted)') + '">' + item.dueDate + '</span>' : '')
+            + '</div>'
+            + '<div style="font-size:13px;color:var(--charcoal);line-height:1.4">' + (st === 'completed' ? '<s style="opacity:.6">' : '') + escapeHtml(item.text) + (st === 'completed' ? '</s>' : '') + '</div>'
+            + (item.preview && item.source === 'flagged' ? '<div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(item.preview.substring(0, 120)) + '</div>' : '')
+            + '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + date + (item.author ? ' by ' + escapeHtml(item.author) : '') + '</div>'
+            + '</div>'
+            + '</div>';
+        });
+      }
+
+      if (levelUpItems.length > 0) {
+        html += '<div style="font-size:11px;font-weight:700;color:#4a90d9;text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px;margin-top:4px">\uD83D\uDCCB Level Up / Personal (' + levelUpItems.length + ')</div>';
+        levelUpItems.slice(0, 15).forEach(function(item) {
+          var st = item.done ? 'completed' : item.status === 'in_progress' ? 'in_progress' : 'open';
+          var statusIcon = st === 'completed' ? '\u2713' : st === 'in_progress' ? '\u25D0' : '\u25CB';
+          var priColor = item.priority === 'urgent' ? '#c0392b' : item.priority === 'high' ? '#e67e22' : '#95a5a6';
+          var date = item.ts ? new Date(item.ts).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
+          html += '<div class="rp-item status-' + st + '">'
+            + '<button class="rp-status-btn ' + st + '" onclick="panelToggleAction(\'' + (item.source || 'project') + '\',' + (item.rowId || item.ts) + ')" title="Click to cycle status">' + statusIcon + '</button>'
+            + '<div class="rp-item-text" style="flex:1;min-width:0">'
+            + '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:2px">'
+            + '<span style="background:' + priColor + ';color:#fff;font-size:9px;font-weight:700;padding:0 6px;border-radius:8px;text-transform:uppercase">' + (item.priority || 'medium') + '</span>'
+            + '<span style="font-size:9px;color:' + (st === 'in_progress' ? '#e67e22' : st === 'completed' ? '#27ae60' : 'var(--muted)') + ';font-weight:600">' + st.replace('_',' ') + '</span>'
+            + (item.dueDate ? '<span style="font-size:10px;color:' + (new Date(item.dueDate+'T12:00:00') < new Date() ? '#c0392b' : 'var(--muted)') + '">' + item.dueDate + '</span>' : '')
+            + '</div>'
+            + '<div style="font-size:13px;color:var(--charcoal);line-height:1.4">' + (st === 'completed' ? '<s style="opacity:.6">' : '') + escapeHtml(item.text) + (st === 'completed' ? '</s>' : '') + '</div>'
+            + '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + date + (item.author ? ' by ' + escapeHtml(item.author) : '') + '</div>'
+            + '</div>'
+            + '</div>';
+        });
+      }
+
+      if (!html) {
+        html = '<div class="rp-empty"><div class="rp-empty-icon">\u2705</div>All caught up! No overdue or due-today DOVA actions.</div>';
+      }
+
+      if (toggleIcon) toggleIcon.textContent = totalOpen > 9 ? '9+' : totalOpen;
+      el.innerHTML = html;
+      if (footer) footer.textContent = totalOpen + ' overdue/due from Smartsheet \u00B7 ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    })
+    .catch(function(e) {
+      el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted)"><div style="font-size:32px;margin-bottom:12px">\u26A0\uFE0F</div><div style="font-size:14px;font-weight:600;margin-bottom:6px">Could not reach Smartsheet</div><div style="font-size:11px;color:var(--muted)">' + escapeHtml(e.message) + '</div></div>';
+      if (footer) footer.textContent = 'Could not reach Smartsheet';
     });
-
-    // Flagged emails
-    flaggedEmails.forEach(function(email) {
-      var accountTag = email.account ? ' [' + email.account.split('@')[0] + ']' : '';
-      var displayText = email.text || email.subject;
-      classify(email.subject + ' ' + (email.preview || ''), {
-        text: '📧 ' + displayText + accountTag,
-        priority: email.priority || 'medium',
-        ts: new Date(email.receivedDate || email.flaggedDate).getTime(),
-        author: email.from || '',
-        source: 'flagged',
-        preview: email.preview || '',
-        rowId: null,
-        status: 'open',
-        done: false,
-      });
-    });
-
-    // Sort
-    function sortGroup(arr) {
-      arr.sort(function(a,b) {
-        var rank = { urgent:0, high:1, medium:2, low:3 };
-        var ar = rank[a.priority]||2, br = rank[b.priority]||2;
-        if (ar !== br) return ar - br;
-        return (b.ts || 0) - (a.ts || 0);
-      });
-    }
-    sortGroup(mfpItems);
-    sortGroup(levelUpItems);
-
-    // Render
-    var html = '';
-    var toggleIcon = document.getElementById('reminder-toggle-count');
-    var totalOpen = mfpItems.length + levelUpItems.length;
-
-    html += '<div style="font-size:11px;color:var(--muted);padding:6px 2px 8px;border-bottom:1px solid var(--border);margin-bottom:6px;display:flex;align-items:center;gap:6px">'
-      + '<span style="font-size:16px">📋</span>'
-      + '<span style="flex:1">From DOVA tracker. <strong>Click</strong> to cycle: Open → In Progress → Complete</span>'
-      + '<button onclick="refreshPanelActions()" style="background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:11px;padding:3px 8px;color:var(--muted);font-family:inherit" title="Refresh from server">↻ Refresh</button>'
-      + '</div>';
-
-    // MFP section
-    if (mfpItems.length > 0) {
-      html += '<div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px">🔴 MFP / Team (' + mfpItems.length + ')</div>';
-      mfpItems.slice(0, 25).forEach(function(item) {
-        var st = item.done ? 'completed' : item.status === 'in_progress' ? 'in_progress' : 'open';
-        var statusIcon = st === 'completed' ? '✓' : st === 'in_progress' ? '◐' : '○';
-        var priColor = item.priority === 'urgent' ? '#c0392b' : item.priority === 'high' ? '#e67e22' : '#95a5a6';
-        var date = item.ts ? new Date(item.ts).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
-        html += '<div class="rp-item status-' + st + '">'
-          + '<button class="rp-status-btn ' + st + '" onclick="panelToggleAction(\'' + (item.source || 'project') + '\',' + (item.rowId || item.ts) + ')" title="Click to cycle status">' + statusIcon + '</button>'
-          + '<div class="rp-item-text" style="flex:1;min-width:0">'
-          + '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:2px">'
-          + '<span style="background:' + priColor + ';color:#fff;font-size:9px;font-weight:700;padding:0 6px;border-radius:8px;text-transform:uppercase">' + (item.priority || 'medium') + '</span>'
-          + '<span style="font-size:9px;color:' + (st === 'in_progress' ? '#e67e22' : st === 'completed' ? '#27ae60' : 'var(--muted)') + ';font-weight:600">' + st.replace('_',' ') + '</span>'
-          + (item.dueDate ? '<span style="font-size:10px;color:' + (new Date(item.dueDate+'T12:00:00') < new Date() ? '#c0392b' : 'var(--muted)') + '">' + item.dueDate + '</span>' : '')
-          + '</div>'
-          + '<div style="font-size:13px;color:var(--charcoal);line-height:1.4">' + (st === 'completed' ? '<s style="opacity:.6">' : '') + escapeHtml(item.text) + (st === 'completed' ? '</s>' : '') + '</div>'
-          + (item.preview && item.source === 'flagged' ? '<div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(item.preview.substring(0, 120)) + '</div>' : '')
-          + '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + date + (item.author ? ' by ' + escapeHtml(item.author) : '') + '</div>'
-          + '</div>'
-          + '</div>';
-      });
-    }
-
-    // Level Up section
-    if (levelUpItems.length > 0) {
-      html += '<div style="font-size:11px;font-weight:700;color:#4a90d9;text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px;margin-top:4px">📋 Level Up / Personal (' + levelUpItems.length + ')</div>';
-      levelUpItems.slice(0, 15).forEach(function(item) {
-        var st = item.done ? 'completed' : item.status === 'in_progress' ? 'in_progress' : 'open';
-        var statusIcon = st === 'completed' ? '✓' : st === 'in_progress' ? '◐' : '○';
-        var priColor = item.priority === 'urgent' ? '#c0392b' : item.priority === 'high' ? '#e67e22' : '#95a5a6';
-        var date = item.ts ? new Date(item.ts).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
-        html += '<div class="rp-item status-' + st + '">'
-          + '<button class="rp-status-btn ' + st + '" onclick="panelToggleAction(\'' + (item.source || 'project') + '\',' + (item.rowId || item.ts) + ')" title="Click to cycle status">' + statusIcon + '</button>'
-          + '<div class="rp-item-text" style="flex:1;min-width:0">'
-          + '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:2px">'
-          + '<span style="background:' + priColor + ';color:#fff;font-size:9px;font-weight:700;padding:0 6px;border-radius:8px;text-transform:uppercase">' + (item.priority || 'medium') + '</span>'
-          + '<span style="font-size:9px;color:' + (st === 'in_progress' ? '#e67e22' : st === 'completed' ? '#27ae60' : 'var(--muted)') + ';font-weight:600">' + st.replace('_',' ') + '</span>'
-          + (item.dueDate ? '<span style="font-size:10px;color:' + (new Date(item.dueDate+'T12:00:00') < new Date() ? '#c0392b' : 'var(--muted)') + '">' + item.dueDate + '</span>' : '')
-          + '</div>'
-          + '<div style="font-size:13px;color:var(--charcoal);line-height:1.4">' + (st === 'completed' ? '<s style="opacity:.6">' : '') + escapeHtml(item.text) + (st === 'completed' ? '</s>' : '') + '</div>'
-          + '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + date + (item.author ? ' by ' + escapeHtml(item.author) : '') + '</div>'
-          + '</div>'
-          + '</div>';
-      });
-    }
-
-    if (!html) {
-      html = '<div class="rp-empty"><div class="rp-empty-icon">✅</div>All caught up! No open action items.</div>';
-    }
-
-    if (toggleIcon) toggleIcon.textContent = totalOpen > 9 ? '9+' : totalOpen;
-    el.innerHTML = html;
-    if (footer) footer.textContent = totalOpen + ' open from STORE · ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-  }).catch(function(e) {
-    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">⚠ Could not load: ' + e.message + '</div>';
-    if (footer) footer.textContent = 'Error loading';
-  });
 }
 
   // Refresh panel actions from server

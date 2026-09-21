@@ -110,7 +110,22 @@ function grpKey(n) {
 
 function escapeHtml(s) {
   if (s == null) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ── DATE HELPERS (shared, used by Reminder Panel) ──
+function isOverdue(row) {
+  if (!row.dueDate) return false;
+  var due = new Date(row.dueDate + 'T23:59:59');
+  return due < new Date();
+}
+function isDueToday(row) {
+  if (!row.dueDate) return false;
+  var today = new Date();
+  var due = new Date(row.dueDate + 'T00:00:00');
+  return due.getFullYear() === today.getFullYear()
+      && due.getMonth() === today.getMonth()
+      && due.getDate() === today.getDate();
 }
 
 function fmtNum(n) {
