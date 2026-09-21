@@ -74,7 +74,6 @@ const PASSWORD_ALLOWED_ROUTES = new Set([
   '/api/actions',
   '/api/logo',
   '/api/graph-proxy',
-  '/api/admin/add-extraction-id',
 ]);
 
 function requireSiteAuth(req, res, parsedPath) {
@@ -762,24 +761,11 @@ export default async function handler(req, res) {
               } catch(e) { return res.status(500).json({ error: e.message }); }
             }
 
-      // ── DOVA DASHBOARD (redirect to embedded view in app) ──
-                  case '/api/dova-dashboard': {
-                    res.writeHead(302, { Location: '/?view=dova' });
-                    return res.end();
-                  }
-
-            // ── ADMIN: ADD EXTRACTIONID COLUMN (one-time) ──
-                  case '/api/admin/add-extraction-id': {
-                    if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
-                    try {
-                      const DOVA = '4456864287772548';
-                      const sheet = await smartsheet.getSheetWithColumns(DOVA);
-                      const hasCol = (sheet.columns||[]).find(c => c.title === 'ExtractionId');
-                      if (hasCol) return res.json({ success: true, message: 'ExtractionId column already exists' });
-                      await smartsheet.addColumn(DOVA, { title: 'ExtractionId', type: 'TEXT_NUMBER' });
-                      return res.json({ success: true, message: 'ExtractionId column added' });
-                    } catch(e) { return res.status(500).json({ error: e.message }); }
-                  }
+      // ── DOVA DASHBOARD (dynamically imported, CJS module) ──
+            case '/api/dova-dashboard': {
+              const { default: ddHandler } = await import('../lib/handlers/dova-dashboard.js');
+              return ddHandler(req, res);
+            }
 
             // ── PASS-THROUGH ROUTES ──
             default:
