@@ -7,7 +7,7 @@ var currentPbView = 'sections';
 var activePhase = null;
 var activeTopic = null;
 var activeSearch = '';
-var collapsedGroups = {'1':true, '6':true, '13':true, '18':true, '37':true};  // {} = all expanded
+var collapsedGroups = {'1':true, '6':true, '13':true, '18':true, '37':true};
 var openSections = {};
 var openSubsecs = {};
 var chatHistory = [];
@@ -15,6 +15,36 @@ var lunaHistory = [];
 var chatOpen = false;
 var projectContext = null;
 var heroResults = {};
+
+// ── STORE: shared data layer for action items ──
+// Single fetch, filtered in-memory by each view. Never reads localStorage as source.
+var STORE = { rows: [], fetchedAt: null };
+
+function loadSTORE(force) {
+  if (STORE.rows.length && !force && Date.now() - STORE.fetchedAt < 60000)
+    return Promise.resolve(STORE.rows);
+  var cached = null;
+  try { cached = JSON.parse(localStorage.getItem('luci_tasks_cache')); } catch(e) {}
+  if (cached && cached.rows && !force && Date.now() - (cached.fetchedAt || 0) < 300000) {
+    STORE = { rows: cached.rows, fetchedAt: cached.fetchedAt || Date.now() };
+    return Promise.resolve(STORE.rows);
+  }
+  return fetch('/api/tasks')
+    .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(j) {
+      STORE = { rows: j.tasks || [], fetchedAt: Date.now() };
+      try { localStorage.setItem('luci_tasks_cache', JSON.stringify({ rows: STORE.rows, fetchedAt: STORE.fetchedAt })); } catch(e) {}
+      return STORE.rows;
+    })
+    .catch(function(e) {
+      if (STORE.rows.length) return STORE.rows;
+      if (cached && cached.rows) {
+        STORE = { rows: cached.rows, fetchedAt: cached.fetchedAt || Date.now() };
+        return STORE.rows;
+      }
+      throw e;
+    });
+}
 
 var PHASES = ['Pre-Construction','Design','Construction','Closeout','Post-Opening','All Phases'];
 
@@ -4434,26 +4464,28 @@ function renderReminderPanel() {
   setTimeout(renderReminderMeetings, 200);
 }
 
-// ── PANEL: ACTION ITEMS WITH CHECKBOXES ───────────────────────────
+// ── PANEL: ACTION ITEMS FROM STORE ────────────────────────────────
 function renderReminderActions() {
   var el = document.getElementById('reminder-panel-actions');
   if (!el) return;
   var footer = document.getElementById('reminder-panel-footer-text');
   if (footer) footer.textContent = 'Updating...';
 
-  // Load directly from the Action Items system's localStorage
-  var teamItems = [];
-  var personalItems = [];
-  try {
-      teamItems = JSON.parse(localStorage.getItem('lu_actions_team') || '[]');
-      personalItems = JSON.parse(localStorage.getItem('lu_actions_personal') || '[]');
-    } catch(e) {}
+  loadSTORE().then(function(rows) {
+    // Filter: open DOVA items OR any open item assigned to Whitney
+    var relevant = rows.filter(function(r) {
+      if (r.status === 'Complete') return false;
+      var proj = (r.project || '').toLowerCase();
+      if (proj === 'dova') return true;
+      if (isWhitney() && proj !== 'mfp') return true;
+      return false;
+    });
 
-    // Fetch flagged emails from backend
+    // Flagged emails (separate source, still fetched)
     var flaggedEmails = [];
     try {
       var xhr = new XMLHttpRequest();
-      xhr.open('GET', '/api/outlook/flagged', false); // sync XHR for simplicity
+      xhr.open('GET', '/api/outlook/flagged', false);
       xhr.withCredentials = true;
       xhr.send();
       if (xhr.status === 200) {
@@ -4461,144 +4493,130 @@ function renderReminderActions() {
         flaggedEmails = fd.actions || [];
       }
     } catch(e) {}
-    var flaggedCount = flaggedEmails.length;
 
-  // Separate MFP vs Level Up items using keyword check
-  var mfpKeywords = ['mfp','freedom park','stadium','lemartec','punch','change order','cost recovery','arq','miller','baker','hvac','scoreboard','commissioning','closeout','pco','invoice','draw','pay app','retainage','tco','permitting','boldyn','das','seating','concession'];
+    // Separate MFP vs other using same keyword set
+    var mfpKeywords = ['mfp','freedom park','stadium','lemartec','punch','change order','cost recovery','arq','miller','baker','hvac','scoreboard','commissioning','closeout','pco','invoice','draw','pay app','retainage','tco','permitting','boldyn','das','seating','concession'];
+    var mfpItems = [], levelUpItems = [];
 
-  var mfpItems = [];    // Team = MFP
-  var levelUpItems = []; // Personal = Level Up (everything else)
+    function classify(text, item) {
+      var txt = (text || '').toLowerCase();
+      var isMFP = mfpKeywords.some(function(kw) { return txt.indexOf(kw) >= 0; });
+      (isMFP ? mfpItems : levelUpItems).push(item);
+    }
 
-  teamItems.forEach(function(item, idx) {
-    if (item.done) return;
-    var txt = (item.text || '').toLowerCase();
-    var isMFP = mfpKeywords.some(function(kw) { return txt.indexOf(kw) >= 0; });
-    if (isMFP || isWhitney()) {
-      // For everyone: Team items matching MFP keywords = MFP items
-      // For Whitney: ALL team items qualify
-      (isMFP ? mfpItems : levelUpItems).push({
-        item: item, idx: idx, tab: 'team', source: 'team'
+    relevant.forEach(function(r) {
+      classify(r.actionItem, {
+        text: r.actionItem,
+        rowId: r.rowId,
+        source: r.source,
+        priority: r.hotTopic ? 'urgent' : 'medium',
+        status: r.status === 'In Progress' ? 'in_progress' : r.status === 'Complete' ? 'completed' : 'open',
+        done: r.status === 'Complete',
+        dueDate: r.dueDate,
+        owner: r.owner,
+        ts: Date.now(),
       });
-    } else {
-      levelUpItems.push({
-        item: item, idx: idx, tab: 'team', source: 'team'
+    });
+
+    // Flagged emails
+    flaggedEmails.forEach(function(email) {
+      var accountTag = email.account ? ' [' + email.account.split('@')[0] + ']' : '';
+      var displayText = email.text || email.subject;
+      classify(email.subject + ' ' + (email.preview || ''), {
+        text: '📧 ' + displayText + accountTag,
+        priority: email.priority || 'medium',
+        ts: new Date(email.receivedDate || email.flaggedDate).getTime(),
+        author: email.from || '',
+        source: 'flagged',
+        preview: email.preview || '',
+        rowId: null,
+        status: 'open',
+        done: false,
+      });
+    });
+
+    // Sort
+    function sortGroup(arr) {
+      arr.sort(function(a,b) {
+        var rank = { urgent:0, high:1, medium:2, low:3 };
+        var ar = rank[a.priority]||2, br = rank[b.priority]||2;
+        if (ar !== br) return ar - br;
+        return (b.ts || 0) - (a.ts || 0);
       });
     }
-  });
+    sortGroup(mfpItems);
+    sortGroup(levelUpItems);
 
-  personalItems.forEach(function(item, idx) {
-      if (item.done) return;
-      var txt = (item.text || '').toLowerCase();
-      var isMFP = mfpKeywords.some(function(kw) { return txt.indexOf(kw) >= 0; });
-      (isMFP ? mfpItems : levelUpItems).push({
-        item: item, idx: idx, tab: 'personal', source: 'personal'
-      });
-    });
-
-    // Merge flagged emails into action items
-        flaggedEmails.forEach(function(email) {
-              var accountTag = email.account ? ' [' + email.account.split('@')[0] + ']' : '';
-              // Use the API-generated action text if available, fall back to subject
-              var displayText = email.text || email.subject;
-              var actionItem = {
-                text: '📧 ' + displayText + accountTag,
-                priority: email.priority || 'medium',
-                ts: new Date(email.receivedDate || email.flaggedDate).getTime(),
-                author: email.from || '',
-                source: 'flagged_email',
-                preview: email.preview || ''
-              };
-      var txt = (email.subject || '').toLowerCase() + ' ' + (email.preview || '').toLowerCase();
-      var isMFP = mfpKeywords.some(function(kw) { return txt.indexOf(kw) >= 0; });
-      (isMFP ? mfpItems : levelUpItems).push({
-        item: actionItem, idx: -1, tab: 'flagged', source: 'flagged'
-      });
-    });
-
-  // Sort each group: urgent first, then by recency
-  function sortGroup(arr) {
-    arr.sort(function(a,b) {
-      var rank = { urgent:0, high:1, medium:2, low:3 };
-      var ar = rank[a.item.priority]||2, br = rank[b.item.priority]||2;
-      if (ar !== br) return ar - br;
-      return (b.item.ts || 0) - (a.item.ts || 0);
-    });
-  }
-  sortGroup(mfpItems);
-  sortGroup(levelUpItems);
-
-  var html = '';
+    // Render
+    var html = '';
     var toggleIcon = document.getElementById('reminder-toggle-count');
     var totalOpen = mfpItems.length + levelUpItems.length;
 
-    // Instruction note + refresh button
-        html += '<div style="font-size:11px;color:var(--muted);padding:6px 2px 8px;border-bottom:1px solid var(--border);margin-bottom:6px;display:flex;align-items:center;gap:6px">'
-          + '<span style="font-size:16px">🔄</span>'
-          + '<span style="flex:1">Click the <strong>circle</strong> on each item to cycle: Open → In Progress → Complete</span>'
-          + '<button onclick="refreshPanelActions()" style="background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:11px;padding:3px 8px;color:var(--muted);font-family:inherit" title="Refresh from server">↻ Refresh</button>'
+    html += '<div style="font-size:11px;color:var(--muted);padding:6px 2px 8px;border-bottom:1px solid var(--border);margin-bottom:6px;display:flex;align-items:center;gap:6px">'
+      + '<span style="font-size:16px">📋</span>'
+      + '<span style="flex:1">From DOVA tracker. <strong>Click</strong> to cycle: Open → In Progress → Complete</span>'
+      + '<button onclick="refreshPanelActions()" style="background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:11px;padding:3px 8px;color:var(--muted);font-family:inherit" title="Refresh from server">↻ Refresh</button>'
+      + '</div>';
+
+    // MFP section
+    if (mfpItems.length > 0) {
+      html += '<div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px">🔴 MFP / Team (' + mfpItems.length + ')</div>';
+      mfpItems.slice(0, 25).forEach(function(item) {
+        var st = item.done ? 'completed' : item.status === 'in_progress' ? 'in_progress' : 'open';
+        var statusIcon = st === 'completed' ? '✓' : st === 'in_progress' ? '◐' : '○';
+        var priColor = item.priority === 'urgent' ? '#c0392b' : item.priority === 'high' ? '#e67e22' : '#95a5a6';
+        var date = item.ts ? new Date(item.ts).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
+        html += '<div class="rp-item status-' + st + '">'
+          + '<button class="rp-status-btn ' + st + '" onclick="panelToggleAction(\'' + (item.source || 'project') + '\',' + (item.rowId || item.ts) + ')" title="Click to cycle status">' + statusIcon + '</button>'
+          + '<div class="rp-item-text" style="flex:1;min-width:0">'
+          + '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:2px">'
+          + '<span style="background:' + priColor + ';color:#fff;font-size:9px;font-weight:700;padding:0 6px;border-radius:8px;text-transform:uppercase">' + (item.priority || 'medium') + '</span>'
+          + '<span style="font-size:9px;color:' + (st === 'in_progress' ? '#e67e22' : st === 'completed' ? '#27ae60' : 'var(--muted)') + ';font-weight:600">' + st.replace('_',' ') + '</span>'
+          + (item.dueDate ? '<span style="font-size:10px;color:' + (new Date(item.dueDate+'T12:00:00') < new Date() ? '#c0392b' : 'var(--muted)') + '">' + item.dueDate + '</span>' : '')
+          + '</div>'
+          + '<div style="font-size:13px;color:var(--charcoal);line-height:1.4">' + (st === 'completed' ? '<s style="opacity:.6">' : '') + escapeHtml(item.text) + (st === 'completed' ? '</s>' : '') + '</div>'
+          + (item.preview && item.source === 'flagged' ? '<div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(item.preview.substring(0, 120)) + '</div>' : '')
+          + '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + date + (item.author ? ' by ' + escapeHtml(item.author) : '') + '</div>'
+          + '</div>'
           + '</div>';
+      });
+    }
 
-      // --- MFP SECTION ---
-  if (mfpItems.length > 0) {
-    html += '<div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px">🔴 MFP / Team (' + mfpItems.length + ')</div>';
-    mfpItems.slice(0, 25).forEach(function(entry) {
-      var item = entry.item;
-      var st = getItemStatus(item);
-      var statusIcon = st === 'completed' ? '✓' : st === 'in_progress' ? '◐' : '○';
-      var priColor = item.priority === 'urgent' ? '#c0392b' : item.priority === 'high' ? '#e67e22' : '#95a5a6';
-      var date = item.ts ? new Date(item.ts).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
-      html += '<div class="rp-item status-' + st + '">'
-        + '<button class="rp-status-btn ' + st + '" onclick="panelToggleAction(\'' + entry.tab + '\',' + entry.idx + ')" title="Click to cycle status">' + statusIcon + '</button>'
-        + '<div class="rp-item-text" style="flex:1;min-width:0">'
-        + '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:2px">'
-        + '<span style="background:' + priColor + ';color:#fff;font-size:9px;font-weight:700;padding:0 6px;border-radius:8px;text-transform:uppercase">' + (item.priority || 'medium') + '</span>'
-        + '<span style="font-size:9px;color:' + (st === 'in_progress' ? '#e67e22' : st === 'completed' ? '#27ae60' : 'var(--muted)') + ';font-weight:600">' + st.replace('_',' ') + '</span>'
-        + (item.dueDate ? '<span style="font-size:10px;color:' + (new Date(item.dueDate+'T12:00:00') < new Date() ? '#c0392b' : 'var(--muted)') + '">' + item.dueDate + '</span>' : '')
-        + '</div>'
-        + '<div style="font-size:13px;color:var(--charcoal);line-height:1.4">' + (st === 'completed' ? '<s style="opacity:.6">' : '') + escapeHtml(item.text) + (st === 'completed' ? '</s>' : '') + '</div>'
-                + (item.preview && entry.source === 'flagged' ? '<div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(item.preview.substring(0, 120)) + '</div>' : '')
-                + '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + date + (item.author ? ' by ' + escapeHtml(item.author) : '') + '</div>'
-                + '</div>'
-                + '</div>';
-    });
-  }
+    // Level Up section
+    if (levelUpItems.length > 0) {
+      html += '<div style="font-size:11px;font-weight:700;color:#4a90d9;text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px;margin-top:4px">📋 Level Up / Personal (' + levelUpItems.length + ')</div>';
+      levelUpItems.slice(0, 15).forEach(function(item) {
+        var st = item.done ? 'completed' : item.status === 'in_progress' ? 'in_progress' : 'open';
+        var statusIcon = st === 'completed' ? '✓' : st === 'in_progress' ? '◐' : '○';
+        var priColor = item.priority === 'urgent' ? '#c0392b' : item.priority === 'high' ? '#e67e22' : '#95a5a6';
+        var date = item.ts ? new Date(item.ts).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
+        html += '<div class="rp-item status-' + st + '">'
+          + '<button class="rp-status-btn ' + st + '" onclick="panelToggleAction(\'' + (item.source || 'project') + '\',' + (item.rowId || item.ts) + ')" title="Click to cycle status">' + statusIcon + '</button>'
+          + '<div class="rp-item-text" style="flex:1;min-width:0">'
+          + '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:2px">'
+          + '<span style="background:' + priColor + ';color:#fff;font-size:9px;font-weight:700;padding:0 6px;border-radius:8px;text-transform:uppercase">' + (item.priority || 'medium') + '</span>'
+          + '<span style="font-size:9px;color:' + (st === 'in_progress' ? '#e67e22' : st === 'completed' ? '#27ae60' : 'var(--muted)') + ';font-weight:600">' + st.replace('_',' ') + '</span>'
+          + (item.dueDate ? '<span style="font-size:10px;color:' + (new Date(item.dueDate+'T12:00:00') < new Date() ? '#c0392b' : 'var(--muted)') + '">' + item.dueDate + '</span>' : '')
+          + '</div>'
+          + '<div style="font-size:13px;color:var(--charcoal);line-height:1.4">' + (st === 'completed' ? '<s style="opacity:.6">' : '') + escapeHtml(item.text) + (st === 'completed' ? '</s>' : '') + '</div>'
+          + '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + date + (item.author ? ' by ' + escapeHtml(item.author) : '') + '</div>'
+          + '</div>'
+          + '</div>';
+      });
+    }
 
-  // --- LEVEL UP SECTION ---
-  if (levelUpItems.length > 0) {
-    html += '<div style="font-size:11px;font-weight:700;color:#4a90d9;text-transform:uppercase;letter-spacing:.04em;padding:4px 0 6px;margin-top:4px">📋 Level Up / Personal (' + levelUpItems.length + ')</div>';
-    levelUpItems.slice(0, 15).forEach(function(entry) {
-      var item = entry.item;
-      var st = getItemStatus(item);
-      var statusIcon = st === 'completed' ? '✓' : st === 'in_progress' ? '◐' : '○';
-      var priColor = item.priority === 'urgent' ? '#c0392b' : item.priority === 'high' ? '#e67e22' : '#95a5a6';
-      var date = item.ts ? new Date(item.ts).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
-      html += '<div class="rp-item status-' + st + '">'
-        + '<button class="rp-status-btn ' + st + '" onclick="panelToggleAction(\'' + entry.tab + '\',' + entry.idx + ')" title="Click to cycle status">' + statusIcon + '</button>'
-        + '<div class="rp-item-text" style="flex:1;min-width:0">'
-        + '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:2px">'
-        + '<span style="background:' + priColor + ';color:#fff;font-size:9px;font-weight:700;padding:0 6px;border-radius:8px;text-transform:uppercase">' + (item.priority || 'medium') + '</span>'
-        + '<span style="font-size:9px;color:' + (st === 'in_progress' ? '#e67e22' : st === 'completed' ? '#27ae60' : 'var(--muted)') + ';font-weight:600">' + st.replace('_',' ') + '</span>'
-        + (item.dueDate ? '<span style="font-size:10px;color:' + (new Date(item.dueDate+'T12:00:00') < new Date() ? '#c0392b' : 'var(--muted)') + '">' + item.dueDate + '</span>' : '')
-        + '</div>'
-        + '<div style="font-size:13px;color:var(--charcoal);line-height:1.4">' + (st === 'completed' ? '<s style="opacity:.6">' : '') + escapeHtml(item.text) + (st === 'completed' ? '</s>' : '') + '</div>'
-                + (item.preview && entry.source === 'flagged' ? '<div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(item.preview.substring(0, 120)) + '</div>' : '')
-                + '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + date + (item.author ? ' by ' + escapeHtml(item.author) : '') + '</div>'
-                + '</div>'
-                + '</div>';
-    });
-          }
+    if (!html) {
+      html = '<div class="rp-empty"><div class="rp-empty-icon">✅</div>All caught up! No open action items.</div>';
+    }
 
-          // Empty state
-  if (!html) {
-    html = '<div class="rp-empty"><div class="rp-empty-icon">✅</div>All caught up! No open action items.</div>';
-  }
-
-  // Update badge count on toggle button
-  if (toggleIcon) toggleIcon.textContent = totalOpen > 9 ? '9+' : totalOpen;
-
+    if (toggleIcon) toggleIcon.textContent = totalOpen > 9 ? '9+' : totalOpen;
     el.innerHTML = html;
-    if (footer) footer.textContent = totalOpen + ' open item' + (totalOpen !== 1 ? 's' : '') + ' · Updated ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-  }
+    if (footer) footer.textContent = totalOpen + ' open from STORE · ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  }).catch(function(e) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">⚠ Could not load: ' + e.message + '</div>';
+    if (footer) footer.textContent = 'Error loading';
+  });
+}
 
   // Refresh panel actions from server
   function refreshPanelActions() {
@@ -4626,16 +4644,27 @@ function renderReminderActions() {
   }
 
   // Panel click handler
-function panelToggleAction(tab, idx) {
-  var items = [];
-  try { items = JSON.parse(localStorage.getItem('lu_actions_' + tab) || '[]'); } catch(e) {}
-  if (items[idx]) {
-    var st = getItemStatus(items[idx]);
-    items[idx].status = st === 'completed' ? 'open' : st === 'in_progress' ? 'completed' : 'in_progress';
-    items[idx].done = items[idx].status === 'completed';
-    try { localStorage.setItem('lu_actions_' + tab, JSON.stringify(items)); } catch(e) {}
-  }
-  renderReminderActions();
+  function panelToggleAction(source, rowId) {
+    // If it's a flagged email (no rowId), skip the write — read-only
+    if (source === 'flagged' || !rowId) {
+      renderReminderActions();
+      return;
+    }
+    // Find the row in STORE
+    var row = STORE.rows.find(function(r) { return String(r.rowId) === String(rowId); });
+    if (!row) { renderReminderActions(); return; }
+    // Cycle: open → in_progress → completed → open
+    var next = row.status === 'In Progress' ? 'Complete' : row.status === 'Complete' ? 'Not Started' : 'In Progress';
+    // Write back via /api/tasks POST
+    fetch('/api/tasks/' + rowId + '?source=' + (row.source || 'project'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: next })
+    }).then(function() {
+      renderReminderActions();
+    }).catch(function() {
+      renderReminderActions();
+    });
   }
 
 function renderReminderMeetings() {
