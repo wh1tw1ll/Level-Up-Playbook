@@ -2,8 +2,8 @@
 // Usage: node scripts/batch-move.js
 // First-time: opens browser for Microsoft device-code auth (one-time per token lifetime)
 
-const TENANT = '49f7f900-be9f-4397-a040-8e1b6f3aec8b';
-const CLIENT_ID = 'e6e6b380-f3cc-485f-91b9-1c2f21de6101';
+const TENANT = '8222d14d-0869-42d3-8b7f-858c65b89c0e';
+const CLIENT_ID = 'f79b29d9-4f75-47db-ad18-9f99406872da';
 const SCOPE = 'offline_access Files.ReadWrite.All Sites.ReadWrite.All User.Read';
 const DRIVE_ID = 'b!E0_TuL7Nn06AK05rVErw-wsS33fXt45AocqEeWrRTV_bI9Wvh3DjRYufso53f05D';
 
