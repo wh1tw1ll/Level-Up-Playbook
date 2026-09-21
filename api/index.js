@@ -72,13 +72,14 @@ function requireSiteAuth(req, res, parsedPath) {
   if (AUTH_BYPASS_ROUTES.has(parsedPath)) return true;
   const cookies = parseCookies(req);
   // Check lu_session (Microsoft OAuth — strongest)
-  const session = cookies['lu_session'];
-  if (session) {
-    try {
-      const data = JSON.parse(decodeURIComponent(session));
-      if (data.authenticated && data.expires_at && Date.now() < data.expires_at) return true;
-    } catch (_) {}
-  }
+    const session = cookies['lu_session'];
+    if (session) {
+      try {
+        const data = JSON.parse(decodeURIComponent(session));
+        // Accept with or without expires_at — the cookie's Max-Age handles expiration
+        if (data.authenticated && data.name) return true;
+      } catch (_) {}
+    }
   // Check lu_site_auth (password gate)
   const siteAuth = cookies['lu_site_auth'];
   if (siteAuth) {
