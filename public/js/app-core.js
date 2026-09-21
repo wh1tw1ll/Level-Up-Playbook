@@ -283,7 +283,7 @@ function setView(view) {
   var target = document.getElementById('view-' + view);
   if (target) target.classList.add('active');
 
-  var navMap = { playbook:'nav-playbook', projects:'nav-projects', actions:'nav-actions', mfp:'nav-projects', 'mfp-dashboard':'nav-projects', luna:'nav-luna' };
+  var navMap = { playbook:'nav-playbook', projects:'nav-projects', tasks:'nav-tasks', actions:'nav-actions', mfp:'nav-projects', 'mfp-dashboard':'nav-projects', luna:'nav-luna' };
   document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
   var tabId = navMap[view];
   if (tabId) {
@@ -299,6 +299,7 @@ function setView(view) {
   if (view === 'luna') { renderHero(); }
   else if (view === 'playbook') renderPbView();
   else if (view === 'projects') renderProjects();
+  else if (view === 'tasks') renderTasksView();
   else if (view === 'mfp') renderMFP();
   else if (view === 'mfp-dashboard') renderMFPDashboard();
   else if (view === 'dova') renderDovaDashboard();

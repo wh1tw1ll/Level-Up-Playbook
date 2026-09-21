@@ -20,6 +20,7 @@
 <script src="js/app-core.js"></script>
 <script src="js/app-playbook.js"></script>
 <script src="js/app-projects.js"></script>
+<script src="js/app-tasks.js"></script>
 </head>
 <body>
 
@@ -61,6 +62,7 @@
   </button>
   <button class="nav-tab" id="nav-playbook" onclick="setView('playbook')">Playbook<span class="sync-badge" data-for="playbook"></span></button>
     <button class="nav-tab" id="nav-projects" onclick="setView('projects')">Projects<span class="sync-badge" data-for="projects"></span></button>
+  <button class="nav-tab" id="nav-tasks" onclick="setView('tasks')">Tasks<span class="sync-badge" data-for="tasks"></span></button>
           </nav>
 
 <!-- ===== PLAYBOOK SUB-NAV ===== -->
@@ -168,6 +170,16 @@
     <div class="view-title"><span>📂</span> Projects</div>
   </div>
   <div class="mfp-grid" id="projects-grid"></div>
+</div>
+
+<!-- ===== TASKS VIEW ===== -->
+<div id="view-tasks" class="view">
+  <div class="view-header">
+    <div class="view-title"><span>📋</span> Tasks</div>
+  </div>
+  <div class="tasks-widget" id="tasks-widget">
+    <div style="padding:60px 24px;text-align:center"><div class="luna-spinner"></div> <span style="color:var(--muted);font-size:14px">Loading tasks...</span></div>
+  </div>
 </div>
 
 <!-- ===== ACTION ITEMS VIEW REMOVED — only in Briefing side panel ===== -->

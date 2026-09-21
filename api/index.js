@@ -28,6 +28,7 @@ import stageHandler from '../lib/handlers/stage.js';
 import promoteHandler from '../lib/handlers/promote.js';
 import extractFromNote from '../lib/handlers/extract-from-note.js';
 import prepMapHandler from '../lib/handlers/prep-map.js';
+import graphProxy from '../lib/handlers/graph-proxy.js';
 import smartsheet from '../lib/smartsheet.js';
 import guardedWrite from '../lib/guarded-write.js';
 
@@ -72,6 +73,7 @@ const PASSWORD_ALLOWED_ROUTES = new Set([
   '/api/client/actions',
   '/api/actions',
   '/api/logo',
+  '/api/graph-proxy',
 ]);
 
 function requireSiteAuth(req, res, parsedPath) {
@@ -237,11 +239,11 @@ export default async function handler(req, res) {
       case '/api/sharepoint/read': return sharepointRead(req, res);
 
       // ── SERVING ──
-            case '/api/actions': {
-                          const html = readFileSync(join(process.cwd(), 'public', 'tasks.html'), 'utf-8');
-                          res.setHeader('Content-Type', 'text/html; charset=utf-8');
-                          return res.status(200).send(html);
-                        }
+                  case '/api/actions': {
+                                // Redirect to main app (standalone widget retired, inline Tasks view active)
+                                res.writeHead(302, { Location: '/?view=tasks' });
+                                return res.end();
+                              }
                   case '/api/client/actions': {
                           return handleClientActions(req, res);
                         }
@@ -700,7 +702,8 @@ export default async function handler(req, res) {
             }
 
       case '/api/prep-map': return prepMapHandler(req, res);
-            case '/api/extract-from-note': return extractFromNote(req, res);
+                  case '/api/extract-from-note': return extractFromNote(req, res);
+                  case '/api/graph-proxy': return graphProxy(req, res);
 
             // ── V6 SCAN: discover Category stragglers + Status options ──
             case '/api/admin/scan-stragglers': {

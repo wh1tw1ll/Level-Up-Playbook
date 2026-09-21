@@ -2247,6 +2247,11 @@ function init() {
     }
 
     setView(returnView);
+    // Also check ?view= URL param for bookmarked links (e.g., /?view=tasks from /api/actions redirect)
+    var viewParam = new URLSearchParams(window.location.search).get('view');
+    if (viewParam && viewParam !== returnView) {
+      setTimeout(function() { setView(viewParam); }, 50);
+    }
     }
 
   // ── LUCI HERO (default home view) ────────────────────────────────
