@@ -1,6 +1,5 @@
 // api/index.js — Consolidated catch-all router
 // All routes here: no new serverless functions created
-
 import checkAuth from '../lib/handlers/check-auth.js';
 import verifyPassword from '../lib/handlers/verify-password.js';
 import chatHandler from '../lib/handlers/chat.js';
@@ -28,20 +27,15 @@ import stageHandler from '../lib/handlers/stage.js';
 import promoteHandler from '../lib/handlers/promote.js';
 import extractFromNote from '../lib/handlers/extract-from-note.js';
 import prepMapHandler from '../lib/handlers/prep-map.js';
-import graphProxy from '../lib/handlers/graph-proxy.js';
 import smartsheet from '../lib/smartsheet.js';
 import guardedWrite from '../lib/guarded-write.js';
-
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { parseCookies } from '../lib/auth.js';
-
 // Module-level flagged store cache (survives warm instances)
 let _flaggedCache = null;
 setStoredData({ actions: [], _storedAt: null });
-
 // ── HELPERS ──
-
 const SHEETS = {
   personal: '2802755367554948',
   project: '4456864287772548',
@@ -50,41 +44,33 @@ const DOVA_SHEET = '4456864287772548';
 const PROJECT_COL_TITLE = 'Project';
 const PROJECT_COL_VALUE = 'DOVA';
 // prepmap discovered dynamically via the prep-map handler
-
 function findColId(cols, title) {
   return cols.find(c => c.title === title)?.id || null;
 }
-
 function getCellValue(row, colId) {
   return row.cells?.find(c => c.columnId === colId)?.displayValue 
     || row.cells?.find(c => c.columnId === colId)?.value 
     || '';
 }
-
 // ── AUTH GUARD — every route except verify-password, check-auth, and OAuth ──
 const AUTH_BYPASS_ROUTES = new Set([
   '/api/verify-password',
   '/api/check-auth',
 ]);
-
 // Routes accessible with password-only (no Microsoft sign-in required)
 // These have been hardened to only return DOVA-filtered data
 const PASSWORD_ALLOWED_ROUTES = new Set([
   '/api/client/actions',
   '/api/actions',
   '/api/logo',
-  '/api/graph-proxy',
 ]);
-
 function requireSiteAuth(req, res, parsedPath) {
   // OAuth routes (req.query.provider) are always allowed
   if (req.query.provider) return true;
   
   // Auth bypass routes are always allowed
   if (AUTH_BYPASS_ROUTES.has(parsedPath)) return true;
-
   const cookies = parseCookies(req);
-
   // Check lu_session (Microsoft OAuth — strongest)
   const session = cookies['lu_session'];
   if (session) {
@@ -93,7 +79,6 @@ function requireSiteAuth(req, res, parsedPath) {
       if (data.authenticated && data.expires_at && Date.now() < data.expires_at) return true;
     } catch (_) {}
   }
-
   // Check lu_site_auth (password gate)
   const siteAuth = cookies['lu_site_auth'];
   if (siteAuth) {
@@ -109,7 +94,6 @@ function requireSiteAuth(req, res, parsedPath) {
       }
     } catch (_) {}
   }
-
   // Also check lu_auth (non-HttpOnly Microsoft refresh token cookie)
   const luAuth = cookies['lu_auth'];
   if (luAuth) {
@@ -118,13 +102,11 @@ function requireSiteAuth(req, res, parsedPath) {
       if (data.refresh_token && data.expires_at && Date.now() < data.expires_at) return true;
     } catch (_) {}
   }
-
   res.setHeader('Content-Type', 'application/json');
   res.status(401).json({ error: 'Authentication required. Visit / to sign in.' });
   return false;
 }
 // ── END AUTH GUARD ──
-
 // ── HANDLER: /api/client/actions — client-facing DOVA filter ──
 // Only serves rows from the DOVA Action Tracker where Project == "DOVA"
 // Fails closed: returns empty array on any error
@@ -136,11 +118,9 @@ async function handleClientActions(req, res) {
       // Fail closed: no Project column means we cannot verify DOVA status
       return res.json({ sheet: 'actions', rows: [], filtered: true, error: 'Project column not found on sheet' });
     }
-
     const columns = (sheet.columns || []).map(c => ({
       id: c.id, title: c.title, type: c.type, options: c.options || null, primary: c.primary || false,
     }));
-
     const rows = (sheet.rows || [])
       .filter(r => {
         const cell = (r.cells || []).find(c => c.columnId === projectCol.id);
@@ -158,7 +138,6 @@ async function handleClientActions(req, res) {
         }
         return { rowId: r.id, rowNumber: r.rowNumber, cells, createdAt: r.createdAt, modifiedAt: r.modifiedAt };
       });
-
     return res.json({
       sheet: 'actions',
       sheetId: DOVA_SHEET,
@@ -175,30 +154,23 @@ async function handleClientActions(req, res) {
   }
 }
 // ── END HANDLER: /api/client/actions ──
-
 // ── ROUTER ──
-
 export default async function handler(req, res) {
   const path = parsePath(req.query.path);
-
   // OAuth routes (called via vercel rewrites /auth/* → /api/oauth?...)
   if (req.query.provider) {
     return oauthHandler(req, res);
   }
-
   // CORS for all routes
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
-
   // ── AUTH GUARD — gate every route except bypass list ──
   if (!requireSiteAuth(req, res, path)) return;
   // ── END AUTH GUARD ──
-
   try {
     switch (path) {
-
       // ── EXISTING ROUTES ──
       case '/api/check-auth': return checkAuth(req, res);
       case '/api/verify-password': return verifyPassword(req, res);
@@ -216,7 +188,6 @@ export default async function handler(req, res) {
                   case '/api/chiefs':
                         case '/api/chiefs/admin': return chiefsHandler(req, res);
             case '/api/chiefs-v3': return chiefsV3Handler(req, res);
-
             case '/api/sync/flagged-store': {
         if (req.method === 'POST') {
           _flaggedCache = {
@@ -237,7 +208,6 @@ export default async function handler(req, res) {
       case '/api/outlook/calendar': return calendarHandler(req, res);
       case '/api/sharepoint/search': return sharepointSearch(req, res);
       case '/api/sharepoint/read': return sharepointRead(req, res);
-
       // ── SERVING ──
                   case '/api/actions': {
                                 // Redirect to main app (standalone widget retired, inline Tasks view active)
@@ -253,9 +223,7 @@ export default async function handler(req, res) {
                                 res.writeHead(302, { Location: '/assets/level-up-logo.png' });
                                 return res.end();
                               }
-
       // ── NEW PHASE 1 ROUTES ──
-
       case '/api/state': {
         // GET /api/state?sheet=personal|project|prepmap
         if (req.method !== 'GET') return res.status(405).json({ error: 'GET only' });
@@ -263,35 +231,29 @@ export default async function handler(req, res) {
         const sheetParam = (url.searchParams.get('sheet') || 'personal').toLowerCase();
         const sheetId = SHEETS[sheetParam];
         if (!sheetId) return res.status(400).json({ error: `Unknown sheet: "${sheetParam}"` });
-
         return handleState(req, res, sheetId, sheetParam);
       }
-
       case '/api/admin/create-outbox': {
         // POST /api/admin/create-outbox — one-time, creates the Claude Outbox sheet
         if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
         return handleCreateOutbox(req, res);
       }
-
       case '/api/admin/ingest-outbox': {
         // GET /api/admin/ingest-outbox — processes pending rows in the Outbox
         if (req.method !== 'GET') return res.status(405).json({ error: 'GET only' });
         return handleIngestOutbox(req, res);
       }
-
       case '/api/admin/cleanup': {
         // POST /api/admin/cleanup — runs Phase 1 cleanup operations
         if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
         return handleCleanup(req, res);
       }
-
       case '/api/admin/setup-phase2': {
         // POST /api/admin/setup-phase2 — one-time Phase 2 setup
         // Creates Context Requests sheet, adds Visibility column to DOVA tracker
         if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
         try {
           const results = [];
-
           // 1. Add Visibility column to DOVA Action Tracker
           const DOVA_SHEET = '4456864287772548';
           try {
@@ -311,7 +273,6 @@ export default async function handler(req, res) {
           } catch (e) {
             results.push({ step: '1-visibility-column', error: e.message });
           }
-
           // 2. Create Context Requests sheet
           try {
             const home = await smartsheet.getHome();
@@ -334,7 +295,6 @@ export default async function handler(req, res) {
           } catch (e) {
             results.push({ step: '2-context-requests-sheet', error: e.message });
           }
-
           return res.json({ success: true, results });
         } catch (e) {
           return res.status(500).json({ error: e.message });
@@ -345,7 +305,6 @@ export default async function handler(req, res) {
               if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
               try {
                 const results = [];
-
                 // 1. Canonicalise Prep Map: rename LUCI Prep Map → Prep Map, delete empty
                 // Canonical: 1007659559112580 ("LUCI Prep Map", 5 rows)
                 // Duplicate: 1625479464570756 ("Prep Map", 0 rows — empty, created by auto-discovery)
@@ -361,7 +320,6 @@ export default async function handler(req, res) {
                 } catch (e) {
                   results.push({ step: '1b-delete-empty-prep-map', error: e.message });
                 }
-
                 // 2. Delete duplicate Outbox sheets
                 // Canonical: 107689561771908 (first created, used by all existing code)
                 // Duplicates: 7922210758152068, 7082304133615492
@@ -373,7 +331,6 @@ export default async function handler(req, res) {
                     results.push({ step: '2-delete-outbox-dup', id: dupId, error: e.message });
                   }
                 }
-
                 // 3. Delete orphan Personal Action Log
                 // 442928536440708 — flagged orphan
                 try {
@@ -382,7 +339,6 @@ export default async function handler(req, res) {
                 } catch (e) {
                   results.push({ step: '3-delete-orphan-pal', error: e.message });
                 }
-
                 // 4. Verify no more duplicates
                 const home = await smartsheet.getHome();
                 const byName = {};
@@ -393,7 +349,6 @@ export default async function handler(req, res) {
                 const remainingDupes = Object.entries(byName)
                   .filter(([_, ids]) => ids.length > 1)
                   .map(([name, ids]) => ({ name, ids }));
-
                 return res.json({
                   success: true,
                   results,
@@ -403,7 +358,6 @@ export default async function handler(req, res) {
                 return res.status(500).json({ error: e.message });
               }
             }
-
       case '/api/admin/delete-sheet': {
         // POST — delete a sheet by ID
         if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
@@ -414,7 +368,6 @@ export default async function handler(req, res) {
           return res.json({ success: true, deleted: sheetId });
         } catch(e) { return res.status(500).json({ error: e.message }); }
       }
-
       case '/api/admin/add-source-confidence': {
         // POST — Add Source and Confidence columns to DOVA tracker,
         // update Confidence picklist on both sheets, normalize legacy 'staged' values
@@ -423,7 +376,6 @@ export default async function handler(req, res) {
           const results = [];
           const DOVA = '4456864287772548';
           const PERSONAL = '2802755367554948';
-
           // 1. Add Source column to DOVA (if missing)
           const dovaSheet = await smartsheet.getSheetWithColumns(DOVA);
           if (!(dovaSheet.columns||[]).find(c => c.title === 'Source')) {
@@ -436,7 +388,6 @@ export default async function handler(req, res) {
           } else {
             results.push('Source column already exists on DOVA');
           }
-
           // 2. Add Confidence column to DOVA (if missing)
           if (!(dovaSheet.columns||[]).find(c => c.title === 'Confidence')) {
             await smartsheet.addColumn(DOVA, {
@@ -448,7 +399,6 @@ export default async function handler(req, res) {
           } else {
             results.push('Confidence column already exists on DOVA');
           }
-
           // 3. Update Confidence picklist on Personal log (add Medium and None)
           const persSheet = await smartsheet.getSheetWithColumns(PERSONAL);
           const confCol = (persSheet.columns||[]).find(c => c.title === 'Confidence');
@@ -465,7 +415,6 @@ export default async function handler(req, res) {
           } else {
             results.push('No Confidence column on Personal log');
           }
-
           // 4. Update Source picklist on Personal log to add Granola
           const srcCol = (persSheet.columns||[]).find(c => c.title === 'Source');
           if (srcCol) {
@@ -476,15 +425,12 @@ export default async function handler(req, res) {
               results.push('Source picklist already has Granola');
             }
           }
-
           // 5. Normalize legacy 'staged' Source values on Personal log — deferred to separate run
                     // (normalization loop removed to keep this within 60s Vercel limit)
                     results.push('Normalize staged values: deferred to /api/admin/normalize-sources');
-
           return res.json({ success: true, results });
         } catch(e) { return res.status(500).json({ error: e.message }); }
       }
-
       case '/api/admin/normalize-sources': {
         // POST — normalize legacy 'staged' Source values on Personal log to Manual/Granola
         if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
@@ -494,7 +440,6 @@ export default async function handler(req, res) {
           const srcCol = (persSheet.columns||[]).find(c => c.title === 'Source');
           const srcRefCol = (persSheet.columns||[]).find(c => c.title === 'SourceRef');
           if (!srcCol) return res.json({ success: false, error: 'No Source column on Personal log' });
-
           const batch = [];
           for (const row of persSheet.rows || []) {
             const srcCell = (row.cells||[]).find(c => c.columnId === srcCol.id);
@@ -513,7 +458,6 @@ export default async function handler(req, res) {
           return res.json({ success: true, normalized: batch.length, result });
         } catch(e) { return res.status(500).json({ error: e.message }); }
       }
-
       case '/api/admin/update-picklists': {
         // POST — update picklist options on Personal log (Source + Confidence)
         if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
@@ -521,7 +465,6 @@ export default async function handler(req, res) {
           const PERSONAL = '2802755367554948';
           const persSheet = await smartsheet.getSheetWithColumns(PERSONAL);
           const results = [];
-
           // Smartsheet API doesn't allow modifying picklist options on existing columns directly.
           // We need to delete and recreate the column. App-layer handling for now.
           const confCol = (persSheet.columns||[]).find(c => c.title === 'Confidence');
@@ -536,7 +479,6 @@ export default async function handler(req, res) {
             });
             results.push('Recreated Confidence column with Medium/None');
           } else results.push('Confidence already has Medium/None or not found');
-
           const srcCol = (persSheet.columns||[]).find(c => c.title === 'Source');
           if (srcCol && !((srcCol.options||[]).includes('Granola'))) {
             const srcIdx = srcCol.index;
@@ -548,11 +490,9 @@ export default async function handler(req, res) {
             });
             results.push('Recreated Source column with Granola');
           } else results.push('Source already has Granola or not found');
-
           return res.json({ success: true, results });
         } catch(e) { return res.status(500).json({ error: e.message }); }
       }
-
       case '/api/admin/request-blank-project-tri': {
         // POST — create Context Requests row with 199 blank Project rows for LUCI triage
         if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
@@ -570,7 +510,6 @@ export default async function handler(req, res) {
             const aid = (r.cells||[]).find(x => x.columnId === aCol.id);
             return `${r.id}: ${aid?.displayValue||aid?.value||''}`;
           }).join('\n');
-
           // Find Context Requests sheet
           const home = await smartsheet.getHome();
           const cr = (home.sheets||[]).filter(s => s.name === 'Context Requests');
@@ -579,7 +518,6 @@ export default async function handler(req, res) {
           const crSheet = await smartsheet.getSheetWithColumns(crId);
           const colMap = {};
           for (const c of crSheet.columns||[]) colMap[c.title] = c.id;
-
           await smartsheet.addRow(crId, [
             { columnId: colMap['RequestId'], value: `BLANK-PROJECT-${Date.now()}` },
             { columnId: colMap['RequestedAt'], value: new Date().toISOString().split('T')[0] },
@@ -588,31 +526,26 @@ export default async function handler(req, res) {
             { columnId: colMap['Question'], value: 'Please classify Project for these 199 rows (rowId: Action ID). Return rowId, Project for each. Anything unsure leave blank.' },
             { columnId: colMap['Status'], value: 'Open' },
           ]);
-
           return res.json({ success: true, blankRowCount: blankRows.length, scopeSize: scope.length, sheetId: crId });
         } catch(e) { return res.status(500).json({ error: e.message }); }
       }
-
       case '/api/admin/clean': {
               // POST — comprehensive DOVA tracker cleanup (batch-optimized)
               if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
               try {
                 const results = [];
                 const DOVA = '4456864287772548';
-
                 function gcv(row, colId) {
                   const cell = (row.cells || []).find(c => c.columnId === colId);
                   if (!cell) return '';
                   const v = cell.displayValue ?? (typeof cell.value === 'object' ? (cell.value.objectValue || '') : cell.value) ?? '';
                   return String(v).trim();
                 }
-
                 // Read sheet ONCE
                 const sheet = await smartsheet.getSheetWithColumns(DOVA);
                 const cols = {}; for (const c of sheet.columns || []) cols[c.title] = c;
                 const rows = sheet.rows || [];
                 const rowMap = {}; for (const r of rows) rowMap[r.id] = r;
-
                 // 1. Dedupe — batch delete
                 const PAIRS = [[5277077752905604,1806590632656772],[681604480106372,2524734934351748],[1878666626334596,5151209441329028],[8871184769351556,2812328897281924],[7874948851433348,2432396358713220],[7026563961454468,5426144256589700],[6227519655772036,6894301517315972],[1980685789822852,4531129980419972],[3136937425239940,2224863538970500],[367135564627844,3469553651285892],[506023801126788,7504026885816196],[6516512704298884,7789282507489156],[217533263773572,7819805766320004],[2283146245177220,6995195399372676],[7061586198527876,6037676732579716],[2262382253965188,547927677730692],[5307550842486660,6034369099071364],[6434363966750596,7012670038867844]];
                 const toDel = new Set();
@@ -628,7 +561,6 @@ export default async function handler(req, res) {
                   deduped.push({keep:keep.id,delete:del.id});
                 }
                 results.push({step:'1-dedupe',count:deduped.length,pairs:deduped});
-
                 // 2. Delete: test row, meeting headings, spam, MFP-completed
                 const HEADINGS = ['action items','next steps','proposal and next steps','general action item log review','new items added','outreach to trade','granola setup'];
                 const aCol = cols['Action ID']; const oCol = cols['Owner']; const cCol = cols['Category']; const pCol = cols['Project'];
@@ -649,7 +581,6 @@ export default async function handler(req, res) {
             catch (e) { /* partial deletion ok — some rows may have been already removed */ }
           }
                 results.push({step:'2-delete',total:toDel.size,headings:headingCount,spam:spamCount,mfpCompleted:mfpCount,testRow:1});
-
                 // 3. Backfill Project and fix Status in one batch update
                 const aId = cols['Action ID']?.id;
                 const pId = cols['Project']?.id;
@@ -687,7 +618,6 @@ export default async function handler(req, res) {
             catch (e) { /* partial updates ok */ }
           }
                 results.push({step:'3-fields',backfill:batchUpdates.filter(u=>u.cells.some(c=>c.columnId===pId)).length,statusFixes:batchUpdates.filter(u=>u.cells.some(c=>c.columnId===sCol)).length,total:batchUpdates.length});
-
                 // 4. Set Visibility on 18 rows
                 const visCol = cols['Visibility']?.id;
                 if (visCol) {
@@ -696,15 +626,11 @@ export default async function handler(req, res) {
                   await smartsheet.updateRows(DOVA, visUpdates);
                   results.push({step:'4-visibility',count:VIS.length});
                 }
-
                 return res.json({success:true,results});
               } catch(e) { return res.status(500).json({error:e.message, stack:e.stack?.substring(0,500)}); }
             }
-
       case '/api/prep-map': return prepMapHandler(req, res);
                   case '/api/extract-from-note': return extractFromNote(req, res);
-                  case '/api/graph-proxy': return graphProxy(req, res);
-
             // ── V6 SCAN: discover Category stragglers + Status options ──
             case '/api/admin/scan-stragglers': {
               // GET — scans DOVA for old Category values and Status column options
@@ -728,7 +654,6 @@ export default async function handler(req, res) {
                 });
               } catch(e) { return res.status(500).json({ error: e.message }); }
             }
-
             // ── V6 FIX: update Category stragglers ──
             case '/api/admin/fix-stragglers': {
               // POST — updates "Design"→"Design & Plans", "Legal & Insurance"→"Legal & Contracts", "Meeting Note"→"General Coordination"
@@ -760,13 +685,10 @@ export default async function handler(req, res) {
                 return res.json({ success: true, updated, details: batch.map(b => ({ rowId: b.id, setTo: b.cells[0].value })) });
               } catch(e) { return res.status(500).json({ error: e.message }); }
             }
-
-      // ── DOVA DASHBOARD (dynamically imported, CJS module) ──
-            case '/api/dova-dashboard': {
-              const { default: ddHandler } = await import('../lib/handlers/dova-dashboard.js');
-              return ddHandler(req, res);
-            }
-
+      // ── DOVA DASHBOARD — redirect to tasks widget (interim) ──
+            case '/api/dova-dashboard':
+              res.writeHead(302, { Location: '/?view=tasks' });
+              return res.end();
             // ── PASS-THROUGH ROUTES ──
             default:
               if (path === '/api/tasks' || path.startsWith('/api/tasks/')) {
@@ -784,9 +706,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: e.message });
   }
 }
-
 // ── HANDLER: /api/state ──
-
 async function handleState(req, res, sheetId, sheetParam) {
   try {
     const sheet = await smartsheet.getSheetWithColumns(sheetId);
@@ -814,9 +734,7 @@ async function handleState(req, res, sheetId, sheetParam) {
     return res.status(500).json({ error: e.message });
   }
 }
-
 // ── HANDLER: /api/admin/create-outbox ──
-
 async function handleCreateOutbox(req, res) {
   // One-time: find the canonical Outbox sheet or create it once
   const OUTBOX_NAME = 'LUCI - Claude Outbox';
@@ -867,20 +785,15 @@ async function handleCreateOutbox(req, res) {
         return res.status(500).json({ error: e.message || 'Failed to create Outbox sheet' });
       }
     }
-
 // ── HANDLER: /api/admin/ingest-outbox ──
-
 // Canonical Outbox sheet (resolved by resolve-duplicates)
 const OUTBOX_SHEET_ID = '107689561771908';
-
 async function handleIngestOutbox(req, res) {
   const PERSONAL_SHEET = '2802755367554948';
   const PROJECT_SHEET = '4456864287772548';
-
   try {
     const outbox = await smartsheet.getSheetWithColumns(OUTBOX_SHEET_ID);
     const cols = outbox.columns || [];
-
     const typeColId = findColId(cols, 'Type');
     const targetSheetColId = findColId(cols, 'TargetSheet');
     const targetRowIdColId = findColId(cols, 'TargetRowId');
@@ -897,14 +810,11 @@ async function handleIngestOutbox(req, res) {
     const ingestStatusColId = findColId(cols, 'IngestStatus');
     const ingestNoteColId = findColId(cols, 'IngestNote');
     const ingestedAtColId = findColId(cols, 'IngestedAt');
-
     const pending = (outbox.rows || []).filter(r => {
       const s = getCellValue(r, ingestStatusColId);
       return !s || s === 'Pending';
     });
-
     const results = [];
-
     for (const row of pending) {
       const rowId = row.id;
       const type = getCellValue(row, typeColId);
@@ -920,13 +830,10 @@ async function handleIngestOutbox(req, res) {
       const seriesId = getCellValue(row, seriesColId);
       const confidence = getCellValue(row, confColId);
       const project = getCellValue(row, projectColId);
-
       const targetSheetId = targetSheet === 'Project' ? PROJECT_SHEET : PERSONAL_SHEET;
-
       try {
         let statusText = 'Error';
         let noteText = '';
-
         if (type === 'Status Update' && targetRowId) {
           // Update existing row
           const targetData = await smartsheet.getSheetWithColumns(targetSheetId);
@@ -968,7 +875,6 @@ async function handleIngestOutbox(req, res) {
           statusText = 'Rejected';
           noteText = `Unknown type: ${type}`;
         }
-
         const updateCells = [{ columnId: ingestStatusColId, value: statusText }];
         if (noteText) updateCells.push({ columnId: ingestNoteColId, value: noteText.substring(0, 200) });
         updateCells.push({ columnId: ingestedAtColId, value: new Date().toISOString().split('T')[0] });
@@ -984,22 +890,18 @@ async function handleIngestOutbox(req, res) {
         results.push({ rowId, type, status: 'Error', error: e.message });
       }
     }
-
     return res.json({ success: true, processed: results.length, results });
   } catch (e) {
     console.error('Ingest outbox error:', e.message);
     return res.status(500).json({ error: e.message });
   }
 }
-
 // ── HANDLER: /api/admin/cleanup ──
-
 async function handleCleanup(req, res) {
   const DOVA_SHEET = '4456864287772548';
   const MFP_SHEET = '5109402316263300';
   const PERSONAL_SHEET = '2802755367554948';
   const results = [];
-
   try {
     // 1. MOVE: read MFP rows from DOVA Project, add to MFP sheet, then delete from DOVA
     const dovaSheet = await smartsheet.getSheetWithColumns(DOVA_SHEET);
@@ -1008,12 +910,10 @@ async function handleCleanup(req, res) {
       const val = (getCellValue(r, projectCol?.id) || '').toLowerCase();
       return val === 'mfp' || val === 'miami freedom park';
     });
-
     if (mfpRows.length > 0) {
       // Get MFP sheet columns for field mapping
       const mfpSheet = await smartsheet.getSheetWithColumns(MFP_SHEET);
       const mfpCols = mfpSheet.columns || [];
-
       // Build and add rows to MFP sheet
       const addRows = mfpRows.map(r => {
         const cells = [];
@@ -1029,14 +929,12 @@ async function handleCleanup(req, res) {
       if (addRows.length > 0) {
         await smartsheet.addRows(MFP_SHEET, addRows);
       }
-
       // Delete from DOVA
       await smartsheet.deleteRows(DOVA_SHEET, mfpRows.map(r => r.id));
       results.push({ step: '1-mfp-rows', moved: mfpRows.length, deleted: mfpRows.length });
     } else {
       results.push({ step: '1-mfp-rows', moved: 0 });
     }
-
     // 2. Delete test rows
     const testPatterns = ['build fix test', 'luna test push', 'luci test push', '^1$'];
     const actionColD = dovaSheet.columns.find(c => c.title === 'Action ID');
@@ -1053,7 +951,6 @@ async function handleCleanup(req, res) {
     if (testRowsDova.length > 0) await smartsheet.deleteRows(DOVA_SHEET, testRowsDova.map(r => r.id));
     if (testRowsPersonal.length > 0) await smartsheet.deleteRows(PERSONAL_SHEET, testRowsPersonal.map(r => r.id));
     results.push({ step: '2-test-rows', deleted: testRowsDova.length + testRowsPersonal.length });
-
     // 3. Delete duplicate email rows (keep first, delete rest)
     const dupKeywords = ['gamba', 'didomenico'];
     const dupRows = (personalSheet.rows || []).filter(r => {
@@ -1067,19 +964,15 @@ async function handleCleanup(req, res) {
     } else {
       results.push({ step: '3-dup-emails', count: dupRows.length, note: 'One or fewer, no action' });
     }
-
     return res.json({ success: true, results });
   } catch (e) {
     console.error('Cleanup error:', e.message);
     return res.status(500).json({ error: e.message, results });
   }
 }
-
 // ── UTILITY ──
-
 function parsePath(path) {
   const p = Array.isArray(path) ? path[0] : path;
   return '/api/' + (p || '').replace(/\/$/, '');
 }
-
 export const config = { maxDuration: 60 };
