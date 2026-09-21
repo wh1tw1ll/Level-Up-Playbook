@@ -300,5 +300,3 @@ function renderMFPCharts() {
     });
   }
 }
-
-function renderDovaDashboard() { window.location.href = '/api/dova-dashboard'; }

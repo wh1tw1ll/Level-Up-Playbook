@@ -329,3 +329,121 @@ function setView(view) {
       console.error('setView error:', err);
     }
   }
+
+// ── MODAL HELPERS (moved from app.js) ─────────────────────────────
+function closeModal(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.remove('open');
+}
+
+function showModal(id, html) {
+  var el = document.getElementById(id);
+  if (!el) {
+    el = document.createElement('div');
+    el.id = id;
+    el.className = 'modal-overlay';
+    el.onclick = function(e) { if (e.target === el) el.classList.remove('open'); };
+    document.body.appendChild(el);
+  }
+  el.innerHTML = html;
+  setTimeout(function() { el.classList.add('open'); }, 10);
+  }
+
+// ── PASSWORD GATE (moved from app.js) ─────────────────────────────
+function handlePasswordClick() {
+  var btn = document.getElementById('password-btn');
+  if (btn) { btn.style.transform = 'scale(0.96)'; btn.style.opacity = '0.8'; }
+  setTimeout(function() {
+    if (btn) { btn.style.transform = ''; btn.style.opacity = ''; }
+    verifyPassword();
+  }, 100);
+}
+
+function verifyPassword() {
+  var inp = document.getElementById('password-input');
+  var btn = document.getElementById('password-btn');
+  var err = document.getElementById('password-error');
+  if (!inp || !btn) return;
+  var pw = inp.value.trim();
+  if (!pw) { err.textContent = 'Please enter a password.'; err.style.display = 'block'; return; }
+  btn.disabled = true;
+  btn.textContent = 'Checking...';
+  err.style.display = 'none';
+    // Safety timeout — never hang on 'Checking...' forever
+    var timedOut = false;
+    var timeout = setTimeout(function() {
+      timedOut = true;
+      err.textContent = 'Request timed out. Try again.';
+      err.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Unlock';
+    }, 10000);
+    fetch('/api/verify-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pw })
+  }).then(function(r) {
+      clearTimeout(timeout);
+      if (timedOut) return;
+      if (!r.ok) {
+      if (r.status === 401) throw new Error('Incorrect password');
+      throw new Error('Server error (' + r.status + ')');
+    }
+    return r.json();
+  }).then(function(data) {
+      if (data.valid || data.success) {
+        document.getElementById('password-overlay').classList.remove('open');
+        document.getElementById('password-overlay').style.display = 'none';
+      } else {
+        err.textContent = 'Unexpected response. Try again.';
+        err.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Unlock';
+      }
+  }).catch(function(e) {
+      clearTimeout(timeout);
+            if (timedOut) return;
+          err.textContent = e.message;
+          err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Unlock';
+    inp.value = '';
+    inp.focus();
+  });
+}
+
+// ── CHECK AUTH ON LOAD (moved from app.js) ────────────────────────
+(function checkSiteAuth() {
+  fetch('/api/check-auth').then(function(r) { return r.json(); }).then(function(data) {
+    var overlay = document.getElementById('password-overlay');
+    if (!overlay) return;
+    if (data.authed) {
+      overlay.classList.remove('open');
+      overlay.style.display = 'none';
+    } else {
+      // Not authed — focus the password input for immediate typing
+      var inp = document.getElementById('password-input');
+      if (inp) setTimeout(function() { inp.focus(); }, 300);
+    }
+  }).catch(function() {
+      // Auth check failed — ensure overlay is visible and focused
+      var overlay = document.getElementById('password-overlay');
+      if (overlay) {
+        overlay.classList.add('open');
+        overlay.style.display = '';
+      }
+      var inp = document.getElementById('password-input');
+      if (inp) setTimeout(function() { inp.focus(); }, 300);
+    });
+})();
+
+// ── REMINDER DISMISS (moved from app.js) ──────────────────────────
+function dismissReminder(id) {
+  var dismissed = {};
+  try { var d = localStorage.getItem('lu_remind_dismiss'); if (d) dismissed = JSON.parse(d); } catch(e) {}
+  dismissed[id] = true;
+  try { localStorage.setItem('lu_remind_dismiss', JSON.stringify(dismissed)); } catch(e) {}
+  // Refresh both home-page reminder cards (app-playbook.js) and panel reminders (app-luna.js)
+  if (typeof renderReminders === 'function') renderReminders();
+  if (typeof renderReminderReminders === 'function') renderReminderReminders();
+}

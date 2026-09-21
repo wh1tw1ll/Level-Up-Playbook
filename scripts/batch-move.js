@@ -8,8 +8,8 @@ const SCOPE = 'offline_access Files.ReadWrite.All Sites.ReadWrite.All User.Read'
 const DRIVE_ID = 'b!E0_TuL7Nn06AK05rVErw-wsS33fXt45AocqEeWrRTV_bI9Wvh3DjRYufso53f05D';
 
 // ── ATTACHMENTS ROOT PATH ──
-// Walk from SharePoint root through Shared Documents / 05 - DOVA / Attachments
-const ROOT_PATH = 'Shared Documents/05 - DOVA/Attachments';
+// Walk from SharePoint root through 05 - DOVA / Attachments
+const ROOT_PATH = '05 - DOVA/Attachments';
 
 // ── FILE OPERATIONS TABLE ──
 const MOVES = [
@@ -185,7 +185,7 @@ async function main() {
   console.log('Step 4: Resolving destination folders...');
   const folderCache = {};
   for (const m of MOVES) {
-    const destPath = `Shared Documents/05 - DOVA/${m.dest}`;
+    const destPath = `05 - DOVA/${m.dest}`;
     try {
       const f = await resolvePath(destPath, token);
       folderCache[m.dest] = f.id;
