@@ -74,6 +74,7 @@ const PASSWORD_ALLOWED_ROUTES = new Set([
   '/api/actions',
   '/api/logo',
   '/api/graph-proxy',
+  '/api/admin/add-extraction-id',
 ]);
 
 function requireSiteAuth(req, res, parsedPath) {
