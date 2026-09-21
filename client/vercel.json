@@ -5,7 +5,7 @@
     { "src": "index.html", "use": "@vercel/static" }
   ],
   "rewrites": [
-    { "source": "/api/client/actions", "destination": "https://level-up-playbook.vercel.app/api/client/actions" },
-    { "source": "/api/dova", "destination": "https://level-up-playbook.vercel.app/api/dova?sheet=BS" }
+    { "source": "/api/client/actions", "destination": "https://luci-by-levelup.vercel.app/api/client/actions" },
+    { "source": "/api/dova", "destination": "https://luci-by-levelup.vercel.app/api/dova?sheet=BS" }
   ]
 }

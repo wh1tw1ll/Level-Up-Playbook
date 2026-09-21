@@ -35,7 +35,7 @@ body{margin:0;font-family:var(--font);background:var(--bg);color:var(--fg);font-
 </head>
 <body>
 <div class="header">
-  <img class="header-logo" src="https://level-up-playbook.vercel.app/assets/level-up-logo.png" alt="Level Up">
+  <img class="header-logo" src="https://luci-by-levelup.vercel.app/assets/level-up-logo.png" alt="Level Up">
   <span class="header-title">DOVA Arena — Project Dashboard</span>
   <span style="margin-left:auto;font-size:12px;color:rgba(255,255,255,0.5)" id="update-time"></span>
 </div>
@@ -48,7 +48,7 @@ body{margin:0;font-family:var(--font);background:var(--bg);color:var(--fg);font-
 // Client-facing dashboard - reads only /api/client/actions and /api/dova (Budget Snapshot)
 // No internal sheet IDs, no access to /api/tasks. Data is server-side filtered to DOVA only.
 
-var API = 'https://level-up-playbook.vercel.app';
+var API = 'https://luci-by-levelup.vercel.app';
 
 function fmt(n) {
   if (n == null || n === '') return '—';

@@ -1872,3 +1872,142 @@ mark.search-highlight{background:#fff3a8;padding:1px 2px;border-radius:2px;color
 .dova-skeleton { display:flex;align-items:center;justify-content:center;min-height:200px;color:#888; }
 .dova-loader { width:32px;height:32px;border:3px solid #e0e0e0;border-top-color:#1B3A5C;border-radius:50%;animation:spin .8s linear infinite;margin-right:12px; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── DOVA DASHBOARD 2.0 (professional layout) ──────────────────── */
+.dova-topbar {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px;background:var(--charcoal,#1a232b);
+  border-bottom:1px solid var(--border,#333);
+}
+.dova-topbar-title { font-size:13px;font-weight:600;color:var(--cool,#F0EFEF); }
+.dova-topbar-right { display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted,#888); }
+.dova-live-dot { width:7px;height:7px;background:#4ade80;border-radius:50%;animation:dova-pulse 2s infinite; }
+@keyframes dova-pulse { 0%{opacity:1} 50%{opacity:0.3} 100%{opacity:1} }
+.dova-live-status { color:#4ade80;font-weight:500; }
+.dova-update-time { color:var(--muted); }
+
+.dova-body { display:flex;flex:1;min-height:calc(100vh - 140px); }
+
+/* Sidebar */
+.dova-sidebar {
+  width:180px;min-width:180px;background:var(--charcoal,#1a232b);
+  border-right:1px solid var(--border,#333);
+  display:flex;flex-direction:column;padding:8px 0;
+}
+.dova-sidebar-nav { flex:1;display:flex;flex-direction:column;gap:0; }
+.dova-nav-tab {
+  display:flex;align-items:center;gap:8px;padding:10px 14px;
+  font-size:13px;font-weight:500;color:var(--muted,#888);
+  cursor:pointer;border:none;background:none;text-align:left;
+  border-left:3px solid transparent;transition:all 0.15s;
+  font-family:var(--font);
+}
+.dova-nav-tab:hover { color:var(--fg,#d4d4d4);background:rgba(255,255,255,0.04); }
+.dova-nav-tab.active { color:var(--fg);border-left-color:var(--accent,#BED1C6);background:rgba(190,209,198,0.08); }
+.dova-nav-count {
+  margin-left:auto;background:rgba(255,255,255,0.1);color:var(--muted);
+  font-size:10px;padding:1px 7px;border-radius:8px;font-weight:700;
+}
+.dova-nav-tab.active .dova-nav-count { background:var(--accent);color:var(--charcoal); }
+.dova-sidebar-footer { padding:12px 14px;font-size:10px;color:var(--muted);border-top:1px solid var(--border); }
+
+/* Content area */
+.dova-content { flex:1;padding:16px 20px;overflow-y:auto; }
+.dova-view-pane { display:none; }
+.dova-view-pane.active { display:block; }
+
+/* Cards */
+.dova-section-row { display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap; }
+.dova-card {
+  background:var(--card,#222);border:1px solid var(--border,#333);
+  border-radius:8px;overflow:hidden;margin-bottom:12px;
+}
+.dova-card-third { flex:1;min-width:200px; }
+.dova-card-header {
+  padding:10px 14px;border-bottom:1px solid var(--border);
+  font-size:13px;font-weight:700;color:var(--fg,#d4d4d4);
+}
+.dova-card-body { padding:10px 14px; }
+
+/* Quick links */
+.dova-quick-links { display:flex;flex-direction:column;gap:2px; }
+.dova-quick-link {
+  display:block;padding:6px 4px;font-size:13px;color:var(--fg);
+  text-decoration:none;border-radius:4px;transition:background .15s;
+}
+.dova-quick-link:hover { background:var(--hover,#2a2a2a); }
+.dova-soon { font-size:9px;color:var(--warn);font-weight:600;margin-left:4px; }
+
+/* KPI grid */
+.dova-kpi-grid { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
+.dova-kpi { padding:8px;text-align:center;background:rgba(255,255,255,0.03);border-radius:6px; }
+.dova-kpi-label { font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px; }
+.dova-kpi-val { font-size:20px;font-weight:700;color:var(--fg); }
+.dova-kpi-val.gold { color:var(--warn,#e6c87c); }
+.dova-kpi-val.red { color:var(--danger,#e86060); }
+.dova-kpi-val.blue { color:var(--accent,#BED1C6); }
+
+/* Priority list */
+.dova-priority-list { display:flex;flex-direction:column;gap:5px; }
+.dova-priority-item { display:flex;align-items:center;gap:6px;font-size:12px;flex-wrap:wrap; }
+.dova-priority-dot { width:6px;height:6px;border-radius:50%;background:var(--muted);flex-shrink:0; }
+.dova-priority-dot.red { background:var(--danger); }
+.dova-priority-text { flex:1;color:var(--fg);word-break:break-word; }
+.dova-priority-meta { font-size:10px;color:var(--muted);white-space:nowrap; }
+
+/* Section titles */
+.dova-section-title { font-size:14px;font-weight:700;color:var(--fg);margin:16px 0 4px;display:flex;justify-content:space-between;align-items:center; }
+.dova-section-title a { font-size:12px;font-weight:500;color:var(--muted);text-decoration:none; }
+.dova-section-title a:hover { color:var(--accent);text-decoration:underline; }
+.dova-section-source { font-size:11px;color:var(--muted);margin-bottom:8px; }
+.dova-section-source a { color:var(--accent);text-decoration:none; }
+.dova-section-source a:hover { text-decoration:underline; }
+
+/* Budget cards */
+.dova-budget-cat {
+  background:var(--card);border:1px solid var(--border);border-radius:8px;
+  padding:10px 14px;margin-bottom:8px;display:inline-block;width:calc(33% - 6px);vertical-align:top;
+  margin-right:6px;
+}
+.dova-budget-grand { width:100%;border-color:var(--accent); }
+.dova-budget-cat-label { font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:6px; }
+.dova-budget-row { display:flex;justify-content:space-between;font-size:12px;padding:2px 0;color:var(--fg); }
+.dova-budget-total { font-weight:700;border-top:1px solid var(--border);padding-top:4px;margin-top:3px; }
+.dova-budget-val { font-weight:600; }
+
+/* Schedule table */
+.dova-card { overflow-x:auto; }
+.dova-schedule-table { width:100%;border-collapse:collapse;font-size:12px; }
+.dova-schedule-table th { padding:8px 10px;text-align:left;font-weight:600;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border); }
+.dova-schedule-table td { padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--fg); }
+.dova-schedule-table tr:hover td { background:var(--hover); }
+.dova-milestone-name { font-weight:500;color:var(--fg); }
+
+.dova-status-pill { display:inline-block;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600; }
+.dova-status-inprogress { background:rgba(59,130,246,0.15);color:#3b82f6; }
+.dova-status-notstarted { background:rgba(232,96,96,0.12);color:var(--danger); }
+
+/* Meetings table */
+.dova-meetings-table { width:100%;border-collapse:collapse;font-size:12px; }
+.dova-meetings-table th { padding:8px 10px;text-align:left;font-weight:600;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border); }
+.dova-meetings-table td { padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--fg); }
+.dova-meeting-when { white-space:nowrap;color:var(--muted);font-size:11px; }
+.dova-meeting-title { font-weight:500; }
+
+/* Action rows */
+.dova-action-row { display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px; }
+.dova-action-row:hover { background:var(--hover); }
+.dova-action-overdue { background:rgba(232,96,96,0.06); }
+.dova-action-icon { flex:0 0 16px;font-size:12px; }
+.dova-action-text { flex:1;color:var(--fg);word-break:break-word; }
+.dova-action-meta { font-size:11px;color:var(--muted);white-space:nowrap; }
+
+/* Budget table */
+.dova-budget-table { width:100%;border-collapse:collapse;font-size:13px; }
+.dova-budget-table th { padding:8px 10px;text-align:left;font-weight:600;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border); }
+.dova-budget-table td { padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--fg); }
+.dova-budget-table tr:hover td { background:var(--hover); }
+.dova-budget-item { font-weight:500; }
+.dova-budget-total-cell { font-weight:700;color:var(--accent); }
+
+.dova-empty { padding:30px;text-align:center;color:var(--muted);font-size:13px; }
