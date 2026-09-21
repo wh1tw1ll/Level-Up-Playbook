@@ -2,6 +2,10 @@
 // tasks.html has the complete LUCI Daily Manager with all features
 
 function renderTasksView() {
-  // Full-page redirect to the daily manager
   window.location.href = '/tasks.html';
+}
+
+// ── PREP VIEW — Redirects to daily manager prep tab ──
+function renderPrepView() {
+  window.location.href = '/tasks.html?view=prep';
 }

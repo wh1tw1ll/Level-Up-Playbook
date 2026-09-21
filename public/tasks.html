@@ -1508,6 +1508,21 @@ function copyPrepPrint(eventId, subject, project) {
 
 // ── EVENT BINDING ──
 document.addEventListener('DOMContentLoaded', function() {
+  // Check URL param for prep view
+  var urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('view') === 'prep') {
+    // Auto-switch to Prep view
+    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+    var prepTab = document.querySelector('.tab[data-project="prep"]');
+    if (prepTab) prepTab.classList.add('active');
+    document.getElementById('task-list').style.display = 'none';
+    var filters = document.querySelector('.filters');
+    if (filters) filters.style.display = 'none';
+    var chips = document.querySelector('.source-chips');
+    if (chips) chips.style.display = 'none';
+    document.getElementById('prep-view').classList.add('active');
+    loadPrepView();
+  }
   // Tabs
   document.getElementById('project-tabs').addEventListener('click', function(e) {
     const tab = e.target.closest('.tab');
