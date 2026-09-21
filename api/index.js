@@ -630,7 +630,7 @@ export default async function handler(req, res) {
               } catch(e) { return res.status(500).json({error:e.message, stack:e.stack?.substring(0,500)}); }
             }
       case '/api/prep-map': return prepMapHandler(req, res);
-                  case '/api/extract-from-note': return extractFromNote(req, res);
+                              case '/api/extract-from-note': return extractFromNote(req, res);
             // ── V6 SCAN: discover Category stragglers + Status options ──
             case '/api/admin/scan-stragglers': {
               // GET — scans DOVA for old Category values and Status column options
