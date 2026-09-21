@@ -27,7 +27,7 @@ function renderProjects() {
       + 'Audit final delivery: June 30, 2026'
       + '</div>'
       + '</div>'
-    + '<div class="mfp-card chiefs-card" onclick="setView(\'dova\')" style="cursor:pointer">'
+    + '<div class="mfp-card chiefs-card" onclick="window.open(\'https://dova-dashboard-ten.vercel.app/\', \'_blank\')" style="cursor:pointer">'
           + '<div class="mfp-card-head">'
           + '<span class="mfp-icon" style="font-size:18px">🏗</span>'
           + '<span class="mfp-card-title">DOVA Arena (Sacramento)</span>'
