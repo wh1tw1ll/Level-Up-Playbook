@@ -1120,6 +1120,14 @@ function init() {
       if (!luUser || !luUser.authenticated) {
         tryRefresh();
       }
+      // Hide password overlay if user is authenticated
+      if (luUser && luUser.authenticated) {
+        var overlay = document.getElementById('password-overlay');
+        if (overlay) {
+          overlay.classList.remove('open');
+          overlay.style.display = 'none';
+        }
+      }
       // Initialize KB now that data scripts have loaded
       initKB();
       // Initialize daily briefing/side panel

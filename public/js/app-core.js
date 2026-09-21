@@ -172,6 +172,12 @@ async function tryRefresh() {
       if (data.authenticated) {
         luUser = { authenticated: true, name: data.name, email: data.email };
         updateAuthUI();
+        // Hide password overlay since user is authenticated
+        var overlay = document.getElementById('password-overlay');
+        if (overlay) {
+          overlay.classList.remove('open');
+          overlay.style.display = 'none';
+        }
         initDailyBriefing();
         return true;
       }
