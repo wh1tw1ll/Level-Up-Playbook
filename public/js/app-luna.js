@@ -506,16 +506,10 @@ function renderReminderActions() {
   var el = document.getElementById('reminder-panel-actions');
   if (!el) return;
   var footer = document.getElementById('reminder-panel-footer-text');
-  if (footer) footer.textContent = 'Loading from Smartsheet...';
+  if (footer) footer.textContent = 'Refreshing...';
 
-  // Direct fetch — never falls back to localStorage
-  fetch('/api/tasks')
-    .then(function(r) {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    })
-    .then(function(data) {
-      var rows = data.tasks || [];
+  // Read from STORE — consistent with task view
+  loadSTORE().then(function(rows) {
       // Filter: DOVA only, not Complete, overdue or due today
       var relevant = rows.filter(function(r) {
         return (r.project || '').toLowerCase() === 'dova'
@@ -671,7 +665,7 @@ function renderReminderActions() {
       if (reminderPanelOpen) {
         renderReminderActions();
       }
-    }, 30000);
+    }, 120000);
   }
   function stopPanelAutoRefresh() {
     if (panelRefreshTimer) {

@@ -1,0 +1,96 @@
+============================================================
+Existing ExtractionIds in sheet: 4
+  key=5dcda8f62cfbf651  rowId=5817297461051268
+  key=669f7010f9a97c45  rowId=7045696762412932
+  key=8d11924bd78164c7  rowId=5776073828073348
+  key=b889d228d28eb419  rowId=7413612250922884
+
+Granola notes: 14
+
+
+--- Note: Dova Arena Sources and Uses (2026-09-21) ---
+  REJECTED [header: Sharing and Next Steps]
+    text: Sharing and Next Steps
+  REJECTED [header: Next Steps]
+    text: Next Steps
+
+--- Note: 4D Wind Effect & Lift Coordination  (2026-09-21) ---
+  REJECTED [header: Next Steps]
+    text: Next Steps
+
+--- Note: PC Elliott Stevenson | KozPure re: Downtown Dova Project Update (2026-09-21) ---
+  REJECTED [header: Next Steps]
+    text: Next Steps
+
+--- Note: Level Up + L&S Intro (2026-09-21) ---
+  REJECTED [header: Next Steps]
+    text: Next Steps
+  KEY-MATCHED [669f7010f9a97c45] rowId=7045696762412932  → skipped
+    text: Lang Schwander to follow up end of November if no contact by then
+
+--- Note: MFP | Payment Chat (2026-09-18) ---
+  KEY-MATCHED [8d11924bd78164c7] rowId=5776073828073348  → skipped
+    text: One further reduction pending; Whitney to follow up with DCL
+  REJECTED [header: Next Steps]
+    text: Next Steps
+  KEY-MATCHED [b889d228d28eb419] rowId=7413612250922884  → skipped
+    text: **Follow up with DCL on pending reduction and Procore invoicing** (Whitney)
+
+--- Note: Zoom - Model Fly Thru w/ P+W for Phase 1 + 2  (2026-09-18) ---
+  REJECTED [header: Next Steps]
+    text: Next Steps
+
+--- Note: DOVA: Design Team Kick-Off [HOLD] (2026-09-17) ---
+  REJECTED [header: Action Items]
+    text: Action Items by Pull Plan Window
+  REJECTED [header: Ongoing]
+    text: Ongoing / Untimed Action Items
+
+--- Note: Zoom - P+W | Level Up | KozPure re: Internal Design Kick-off (2026-09-16) ---
+  KEY-MATCHED [5dcda8f62cfbf651] rowId=5817297461051268  → skipped
+    text: Santana forwarded the invite; Whitney to double-check
+  REJECTED [header: Design Review Process]
+    text: Design Review Process and Next Steps
+  REJECTED [header: Next Steps]
+    text: Next Steps
+
+--- Note: MFP | Tracker Reconciliation + Graham Email (2026-09-16) ---
+  REJECTED [actor missing: no known actor name/full-name pattern; no owner tag (Name); no we/team/group/i commitment language]
+    text: Pulled from Thomas’s action items and Joseph’s prior email
+  REJECTED [header: Next Steps]
+    text: Next Steps
+
+--- Note: Zoom - Level Up | KozPure re: weekly touch point (2026-09-16) ---
+  REJECTED [header: Next Steps]
+    text: Next Steps
+
+--- Note: MFP | Closeout Tracker (2026-09-16) ---
+  REJECTED [header: Next Steps]
+    text: Next Steps
+
+--- Note: Zoom - Dova Project re: COA review (2026-09-15) ---
+  REJECTED [header: Next Steps]
+    text: Next Steps
+
+--- Note: FW: NHS6 - Weekly M, E, P, LV, AV Coordination (2026-09-15) ---
+  REJECTED [actor missing: no known actor name/full-name pattern; no owner tag (Name); no we/team/group/i commitment language]
+    text: Model Coordination and Next Steps
+  REJECTED [header: Next Steps]
+    text: Next Steps
+
+--- Note: NHS6 - Weekly Enclosure Coordination (2026-09-15) ---
+  REJECTED [actor missing: no known actor name/full-name pattern; no owner tag (Name); no we/team/group/i commitment language]
+    text: Next step: circulate this week for team to rank criteria by importance to the project
+  REJECTED [actor missing: no known actor name/full-name pattern; no owner tag (Name); no we/team/group/i commitment language]
+    text: Next step: quick conversation with structural (Sarah Root) to confirm loads held for exter
+  REJECTED [no action verb found in list]
+    text: Next step: Buro Happold to produce slab edge plan with one-line diagram showing 4D trench 
+  REJECTED [header: Next Steps]
+    text: Next Steps
+
+============================================================
+TOTAL candidates (passed ACT_KW):   26
+GATE-REJECTED:                      22
+KEY-MATCHED (already in sheet):     4
+NEW (would write):                  0
+Sum check: gate+key+new = 26  total = 26

@@ -27,6 +27,7 @@ import stageHandler from '../lib/handlers/stage.js';
 import promoteHandler from '../lib/handlers/promote.js';
 import extractFromNote from '../lib/handlers/extract-from-note.js';
 import prepMapHandler from '../lib/handlers/prep-map.js';
+import agendasStoreHandler from '../lib/handlers/agendas-store.js';
 import smartsheet from '../lib/smartsheet.js';
 import guardedWrite from '../lib/guarded-write.js';
 import { readFileSync } from 'fs';
@@ -56,6 +57,8 @@ function getCellValue(row, colId) {
 const AUTH_BYPASS_ROUTES = new Set([
   '/api/verify-password',
   '/api/check-auth',
+  '/api/prep',
+  '/api/prep/agendas',
 ]);
 // Routes accessible with password-only (no Microsoft sign-in required)
 // These have been hardened to only return DOVA-filtered data
@@ -63,6 +66,7 @@ const PASSWORD_ALLOWED_ROUTES = new Set([
   '/api/client/actions',
   '/api/actions',
   '/api/logo',
+  '/api/tasks',
 ]);
 function requireSiteAuth(req, res, parsedPath) {
   // OAuth routes (req.query.provider) are always allowed
@@ -175,6 +179,7 @@ export default async function handler(req, res) {
       case '/api/verify-password': return verifyPassword(req, res);
       case '/api/chat': return chatHandler(req, res);
       case '/api/prep': return prepHandler(req, res);
+      case '/api/prep/agendas': return agendasStoreHandler(req, res);
       case '/api/stage': return stageHandler(req, res);
       case '/api/promote': return promoteHandler(req, res);
       case '/api/ss-ops': return ssOpsHandler(req, res);

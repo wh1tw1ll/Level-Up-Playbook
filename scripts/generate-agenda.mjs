@@ -213,38 +213,7 @@ function buildAgenda(event, noteDetail, tasks) {
   }
   h += '\n' + '─'.repeat(25) + '\n\n';
 
-  const ownedTasks = tasks.filter(t => t.owner && isWhitney(t.owner));
-  const owedTasks = tasks.filter(t => t.owner && !isWhitney(t.owner));
-
-  if (ownedTasks.length) {
-    h += `<b>WHAT I OWE (${ownedTasks.length})</b>\n`;
-    for (const t of ownedTasks.slice(0, 8)) {
-      const due = t.dueDate ? ` | due ${t.dueDate}` : '';
-      h += `  ☐ ${escapeHtml(t.actionItem)}${due}\n`;
-    }
-    if (ownedTasks.length > 8) h += `  ... +${ownedTasks.length - 8} more\n`;
-    h += '\n';
-  }
-
-  if (owedTasks.length) {
-    h += `<b>OWED TO ME (${owedTasks.length})</b>\n`;
-    const groups = {};
-    for (const t of owedTasks) {
-      const o = t.owner || 'Unassigned';
-      if (!groups[o]) groups[o] = [];
-      groups[o].push(t);
-    }
-    for (const [owner, items] of Object.entries(groups).sort()) {
-      h += `  👤 ${escapeHtml(owner)}\n`;
-      for (const t of items.slice(0, 3)) {
-        const due = t.dueDate ? ` | due ${t.dueDate}` : '';
-        h += `    ☐ ${escapeHtml(t.actionItem)}${due}\n`;
-      }
-      if (items.length > 3) h += `    ... +${items.length - 3} more\n`;
-    }
-    h += '\n';
-  }
-
+  // ── CONTEXT FROM PREVIOUS MEETING NOTES ──
   if (noteDetail) {
     const summary = noteDetail.summary_text || '';
     if (summary) {
@@ -263,16 +232,22 @@ function buildAgenda(event, noteDetail, tasks) {
       if (items.length > 5) h += `  ... +${items.length - 5} more\n`;
       h += '\n';
     }
+  } else {
+    h += `<i>⚠ No prior meeting notes available — review recent emails for context.</i>\n\n`;
   }
 
-  // Due this week
+  // ── DUE THIS WEEK ──
+  // Only show due-soon items that are actually Whitney's or directly relevant
   const now = new Date();
   const weekEnd = new Date(now.getTime() + 7 * 86400000).toISOString().slice(0, 10);
-  const dueSoon = tasks.filter(t => t.dueDate && t.dueDate <= weekEnd);
+  const dueSoon = tasks.filter(t =>
+    t.dueDate && t.dueDate <= weekEnd
+    && (t.owner && isWhitney(t.owner))
+  );
   if (dueSoon.length) {
-    h += `<b>DISCUSSION TOPICS (due this week)</b>\n`;
+    h += `<b>⚠ ITEMS I OWE (due this week)</b>\n`;
     for (const t of dueSoon.slice(0, 5)) {
-      h += `  🔵 ${escapeHtml(t.actionItem)} — ${escapeHtml(t.owner || 'unowned')}\n`;
+      h += `  ☐ ${escapeHtml(t.actionItem)}\n`;
     }
     if (dueSoon.length > 5) h += `  ... +${dueSoon.length - 5} more\n`;
     h += '\n';
@@ -295,17 +270,14 @@ function matchNote(event, allNotes) {
   return null;
 }
 
-// ── TELEGRAM ────────────────────────────────────────────────────────
+// ── POST TO LUCI API ────────────────────────────────────────────────────
 
-async function sendTelegram(message) {
-  const token = getTelegramToken();
-  if (!token) { console.log('No Telegram token'); return false; }
+async function postAgendas(agendas) {
+  const url = 'https://luci-by-levelup.vercel.app/api/prep/agendas';
   try {
-    const result = await httpsPost(`https://api.telegram.org/bot${token}/sendMessage`, {
-      chat_id: TELEGRAM_CHAT, text: message, parse_mode: 'HTML', disable_notification: false,
-    });
+    const result = await httpsPost(url, { agendas }, {});
     return result?.ok || false;
-  } catch (e) { console.log('Telegram error:', e.message); return false; }
+  } catch (e) { console.log('API post error:', e.message); return false; }
 }
 
 // ── MAIN ────────────────────────────────────────────────────────────
@@ -331,7 +303,7 @@ async function main() {
   const events = (data?.value || []).filter(e => !e.isAllDay);
   if (!events.length) {
     console.log('No meetings in window');
-    await sendTelegram('📋 No meetings scheduled in the next 48 hours.');
+    await postAgendas([]);
     return;
   }
   console.log(`Meetings: ${events.length}`);
@@ -352,7 +324,7 @@ async function main() {
   const allTasks = await fetchOpenTasks();
   console.log(`Tasks: ${allTasks.length}`);
 
-  let sent = 0;
+  const agendas = [];
   for (const event of events) {
     const subject = event.subject || '';
     if (!subject || subject === 'Untitled' || subject.startsWith('[')) continue;
@@ -360,22 +332,21 @@ async function main() {
     const note = matchNote(event, allNotes);
     const noteDetail = note ? await granolaDetail(note.id) : null;
 
-    const project = resolveProject(subject);
-    const meetingTasks = allTasks.filter(t => t.project === project || project === 'Unassigned');
-
-    const agenda = buildAgenda(event, noteDetail, meetingTasks);
-    if (await sendTelegram(agenda)) {
-      console.log(`  ✅ ${subject}`);
-      sent++;
-    } else {
-      console.log(`  ❌ ${subject}`);
-    }
+    const agenda = buildAgenda(event, noteDetail, allTasks);
+    agendas.push({
+      meetingSubject: subject,
+      meetingTime: event.start?.dateTime || '',
+      duration: (event.start?.dateTime && event.end?.dateTime)
+        ? Math.round((new Date(event.end.dateTime) - new Date(event.start.dateTime)) / 60000) : 0,
+      hasPriorNotes: !!noteDetail,
+      agendaHtml: agenda,
+    });
+    console.log(`  ${noteDetail ? '✅' : '⚠️'} ${subject}`);
   }
 
-  if (!sent && events.length) {
-    await sendTelegram(`📋 Found ${events.length} upcoming meetings but none met agenda criteria.`);
-  }
-  console.log(`\nDone. ${sent} agendas sent.`);
+  console.log(`\nPublishing ${agendas.length} agendas to LUCI page...`);
+  await postAgendas(agendas);
+  console.log('Done.');
 }
 
 main().catch(e => { console.log('Fatal:', e.message); process.exit(1); });

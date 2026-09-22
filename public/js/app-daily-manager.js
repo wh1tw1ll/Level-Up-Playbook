@@ -3,7 +3,7 @@
 // All var, no let/const — consistent with LUCI codebase
 
 function renderDailyManager() {
-
+try {
 // ── STATE ──
 var allTasks = [];
 var myName = 'Whitney Williams';
@@ -13,6 +13,7 @@ var currentStatus = 'open';
 var currentOwner = '';
 var currentSeries = '';
 var currentSource = 'all';
+var currentSourceRef = '';
 var searchText = '';
 var quickFilters = { overdue: false, week: false, hot: false, mine: false };
 
@@ -212,6 +213,7 @@ function getFilteredTasks() {
     if (t.status === 'Archived') return false;
     if (currentProject !== 'all' && t.project !== currentProject) return false;
     if (currentSource !== 'all' && t.source !== currentSource) return false;
+    if (currentSourceRef && !t.sourceRef?.toLowerCase().includes(currentSourceRef.toLowerCase())) return false;
     if (currentCategory && t.category !== currentCategory) return false;
     if (currentStatus === 'open' && t.status !== 'Not Started' && t.status !== 'In Progress') return false;
     if (currentStatus === 'closed' && t.status !== 'Complete') return false;
@@ -447,6 +449,17 @@ function loadTasks() {
           seriesSel.innerHTML += '<option value="' + escapeHtml(s) + '">' + escapeHtml(s.substring(0, 20)) + '...</option>';
         });
       }
+      // Populate source/meeting filter
+      var sourceRefs = new Set(allTasks.map(function(t) { return t.sourceRef; }).filter(Boolean));
+      var srcSel = document.getElementById('source-filter');
+      if (srcSel) {
+        srcSel.innerHTML = '<option value="">All Sources</option>';
+        var srcArr = [];
+        sourceRefs.forEach(function(s) { srcArr.push(s); });
+        srcArr.sort().forEach(function(s) {
+          srcSel.innerHTML += '<option value="' + escapeHtml(s) + '">' + escapeHtml(s.substring(0, 45)) + '</option>';
+        });
+      }
       render();
       if (taskList) taskList.classList.remove('loading');
       var now = new Date().toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
@@ -485,9 +498,6 @@ function cycleStatus(el, rowId) {
   else if (raw === 'In Progress') next = 'Complete';
   else next = 'Not Started';
 
-  task.status = next;
-  render();
-
   var taskEl = document.querySelector('.task[data-row-id="' + rowId + '"]');
   var source = taskEl ? taskEl.dataset.source || 'project' : 'project';
   pendingWrites[rowId] = { fields: { status: next } };
@@ -496,9 +506,16 @@ function cycleStatus(el, rowId) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status: next })
   }).then(function(r) {
-    if (r.ok) { loadTasks(); }
-    else { showToast('Status update failed', 2000); loadTasks(); }
-  }).catch(function() { loadTasks(); });
+    if (!r.ok) throw new Error('save failed: ' + r.status);
+    return r.json();
+  }).then(function() {
+    task.status = next;
+    render();
+    loadTasks();
+  }).catch(function(e) {
+    render();
+    showToast('Could not save: ' + e.message, 3000);
+  });
 }
 
 // ── TOGGLE TASK with animation on complete ──
@@ -875,7 +892,12 @@ function editStatusNote(el, rowId) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ statusNote: newText })
-    }).catch(function() {});
+    }).then(function(r) {
+      if (!r.ok) throw new Error('save failed: ' + r.status);
+    }).catch(function(e) {
+      div.textContent = currentText;
+      showToast('Could not save status note: ' + e.message, 3000);
+    });
   }
 
   input.onblur = save;
@@ -912,7 +934,12 @@ function editTaskTitle(el, rowId) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ actionItem: newText })
-      }).catch(function() {});
+      }).then(function(r) {
+        if (!r.ok) throw new Error('save failed: ' + r.status);
+      }).catch(function(e) {
+        div.textContent = currentText;
+        showToast('Could not save: ' + e.message, 3000);
+      });
     }
     input.replaceWith(div);
     div.onclick = function(e) { e.stopPropagation(); editTaskTitle(this, rowId); };
@@ -1532,6 +1559,29 @@ if (tabsEl) {
   });
 }
 
+// Reset all filters
+function resetFilters() {
+  currentProject = 'all';
+  currentCategory = '';
+  currentStatus = 'open';
+  currentOwner = '';
+  currentSeries = '';
+  currentSource = 'all';
+  currentSourceRef = '';
+  searchText = '';
+  quickFilters = { overdue: false, week: false, hot: false, mine: false };
+  var searchInput = document.getElementById('search-input');
+  if (searchInput) searchInput.value = '';
+  document.querySelectorAll('.filter-chip').forEach(function(c) { c.classList.remove('active'); });
+  document.querySelectorAll('.dm-select').forEach(function(s) { s.value = ''; });
+  // Re-set status filter to open
+  var statusSel = document.getElementById('status-filter');
+  if (statusSel) statusSel.value = 'open';
+  var srcSel = document.getElementById('source-filter');
+  if (srcSel) srcSel.value = '';
+  render();
+}
+
 // Search
 var searchInput = document.getElementById('search-input');
 if (searchInput) {
@@ -1573,6 +1623,15 @@ var seriesFilter = document.getElementById('series-filter');
 if (seriesFilter) {
   seriesFilter.addEventListener('change', function() {
     currentSeries = this.value;
+    render();
+  });
+}
+
+// Source/meeting filter
+var sourceFilter = document.getElementById('source-filter');
+if (sourceFilter) {
+  sourceFilter.addEventListener('change', function() {
+    currentSourceRef = this.value;
     render();
   });
 }
@@ -1687,5 +1746,5 @@ document.addEventListener('click', function(e) {
 
 // Return the refresh interval so the caller can clear it when leaving the view
 return refreshInterval;
-
+} catch(e) { console.error('renderDailyManager error:', e); }
 } // end renderDailyManager()

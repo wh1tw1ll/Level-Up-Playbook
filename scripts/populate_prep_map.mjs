@@ -105,7 +105,7 @@ async function main() {
   const seriesData = {};
   for (const sm of seriesMasters) {
     const inst = await graph('/me/calendar/events/' + encodeURIComponent(sm)
-      + '/instances?startDateTime=2026-08-01T00:00:00Z&endDateTime=2026-09-15T23:59:00Z&$select=subject,start,id&$top=20', tok);
+      + '/instances?startDateTime=2026-08-01T00:00:00Z&endDateTime=' + encodeURIComponent(new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0]) + 'T23:59:00Z&$select=subject,start,id&$top=20', tok);
     seriesData[sm] = (inst.value || []).sort((a, b) => new Date(b.start?.dateTime) - new Date(a.start?.dateTime));
   }
 
