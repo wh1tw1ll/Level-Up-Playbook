@@ -1747,4 +1747,17 @@ document.addEventListener('click', function(e) {
 // Return the refresh interval so the caller can clear it when leaving the view
 return refreshInterval;
 } catch(e) { console.error('renderDailyManager error:', e); }
+
+// Expose critical functions globally for inline onclick handlers
+window.toggleTask = toggleTask;
+window.deleteTask = deleteTask;
+window.editTaskTitle = editTaskTitle;
+window.promoteTask = promoteTask;
+window.toggleDiscussions = toggleDiscussions;
+window.editStatusNote = editStatusNote;
+window.cycleStatus = cycleStatus;
+window.jumpToLinkedRow = jumpToLinkedRow;
+window.copyPrepPrint = copyPrepPrint;
+window.switchPrepTab = switchPrepTab;
+
 } // end renderDailyManager()
