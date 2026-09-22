@@ -98,7 +98,12 @@ function requireSiteAuth(req, res, parsedPath) {
     try {
       const data = JSON.parse(decodeURIComponent(siteAuth));
       if (data.authed && data.expires_at && Date.now() < data.expires_at) {
-        if (PASSWORD_ALLOWED_ROUTES.has(parsedPath)) return true;
+        // Exact route match OR prefix match for /api/tasks/, /api/dispatch/
+        if (PASSWORD_ALLOWED_ROUTES.has(parsedPath) ||
+            parsedPath.startsWith('/api/tasks/') ||
+            parsedPath.startsWith('/api/dispatch/')) {
+          return true;
+        }
         res.setHeader('Content-Type', 'application/json');
         res.status(401).json({ error: 'Microsoft sign-in required for this route. Visit / to sign in.' });
         return false;
