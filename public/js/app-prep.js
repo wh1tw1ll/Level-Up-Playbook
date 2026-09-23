@@ -46,6 +46,9 @@ function renderPrepUnified(container, prepData, upcomingData) {
   });
   function findAgenda(subject) {
     if (!subject) return null;
+    // Denylist: these meetings never get a fuzzy-matched agenda (keep meeting, drop agenda)
+    var subjLower = String(subject).toLowerCase();
+    if (subjLower.indexOf('boldyn') !== -1 || subjLower.indexOf('design team') !== -1) return null;
     // Word-overlap scoring, same as server. Handles "i5 LED Coordination" vs "...Design Coordination".
     function norm(s) {
       return String(s || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/)
