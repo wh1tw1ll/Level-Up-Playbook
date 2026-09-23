@@ -46,11 +46,25 @@ function renderPrepUnified(container, prepData, upcomingData) {
   });
   function findAgenda(subject) {
     if (!subject) return null;
-    var s = subject.toLowerCase().trim();
-    if (agendaBySubject[s]) return agendaBySubject[s];
-    for (var k in agendaBySubject) {
-      if (s.length > 5 && k.length > 5 && (s.indexOf(k) !== -1 || k.indexOf(s) !== -1)) return agendaBySubject[k];
+    // Word-overlap scoring, same as server. Handles "i5 LED Coordination" vs "...Design Coordination".
+    function norm(s) {
+      return String(s || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/)
+        .filter(function(w) { return w.length > 2 && ['the','and','for','with','you','our','are','per','re'].indexOf(w) === -1; });
     }
+    var a = norm(subject);
+    if (a.length === 0) return null;
+    var best = null;
+    var bestScore = 0;
+    for (var k in agendaBySubject) {
+      var b = norm(k);
+      if (b.length === 0) continue;
+      var short = a.length < b.length ? a : b;
+      var long = a.length < b.length ? b : a;
+      var overlap = short.filter(function(w) { return long.indexOf(w) !== -1; }).length;
+      var score = overlap / short.length;
+      if (score > bestScore) { bestScore = score; best = k; }
+    }
+    if (best && bestScore >= 0.7) return agendaBySubject[best];
     return null;
   }
 
