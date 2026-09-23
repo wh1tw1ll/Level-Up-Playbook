@@ -23,6 +23,8 @@ import dovaSeedHandler from '../lib/handlers/dova-seed.js';
 import dovaWorkspaceHandler from '../lib/handlers/dova-workspace.js';
 import dovaUpdateSchedule from '../lib/handlers/dova-update-schedule.js';
 import prepHandler from '../lib/handlers/prep.js';
+import prepUpcomingHandler from '../lib/handlers/prep-upcoming.js';
+import prepGenerateHandler from '../lib/handlers/prep-generate.js';
 import stageHandler from '../lib/handlers/stage.js';
 import promoteHandler from '../lib/handlers/promote.js';
 import extractFromNote from '../lib/handlers/extract-from-note.js';
@@ -185,6 +187,8 @@ export default async function handler(req, res) {
       case '/api/chat': return chatHandler(req, res);
       case '/api/prep': return prepHandler(req, res);
       case '/api/prep/agendas': return agendasStoreHandler(req, res);
+      case '/api/prep/upcoming': return prepUpcomingHandler(req, res);
+      case '/api/prep/generate': return prepGenerateHandler(req, res);
       case '/api/stage': return stageHandler(req, res);
       case '/api/promote': return promoteHandler(req, res);
       case '/api/ss-ops': return ssOpsHandler(req, res);
