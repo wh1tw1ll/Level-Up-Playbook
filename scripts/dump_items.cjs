@@ -1,0 +1,58 @@
+const fs = require('fs');
+
+function getToken() {
+  const lines = fs.readFileSync('C:/Users/HermesAdmin/Level-Up-Playbook/.env.local', 'utf8').split('\n');
+  for (const x of lines) {
+    const t = x.trim();
+    if (t.includes('SMARTSHEET_TOKEN') && t.includes('=')) {
+      let v = t.split('=').slice(1).join('=');
+      v = v.replace(/"/g, '').replace(/'/g, '').trim();
+      if (v.length > 10) return v;
+    }
+  }
+  throw new Error('Token not found');
+}
+
+const token = getToken();
+const https = require('https');
+
+const opts = {
+  hostname: 'api.smartsheet.com',
+  path: '/2.0/sheets/4456864287772548',
+  method: 'GET',
+  headers: { 'Authorization': 'Bearer ' + token }
+};
+
+const req = https.request(opts, (res) => {
+  let d = '';
+  res.on('data', c => d += c);
+  res.on('end', () => {
+    const s = JSON.parse(d);
+
+    // Build items
+    const items = s.rows.map(r => {
+      const vals = {};
+      (r.cells || []).forEach(c => {
+        const col = s.columns.find(x => x.id === c.columnId);
+        if (col) vals[col.title] = c.displayValue || c.value || '';
+      });
+      return {
+        row: r.rowNumber, id: r.id,
+        action: String(vals['Action ID'] || '').trim(),
+        status: String(vals['Status'] || '').trim(),
+        owner: String(vals['Owner'] || '').trim(),
+        project: String(vals['Project'] || '').trim(),
+        category: String(vals['Category'] || '').trim(),
+        due: String(vals['Due Date'] || '').trim()
+      };
+    }).filter(i => i.action);
+
+    // Print ALL items so I can manually analyze
+    items.forEach(i => {
+      const short = i.action.replace(/\n/g, ' | ').substring(0, 150);
+      console.log(i.row + '\t[' + i.status + ']\t' + i.owner + '\t' + short);
+    });
+  });
+});
+req.on('error', e => console.error('Error:', e.message));
+req.end();

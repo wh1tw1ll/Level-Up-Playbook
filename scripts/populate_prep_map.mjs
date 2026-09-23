@@ -8,6 +8,7 @@ import fs from 'fs';
 import https from 'https';
 
 const smToken = fs.readFileSync('C:\\Users\\HermesAdmin\\.hermes\\.smartsheet_token', 'utf8').trim();
+process.env.SMARTSHEET_TOKEN = smToken;
 const msalTokens = JSON.parse(fs.readFileSync('C:\\Users\\HermesAdmin\\.hermes\\msal_tokens.json', 'utf8'));
 const granolaToken = 'grn_Xt3QX2jolKxe3tEGXUeL4QiH_DQwZXXZvbetD39O12j2PevnIBvXFgH6UZMphuXM6sUrP';
 

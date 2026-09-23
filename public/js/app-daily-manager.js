@@ -966,10 +966,10 @@ function deleteTask(btnEl, rowId) {
       allTasks = allTasks.filter(function(t) { return String(t.rowId) !== String(rowId); });
       render();
 
-      fetch('/api/tasks/' + rowId + '?source=' + source, {
+      fetch('/api/tasks?source=' + source, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'delete' })
+        body: JSON.stringify({ action: 'delete', rowId: String(rowId) })
       })
         .then(function(r) {
           if (!r.ok) {

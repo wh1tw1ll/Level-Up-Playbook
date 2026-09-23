@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box}
-:root{--bg:#181818;--fg:#d4d4d4;--accent:#BED1C6;--card:#222;--border:#333;--success:#7ecf7e;--warn:#e6c87c;--danger:#e86060;--muted:#888;--hover:#2a2a2a;--teal:#184655;--cool-gray:#F0EFEF;--warm-gray:#E6E7E8;--radius:6px;--font:"Aptos","Aptos Display","Segoe UI Variable","Segoe UI",system-ui,sans-serif}
+:root{--bg:#181818;--fg:#c0c0c0;--accent:#BED1C6;--card:#222;--border:#333;--success:#7ecf7e;--warn:#e6c87c;--danger:#e86060;--muted:#888;--hover:#2a2a2a;--teal:#184655;--cool-gray:#F0EFEF;--warm-gray:#E6E7E8;--radius:6px;--font:"Aptos","Aptos Display","Segoe UI Variable","Segoe UI",system-ui,sans-serif}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.4;overflow:hidden;height:100%}
 body{display:flex;flex-direction:column}
 /* Header */
@@ -1255,10 +1255,10 @@ function deleteTask(btnEl, rowId) {
       render();
 
       // Fire API in background
-      fetch('/api/tasks/' + rowId + '?source=' + source, {
+      fetch('/api/tasks?source=' + source, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'delete' })
+        body: JSON.stringify({ action: 'delete', rowId: String(rowId) })
       })
         .then(function(r) {
           if (!r.ok) {
