@@ -643,7 +643,7 @@ function toggleTask(el, rowId) {
     fetch('/api/tasks/' + rowId + '?source=' + source, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'Complete' })
+      body: JSON.stringify({ status: 'Complete', completedDate: new Date().toISOString().slice(0, 10) })
     })
       .then(function(r) {
         if (!r.ok) {
