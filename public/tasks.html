@@ -41,6 +41,8 @@ body{display:flex;flex-direction:column}
 .quick-chip.overdue-chip.active{background:rgba(232,96,96,0.15);border-color:var(--danger);color:var(--danger)}
 .csv-btn{padding:3px 10px;border-radius:var(--radius);font-size:12px;cursor:pointer;color:var(--muted);background:transparent;border:1px solid var(--border);transition:all .15s;font-family:var(--font);white-space:nowrap;height:28px;line-height:1}
 .csv-btn:hover{color:var(--accent);border-color:var(--accent)}
+.sort-dir-btn{padding:3px 8px;border-radius:var(--radius);font-size:14px;cursor:pointer;color:var(--accent);background:transparent;border:1px solid var(--accent);transition:all .15s;font-family:var(--font);line-height:1;height:28px;display:flex;align-items:center;justify-content:center}
+.sort-dir-btn:hover{background:rgba(190,209,198,0.12)}
 .meta-tag.unowned{font-style:italic;color:var(--danger)}
 /* Task List */
 .tasks{flex:1;overflow-y:auto;overflow-x:hidden;padding:0}
@@ -293,6 +295,16 @@ body{display:flex;flex-direction:column}
     <option value="">All Series</option>
   </select>
   <button class="csv-btn" onclick="exportCSV()">📋 CSV</button>
+  <select class="filter-select" id="sort-select">
+    <option value="dueDate">Sort: Due Date</option>
+    <option value="createdAt">Sort: Created Date</option>
+    <option value="category">Sort: Category</option>
+    <option value="owner">Sort: Owner</option>
+    <option value="status">Sort: Status</option>
+    <option value="project">Sort: Project</option>
+    <option value="actionItem">Sort: Action</option>
+  </select>
+  <button class="sort-dir-btn" id="sort-dir-btn" onclick="toggleSortDir()" title="Toggle sort direction">↑</button>
   <span class="filter-count" id="count-display">0 tasks</span>
 </div>
 <div class="tasks" id="task-list"></div>

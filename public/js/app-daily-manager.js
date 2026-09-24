@@ -16,6 +16,8 @@ var currentSource = 'all';
 var currentSourceRef = '';
 var searchText = '';
 var quickFilters = { overdue: false, week: false, hot: false, mine: false };
+var currentSort = 'dueDate';
+var sortAsc = true;
 
 // ── HELPERS ──
 function daysUntil(d) {
@@ -267,23 +269,44 @@ function getFilteredTasks() {
 function render() {
   var filtered = getFilteredTasks();
 
-  // Sort: my tasks first, then overdue, then this week, then by date
+  // Sort: dynamic by currentSort + sortAsc
   filtered.sort(function(a, b) {
-    var aMine = a.owner === myName ? 0 : 1;
-    var bMine = b.owner === myName ? 0 : 1;
-    if (aMine !== bMine) return aMine - bMine;
-
-    var aOver = isOverdue(a.dueDate) ? 0 : 1;
-    var bOver = isOverdue(b.dueDate) ? 0 : 1;
-    if (aOver !== bOver) return aOver - bOver;
-
-    var aWeek = a.status !== 'Complete' && isThisWeek(a.dueDate) ? 0 : 1;
-    var bWeek = b.status !== 'Complete' && isThisWeek(b.dueDate) ? 0 : 1;
-    if (aWeek !== bWeek) return aWeek - bWeek;
-
-    var ad = a.dueDate || '9999-12-31';
-    var bd = b.dueDate || '9999-12-31';
-    return ad.localeCompare(bd);
+    var va, vb;
+    switch (currentSort) {
+      case 'dueDate':
+        va = a.dueDate || '9999-12-31';
+        vb = b.dueDate || '9999-12-31';
+        break;
+      case 'createdAt':
+        va = a.createdAt || '';
+        vb = b.createdAt || '';
+        break;
+      case 'category':
+        va = (a.category || '').toLowerCase();
+        vb = (b.category || '').toLowerCase();
+        break;
+      case 'owner':
+        va = (a.owner || '').toLowerCase();
+        vb = (b.owner || '').toLowerCase();
+        break;
+      case 'status':
+        va = (a.status || '').toLowerCase();
+        vb = (b.status || '').toLowerCase();
+        break;
+      case 'project':
+        va = (a.project || '').toLowerCase();
+        vb = (b.project || '').toLowerCase();
+        break;
+      case 'actionItem':
+        va = (a.actionItem || '').toLowerCase();
+        vb = (b.actionItem || '').toLowerCase();
+        break;
+      default:
+        va = a.dueDate || '9999-12-31';
+        vb = b.dueDate || '9999-12-31';
+    }
+    var cmp = va < vb ? -1 : va > vb ? 1 : 0;
+    return sortAsc ? cmp : -cmp;
   });
 
   // Render
@@ -1619,6 +1642,8 @@ function resetFilters() {
   currentSourceRef = '';
   searchText = '';
   quickFilters = { overdue: false, week: false, hot: false, mine: false };
+  currentSort = 'dueDate';
+  sortAsc = true;
   var searchInput = document.getElementById('search-input');
   if (searchInput) searchInput.value = '';
   document.querySelectorAll('.filter-chip').forEach(function(c) { c.classList.remove('active'); });
@@ -1628,6 +1653,17 @@ function resetFilters() {
   if (statusSel) statusSel.value = 'open';
   var srcSel = document.getElementById('source-filter');
   if (srcSel) srcSel.value = '';
+  var sortSel = document.getElementById('sort-select');
+  if (sortSel) sortSel.value = 'dueDate';
+  var dirBtn = document.getElementById('sort-dir-btn');
+  if (dirBtn) dirBtn.textContent = '↑';
+  render();
+}
+
+function toggleSortDir() {
+  sortAsc = !sortAsc;
+  var btn = document.getElementById('sort-dir-btn');
+  if (btn) btn.textContent = sortAsc ? '↑' : '↓';
   render();
 }
 
@@ -1681,6 +1717,15 @@ var sourceFilter = document.getElementById('source-filter');
 if (sourceFilter) {
   sourceFilter.addEventListener('change', function() {
     currentSourceRef = this.value;
+    render();
+  });
+}
+
+// Sort select
+var sortSelect = document.getElementById('sort-select');
+if (sortSelect) {
+  sortSelect.addEventListener('change', function() {
+    currentSort = this.value;
     render();
   });
 }
@@ -1809,6 +1854,7 @@ window.switchPrepTab = switchPrepTab;
 window.toggleSound = toggleSound;
 window.toggleQuickFilter = toggleQuickFilter;
 window.resetFilters = resetFilters;
+window.toggleSortDir = toggleSortDir;
 window.openGranola = openGranola;
 window.exportCSV = exportCSV;
 
