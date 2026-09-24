@@ -119,6 +119,17 @@
 .meta-tag.source.manual{background:rgba(136,136,136,0.1);color:#8a98a5;cursor:default}
 .meta-tag.source.other{color:#8a98a5;cursor:default}
 
+/* Editable meta tags (owner, due date) */
+.meta-tag.editable{cursor:pointer;transition:opacity .15s}
+.meta-tag.editable:hover{opacity:0.7}
+.meta-tag.empty{font-style:italic;color:rgba(154,171,184,0.4);cursor:pointer}
+.meta-tag.empty:hover{color:rgba(154,171,184,0.7)}
+
+/* Inline edit inputs for meta tags */
+.meta-tag-input{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1px 5px;color:var(--charcoal);font-size:13px;outline:none;font-family:var(--font);width:auto;min-width:80px;max-width:180px;height:22px}
+.meta-tag-input:focus{border-color:var(--sage)}
+.meta-tag-input.date-input{max-width:140px;min-width:120px}
+
 /* Status note */
 .status-note{font-size:12px;color:#8a98a5;margin:2px 0 0;display:flex;align-items:center;gap:4px}
 .status-note::before{content:'>';font-size:11px;margin-right:3px;color:#666}

@@ -403,8 +403,8 @@ function render() {
         '<div class="task-title" onclick="event.stopPropagation();editTaskTitle(this,' + t.rowId + ')">' + escapeHtml(t.actionItem) + '</div>' +
         snHtml +
         '<div class="task-meta">' +
-          (t.owner ? '<span class="meta-tag owner">' + escapeHtml(t.owner) + '</span>' : '') +
-          (t.dueDate ? '<span class="meta-tag ' + dueClass + '">' + dueLabel + '</span>' : '') +
+          '<span class="meta-tag owner' + (t.owner ? ' editable' : ' empty') + '" onclick="event.stopPropagation();editOwner(this,' + t.rowId + ')">' + (t.owner ? escapeHtml(t.owner) : '+ assign') + '</span>' +
+          '<span class="meta-tag ' + dueClass + (t.dueDate ? ' editable' : ' empty') + '" onclick="event.stopPropagation();editDueDate(this,' + t.rowId + ')">' + (t.dueDate ? dueLabel : '+ due date') + '</span>' +
           (t.project ? '<span class="meta-tag project" data-project="' + escapeHtml(t.project.toLowerCase()) + '">' + escapeHtml(t.project) + '</span>' : '') +
           (firm ? '<span class="meta-tag firm">' + escapeHtml(firm) + '</span>' : '') +
           (statusLabel ? '<span class="meta-tag ' + statusClass + '" onclick="event.stopPropagation();cycleStatus(this,' + t.rowId + ')">' + escapeHtml(statusLabel) + '</span>' : '') +
@@ -1026,6 +1026,123 @@ function editTaskTitle(el, rowId) {
     }
     if (e.key === 'Enter') { e.preventDefault(); save(); }
     if (e.key === 'Escape') { save(); }
+  };
+}
+
+// ── OWNER (inline edit) ──
+function editOwner(el, rowId) {
+  var currentText = el.textContent;
+  var isEmpty = el.classList.contains('empty');
+  var input = document.createElement('input');
+  input.className = 'meta-tag-input owner-input';
+  input.type = 'text';
+  input.value = isEmpty ? '' : currentText;
+  input.placeholder = 'Assign owner...';
+  el.replaceWith(input);
+  input.focus();
+  input.select();
+
+  function save() {
+    var newOwner = input.value.trim();
+    var span = document.createElement('span');
+    span.className = 'meta-tag owner' + (newOwner ? ' editable' : ' empty');
+    span.textContent = newOwner || '+ assign';
+    input.replaceWith(span);
+    span.onclick = function(e) { e.stopPropagation(); editOwner(this, rowId); };
+
+    if (newOwner !== (isEmpty ? '' : currentText)) {
+      var taskEl = input.closest('.task');
+      var src = taskEl ? taskEl.dataset.source || 'project' : 'project';
+      fetch('/api/tasks/' + rowId + '?source=' + src, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ owner: newOwner || null })
+      }).then(function(r) {
+        if (!r.ok) throw new Error('save failed: ' + r.status);
+        var t = allTasks.find(function(t) { return String(t.rowId) === String(rowId); });
+        if (t) t.owner = newOwner || null;
+      }).catch(function(e) {
+        span.textContent = currentText || '+ assign';
+        if (!currentText) span.classList.add('empty');
+        showToast('Could not save owner: ' + e.message, 3000);
+      });
+    }
+  }
+
+  input.onblur = save;
+  input.onkeydown = function(e) {
+    if (e.key === 'Enter') { save(); }
+    if (e.key === 'Escape') { input.blur(); }
+  };
+}
+
+// ── DUE DATE (inline edit) ──
+function editDueDate(el, rowId) {
+  var currentText = el.textContent;
+  var isEmpty = el.classList.contains('empty');
+  var task = allTasks.find(function(t) { return String(t.rowId) === String(rowId); });
+  var currentDate = task ? (task.dueDate || '') : '';
+  var input = document.createElement('input');
+  input.className = 'meta-tag-input date-input';
+  input.type = 'date';
+  input.value = currentDate;
+  el.replaceWith(input);
+  input.focus();
+  if (typeof input.showPicker === 'function') input.showPicker();
+
+  function save() {
+    var newDate = input.value;
+    var span = document.createElement('span');
+    if (newDate) {
+      var days = daysUntil(newDate);
+      var over = days < 0;
+      var dueCls = 'due editable';
+      var label;
+      if (over) {
+        var absDays = Math.abs(days);
+        label = absDays === 0 ? 'Due today' : absDays + ' days overdue';
+        dueCls += ' overdue-tag';
+      } else if (days === 0) {
+        label = 'Due today';
+        dueCls += ' soon';
+      } else if (days <= 3) {
+        label = formatDate(newDate) + ' (' + days + 'd)';
+        dueCls += ' soon';
+      } else {
+        label = formatDate(newDate);
+      }
+      span.className = 'meta-tag ' + dueCls;
+      span.textContent = label;
+    } else {
+      span.className = 'meta-tag due empty';
+      span.textContent = '+ due date';
+    }
+    input.replaceWith(span);
+    span.onclick = function(e) { e.stopPropagation(); editDueDate(this, rowId); };
+
+    if (newDate !== currentDate) {
+      var taskEl = input.closest('.task');
+      var src = taskEl ? taskEl.dataset.source || 'project' : 'project';
+      fetch('/api/tasks/' + rowId + '?source=' + src, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dueDate: newDate || null })
+      }).then(function(r) {
+        if (!r.ok) throw new Error('save failed: ' + r.status);
+        var t = allTasks.find(function(t) { return String(t.rowId) === String(rowId); });
+        if (t) t.dueDate = newDate || null;
+      }).catch(function(e) {
+        span.textContent = currentText || '+ due date';
+        if (!currentText) span.classList.add('empty');
+        showToast('Could not save due date: ' + e.message, 3000);
+      });
+    }
+  }
+
+  input.onblur = save;
+  input.onkeydown = function(e) {
+    if (e.key === 'Enter') { save(); }
+    if (e.key === 'Escape') { input.blur(); }
   };
 }
 
