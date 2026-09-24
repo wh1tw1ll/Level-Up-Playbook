@@ -69,6 +69,7 @@ const PASSWORD_ALLOWED_ROUTES = new Set([
   '/api/actions',
   '/api/logo',
   '/api/tasks',
+  '/api/chat',
 ]);
 function requireSiteAuth(req, res, parsedPath) {
   // OAuth routes (req.query.provider) are always allowed
