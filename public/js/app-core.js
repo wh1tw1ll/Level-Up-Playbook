@@ -440,7 +440,7 @@ function verifyPassword() {
         var hashView = window.location.hash.substring(1);
         var validViews = ['luna','playbook','projects','tasks','prep','mfp','mfp-dashboard','dova'];
         if (validViews.indexOf(hashView) >= 0) {
-          setTimeout(function() { if (window.setView) window.setView(hashView); }, 100);
+          if (window.setView) window.setView(hashView);
         }
       }
     } else {

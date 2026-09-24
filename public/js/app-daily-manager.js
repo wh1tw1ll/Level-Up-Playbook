@@ -145,39 +145,6 @@ function setContextMessage(msg, duration) {
   }
 }
 
-// ── EXPORT CSV ──
-function exportCSV() {
-  var rows = [['Project','Title','Status','Owner','Category','Due Date','Discipline','Firm','Source']];
-  allTasks.forEach(function(t) {
-    if (t.status === 'Complete' || t.status === 'Closed') return; // only open tasks
-    rows.push([
-      t.project || '', t.title || t.task || '', t.status || '',
-      t.owner || '', t.category || '', t.dueDate || '',
-      t.discipline || '', t.firm || '', t.source || ''
-    ]);
-  });
-  if (rows.length === 1) { // header only — no data
-    var el = document.getElementById('context-message');
-    if (el) el.textContent = 'No open tasks to export';
-    return;
-  }
-  var csv = rows.map(function(r) {
-    return r.map(function(c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(',');
-  }).join('\n');
-  var blob = new Blob([csv], { type: 'text/csv' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = 'luci-tasks-' + new Date().toISOString().slice(0, 10) + '.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  setContextMessage('✓ Exported ' + (rows.length - 1) + ' tasks', 3000);
-}
-window.exportCSV = exportCSV;
-}
-
 // ── SOURCE LINK ──
 function openGranola() {
   // Try native Granola app (macOS registered scheme), fallback to web
@@ -1840,6 +1807,7 @@ window.toggleSound = toggleSound;
 window.toggleQuickFilter = toggleQuickFilter;
 window.resetFilters = resetFilters;
 window.openGranola = openGranola;
+window.exportCSV = exportCSV;
 
 return refreshInterval;
 } catch(e) { console.error('renderDailyManager error:', e); }
