@@ -129,7 +129,7 @@ def should_skip(subj):
     if 'LUCI' in subj: return True
     return False
 
-def is_action_worthy(subj):
+def is_action_worthy(subj, body):
     aw = ['review', 'approve', 'sign', 'send', 'update', 'confirm',
           'follow up', 'revise', 'submitted', 'revised', 'for review',
           'for approval', 'action required', 'response needed',
@@ -137,8 +137,18 @@ def is_action_worthy(subj):
           'agreement', 'quote', 'pricing', 'draft', 'closeout']
     sl = subj.lower()
     for w in aw:
-        if w in sl: return True
-    return False
+        if w in sl: return True, 'subject'
+    # Also check body for action language
+    bl = body.lower()
+    body_action_phrases = ['please review', 'please approve', 'need your',
+                           'could you', 'can you', 'we need to',
+                           'action required', 'response needed',
+                           'follow up', 'provide feedback', 'review and',
+                           'signature required', 'your approval is needed',
+                           'attached for your', 'submitted for your']
+    for p in body_action_phrases:
+        if p in bl: return True, 'body'
+    return False, None
 
 def normalize(t):
     t = t.lower().strip()
@@ -196,26 +206,47 @@ for fname, folder in folders:
                 if subj:
                     sender = str(msg.SenderName or '')
                     to = str(msg.To or '')
-                    msg_list.append((subj, sender, to))
+                    body = str(msg.Body or '')[:1000]
+                    msg_list.append((subj, sender, to, body))
                     count += 1
             except:
                 continue
         if count > 0:
             scanned_count += 1
             print('  ' + fname + ': ' + str(count) + ' msgs', flush=True)
-            for subj, sender, to in msg_list:
+            for subj, sender, to, body_text in msg_list:
                 if should_skip(subj): continue
                 clean = re.sub(r'^(Re|Fw|FW|RE|RE:|Fw:)\s*:\s*', '', subj, flags=re.IGNORECASE).strip()
                 tag = normalize(clean)
                 if tag in seen_subjects or tag in existing_norm:
                     skipped_count += 1; continue
                 seen_subjects.add(tag)
-                if not is_action_worthy(clean):
+                # Extract a real action from the body instead of using the subject
+                body_action = ''
+                body_lines = body_text.split('\n')
+                for bl in body_lines:
+                    b = bl.strip().lower()
+                    for pat in ['please review', 'please approve', 'need your',
+                                'could you', 'can you', 'we need to',
+                                'action required', 'response needed',
+                                'signature required', 'your approval is needed',
+                                'attached for your', 'submitted for your',
+                                'please provide', 'please sign', 'please send',
+                                'please confirm', 'please complete', 'please submit',
+                                'please update', 'please follow up']:
+                        if pat in b:
+                            body_action = bl.strip()[:200]
+                            break
+                    if body_action: break
+                worthy, source = is_action_worthy(clean, body_text)
+                if not worthy:
                     skipped_count += 1; continue
+                # Use body-extracted action if available, fall back to subject
+                action_text = body_action if body_action else clean
                 if DRY_RUN:
                     status, rid = 'DRY_RUN', 'N/A'
                 else:
-                    payload = json.dumps({'text': clean, 'owner': 'Whitney Williams', 'sourceRef': 'MFPmail:' + fname})
+                    payload = json.dumps({'text': action_text, 'owner': 'Whitney Williams', 'sourceRef': 'MFPmail:' + fname})
                     for _ in range(3):
                         try:
                             r = subprocess.run(['curl', '-s', '-X', 'POST', STAGE_URL,
