@@ -1044,7 +1044,7 @@ function confirmAction(btnEl, text, subtext, onConfirm) {
   if (top < 8) { top = rect.bottom + 8; above = false; }
   box.style.left = left + 'px';
   box.style.top = top + 'px';
-  box.setAttribute('data-arrow', above ? 'bottom' : 'top');
+  box.setAttribute('data-arrow', above ? 'top' : 'bottom');
 
   overlay.querySelector('#confirm-ok').onclick = function() {
     overlay.remove();

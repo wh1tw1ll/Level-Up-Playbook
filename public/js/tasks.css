@@ -197,6 +197,8 @@
 .confirm-btn.cancel:hover{background:var(--card)}
 .confirm-btn.ok{background:var(--sage);color:#0e1419;border-color:var(--sage)}
 .confirm-btn.ok:hover{opacity:0.85}
+.confirm-btn.danger{background:#c73a3a;color:#fff;border-color:#c73a3a}
+.confirm-btn.danger:hover{background:#a32e2e}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
 /* Undo toast */
