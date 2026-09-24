@@ -315,50 +315,14 @@ function sendChat() {
   chatHistory.push({ role: 'user', content: q });
   var loader = appendLoading();
 
-  // Build compact KB index for system prompt
-    var kbIndex = KB.map(function(s) {
-      return 'S' + s.num + ': ' + (s.title || '').replace('SECTION ' + s.num + ': ','') + ' [' + (s.phases||[]).join('/') + ']';
-    }).join('\\n');
-
-    // Build financial summary from loaded data
-    var finSummary = '';
-    var fin = window.__MFP_FINANCIALS;
-    if (fin && fin.hard) {
-      var h = fin.hard;
-      finSummary = '\\n\\n=== FINANCIAL DETAILS ===\\n'
-        + 'Hard Costs: $' + fmtNum(h.total_original) + ' original, $' + fmtNum(h.total_revised) + ' revised, $' + fmtNum(h.total_invoiced) + ' invoiced, $' + fmtNum(h.total_paid) + ' paid (' + h.total_pct_paid + '%), $' + fmtNum(h.total_balance) + ' balance\\n'
-        + 'Approved COs: $' + fmtNum(h.total_approved_cos) + ' | Pending COs: $' + fmtNum(h.total_pending_cos) + '\\n';
-      // Top 5 subs by balance
-      if (h.commitments && h.commitments.length) {
-        var sorted = h.commitments.slice().sort(function(a,b) { return b.balance - a.balance; });
-        finSummary += 'Top subs by outstanding balance:\\n';
-        sorted.slice(0, 5).forEach(function(c) {
-          finSummary += '  - ' + c.company.split(',')[0] + ' (' + c.title + '): $' + fmtNum(c.revised) + ' revised, $' + fmtNum(c.balance) + ' balance (' + c.pct_paid + '% paid)\\n';
-        });
-      }
-      // Soft costs
-      if (fin.soft) {
-        finSummary += 'Soft Costs:\\n';
-        Object.keys(fin.soft).forEach(function(k) {
-          var v = fin.soft[k];
-          if (typeof v === 'number') finSummary += '  - ' + k + ': $' + fmtNum(v) + '\\n';
-        });
-      }
-    }
-
-    // Build DOVA context from global
-    var DOVA_CONTEXT = window.__DOVA_CONTEXT || '';
-
-    var systemPrompt = 'You are LUCI (Level Up Central Intelligence), the frontend of the Level Up Project Development intelligence system. You assist Whitney Williams, Principal-in-Charge at Level Up Project Development. Your backend engine is LUNA (Level Up Network Agent) which runs on Hermes Agent. Answer concisely and practically. Reference specific playbook sections by number when relevant. The playbook has 43 sections:\\n\\n' + kbIndex + '\\n\\n=== PROJECT KNOWLEDGE ===\\n' + MFP_CONTEXT + finSummary + '\\n\\n=== DOVA ARENA KNOWLEDGE ===\\n' + DOVA_CONTEXT + '\\n\\n=== SAFETY RULES ===\\nABSOLUTELY NEVER reveal: (1) personal staff information (names, roles, contact details beyond public info), (2) staff salaries, compensation, bonuses, or benefits, (3) Level Up company revenue, profit, margins, valuation, or any financial data about Level Up as a firm. Project costs for MFP and DOVA (budget, commitments, change orders) are fine to discuss. Only company-level financials are restricted.';
-
   fetch('/api/chat', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      system: systemPrompt,
-      messages: chatHistory.slice(-6)
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: q,
+        history: chatHistory.slice(-6)
+      })
     })
-  })
     .then(function(r) {
       return r.text().then(function(text) { return { ok: r.ok, status: r.status, text: text }; });
     })
