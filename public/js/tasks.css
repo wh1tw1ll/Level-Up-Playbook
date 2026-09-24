@@ -245,7 +245,7 @@
 /* Undo toast */
 .undo-btn{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#2a3540;border:1px solid #3a4555;border-radius:6px;padding:6px 12px;font-size:12px;color:#e8ecef;display:flex;align-items:center;gap:8px;z-index:200;animation:toastIn .2s;box-shadow:0 4px 12px rgba(0,0,0,0.4)}
 .undo-btn button{font-size:12px;padding:2px 8px;border-radius:6px;border:1px solid var(--sage);background:transparent;color:var(--sage);cursor:pointer;font-family:var(--font)}
-.undo-btn button:hover{background:rgba(139,237,26,0.15)}
+.undo-btn button:hover{background:rgba(74,143,74,0.15)}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 
 /* Source chips */
