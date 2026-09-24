@@ -231,8 +231,8 @@ function renderCardBody(card) {
       html += '<button class="prep-export-btn" data-export="' + escapeHtmlAttr(card.id) + '">⬇ Export to Word</button>';
       html += '<button class="prep-regenerate-btn" data-generate="' + escapeHtmlAttr(card.id) + '">🔄 Regenerate</button>';
       html += '</div>';
-      html += '<div class="prep-collapsible open">';
-      html += '<div class="prep-collapsible-header" onclick="prepToggleSection(this)">📋 Agenda <span class="prep-collapsible-chevron">▼</span></div>';
+      html += '<div class="prep-collapsible">';
+      html += '<div class="prep-collapsible-header" onclick="prepToggleSection(this)">📋 Agenda <span class="prep-collapsible-chevron">▶</span></div>';
       html += '<div class="prep-collapsible-body"><div class="prep-agenda-content">' + card.agendaHtml + '</div></div>';
       html += '</div>';
     } else {
@@ -248,16 +248,16 @@ function renderCardBody(card) {
       html += '<div class="prep-card-linkrow"><a href="' + escapeHtmlAttr(card.webUrl) + '" target="_blank" rel="noopener">Open in Granola ↗</a></div>';
     }
     if (card.hasAgenda) {
-      html += '<div class="prep-collapsible open">';
-      html += '<div class="prep-collapsible-header" onclick="prepToggleSection(this)">📋 Agenda <span class="prep-collapsible-chevron">▼</span></div>';
+      html += '<div class="prep-collapsible">';
+      html += '<div class="prep-collapsible-header" onclick="prepToggleSection(this)">📋 Agenda <span class="prep-collapsible-chevron">▶</span></div>';
       html += '<div class="prep-collapsible-body">';
       html += '<div class="prep-card-actions-row" style="margin-bottom:10px">';
       html += '<button class="prep-export-btn" data-export="' + escapeHtmlAttr(card.id) + '">⬇ Export to Word</button>';
       html += '</div>';
       html += '<div class="prep-agenda-content">' + card.agendaHtml + '</div></div></div>';
     }
-    html += '<div class="prep-collapsible open">';
-    html += '<div class="prep-collapsible-header" onclick="prepToggleSection(this)">📝 Notes <span class="prep-collapsible-chevron">▼</span></div>';
+    html += '<div class="prep-collapsible">';
+    html += '<div class="prep-collapsible-header" onclick="prepToggleSection(this)">📝 Notes <span class="prep-collapsible-chevron">▶</span></div>';
     html += '<div class="prep-collapsible-body">';
     if (card.notes) {
       html += '<div class="prep-detail-summary">' + mdToHtml(card.notes) + '</div>';
@@ -266,8 +266,8 @@ function renderCardBody(card) {
     }
     html += '</div></div>';
     if (card.actions.length > 0) {
-      html += '<div class="prep-collapsible open">';
-      html += '<div class="prep-collapsible-header" onclick="prepToggleSection(this)">✅ Action Items (' + card.actions.length + ') <span class="prep-collapsible-chevron">▼</span></div>';
+      html += '<div class="prep-collapsible">';
+      html += '<div class="prep-collapsible-header" onclick="prepToggleSection(this)">✅ Action Items (' + card.actions.length + ') <span class="prep-collapsible-chevron">▶</span></div>';
       html += '<div class="prep-collapsible-body"><div class="prep-actions-list">';
       card.actions.forEach(function(a) {
         var ownerStr = a.owner ? '<span class="prep-action-owner">' + escapeHtml(a.owner) + '</span>' : '';
@@ -447,10 +447,9 @@ function prepToggleSection(header) {
   var body = wrapper.querySelector('.prep-collapsible-body');
   var chevron = header.querySelector('.prep-collapsible-chevron');
   if (!body) return;
-  var isOpen = body.style.display !== 'none';
-  body.style.display = isOpen ? 'none' : 'block';
-  if (chevron) chevron.textContent = isOpen ? '▶' : '▼';
+  var isOpen = wrapper.classList.contains('open');
   wrapper.classList.toggle('open', !isOpen);
+  if (chevron) chevron.textContent = isOpen ? '▶' : '▼';
 }
 window.prepToggleSection = prepToggleSection;
 
@@ -604,7 +603,8 @@ function escapeHtmlAttr(s) {
     '.prep-collapsible-header:hover{background:var(--teal-light)}' +
     '.prep-collapsible-chevron{font-size:10px;color:var(--muted);margin-left:auto;transition:transform .15s}' +
     '.prep-collapsible.open>.prep-collapsible-header{border-bottom:1px solid var(--border)}' +
-    '.prep-collapsible-body{padding:10px 14px;background:var(--card);font-size:13px;line-height:1.6;color:var(--charcoal)}' +
+    '.prep-collapsible-body{display:none;padding:10px 14px;background:var(--card);font-size:13px;line-height:1.6;color:var(--charcoal)}' +
+    '.prep-collapsible.open>.prep-collapsible-body{display:block}' +
     '.prep-collapsible-body .prep-empty-sm{font-size:12px;color:var(--muted);padding:4px 0}' +
     '.prep-detail-summary{font-size:13px;line-height:1.65;color:var(--charcoal);padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;max-height:60vh;overflow-y:auto}' +
     '.prep-detail-summary h1,.prep-detail-summary h2,.prep-detail-summary h3,.prep-detail-summary h4{color:var(--teal);margin:10px 0 4px}' +
