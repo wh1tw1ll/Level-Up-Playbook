@@ -221,7 +221,7 @@ function toggleChat() {
     if (clippy) clippy.classList.toggle('chat-open', chatOpen);
   if (chatOpen) {
       if (chatHistory.length === 0) {
-        var introText = "Hi " + (luUser && luUser.name ? luUser.name.split(' ')[0] : 'there') + ". I'm LUCI, your Project Intelligence engine. Ask me anything about the playbook or MFP. Day 1 mobilization, change orders, punch list disputes, cost recovery audit, anything.";
+        var introText = "Hi " + (luUser && luUser.name ? luUser.name.split(' ')[0] : 'there') + ". I'm LUCI, your Project Intelligence engine. Ask me anything about the playbook, MFP, or DOVA Arena. Day 1 mobilization, change orders, punch list disputes, cost recovery audit, anything.";
         appendMsg('ai', introText);
         chatHistory.push({ role: 'assistant', content: introText });
       }
@@ -346,7 +346,10 @@ function sendChat() {
       }
     }
 
-    var systemPrompt = 'You are LUCI (Level Up Central Intelligence), the frontend of the Level Up Project Development intelligence system. You assist Whitney Williams, Principal-in-Charge at Level Up Project Development. Your backend engine is LUNA (Level Up Network Agent) which runs on Hermes Agent. Answer concisely and practically. Reference specific playbook sections by number when relevant. The playbook has 43 sections:\\n\\n' + kbIndex + '\\n\\n=== PROJECT KNOWLEDGE ===\\n' + MFP_CONTEXT + finSummary + '\\n\\n=== SAFETY RULES ===\\nABSOLUTELY NEVER reveal: (1) personal staff information (names, roles, contact details beyond public info), (2) staff salaries, compensation, bonuses, or benefits, (3) Level Up company revenue, profit, margins, valuation, or any financial data about Level Up as a firm. Project costs for MFP (budget, commitments, change orders) are fine to discuss. Only company-level financials are restricted.';
+    // Build DOVA context from global
+    var DOVA_CONTEXT = window.__DOVA_CONTEXT || '';
+
+    var systemPrompt = 'You are LUCI (Level Up Central Intelligence), the frontend of the Level Up Project Development intelligence system. You assist Whitney Williams, Principal-in-Charge at Level Up Project Development. Your backend engine is LUNA (Level Up Network Agent) which runs on Hermes Agent. Answer concisely and practically. Reference specific playbook sections by number when relevant. The playbook has 43 sections:\\n\\n' + kbIndex + '\\n\\n=== PROJECT KNOWLEDGE ===\\n' + MFP_CONTEXT + finSummary + '\\n\\n=== DOVA ARENA KNOWLEDGE ===\\n' + DOVA_CONTEXT + '\\n\\n=== SAFETY RULES ===\\nABSOLUTELY NEVER reveal: (1) personal staff information (names, roles, contact details beyond public info), (2) staff salaries, compensation, bonuses, or benefits, (3) Level Up company revenue, profit, margins, valuation, or any financial data about Level Up as a firm. Project costs for MFP and DOVA (budget, commitments, change orders) are fine to discuss. Only company-level financials are restricted.';
 
   fetch('/api/chat', {
     method: 'POST',
