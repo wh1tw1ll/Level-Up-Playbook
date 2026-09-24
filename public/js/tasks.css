@@ -230,6 +230,7 @@
 [data-theme="light"] .confirm-msg{color:#333}
 [data-theme="light"] .confirm-btn{color:#444;border-color:#ccc}
 [data-theme="light"] .confirm-btn.ok{color:#fff}
+[data-theme="light"] .confirm-btn.danger{color:#fff}
 [data-theme="light"] .undo-btn{background:#333;border-color:#555;color:#eee}
 [data-theme="light"] .source-chip{color:#6b7a85}
 [data-theme="light"] .source-chip:hover{color:#333;background:#eef0f2}
