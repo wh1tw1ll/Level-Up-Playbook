@@ -1034,28 +1034,40 @@ function deleteTask(btnEl, rowId) {
   var taskEl = btnEl.closest('.task');
   var source = taskEl.dataset.source || 'project';
   var actionItem = getActionItem(rowId);
+  var taskHtml = taskEl.outerHTML;
+  var originalIndex = allTasks.findIndex(function(t) { return String(t.rowId) === String(rowId); });
+  var originalTask = allTasks.find(function(t) { return String(t.rowId) === String(rowId); });
 
-  confirmAction(btnEl,
-    'Delete "' + actionItem + '"?',
-    'This cannot be undone. The row will be removed from the sheet.',
+  // Optimistically remove from UI
+  taskEl.remove();
+  allTasks = allTasks.filter(function(t) { return String(t.rowId) !== String(rowId); });
+  render();
+
+  // POST delete to API immediately
+  fetch('/api/tasks?source=' + source, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'delete', rowId: String(rowId) })
+  })
+    .then(function(r) {
+      if (!r.ok) {
+        showToast('Delete failed — row may still exist', 3000);
+      }
+    })
+    .catch(function() {
+      showToast('Delete failed — row may still exist', 3000);
+    });
+
+  // Show undo toast
+  showUndoToast('"' + (actionItem || '').substring(0, 80) + '" deleted',
     function() {
-      taskEl.remove();
-      allTasks = allTasks.filter(function(t) { return String(t.rowId) !== String(rowId); });
+      // Undo: restore task
+      allTasks.splice(originalIndex, 0, originalTask);
       render();
-
-      fetch('/api/tasks?source=' + source, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'delete', rowId: String(rowId) })
-      })
-        .then(function(r) {
-          if (!r.ok) {
-            showToast('Delete failed \u2014 row may still exist', 3000);
-          }
-        })
-        .catch(function() {
-          showToast('Delete failed \u2014 row may still exist', 3000);
-        });
+      showToast('Restored', 1500);
+    },
+    function() {
+      // Timeout: already deleted from API, nothing more to do
     }
   );
 }

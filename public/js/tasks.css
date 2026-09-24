@@ -279,3 +279,11 @@
 [data-theme="light"] .dm-new-task-btn:hover{border-color:#4a8f4a;background:rgba(74,143,74,0.06)}
 [data-theme="light"] .ntf-input,[data-theme="light"] .ntf-select{border-color:#ccc;background:#fff;color:#333}
 [data-theme="light"] .ntf-input:focus,[data-theme="light"] .ntf-select:focus{border-color:#4a8f4a}
+[data-theme="light"] .undo-toast{background:#f5f5f5;border-color:#d0d0d0;color:#333}
+[data-theme="light"] .undo-toast button{color:#4a8f4a;border-color:#4a8f4a}
+
+/* Undo toast */
+.undo-toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#2a3540;border:1px solid #3a4555;border-radius:6px;padding:8px 14px;font-size:13px;color:#e8ecef;display:flex;align-items:center;gap:10px;z-index:200;animation:toastIn .2s;box-shadow:0 4px 12px rgba(0,0,0,0.4);font-family:var(--font)}
+.undo-toast button{font-size:12px;padding:3px 10px;border-radius:6px;border:1px solid var(--sage);background:transparent;color:var(--sage);cursor:pointer;font-family:var(--font);white-space:nowrap}
+.undo-toast button:hover{background:rgba(74,143,74,0.15)}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
