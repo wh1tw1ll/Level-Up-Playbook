@@ -231,7 +231,10 @@ function renderCardBody(card) {
       html += '<button class="prep-export-btn" data-export="' + escapeHtmlAttr(card.id) + '">⬇ Export to Word</button>';
       html += '<button class="prep-regenerate-btn" data-generate="' + escapeHtmlAttr(card.id) + '">🔄 Regenerate</button>';
       html += '</div>';
-      html += '<div class="prep-agenda-content">' + card.agendaHtml + '</div>';
+      html += '<div class="prep-collapsible open">';
+      html += '<div class="prep-collapsible-header" onclick="prepToggleSection(this)">📋 Agenda <span class="prep-collapsible-chevron">▼</span></div>';
+      html += '<div class="prep-collapsible-body"><div class="prep-agenda-content">' + card.agendaHtml + '</div></div>';
+      html += '</div>';
     } else {
       html += '<div class="prep-card-actions-row">';
       html += '<button class="prep-generate-btn" data-generate="' + escapeHtmlAttr(card.id) + '">Generate Agenda</button>';
@@ -241,25 +244,31 @@ function renderCardBody(card) {
     }
   } else {
     // Past meeting: notes + actions + agenda if exists
-    if (card.hasAgenda) {
-      html += '<div class="prep-card-actions-row">';
-      html += '<button class="prep-export-btn" data-export="' + escapeHtmlAttr(card.id) + '">⬇ Export Agenda to Word</button>';
-      html += '</div>';
-      html += '<div class="prep-agenda-content">' + card.agendaHtml + '</div>';
-      html += '<div class="prep-notes-divider"></div>';
-    }
     if (card.webUrl) {
       html += '<div class="prep-card-linkrow"><a href="' + escapeHtmlAttr(card.webUrl) + '" target="_blank" rel="noopener">Open in Granola ↗</a></div>';
     }
-    html += '<div class="prep-detail-section-title">📝 Notes</div>';
+    if (card.hasAgenda) {
+      html += '<div class="prep-collapsible open">';
+      html += '<div class="prep-collapsible-header" onclick="prepToggleSection(this)">📋 Agenda <span class="prep-collapsible-chevron">▼</span></div>';
+      html += '<div class="prep-collapsible-body">';
+      html += '<div class="prep-card-actions-row" style="margin-bottom:10px">';
+      html += '<button class="prep-export-btn" data-export="' + escapeHtmlAttr(card.id) + '">⬇ Export to Word</button>';
+      html += '</div>';
+      html += '<div class="prep-agenda-content">' + card.agendaHtml + '</div></div></div>';
+    }
+    html += '<div class="prep-collapsible open">';
+    html += '<div class="prep-collapsible-header" onclick="prepToggleSection(this)">📝 Notes <span class="prep-collapsible-chevron">▼</span></div>';
+    html += '<div class="prep-collapsible-body">';
     if (card.notes) {
       html += '<div class="prep-detail-summary">' + mdToHtml(card.notes) + '</div>';
     } else {
       html += '<div class="prep-empty-sm">No Granola notes for this meeting.</div>';
     }
+    html += '</div></div>';
     if (card.actions.length > 0) {
-      html += '<div class="prep-detail-section-title" style="margin-top:14px">✅ Action Items <span class="prep-action-badge">' + card.actions.length + '</span></div>';
-      html += '<div class="prep-actions-list">';
+      html += '<div class="prep-collapsible open">';
+      html += '<div class="prep-collapsible-header" onclick="prepToggleSection(this)">✅ Action Items (' + card.actions.length + ') <span class="prep-collapsible-chevron">▼</span></div>';
+      html += '<div class="prep-collapsible-body"><div class="prep-actions-list">';
       card.actions.forEach(function(a) {
         var ownerStr = a.owner ? '<span class="prep-action-owner">' + escapeHtml(a.owner) + '</span>' : '';
         var statusClass = 'prep-status-open';
@@ -271,7 +280,7 @@ function renderCardBody(card) {
         html += '<div class="prep-action-meta">' + ownerStr + ' <span class="prep-status-badge ' + statusClass + '">' + statusLabel + '</span></div>';
         html += '</div>';
       });
-      html += '</div>';
+      html += '</div></div></div>';
     }
   }
   return html;
@@ -432,6 +441,19 @@ function togglePriority() {
 }
 window.togglePriority = togglePriority;
 
+function prepToggleSection(header) {
+  var wrapper = header.parentNode;
+  if (!wrapper) return;
+  var body = wrapper.querySelector('.prep-collapsible-body');
+  var chevron = header.querySelector('.prep-collapsible-chevron');
+  if (!body) return;
+  var isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if (chevron) chevron.textContent = isOpen ? '▶' : '▼';
+  wrapper.classList.toggle('open', !isOpen);
+}
+window.prepToggleSection = prepToggleSection;
+
 // ── LIGHT MARKDOWN → HTML (for Granola notes) ──
 function mdToHtml(md) {
   if (!md) return '';
@@ -577,6 +599,13 @@ function escapeHtmlAttr(s) {
     '.prep-card-linkrow a{font-size:12px;color:var(--teal);text-decoration:none;font-weight:600}' +
     '.prep-card-linkrow a:hover{text-decoration:underline}' +
     '.prep-detail-section-title{font-size:13px;font-weight:700;color:var(--charcoal);margin-bottom:8px}' +
+    '.prep-collapsible{border:1px solid var(--border);border-radius:6px;margin-bottom:10px;overflow:hidden}' +
+    '.prep-collapsible-header{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:13px;font-weight:600;color:var(--charcoal);background:var(--card);user-select:none;transition:background .12s}' +
+    '.prep-collapsible-header:hover{background:var(--teal-light)}' +
+    '.prep-collapsible-chevron{font-size:10px;color:var(--muted);margin-left:auto;transition:transform .15s}' +
+    '.prep-collapsible.open>.prep-collapsible-header{border-bottom:1px solid var(--border)}' +
+    '.prep-collapsible-body{padding:10px 14px;background:var(--card);font-size:13px;line-height:1.6;color:var(--charcoal)}' +
+    '.prep-collapsible-body .prep-empty-sm{font-size:12px;color:var(--muted);padding:4px 0}' +
     '.prep-detail-summary{font-size:13px;line-height:1.65;color:var(--charcoal);padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;max-height:60vh;overflow-y:auto}' +
     '.prep-detail-summary h1,.prep-detail-summary h2,.prep-detail-summary h3,.prep-detail-summary h4{color:var(--teal);margin:10px 0 4px}' +
     '.prep-detail-summary h1{font-size:15px}.prep-detail-summary h2{font-size:14px}' +
