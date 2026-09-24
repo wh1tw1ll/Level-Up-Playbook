@@ -13,8 +13,24 @@ DOVA_FOLDER = r'C:\Users\HermesAdmin\OneDrive - levelup-pd.com\Documents - Level
 DRY_RUN = '--dry-run' in sys.argv
 DAYS = 3  # Scan last 3 days for the re-run (initial full 7-day already done)
 
-STAGE_URL = 'https://level-up-playbook.vercel.app/api/stage'
 LOG_FILE = r'C:\Users\HermesAdmin\.hermes\levelup_mail_scan_log.json'
+
+# Smartsheet Personal action log
+PERSONAL_SHEET_ID = '2802755367554948'
+SST = open(r'C:\Users\HermesAdmin\ss_api_key.txt').read().strip()
+SST_HDR = {'Authorization': 'Bearer ' + SST, 'Content-Type': 'application/json'}
+
+# Cache column map once
+_COL_MAP = None
+def get_col_map():
+    global _COL_MAP
+    if _COL_MAP is None:
+        req = urllib.request.Request(
+            'https://api.smartsheet.com/2.0/sheets/' + PERSONAL_SHEET_ID,
+            headers={'Authorization': 'Bearer ' + SST})
+        sheet = json.loads(urllib.request.urlopen(req).read())
+        _COL_MAP = {c['title']: c['id'] for c in sheet.get('columns', [])}
+    return _COL_MAP
 
 with open(r'C:\Users\HermesAdmin\.hermes\graph_levelup_cache.json') as f:
     tok = json.load(f)
@@ -204,18 +220,39 @@ def normalize(t):
     return t
 
 def stage_item(text, owner, source_ref):
+    """Write directly to Smartsheet Personal Action Log instead of Vercel API (which needs OAuth)."""
     if DRY_RUN:
         return 'DRY_RUN', 'N/A'
-    payload = json.dumps({'text': text, 'owner': owner, 'sourceRef': source_ref})
+    col_map = get_col_map()
+    row = {
+        "toBottom": True,
+        "cells": [
+            {"columnId": col_map['Action ID'], "value": text},
+            {"columnId": col_map['Owner'], "value": owner},
+            {"columnId": col_map['Status'], "value": "Not Started"},
+            {"columnId": col_map['Category'], "value": "Staged"},
+            {"columnId": col_map['Source'], "value": "Email"},
+            {"columnId": col_map['SourceRef'], "value": source_ref},
+            {"columnId": col_map['Confidence'], "value": "High"},
+        ]
+    }
+    payload = json.dumps([row]).encode()
+    url = 'https://api.smartsheet.com/2.0/sheets/' + PERSONAL_SHEET_ID + '/rows'
     for _ in range(3):
         try:
-            r = subprocess.run(['curl', '-s', '-X', 'POST', STAGE_URL,
-                '-H', 'Content-Type: application/json', '-d', payload],
-                capture_output=True, text=True, timeout=15)
-            if r.stdout:
-                resp = json.loads(r.stdout)
-                return resp.get('status', 'ERR'), resp.get('rowId', '?')
-        except: pass
+            req = urllib.request.Request(url, data=payload, headers=SST_HDR, method='POST')
+            resp = json.loads(urllib.request.urlopen(req).read())
+            # resp.result is a list (one entry per row added)
+            results = resp.get('result', [])
+            row_id = results[0].get('id', '?') if results else '?'
+            return 'OK', str(row_id)
+        except urllib.error.HTTPError as e:
+            body = e.read().decode()[:300]
+            print(f'    [STAGE HTTP {e.code}] {body}', flush=True)
+            if e.code in (400, 422):
+                return 'FAIL', '?'  # Don't retry validation errors
+        except Exception as e:
+            print(f'    [STAGE ERR] {e}', flush=True)
         time.sleep(1)
     return 'FAIL', '?'
 

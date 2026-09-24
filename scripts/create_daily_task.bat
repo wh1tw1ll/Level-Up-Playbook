@@ -1,0 +1,1 @@
+schtasks /Create /XML "C:\Users\HermesAdmin\Level-Up-Playbook\scripts\mfp_daily_task.xml" /TN "LUNA_MFP_DAILY_SCAN" /F

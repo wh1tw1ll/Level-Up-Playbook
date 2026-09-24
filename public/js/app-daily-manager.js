@@ -942,25 +942,24 @@ function editStatusNote(el, rowId) {
 // ── TASK TITLE (inline edit) ──
 function editTaskTitle(el, rowId) {
   var currentText = el.textContent;
-  var input = document.createElement('input');
-  input.type = 'text';
-  input.style.cssText = 'background:#252525;border:1px solid #555;border-radius:var(--radius);padding:2px 6px;color:#d4d4d4;font-size:15.5px;width:100%;outline:none;font-family:var(--font)';
-  input.value = currentText.trim() === 'Add note...' ? '' : currentText;
-  input.placeholder = 'Edit task text...';
-  el.replaceWith(input);
-  input.focus();
-  input.select();
+  var textarea = document.createElement('textarea');
+  textarea.style.cssText = 'background:#252525;border:1px solid #555;border-radius:var(--radius);padding:6px 8px;color:#d4d4d4;font-size:15.5px;width:100%;min-height:80px;outline:none;font-family:var(--font);resize:vertical;line-height:1.4';
+  textarea.value = currentText.trim() === 'Add note...' ? '' : currentText;
+  textarea.placeholder = 'Edit task text...';
+  el.replaceWith(textarea);
+  textarea.focus();
+  textarea.select();
 
   function save() {
-    var newText = input.value.trim();
-    var parent = input.closest('.task-body');
+    var newText = textarea.value.trim();
+    var parent = textarea.closest('.task-body');
     var div = document.createElement('div');
     div.className = 'task-title';
     div.textContent = newText || currentText;
     div.style.cursor = 'pointer';
     if (newText && newText !== currentText) {
       pendingWrites[rowId] = { actionItem: getActionItem(rowId), fields: { actionItem: newText } };
-      var taskEl = input.closest('.task');
+      var taskEl = textarea.closest('.task');
       var src = taskEl ? taskEl.dataset.source || 'project' : 'project';
       fetch('/api/tasks/' + rowId + '?source=' + src, {
         method: 'POST',
@@ -973,13 +972,17 @@ function editTaskTitle(el, rowId) {
         showToast('Could not save: ' + e.message, 3000);
       });
     }
-    input.replaceWith(div);
+    textarea.replaceWith(div);
     div.onclick = function(e) { e.stopPropagation(); editTaskTitle(this, rowId); };
   }
 
-  input.onblur = save;
-  input.onkeydown = function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); save(); }
+  textarea.onblur = save;
+  textarea.onkeydown = function(e) {
+    if (e.key === 'Enter' && e.shiftKey) {
+      // Shift+Enter = insert newline in textarea (default behaviour, let it through)
+      return;
+    }
+    if (e.key === 'Enter') { e.preventDefault(); save(); }
     if (e.key === 'Escape') { save(); }
   };
 }
