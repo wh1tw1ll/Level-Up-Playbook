@@ -948,6 +948,9 @@ mark.search-highlight{background:#fff3a8;padding:1px 2px;border-radius:2px;color
   filter: drop-shadow(0 2px 8px rgba(0,0,0,.15));
   transition: filter .2s;
 }
+[data-theme="dark"] .luna-clippy-icon {
+  filter: brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0,0,0,.3));
+}
 .clippy-dismiss {
   position: absolute;
   top: -8px;
@@ -973,6 +976,9 @@ mark.search-highlight{background:#fff3a8;padding:1px 2px;border-radius:2px;color
 .clippy-dismiss:hover { background: #E31837; color: #fff; border-color: #E31837; }
 .luna-clippy-icon:hover {
   filter: drop-shadow(0 4px 16px rgba(0,0,0,.25));
+}
+[data-theme="dark"] .luna-clippy-icon:hover {
+  filter: brightness(0) invert(1) drop-shadow(0 4px 16px rgba(0,0,0,.4));
 }
 /* Pulsing glow on idle */
 @keyframes clippy-float {
