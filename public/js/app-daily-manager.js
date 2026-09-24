@@ -179,19 +179,47 @@ window.exportCSV = exportCSV;
 }
 
 // ── SOURCE LINK ──
+function openGranola() {
+  // Try native Granola app (macOS registered scheme), fallback to web
+  var fallbackTimer = setTimeout(function() {
+    window.open('https://app.granola.ai', '_blank');
+  }, 500);
+  
+  // Attempt to open native app via custom protocol
+  var iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  iframe.src = 'granola://';
+  document.body.appendChild(iframe);
+  
+  // Clear fallback if page visibility changes (native app launched successfully)
+  var onBlur = function() {
+    clearTimeout(fallbackTimer);
+    document.removeEventListener('visibilitychange', onBlur);
+    window.removeEventListener('blur', onBlur);
+    if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+  };
+  document.addEventListener('visibilitychange', onBlur);
+  window.addEventListener('blur', onBlur);
+  
+  // Cleanup iframe after timeout
+  setTimeout(function() {
+    if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+  }, 1000);
+}
+
 function renderSourceLink(sourceRef) {
   if (!sourceRef) return '';
   var s = sourceRef.trim();
   if (s.toLowerCase().startsWith('granola:')) {
     var title = s.substring(8).trim();
-    return '<a class="meta-tag source granola" href="#" onclick="event.stopPropagation();alert(\'Granola note: ' + escapeHtml(title) + '\')" title="' + escapeHtml(s) + '">\uD83D\uDCDD ' + escapeHtml(title.substring(0, 30)) + (title.length > 30 ? '...' : '') + '</a>';
+    return '<a class="meta-tag source granola" href="#" onclick="event.stopPropagation();openGranola();return false" data-granola-title="' + escapeHtml(title) + '" title="' + escapeHtml(s) + '">📝 ' + escapeHtml(title.substring(0, 30)) + (title.length > 30 ? '...' : '') + '</a>';
   }
   if (s.toLowerCase().startsWith('email:')) {
     var subj = s.substring(6).trim();
-    return '<a class="meta-tag source email" href="#" onclick="event.stopPropagation();alert(\'Email: ' + escapeHtml(subj) + '\')" title="' + escapeHtml(s) + '">\u2709\uFE0F ' + escapeHtml(subj.substring(0, 30)) + (subj.length > 30 ? '...' : '') + '</a>';
+    return '<a class="meta-tag source email" href="#" onclick="event.stopPropagation();alert(\'Email: ' + escapeHtml(subj) + '\')" title="' + escapeHtml(s) + '">✉️ ' + escapeHtml(subj.substring(0, 30)) + (subj.length > 30 ? '...' : '') + '</a>';
   }
   if (s.toLowerCase().startsWith('manual') || s.toLowerCase().includes('added manually')) {
-    return '<span class="meta-tag source manual">\uD83D\uDCCB Manual</span>';
+    return '<span class="meta-tag source manual">📋 Manual</span>';
   }
   return '<span class="meta-tag source unknown">' + escapeHtml(s.substring(0, 20)) + '</span>';
 }
@@ -1808,6 +1836,10 @@ window.cycleStatus = cycleStatus;
 window.jumpToLinkedRow = jumpToLinkedRow;
 window.copyPrepPrint = copyPrepPrint;
 window.switchPrepTab = switchPrepTab;
+window.toggleSound = toggleSound;
+window.toggleQuickFilter = toggleQuickFilter;
+window.resetFilters = resetFilters;
+window.openGranola = openGranola;
 
 return refreshInterval;
 } catch(e) { console.error('renderDailyManager error:', e); }

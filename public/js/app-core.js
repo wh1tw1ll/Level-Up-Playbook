@@ -435,6 +435,14 @@ function verifyPassword() {
     if (data.authed) {
       overlay.classList.remove('open');
       overlay.style.display = 'none';
+      // Restore view from hash on page load (browser refresh persistence)
+      if (window.location.hash && window.location.hash.length > 1) {
+        var hashView = window.location.hash.substring(1);
+        var validViews = ['luna','playbook','projects','tasks','prep','mfp','mfp-dashboard','dova'];
+        if (validViews.indexOf(hashView) >= 0) {
+          setTimeout(function() { if (window.setView) window.setView(hashView); }, 100);
+        }
+      }
     } else {
       // Not authed — focus the password input for immediate typing
       var inp = document.getElementById('password-input');

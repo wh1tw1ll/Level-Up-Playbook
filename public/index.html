@@ -355,14 +355,25 @@
   function hideOverlay() {
           overlay.classList.remove('open');
           overlay.style.display = 'none';
-          // Check for direct view link
-          var params = new URLSearchParams(window.location.search);
-          var view = params.get('view');
-          if (view) {
-            setTimeout(function() {
-              if (window.setView) window.setView(view);
-            }, 100);
-          }
+          // Check for direct view link (query param or hash)
+                    var params = new URLSearchParams(window.location.search);
+                    var view = params.get('view');
+                    if (view) {
+                      setTimeout(function() {
+                        if (window.setView) window.setView(view);
+                      }, 100);
+                      return;
+                    }
+                    // Check hash for view persistence across refresh
+                    if (window.location.hash && window.location.hash.length > 1) {
+                      var hashView = window.location.hash.substring(1);
+                      var validViews = ['luna','playbook','projects','tasks','prep','mfp','mfp-dashboard','dova'];
+                      if (validViews.indexOf(hashView) >= 0) {
+                        setTimeout(function() {
+                          if (window.setView) window.setView(hashView);
+                        }, 100);
+                      }
+                    }
         }
   
   // ── Password verification ──────────────────────────────────────────
