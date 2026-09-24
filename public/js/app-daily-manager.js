@@ -183,20 +183,20 @@ function renderSourceLink(sourceRef) {
   // Granola meeting — show title
   if (sl.startsWith('granola:')) {
     var title = s.substring(8).trim();
-    return '<a class="meta-tag source granola" href="#" onclick="event.stopPropagation();openGranola();return false" data-granola-title="' + escapeHtml(title) + '" title="' + escapeHtml(s) + '">' + escapeHtml(title.substring(0, 30)) + (title.length > 30 ? '...' : '') + '</a>';
+    return '<a class="meta-tag source granola" href="#" onclick="event.stopPropagation();openGranola();return false" data-granola-title="' + escapeHtml(title) + '" title="' + escapeHtml(s) + '">' + escapeHtml(title.substring(0, 80)) + (title.length > 80 ? '...' : '') + '</a>';
   }
   // GranolaNote
   if (sl.startsWith('granolanote')) {
     return '<span class="meta-tag source notes">Notes</span>';
   }
-  // Email from LevelUpMail scan
-  if (sl.startsWith('levelupmail')) {
+  // Mail from LevelUp or MFP scanner
+  if (sl.startsWith('levelupmail') || sl.startsWith('mfpmail')) {
     return '<span class="meta-tag source mail">Mail</span>';
   }
   // Email with subject
   if (sl.startsWith('email:')) {
     var subj = s.substring(6).trim();
-    return '<a class="meta-tag source email" href="#" onclick="event.stopPropagation();alert(\'Email: ' + escapeHtml(subj) + '\')" title="' + escapeHtml(s) + '">' + escapeHtml(subj.substring(0, 30)) + (subj.length > 30 ? '...' : '') + '</a>';
+    return '<a class="meta-tag source email" href="#" onclick="event.stopPropagation();alert(\'Email: ' + escapeHtml(subj) + '\')" title="' + escapeHtml(s) + '">' + escapeHtml(subj.substring(0, 80)) + (subj.length > 80 ? '...' : '') + '</a>';
   }
   // Manual
   if (sl.startsWith('manual') || sl.includes('added manually')) {
@@ -209,7 +209,7 @@ function renderSourceLink(sourceRef) {
     return '<span class="meta-tag source other">' + escapeHtml(category) + '</span>';
   }
   // True unknown — show abbreviated
-  return '<span class="meta-tag source other">' + escapeHtml(s.substring(0, 12)) + '</span>';
+  return '<span class="meta-tag source other">' + escapeHtml(s.substring(0, 60)) + '</span>';
 }
 
 // ── TASK TYPE INFERENCE ──
@@ -520,7 +520,7 @@ function loadTasks() {
         var seriesArr = [];
         seriesIds.forEach(function(s) { seriesArr.push(s); });
         seriesArr.sort().forEach(function(s) {
-          seriesSel.innerHTML += '<option value="' + escapeHtml(s) + '">' + escapeHtml(s.substring(0, 20)) + '...</option>';
+          seriesSel.innerHTML += '<option value="' + escapeHtml(s) + '">' + escapeHtml(s.substring(0, 60)) + '</option>';
         });
       }
       // Populate source/meeting filter
@@ -531,7 +531,7 @@ function loadTasks() {
         var srcArr = [];
         sourceRefs.forEach(function(s) { srcArr.push(s); });
         srcArr.sort().forEach(function(s) {
-          srcSel.innerHTML += '<option value="' + escapeHtml(s) + '">' + escapeHtml(s.substring(0, 45)) + '</option>';
+          srcSel.innerHTML += '<option value="' + escapeHtml(s) + '">' + escapeHtml(s.substring(0, 100)) + '</option>';
         });
       }
       render();
