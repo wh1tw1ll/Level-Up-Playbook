@@ -93,6 +93,7 @@
 /* Task meta tags */
 .task-meta{display:flex;gap:8px;margin-top:0;flex-wrap:wrap;align-items:center;line-height:1.5}
 .meta-tag{font-size:14px;white-space:nowrap;color:rgba(154,171,184,0.65)}
+.meta-tag.due{color:rgba(154,171,184,0.9)}
 .meta-tag.owner{background:rgba(98,168,59,0.15);color:#62a83b;padding:1px 5px;border-radius:3px}
 .meta-tag.overdue-tag{color:#c95a5a;font-weight:500}
 .meta-tag.soon{color:#c4a85c}
