@@ -1245,7 +1245,7 @@ function deleteTask(btnEl, rowId) {
   const source = taskEl.dataset.source || 'project';
   const actionItem = getActionItem(rowId);
 
-  confirmAction(
+  confirmAction(btnEl,
     'Delete "' + actionItem + '"?',
     'This cannot be undone. The row will be removed from the sheet.',
     function() {
@@ -1309,7 +1309,8 @@ function showToast(message, duration) {
 }
 
 // ── CONFIRMATION DIALOG ──
-function confirmAction(text, subtext, onConfirm) {
+function confirmAction(btnEl, text, subtext, onConfirm) {
+  const rect = btnEl.getBoundingClientRect();
   const overlay = document.createElement('div');
   overlay.className = 'confirm-overlay';
   overlay.innerHTML =
@@ -1321,11 +1322,22 @@ function confirmAction(text, subtext, onConfirm) {
       '</div>' +
     '</div>';
   document.body.appendChild(overlay);
-  document.getElementById('confirm-ok').onclick = function() {
+
+  const box = overlay.querySelector('.confirm-box');
+  const boxW = box.offsetWidth;
+  let left = Math.max(8, rect.left + rect.width - boxW);
+  let top = rect.top - box.offsetHeight - 8;
+  let above = true;
+  if (top < 8) { top = rect.bottom + 8; above = false; }
+  box.style.left = left + 'px';
+  box.style.top = top + 'px';
+  box.setAttribute('data-arrow', above ? 'bottom' : 'top');
+
+  overlay.querySelector('#confirm-ok').onclick = function() {
     overlay.remove();
     onConfirm();
   };
-  document.getElementById('confirm-cancel').onclick = function() { overlay.remove(); };
+  overlay.querySelector('#confirm-cancel').onclick = function() { overlay.remove(); };
   overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
 }
 

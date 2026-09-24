@@ -958,7 +958,7 @@ function deleteTask(btnEl, rowId) {
   var source = taskEl.dataset.source || 'project';
   var actionItem = getActionItem(rowId);
 
-  confirmAction(
+  confirmAction(btnEl,
     'Delete "' + actionItem + '"?',
     'This cannot be undone. The row will be removed from the sheet.',
     function() {
@@ -1019,8 +1019,9 @@ function showToast(message, duration) {
   setTimeout(function() { toast.remove(); }, duration);
 }
 
-// ── CONFIRMATION DIALOG ──
-function confirmAction(text, subtext, onConfirm) {
+// ── CONFIRMATION DIALOG (positioned near trigger button) ──
+function confirmAction(btnEl, text, subtext, onConfirm) {
+  var rect = btnEl.getBoundingClientRect();
   var overlay = document.createElement('div');
   overlay.className = 'confirm-overlay';
   overlay.innerHTML =
@@ -1032,6 +1033,19 @@ function confirmAction(text, subtext, onConfirm) {
       '</div>' +
     '</div>';
   document.body.appendChild(overlay);
+
+  var box = overlay.querySelector('.confirm-box');
+  // Position above the button, right-aligned
+  var boxW = box.offsetWidth;
+  var left = Math.max(8, rect.left + rect.width - boxW);
+  var top = rect.top - box.offsetHeight - 8;
+  var above = true;
+  // Flip below if not enough room above
+  if (top < 8) { top = rect.bottom + 8; above = false; }
+  box.style.left = left + 'px';
+  box.style.top = top + 'px';
+  box.setAttribute('data-arrow', above ? 'bottom' : 'top');
+
   overlay.querySelector('#confirm-ok').onclick = function() {
     overlay.remove();
     onConfirm();

@@ -185,8 +185,12 @@
 .ns-working{font-size:11px;color:#8a98a5;font-style:italic}
 
 /* Confirm overlay */
-.confirm-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:100;display:flex;align-items:center;justify-content:center;animation:fadeIn .15s}
-.confirm-box{background:var(--card);border:1px solid #3a4555;border-radius:6px;padding:12px 16px;min-width:220px;max-width:320px}
+.confirm-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:100;animation:fadeIn .15s}
+.confirm-box{position:fixed;z-index:101;background:var(--card);border:1px solid #3a4555;border-radius:6px;padding:12px 16px;min-width:220px;max-width:320px;box-shadow:0 4px 16px rgba(0,0,0,0.4)}
+/* Arrow pointing toward the trigger button */
+.confirm-box::after{content:'';position:absolute;width:10px;height:10px;background:var(--card);border-right:1px solid #3a4555;border-bottom:1px solid #3a4555;transform:rotate(45deg)}
+.confirm-box[data-arrow=top]::after{bottom:-6px;left:50%;margin-left:-5px}
+.confirm-box[data-arrow=bottom]::after{top:-6px;left:50%;margin-left:-5px;border-right:none;border-bottom:none;border-top:1px solid #3a4555;border-left:1px solid #3a4555}
 .confirm-msg{font-size:13px;color:#e8ecef;margin:0 0 10px;line-height:1.4}
 .confirm-actions{display:flex;gap:6px;justify-content:flex-end}
 .confirm-btn{font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid #3a4555;cursor:pointer;background:var(--card);color:#e8ecef;font-family:var(--font)}
