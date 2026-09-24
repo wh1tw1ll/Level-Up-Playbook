@@ -44,6 +44,25 @@ function renderTasksView() {
       '</div>' +
     '</div>' +
     '<div class="dm-body">' +
+      '<div class="dm-new-task-bar">' +
+        '<button class="dm-new-task-btn" onclick="toggleNewTaskForm()" title="Add a new task">+ New Task</button>' +
+        '<div id="new-task-form" class="new-task-form" style="display:none">' +
+          '<div class="ntf-row">' +
+            '<input id="ntf-title" class="ntf-input ntf-title-input" type="text" placeholder="Task title (required)" autocomplete="off">' +
+          '</div>' +
+          '<div class="ntf-row ntf-fields">' +
+            '<select id="ntf-project" class="ntf-select"><option value="">Project</option><option value="MFP">MFP</option><option value="DOVA">DOVA</option><option value="Business Dev">Business Dev</option><option value="KC Chiefs">KC Chiefs</option><option value="Sphere">Sphere</option></select>' +
+            '<select id="ntf-category" class="ntf-select"><option value="">Category</option><option value="Coordination">Coordination</option><option value="Design">Design</option><option value="Procurement">Procurement</option><option value="Submittal">Submittal</option><option value="RFI">RFI</option><option value="Budget">Budget</option><option value="Schedule">Schedule</option><option value="Closeout">Closeout</option><option value="General">General</option></select>' +
+            '<input id="ntf-owner" class="ntf-input" type="text" placeholder="Owner" autocomplete="off">' +
+            '<input id="ntf-due" class="ntf-input ntf-date" type="date" placeholder="Due date">' +
+          '</div>' +
+          '<div class="ntf-actions">' +
+            '<button class="ntf-submit" onclick="submitNewTask()">Add Task</button>' +
+            '<button class="ntf-cancel" onclick="hideNewTaskForm()">Cancel</button>' +
+            '<span id="ntf-status" class="ntf-status"></span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
       '<div id="project-tabs" class="project-tabs"></div>' +
       '<div id="task-list" class="task-list"></div>' +
       '<div id="prep-view" class="prep-view" style="display:none"></div>' +

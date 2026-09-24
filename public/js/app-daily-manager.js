@@ -179,18 +179,37 @@ function openGranola() {
 function renderSourceLink(sourceRef) {
   if (!sourceRef) return '';
   var s = sourceRef.trim();
-  if (s.toLowerCase().startsWith('granola:')) {
+  var sl = s.toLowerCase();
+  // Granola meeting — show title
+  if (sl.startsWith('granola:')) {
     var title = s.substring(8).trim();
     return '<a class="meta-tag source granola" href="#" onclick="event.stopPropagation();openGranola();return false" data-granola-title="' + escapeHtml(title) + '" title="' + escapeHtml(s) + '">📝 ' + escapeHtml(title.substring(0, 30)) + (title.length > 30 ? '...' : '') + '</a>';
   }
-  if (s.toLowerCase().startsWith('email:')) {
+  // GranolaNote — short label
+  if (sl.startsWith('granolanote')) {
+    return '<span class="meta-tag source manual">📝 Notes</span>';
+  }
+  // Email from LevelUpMail scan
+  if (sl.startsWith('levelupmail')) {
+    return '<span class="meta-tag source email">✉️ Mail</span>';
+  }
+  // Email with subject
+  if (sl.startsWith('email:')) {
     var subj = s.substring(6).trim();
     return '<a class="meta-tag source email" href="#" onclick="event.stopPropagation();alert(\'Email: ' + escapeHtml(subj) + '\')" title="' + escapeHtml(s) + '">✉️ ' + escapeHtml(subj.substring(0, 30)) + (subj.length > 30 ? '...' : '') + '</a>';
   }
-  if (s.toLowerCase().startsWith('manual') || s.toLowerCase().includes('added manually')) {
+  // Manual
+  if (sl.startsWith('manual') || sl.includes('added manually')) {
     return '<span class="meta-tag source manual">📋 Manual</span>';
   }
-  return '<span class="meta-tag source unknown">' + escapeHtml(s.substring(0, 20)) + '</span>';
+  // Anything else with a colon prefix — show just the category
+  var colonIdx = sl.indexOf(':');
+  if (colonIdx > 0 && colonIdx < 10) {
+    var category = s.substring(0, colonIdx);
+    return '<span class="meta-tag source unknown">' + escapeHtml(category) + '</span>';
+  }
+  // True unknown — show abbreviated
+  return '<span class="meta-tag source unknown">' + escapeHtml(s.substring(0, 12)) + '</span>';
 }
 
 // ── TASK TYPE INFERENCE ──
@@ -1857,6 +1876,83 @@ window.resetFilters = resetFilters;
 window.toggleSortDir = toggleSortDir;
 window.openGranola = openGranola;
 window.exportCSV = exportCSV;
+// ── NEW TASK FORM HANDLERS ──
+window.toggleNewTaskForm = function() {
+  var form = document.getElementById('new-task-form');
+  if (!form) return;
+  var shown = form.style.display !== 'none';
+  form.style.display = shown ? 'none' : 'block';
+  if (!shown) {
+    document.getElementById('ntf-title').focus();
+  }
+};
+window.hideNewTaskForm = function() {
+  var form = document.getElementById('new-task-form');
+  if (form) form.style.display = 'none';
+  var status = document.getElementById('ntf-status');
+  if (status) status.textContent = '';
+};
+window.submitNewTask = function() {
+  var title = document.getElementById('ntf-title');
+  var project = document.getElementById('ntf-project');
+  var category = document.getElementById('ntf-category');
+  var owner = document.getElementById('ntf-owner');
+  var due = document.getElementById('ntf-due');
+  var status = document.getElementById('ntf-status');
+  var btn = document.querySelector('.ntf-submit');
+
+  var t = (title.value || '').trim();
+  if (!t) {
+    if (status) status.textContent = '⚠️ Title is required';
+    if (title) title.focus();
+    return;
+  }
+  if (btn) btn.disabled = true;
+  if (status) status.textContent = '⏳ Creating...';
+
+  fetch('/api/tasks/create', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      actionItem: t,
+      project: project ? project.value : '',
+      category: category ? category.value : '',
+      owner: owner ? owner.value.trim() : '',
+      dueDate: due ? due.value : '',
+      discipline: '',
+      responsibleFirm: ''
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.error) {
+      if (status) status.textContent = '❌ ' + data.error;
+      if (btn) btn.disabled = false;
+      return;
+    }
+    if (status) status.textContent = '✅ Created!';
+    // Clear fields
+    if (title) title.value = '';
+    if (project) project.value = '';
+    if (category) category.value = '';
+    if (owner) owner.value = '';
+    if (due) due.value = '';
+    // Refresh task list
+    if (typeof loadTasks === 'function') {
+      loadTasks();
+    } else {
+      window.location.reload();
+    }
+    setTimeout(function() {
+      if (status) status.textContent = '';
+      if (btn) btn.disabled = false;
+    }, 2000);
+  })
+  .catch(function(err) {
+    if (status) status.textContent = '❌ ' + err.message;
+    if (btn) btn.disabled = false;
+  });
+};
 
 return refreshInterval;
 } catch(e) { console.error('renderDailyManager error:', e); }
