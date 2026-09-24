@@ -1032,11 +1032,11 @@ function confirmAction(text, subtext, onConfirm) {
       '</div>' +
     '</div>';
   document.body.appendChild(overlay);
-  document.getElementById('confirm-ok').onclick = function() {
+  overlay.querySelector('#confirm-ok').onclick = function() {
     overlay.remove();
     onConfirm();
   };
-  document.getElementById('confirm-cancel').onclick = function() { overlay.remove(); };
+  overlay.querySelector('#confirm-cancel').onclick = function() { overlay.remove(); };
   overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
 }
 
