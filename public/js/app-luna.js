@@ -1093,6 +1093,13 @@ function init() {
       initKB();
       // Initialize daily briefing/side panel
       initDailyBriefing();
+      // Restore last view from URL hash (survives browser refresh)
+      try {
+        var hash = location.hash.replace('#', '');
+        if (hash && hash !== 'luna') {
+          setTimeout(function() { setView(hash); }, 100);
+        }
+      } catch(e) {}
 
   // Update footer status
   if (footer) {

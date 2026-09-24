@@ -303,6 +303,8 @@ function renderPbView() {
 }
 
 function setView(view) {
+  // Store view in URL hash for refresh persistence
+  try { location.hash = '#' + view; } catch(e) {}
   try {
   currentView = view;
 

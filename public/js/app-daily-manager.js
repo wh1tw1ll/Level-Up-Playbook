@@ -68,22 +68,27 @@ function toggleSound() {
   try { localStorage.setItem('luci_sound', soundEnabled ? 'on' : 'off'); } catch(e) {}
   var el = document.getElementById('sound-toggle');
   if (el) el.textContent = soundEnabled ? '\uD83D\uDD0A' : '\uD83D\uDD07';
+  // Play test beep so user knows sound is working
+  if (soundEnabled) playBeep(1000, 0.06);
 }
-function playClick() {
-  if (!soundEnabled) return;
+function playBeep(freq, dur) {
   try {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     var osc = audioCtx.createOscillator();
     var gain = audioCtx.createGain();
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-    osc.frequency.value = 800;
+    osc.frequency.value = freq || 800;
     osc.type = 'sine';
     gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (dur || 0.08));
     osc.start();
-    osc.stop(audioCtx.currentTime + 0.08);
+    osc.stop(audioCtx.currentTime + (dur || 0.08));
   } catch(e) {}
+}
+function playClick() {
+  if (!soundEnabled) return;
+  playBeep(800, 0.08);
 }
 // Init sound toggle display (deferred)
 setTimeout(function() {
@@ -135,10 +140,42 @@ function setContextMessage(msg, duration) {
   var el = document.getElementById('context-message');
   if (!el) return;
   el.textContent = msg || '';
-  el.className = 'count-flash';
-  if (duration) {
+  if (duration > 0) {
     setTimeout(function() { el.textContent = ''; }, duration);
   }
+}
+
+// ── EXPORT CSV ──
+function exportCSV() {
+  var rows = [['Project','Title','Status','Owner','Category','Due Date','Discipline','Firm','Source']];
+  allTasks.forEach(function(t) {
+    if (t.status === 'Complete' || t.status === 'Closed') return; // only open tasks
+    rows.push([
+      t.project || '', t.title || t.task || '', t.status || '',
+      t.owner || '', t.category || '', t.dueDate || '',
+      t.discipline || '', t.firm || '', t.source || ''
+    ]);
+  });
+  if (rows.length === 1) { // header only — no data
+    var el = document.getElementById('context-message');
+    if (el) el.textContent = 'No open tasks to export';
+    return;
+  }
+  var csv = rows.map(function(r) {
+    return r.map(function(c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(',');
+  }).join('\n');
+  var blob = new Blob([csv], { type: 'text/csv' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'luci-tasks-' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  setContextMessage('✓ Exported ' + (rows.length - 1) + ' tasks', 3000);
+}
+window.exportCSV = exportCSV;
 }
 
 // ── SOURCE LINK ──
