@@ -204,6 +204,43 @@
 .confirm-btn.danger{background:#c73a3a;color:#fff;border-color:#c73a3a}
 .confirm-btn.danger:hover{background:#a32e2e}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+/* ── LIGHT MODE OVERRIDES ─────────────────────────────────────────── */
+/* Tasks.css is hardcoded for dark bg colors. Light mode needs readable alternatives. */
+[data-theme="light"] .task-title{color:#2c3e50}
+[data-theme="light"] .task:hover{background:#f0f2f5}
+[data-theme="light"] .task-list{background:transparent;border-radius:0}
+[data-theme="light"] .task{border-bottom:1px solid #e8e8e5}
+[data-theme="light"] .meta-tag{color:#6b7a85}
+[data-theme="light"] .meta-tag.project{background:rgba(136,136,136,0.08);color:#6b7a85}
+[data-theme="light"] .meta-tag.firm{background:rgba(136,136,136,0.07);color:#6b7a85}
+[data-theme="light"] .meta-tag.source.manual{color:#6b7a85}
+[data-theme="light"] .task-delete{color:#999}
+[data-theme="light"] .disc-thread{background:#f5f6f7;border-color:#ddd}
+[data-theme="light"] .disc-msg{border-bottom-color:#eee}
+[data-theme="light"] .disc-text{color:#444}
+[data-theme="light"] .disc-time{color:#888}
+[data-theme="light"] .disc-input-row{border-top-color:#ddd}
+[data-theme="light"] .dm-count{color:#6b7a85}
+[data-theme="light"] .context-message{color:#6b7a85}
+[data-theme="light"] .refresh-status{color:#6b7a85}
+[data-theme="light"] .dm-select{background:#fff}
+[data-theme="light"] .task-dispatch{color:#6b7a85;border-color:#ccc}
+[data-theme="light"] .task-draft-btn{color:#6b7a85;border-color:#ccc}
+[data-theme="light"] .ns-task{color:#444}
+[data-theme="light"] .ns-btn{color:#6b7a85;border-color:#ccc}
+[data-theme="light"] .ns-working{color:#6b7a85}
+[data-theme="light"] .confirm-box{border-color:#ccc}
+[data-theme="light"] .confirm-box::after{border-right-color:#ccc;border-bottom-color:#ccc}
+[data-theme="light"] .confirm-msg{color:#333}
+[data-theme="light"] .confirm-btn{color:#444;border-color:#ccc}
+[data-theme="light"] .confirm-btn.ok{color:#fff}
+[data-theme="light"] .undo-btn{background:#333;border-color:#555;color:#eee}
+[data-theme="light"] .source-chip{color:#6b7a85}
+[data-theme="light"] .source-chip:hover{color:#333;background:#eef0f2}
+[data-theme="light"] .dm-search::placeholder{color:#6b7a85}
+[data-theme="light"] .status-note{color:#6b7a85}
+
+/* ── SAGE GREEN — already handled by :root/[data-theme] in styles.css ── */
 
 /* Undo toast */
 .undo-btn{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#2a3540;border:1px solid #3a4555;border-radius:6px;padding:6px 12px;font-size:12px;color:#e8ecef;display:flex;align-items:center;gap:8px;z-index:200;animation:toastIn .2s;box-shadow:0 4px 12px rgba(0,0,0,0.4)}

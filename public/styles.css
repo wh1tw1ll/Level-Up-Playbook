@@ -2,7 +2,7 @@
 
 :root{
   --teal:#184655;--teal-light:#E8F1EF;--teal-mid:#2D6B7F;
-  --sage:#8BED1C;--charcoal:#181818;--cool:#E6E7E8;
+  --sage:#4a8f4a;--charcoal:#181818;--cool:#E6E7E8;
   --bg:#F8F8F6;--card:#fff;--border:#E2E2DE;--muted:#717168;
   --topbar-bg:#ffffff;--radius:10px;
   --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04);
@@ -11,7 +11,7 @@
 [data-theme="dark"]{
   --bg:#0e1419;--card:#1a232b;--border:#2a3540;--muted:#8a98a5;
   --charcoal:#e8ecef;--cool:#2a3540;--teal-light:#1d2d35;
-  --topbar-bg:#10222a;--topbar-text:#e8ecef;
+  --topbar-bg:#10222a;--topbar-text:#e8ecef;--sage:#8BED1C;
 }
 [data-theme="dark"] .topbar-logo{filter:brightness(0) invert(1)}
 *{box-sizing:border-box;margin:0;padding:0}
