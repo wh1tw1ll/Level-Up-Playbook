@@ -331,7 +331,7 @@ function render() {
         '<div class="task-meta">' +
           (t.owner ? '<span class="meta-tag owner">' + escapeHtml(t.owner) + '</span>' : '') +
           (t.dueDate ? '<span class="meta-tag ' + dueClass + '">' + dueLabel + '</span>' : '') +
-          (t.project ? '<span class="meta-tag project">' + escapeHtml(t.project) + '</span>' : '') +
+          (t.project ? '<span class="meta-tag project" data-project="' + escapeHtml(t.project.toLowerCase()) + '">' + escapeHtml(t.project) + '</span>' : '') +
           (firm ? '<span class="meta-tag firm">' + escapeHtml(firm) + '</span>' : '') +
           (statusLabel ? '<span class="meta-tag ' + statusClass + '" onclick="event.stopPropagation();cycleStatus(this,' + t.rowId + ')">' + escapeHtml(statusLabel) + '</span>' : '') +
           (sourceText ? '<span class="meta-tag">' + sourceText + '</span>' : '') +
@@ -1381,7 +1381,7 @@ function renderPrepCard(ev) {
   var isOneOff = !ev.isRecurring;
   var isPast = ev._isPast;
   var cardClass = 'prep-card' + (hasNote ? ' has-note' : '') + (isPast ? ' prep-card-past' : '');
-  var projectBadge = ev.project ? ' <span class="meta-tag project" style="font-size:10px;padding:0 4px">' + escapeHtml(ev.project) + '</span>' : '';
+  var projectBadge = ev.project ? ' <span class="meta-tag project" data-project="' + escapeHtml(ev.project.toLowerCase()) + '" style="font-size:10px;padding:0 4px">' + escapeHtml(ev.project) + '</span>' : '';
   var eventId = escapeHtml(ev.eventId || 'no-id');
   var detailId = 'prep-detail-' + eventId;
 
