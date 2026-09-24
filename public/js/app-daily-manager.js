@@ -183,33 +183,33 @@ function renderSourceLink(sourceRef) {
   // Granola meeting — show title
   if (sl.startsWith('granola:')) {
     var title = s.substring(8).trim();
-    return '<a class="meta-tag source granola" href="#" onclick="event.stopPropagation();openGranola();return false" data-granola-title="' + escapeHtml(title) + '" title="' + escapeHtml(s) + '">📝 ' + escapeHtml(title.substring(0, 30)) + (title.length > 30 ? '...' : '') + '</a>';
+    return '<a class="meta-tag source granola" href="#" onclick="event.stopPropagation();openGranola();return false" data-granola-title="' + escapeHtml(title) + '" title="' + escapeHtml(s) + '">' + escapeHtml(title.substring(0, 30)) + (title.length > 30 ? '...' : '') + '</a>';
   }
-  // GranolaNote — short label
+  // GranolaNote
   if (sl.startsWith('granolanote')) {
-    return '<span class="meta-tag source manual">📝 Notes</span>';
+    return '<span class="meta-tag source notes">Notes</span>';
   }
   // Email from LevelUpMail scan
   if (sl.startsWith('levelupmail')) {
-    return '<span class="meta-tag source email">✉️ Mail</span>';
+    return '<span class="meta-tag source mail">Mail</span>';
   }
   // Email with subject
   if (sl.startsWith('email:')) {
     var subj = s.substring(6).trim();
-    return '<a class="meta-tag source email" href="#" onclick="event.stopPropagation();alert(\'Email: ' + escapeHtml(subj) + '\')" title="' + escapeHtml(s) + '">✉️ ' + escapeHtml(subj.substring(0, 30)) + (subj.length > 30 ? '...' : '') + '</a>';
+    return '<a class="meta-tag source email" href="#" onclick="event.stopPropagation();alert(\'Email: ' + escapeHtml(subj) + '\')" title="' + escapeHtml(s) + '">' + escapeHtml(subj.substring(0, 30)) + (subj.length > 30 ? '...' : '') + '</a>';
   }
   // Manual
   if (sl.startsWith('manual') || sl.includes('added manually')) {
-    return '<span class="meta-tag source manual">📋 Manual</span>';
+    return '<span class="meta-tag source manual">Manual</span>';
   }
   // Anything else with a colon prefix — show just the category
   var colonIdx = sl.indexOf(':');
   if (colonIdx > 0 && colonIdx < 10) {
     var category = s.substring(0, colonIdx);
-    return '<span class="meta-tag source unknown">' + escapeHtml(category) + '</span>';
+    return '<span class="meta-tag source other">' + escapeHtml(category) + '</span>';
   }
   // True unknown — show abbreviated
-  return '<span class="meta-tag source unknown">' + escapeHtml(s.substring(0, 12)) + '</span>';
+  return '<span class="meta-tag source other">' + escapeHtml(s.substring(0, 12)) + '</span>';
 }
 
 // ── TASK TYPE INFERENCE ──
