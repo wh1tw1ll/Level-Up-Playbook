@@ -410,7 +410,107 @@
   margin-top: 2px;
 }
 
-/* ── FOOTER ── */
+/* ── WEATHER CARD ── */
+.briefing-weather-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+
+.briefing-weather-alert {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.briefing-weather-detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 4px 0;
+}
+
+.briefing-wx-site {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.briefing-weather-detail span {
+  white-space: nowrap;
+}
+
+/* ── DECISION ITEMS ── */
+.briefing-card-decision {
+  border-left: 3px solid #8b5cf6;
+}
+
+[data-theme="dark"] .briefing-card-decision {
+  border-left-color: #a78bfa;
+}
+
+.briefing-badge-decision {
+  color: #fff;
+  background: #8b5cf6;
+}
+
+[data-theme="dark"] .briefing-badge-decision {
+  background: #a78bfa;
+}
+
+.briefing-decision-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: flex-start;
+}
+
+.briefing-decision-item:last-child {
+  border-bottom: none;
+}
+
+.briefing-decision-marker {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #8b5cf6;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+[data-theme="dark"] .briefing-decision-marker {
+  background: #a78bfa;
+}
+
+.briefing-decision-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.briefing-decision-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+/* ── FOOTER ACTIONS ── */
 .briefing-footer {
   display: flex;
   justify-content: space-between;
@@ -420,19 +520,84 @@
   color: var(--text-muted);
 }
 
+.briefing-footer-left,
+.briefing-footer-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .briefing-refresh-btn {
   background: none;
   border: none;
   color: var(--accent);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   padding: 4px 8px;
   border-radius: 4px;
+  line-height: 1;
 }
 
 .briefing-refresh-btn:hover {
   background: var(--hover-bg);
+}
+
+.briefing-link-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.briefing-link-btn:hover {
+  background: var(--hover-bg);
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.briefing-audio-btn {
+  background: var(--accent);
+  border: none;
+  color: var(--bg);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.briefing-audio-btn:hover {
+  opacity: 0.85;
+}
+
+.briefing-today-btn {
+  background: var(--card-bg);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 8px;
+}
+
+.briefing-today-btn:hover {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* ── SECTION TOGGLE ROTATE ── */
+.briefing-card-toggle {
+  font-size: 12px;
+  color: var(--text-muted);
+  transition: transform 0.2s;
+  line-height: 1;
 }
 
 /* ── DARK MODE OVERRIDES ── */

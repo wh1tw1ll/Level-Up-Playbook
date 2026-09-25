@@ -1,16 +1,22 @@
-// js/app-briefing.js — The Daily Operating Picture
-// A digestible, single-scroll briefing that tells Whitney what matters today.
-// Loaded from /api/briefing — no STORE dependency.
+// js/app-briefing.js — The Daily Operating Picture v2
+// Weather, meetings, attention items, decisions, audio, yesterday's brief
 
 /* global escapeHtml */
-function renderBriefingView() {
-  const container = document.getElementById('briefing-content');
+
+var briefingViewState = 'today';
+
+function renderBriefingView(dateOverride) {
+  var container = document.getElementById('briefing-content');
   if (!container) return;
+
+  briefingViewState = dateOverride ? 'history' : 'today';
 
   container.innerHTML = '<div class="briefing-skeleton"><div class="briefing-loader"></div><span>Assembling your briefing...</span></div>';
 
-  // ── FETCH BRIEFING DATA ──
-  fetch('/api/briefing')
+  var url = '/api/briefing';
+  if (dateOverride) url += '?date=' + encodeURIComponent(dateOverride);
+
+  fetch(url)
     .then(function(r) {
       if (!r.ok) throw new Error('Status ' + r.status);
       return r.json();
@@ -27,20 +33,50 @@ function renderBriefingView() {
 function renderBriefing(container, data) {
   var html = '';
 
-  // ═══ SECTION 1: GREETING ═══
+  // ═══ SECTION 1: GREETING + DATE ═══
   html += '<div class="briefing-header">';
-  html += '  <div class="briefing-greeting">☕ ' + escapeHtml(data.greeting) + ', <strong>' + escapeHtml(data.name) + '</strong></div>';
-  html += '  <div class="briefing-date">' + escapeHtml(data.dayLabel) + '</div>';
+  if (data.isHistorical) {
+    html += '  <div class="briefing-greeting">📜 Briefing for <strong>' + escapeHtml(data.dayLabel) + '</strong></div>';
+    html += '  <div style="margin-top:8px"><button class="briefing-today-btn" onclick="renderBriefingView()">← Back to Today</button></div>';
+  } else {
+    html += '  <div class="briefing-greeting">☕ ' + escapeHtml(data.greeting) + ', <strong>' + escapeHtml(data.name) + '</strong></div>';
+    html += '  <div class="briefing-date">' + escapeHtml(data.dayLabel) + '</div>';
+  }
   html += '</div>';
 
-  // ═══ SECTION 2: MEETING TIMELINE ═══
+  // ═══ SECTION 2: WEATHER ALERT ═══
+  if (!data.isHistorical && data.weather) {
+    var wx = data.weather;
+
+    html += '<div class="briefing-weather-card">';
+    html += '  <div class="briefing-weather-alert">' + escapeHtml(wx.alert || 'Weather data unavailable') + '</div>';
+    if (wx.mfp && !data.isHistorical) {
+      html += '  <div class="briefing-weather-detail">';
+      html += '    <span class="briefing-wx-site tag-mfp">MFP</span>';
+      html += '    <span>' + escapeHtml(wx.mfp.condition) + '</span>';
+      html += '    <span>' + Math.round(wx.mfp.tempHigh) + '°/' + Math.round(wx.mfp.tempLow) + '°</span>';
+      html += '    <span>' + wx.mfp.precipProb + '% rain</span>';
+      html += '  </div>';
+    }
+    if (wx.dova && !data.isHistorical) {
+      html += '  <div class="briefing-weather-detail">';
+      html += '    <span class="briefing-wx-site tag-dova">DOVA</span>';
+      html += '    <span>' + escapeHtml(wx.dova.condition) + '</span>';
+      html += '    <span>' + Math.round(wx.dova.tempHigh) + '°/' + Math.round(wx.dova.tempLow) + '°</span>';
+      html += '    <span>' + wx.dova.precipProb + '% rain</span>';
+      html += '  </div>';
+    }
+    html += '</div>';
+  }
+
+  // ═══ SECTION 3: MEETING TIMELINE ═══
   var hasMeetings = data.events && data.events.length > 0;
   var meetingCount = hasMeetings ? data.events.length : 0;
 
   html += '<div class="briefing-card" data-expand="meetings">';
   html += '  <div class="briefing-card-header" onclick="toggleBriefingSection(this)">';
   html += '    <span class="briefing-card-icon">📅</span>';
-  html += '    <span class="briefing-card-title">Today\'s Schedule</span>';
+  html += '    <span class="briefing-card-title">' + (data.isHistorical ? 'Meetings' : 'Today\'s Schedule') + '</span>';
   html += '    <span class="briefing-card-badge">' + meetingCount + '</span>';
   html += '    <span class="briefing-card-toggle">▾</span>';
   html += '  </div>';
@@ -67,16 +103,49 @@ function renderBriefing(container, data) {
       html += '    </div>';
     }
   } else {
-    html += '    <div class="briefing-empty-section">';
-    html += '      <p>No meetings scheduled today.</p>';
-    html += '    </div>';
+    html += '    <div class="briefing-empty-section"><p>No meetings' + (data.isHistorical ? '' : ' scheduled today') + '.</p></div>';
   }
-
   html += '  </div>';
   html += '</div>';
-  html += '';
 
-  // ═══ SECTION 3: ATTENTION ITEMS ═══
+  // ═══ SECTION 4: DECISION NEEDED ═══
+  var hasDecisions = data.decisions && data.decisions.length > 0;
+
+  html += '<div class="briefing-card' + (hasDecisions ? ' briefing-card-decision' : '') + '" data-expand="decisions">';
+  html += '  <div class="briefing-card-header" onclick="toggleBriefingSection(this)">';
+  html += '    <span class="briefing-card-icon">✋</span>';
+  html += '    <span class="briefing-card-title">' + (hasDecisions ? 'Decision Needed' : 'Decisions') + '</span>';
+  if (hasDecisions) {
+    html += '    <span class="briefing-card-badge briefing-badge-decision">' + data.decisions.length + '</span>';
+  }
+  html += '    <span class="briefing-card-toggle">▾</span>';
+  html += '  </div>';
+  html += '  <div class="briefing-card-body" style="display:' + (hasDecisions ? 'block' : 'none') + '">';
+
+  if (hasDecisions) {
+    for (var d = 0; d < data.decisions.length; d++) {
+      var dec = data.decisions[d];
+      var projectClass = getProjectClass(dec.project);
+      html += '    <div class="briefing-decision-item">';
+      html += '      <div class="briefing-decision-marker">!</div>';
+      html += '      <div class="briefing-decision-body">';
+      html += '        <div class="briefing-decision-title">' + escapeHtml(dec.title) + '</div>';
+      html += '        <div class="briefing-item-meta">';
+      html += '          <span class="briefing-item-tag ' + projectClass + '">' + escapeHtml(dec.project || 'General') + '</span>';
+      if (dec.label) {
+        html += '          <span class="briefing-item-label briefing-item-label-critical">' + escapeHtml(dec.label) + '</span>';
+      }
+      html += '        </div>';
+      html += '      </div>';
+      html += '    </div>';
+    }
+  } else {
+    html += '    <div class="briefing-empty-section"><p>✓ No items need your decision right now.</p></div>';
+  }
+  html += '  </div>';
+  html += '</div>';
+
+  // ═══ SECTION 5: ATTENTION ITEMS ═══
   var hasAttention = data.attentionItems && data.attentionItems.length > 0;
   var criticalCount = 0;
   var highCount = 0;
@@ -93,12 +162,12 @@ function renderBriefing(container, data) {
   html += '  <div class="briefing-card-header" onclick="toggleBriefingSection(this)">';
   if (criticalCount > 0) {
     html += '    <span class="briefing-card-icon">⚠️</span>';
-  } else if (highCount > 0) {
+  } else if (hasAttention) {
     html += '    <span class="briefing-card-icon">📋</span>';
   } else {
     html += '    <span class="briefing-card-icon">✓</span>';
   }
-  html += '    <span class="briefing-card-title">' + (criticalCount > 0 ? 'Needs Your Attention' : highCount > 0 ? 'Due Today' : 'All Clear') + '</span>';
+  html += '    <span class="briefing-card-title">' + (criticalCount > 0 ? 'Needs Your Attention' : hasAttention ? 'Upcoming' : 'All Clear') + '</span>';
   if (hasAttention) {
     html += '    <span class="briefing-card-badge briefing-badge-' + (criticalCount > 0 ? 'danger' : 'warn') + '">' + data.attentionItems.length + '</span>';
   }
@@ -127,15 +196,12 @@ function renderBriefing(container, data) {
       html += '    </div>';
     }
   } else {
-    html += '    <div class="briefing-empty-section">';
-    html += '      <p>✓ Nothing urgent today.</p>';
-    html += '    </div>';
+    html += '    <div class="briefing-empty-section"><p>' + (data.isHistorical ? 'No items for this date.' : '✓ Nothing urgent today.') + '</p></div>';
   }
-
   html += '  </div>';
   html += '</div>';
 
-  // ═══ SECTION 4: LUNA NOTE ═══
+  // ═══ SECTION 6: LUNA NOTE (between cards, prominent) ═══
   if (data.lunaNote) {
     html += '<div class="briefing-luna-card">';
     html += '  <div class="briefing-luna-icon">' + escapeHtml(data.lunaNote.icon) + '</div>';
@@ -143,7 +209,7 @@ function renderBriefing(container, data) {
     html += '</div>';
   }
 
-  // ═══ SECTION 5: PROJECT PULSE ═══
+  // ═══ SECTION 7: PROJECT PULSE ═══
   var hasPulse = data.projectPulse && data.projectPulse.length > 0;
 
   html += '<div class="briefing-card" data-expand="pulse">';
@@ -172,14 +238,27 @@ function renderBriefing(container, data) {
       html += '    </div>';
     }
   }
-
   html += '  </div>';
   html += '</div>';
 
-  // ═══ SECTION 6: FOOTER ═══
+  // ═══ SECTION 8: FOOTER with audio + yesterday ═══
   html += '<div class="briefing-footer">';
-  html += '  <span>Last updated: ' + escapeHtml(formatBriefingTime(new Date().toISOString())) + '</span>';
-  html += '  <button class="briefing-refresh-btn" onclick="renderBriefingView()">↻ Refresh</button>';
+  html += '  <div class="briefing-footer-left">';
+  html += '    <span>Updated ' + escapeHtml(formatBriefingTime(new Date().toISOString())) + '</span>';
+
+  if (!data.isHistorical && data.yesterday) {
+    html += '    <button class="briefing-link-btn" onclick="renderBriefingView(\'' + escapeHtml(data.yesterday) + '\')">📄 Yesterday</button>';
+  }
+
+  html += '  </div>';
+  html += '  <div class="briefing-footer-right">';
+
+  if (!data.isHistorical && data.audioSummary && data.audioSummary.length > 20) {
+    html += '    <button class="briefing-audio-btn" onclick="playBriefingAudio(this)" data-text="' + escapeHtml(data.audioSummary) + '">🎧 Listen</button>';
+  }
+
+  html += '    <button class="briefing-refresh-btn" onclick="renderBriefingView()">↻</button>';
+  html += '  </div>';
   html += '</div>';
 
   container.innerHTML = html;
@@ -191,6 +270,51 @@ function renderBriefing(container, data) {
       if (alertCard) alertCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
   }
+}
+
+// ── AUDIO BRIEFING (Web Speech API) ──
+function playBriefingAudio(btn) {
+  if (!btn) return;
+
+  var text = btn.getAttribute('data-text');
+  if (!text) return;
+
+  // Check if already speaking
+  if (window.speechSynthesis && window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    btn.textContent = '🎧 Listen';
+    return;
+  }
+
+  var utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 1.0;
+  utterance.pitch = 1.0;
+  utterance.volume = 1.0;
+
+  // Try to find a good voice
+  var voices = window.speechSynthesis.getVoices();
+  var preferredVoice = null;
+  for (var v = 0; v < voices.length; v++) {
+    if (voices[v].name.indexOf('Samantha') !== -1 || voices[v].name.indexOf('Google US English') !== -1) {
+      preferredVoice = voices[v];
+      break;
+    }
+  }
+  if (preferredVoice) utterance.voice = preferredVoice;
+
+  utterance.onstart = function() {
+    btn.textContent = '⏹ Stop';
+  };
+
+  utterance.onend = function() {
+    btn.textContent = '🎧 Listen';
+  };
+
+  utterance.onerror = function() {
+    btn.textContent = '🎧 Listen';
+  };
+
+  window.speechSynthesis.speak(utterance);
 }
 
 // ── HELPERS ──
@@ -234,3 +358,4 @@ function toggleBriefingSection(header) {
 // ── EXPOSE ──
 window.renderBriefingView = renderBriefingView;
 window.toggleBriefingSection = toggleBriefingSection;
+window.playBriefingAudio = playBriefingAudio;
