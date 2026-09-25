@@ -30,6 +30,7 @@ import promoteHandler from '../lib/handlers/promote.js';
 import extractFromNote from '../lib/handlers/extract-from-note.js';
 import prepMapHandler from '../lib/handlers/prep-map.js';
 import agendasStoreHandler from '../lib/handlers/agendas-store.js';
+import briefingHandler from '../lib/handlers/briefing.js';
 import smartsheet from '../lib/smartsheet.js';
 import guardedWrite from '../lib/guarded-write.js';
 import { readFileSync } from 'fs';
@@ -64,7 +65,8 @@ const AUTH_BYPASS_ROUTES = new Set([
   '/api/admin/ingest-outbox',
   '/api/admin/create-outbox',
   '/api/admin/cleanup',
-]);
+    '/api/briefing',
+  ]);
 // Routes accessible with password-only (no Microsoft sign-in required)
 // These have been hardened to only return DOVA-filtered data
 const PASSWORD_ALLOWED_ROUTES = new Set([
@@ -227,10 +229,11 @@ export default async function handler(req, res) {
       case '/api/sharepoint/read': return sharepointRead(req, res);
       // ── SERVING ──
                   case '/api/actions': {
-                                // Redirect to main app (standalone widget retired, inline Tasks view active)
-                                res.writeHead(302, { Location: '/?view=tasks' });
-                                return res.end();
-                              }
+                          // Redirect to main app (standalone widget retired, inline Tasks view active)
+                          res.writeHead(302, { Location: '/?view=tasks' });
+                          return res.end();
+                        }
+                        case '/api/briefing': return briefingHandler(req, res);
                   case '/api/client/actions': {
                           return handleClientActions(req, res);
                         }

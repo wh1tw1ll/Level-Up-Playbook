@@ -1,0 +1,511 @@
+/* ── BRIEFING VIEW ── */
+/* A clean, digestible morning briefing. No dense tables. Just what matters. */
+
+.briefing-content {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 16px 16px 48px;
+}
+
+/* ── Skeleton / loading ── */
+.briefing-skeleton {
+  text-align: center;
+  padding: 80px 24px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.briefing-loader {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: briefing-spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes briefing-spin {
+  to { transform: rotate(360deg); }
+}
+
+.briefing-empty {
+  text-align: center;
+  padding: 80px 24px;
+  color: var(--muted);
+}
+
+.briefing-empty-sub {
+  font-size: 12px;
+  margin-top: 8px;
+  color: var(--text-muted);
+}
+
+.briefing-retry-btn {
+  margin-top: 16px;
+  padding: 8px 20px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.briefing-retry-btn:hover {
+  background: var(--hover-bg);
+}
+
+/* ── Empty section (no meetings / no items) ── */
+.briefing-empty-section {
+  padding: 16px 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.briefing-empty-section p {
+  margin: 0;
+}
+
+/* ── HEADER: Greeting + date ── */
+.briefing-header {
+  margin-bottom: 20px;
+  padding: 0 4px;
+}
+
+.briefing-greeting {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.briefing-greeting strong {
+  color: var(--accent);
+}
+
+.briefing-date {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ── SECTION CARDS ── */
+.briefing-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.briefing-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+[data-theme="dark"] .briefing-card:hover {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+/* Alert card (overdue items) */
+.briefing-card-alert {
+  border-left: 3px solid #e74c3c;
+}
+
+/* Card header — clickable to toggle */
+.briefing-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.briefing-card-header:active {
+  background: var(--hover-bg);
+}
+
+.briefing-card-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.briefing-card-title {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.briefing-card-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg);
+  padding: 2px 8px;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.briefing-badge-danger {
+  color: #fff;
+  background: #e74c3c;
+}
+
+.briefing-badge-warn {
+  color: #fff;
+  background: #f39c12;
+}
+
+.briefing-card-toggle {
+  font-size: 12px;
+  color: var(--text-muted);
+  transition: transform 0.2s;
+  line-height: 1;
+}
+
+/* Card body — collapsible */
+.briefing-card-body {
+  padding: 0 16px 14px;
+  border-top: 1px solid var(--border);
+  margin-top: 0;
+}
+
+.briefing-card-body > *:first-child {
+  padding-top: 12px;
+}
+
+/* ── MEETING TIMELINE ── */
+.briefing-event {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.briefing-event:last-child {
+  border-bottom: none;
+}
+
+.briefing-event-time {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 56px;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.briefing-event-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.briefing-event-online .briefing-event-dot {
+  background: #8b5cf6;
+}
+
+.briefing-event-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.briefing-event-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.briefing-event-location {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ── ATTENTION ITEMS ── */
+.briefing-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: flex-start;
+}
+
+.briefing-item:last-child {
+  border-bottom: none;
+}
+
+.briefing-item-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.briefing-item-dot-critical {
+  background: #e74c3c;
+}
+
+.briefing-item-dot-high {
+  background: #f39c12;
+}
+
+.briefing-item-dot-upcoming {
+  background: #3498db;
+}
+
+.briefing-item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.briefing-item-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.briefing-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+  align-items: center;
+}
+
+.briefing-item-tag {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.briefing-item-label {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.briefing-item-label-critical {
+  background: rgba(231, 76, 60, 0.12);
+  color: #e74c3c;
+}
+
+.briefing-item-label-high {
+  background: rgba(243, 156, 18, 0.12);
+  color: #f39c12;
+}
+
+.briefing-item-label-upcoming {
+  background: rgba(52, 152, 219, 0.12);
+  color: #3498db;
+}
+
+.briefing-item-owner {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ── PROJECT TAG COLORS ── */
+.tag-mfp {
+  background: rgba(212, 135, 74, 0.15);
+  color: #d4874a;
+}
+
+.tag-dova {
+  background: rgba(74, 138, 212, 0.15);
+  color: #4a8ad4;
+}
+
+.tag-business {
+  background: rgba(93, 160, 93, 0.15);
+  color: #5da05d;
+}
+
+.tag-sphere {
+  background: rgba(155, 89, 182, 0.15);
+  color: #9b59b6;
+}
+
+.tag-general {
+  background: var(--hover-bg);
+  color: var(--text-muted);
+}
+
+/* ── LUNA NOTE ── */
+.briefing-luna-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+
+.briefing-luna-icon {
+  font-size: 20px;
+  line-height: 1.3;
+  flex-shrink: 0;
+}
+
+.briefing-luna-text {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+  flex: 1;
+}
+
+/* ── PROJECT PULSE ── */
+.briefing-pulse-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.briefing-pulse-row:last-child {
+  border-bottom: none;
+}
+
+.briefing-pulse-health {
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.briefing-pulse-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.briefing-pulse-name {
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 4px;
+}
+
+.briefing-pulse-summary {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ── FOOTER ── */
+.briefing-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 4px 0;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.briefing-refresh-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.briefing-refresh-btn:hover {
+  background: var(--hover-bg);
+}
+
+/* ── DARK MODE OVERRIDES ── */
+[data-theme="dark"] .briefing-event-dot {
+  background: var(--accent);
+}
+
+[data-theme="dark"] .briefing-event-online .briefing-event-dot {
+  background: #a78bfa;
+}
+
+[data-theme="dark"] .briefing-card-alert {
+  border-left-color: #ef4444;
+}
+
+[data-theme="dark"] .briefing-item-label-critical {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+[data-theme="dark"] .briefing-item-label-high {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+
+[data-theme="dark"] .briefing-item-label-upcoming {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+
+[data-theme="dark"] .briefing-badge-danger {
+  background: #ef4444;
+}
+
+[data-theme="dark"] .briefing-badge-warn {
+  background: #f59e0b;
+}
+
+[data-theme="dark"] .tag-mfp {
+  background: rgba(212, 135, 74, 0.25);
+  color: #e8a86a;
+}
+
+[data-theme="dark"] .tag-dova {
+  background: rgba(74, 138, 212, 0.25);
+  color: #7ab8d4;
+}
+
+[data-theme="dark"] .tag-business {
+  background: rgba(93, 160, 93, 0.25);
+  color: #7bc07b;
+}
+
+[data-theme="dark"] .tag-sphere {
+  background: rgba(155, 89, 182, 0.25);
+  color: #c084d6;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 480px) {
+  .briefing-content {
+    padding: 12px 12px 36px;
+  }
+
+  .briefing-greeting {
+    font-size: 19px;
+  }
+
+  .briefing-card-header {
+    padding: 12px 14px;
+  }
+
+  .briefing-card-body {
+    padding: 0 14px 12px;
+  }
+}
