@@ -152,9 +152,8 @@ function getCookie(name) {
 function updateDataDate() {
   var el = document.getElementById('data-date');
   if (!el) return;
-  var d = new Date();
-  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  el.textContent = 'static as of ' + months[d.getMonth()] + ' ' + d.getDate();
+  // Data files last updated Sep 24, 2026. Tasks are live from Smartsheet.
+  el.textContent = 'KB: Sep 19 · Tasks: live';
 }
 document.addEventListener('DOMContentLoaded', updateDataDate);
 
