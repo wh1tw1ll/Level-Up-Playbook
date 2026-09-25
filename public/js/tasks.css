@@ -297,4 +297,32 @@
 .undo-toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#2a3540;border:1px solid #3a4555;border-radius:6px;padding:8px 14px;font-size:13px;color:#e8ecef;display:flex;align-items:center;gap:10px;z-index:200;animation:toastIn .2s;box-shadow:0 4px 12px rgba(0,0,0,0.4);font-family:var(--font)}
 .undo-toast button{font-size:12px;padding:3px 10px;border-radius:6px;border:1px solid var(--sage);background:transparent;color:var(--sage);cursor:pointer;font-family:var(--font);white-space:nowrap}
 .undo-toast button:hover{background:rgba(74,143,74,0.15)}
+
+/* ── MOBILE / TOUCH OVERRIDES ── */
+/* Always show delete button, bigger tap targets */
+@media (hover: none) and (pointer: coarse) {
+  .task-delete{opacity:0.4;width:22px;height:22px;font-size:13px}
+  .task-delete:active{opacity:1;color:#e86060}
+  .task-dispatch{padding:4px 10px;font-size:11px;min-height:30px}
+  .task-draft-btn{padding:4px 9px;font-size:12px;min-height:30px;min-width:30px;display:flex;align-items:center;justify-content:center}
+  .task-promote{padding:4px 9px;font-size:12px;min-height:30px}
+  .meta-tag{padding:3px 7px}
+  .meta-tag.owner{padding:3px 7px}
+  .meta-tag.project{padding:3px 7px}
+  .meta-tag.firm{padding:3px 7px}
+  .meta-tag.status{padding:3px 7px}
+  .meta-tag.disc{padding:3px 7px}
+  .meta-tag.source{padding:3px 7px}
+  .meta-tag-input{min-height:30px;font-size:14px;min-width:100px}
+  .filter-chip{padding:5px 12px;font-size:13px;min-height:32px}
+  .dm-icon-btn{padding:5px 10px;min-height:32px;min-width:32px}
+  .dm-select{min-height:32px;font-size:13px}
+  .task-title{font-size:14px;line-height:1.5;padding:2px 0}
+  .task{padding:10px 10px}
+  .status-note-input{min-height:30px;font-size:13px}
+}
+/* Tablet landscape — moderate touch improvements */
+@media (hover: none) and (pointer: fine) {
+  .task-delete{opacity:0.4}
+}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}

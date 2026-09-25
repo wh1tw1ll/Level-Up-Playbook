@@ -1,0 +1,20 @@
+{
+  "name": "LUCI — Level Up Central Intelligence",
+  "short_name": "LUCI",
+  "description": "Project intelligence, task management, and playbook for Level Up Project Development",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e1419",
+  "theme_color": "#10222a",
+  "icons": [
+    {
+      "src": "/assets/LUCI_icon_tile.png",
+      "sizes": "1000x1000",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "en-US"
+}
