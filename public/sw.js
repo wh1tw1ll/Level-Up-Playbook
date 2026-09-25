@@ -14,9 +14,10 @@ const ASSETS = [
   '/js/app-luna.js',
   '/manifest.json',
   '/assets/LUCI_icon_tile.png',
+  '/assets/level-up-app-icon.svg',
+  '/assets/level-up-logo.png',
   '/assets/LUCI_lockup_ink.svg',
-  '/assets/LUCI_lockup_cream.svg',
-  '/assets/level-up-logo.png'
+  '/assets/lockup-black.svg'
 ];
 
 self.addEventListener('install', e => {
