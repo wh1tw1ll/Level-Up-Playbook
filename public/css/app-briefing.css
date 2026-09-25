@@ -674,3 +674,29 @@
     padding: 0 14px 12px;
   }
 }
+
+/* ── PREP TAB: edit icon ── */
+.prep-action-text {
+  cursor: pointer;
+  border-bottom: 1px dashed transparent;
+  transition: border-color 0.15s;
+}
+.prep-action-text:hover {
+  border-bottom-color: var(--accent);
+}
+.prep-action-edit {
+  cursor: pointer;
+  font-size: 11px;
+  margin-left: 4px;
+  opacity: 0.4;
+  transition: opacity 0.15s;
+  user-select: none;
+}
+.prep-action-edit:hover {
+  opacity: 1;
+}
+.prep-edit-input {
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}

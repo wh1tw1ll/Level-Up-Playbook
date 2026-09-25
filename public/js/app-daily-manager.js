@@ -1660,18 +1660,26 @@ function renderPrepCard(ev) {
       for (var oi2 = 0; oi2 < items.length; oi2++) {
         var item = items[oi2];
         var dueLabel = item.dueDate ? ' | due ' + item.dueDate : '';
-        h += '  <div style="font-size:12px;padding:1px 0 1px 12px;color:var(--fg)">' + escapeHtml(item.actionItem) + (dueLabel ? '<span style="color:var(--muted);font-size:11px">' + dueLabel + '</span>' : '') + '</div>';
-      }
-      h += '</div>';
-    }
-  }
+                h += '  <div style="font-size:12px;padding:1px 0 1px 12px;color:var(--fg)">';
+                h += '    <span class="prep-action-text" onclick="editPrepItem(this,' + item.rowId + ',\'project\')">' + escapeHtml(item.actionItem) + '</span>';
+                h += '    <span class="prep-action-edit" onclick="event.stopPropagation();editPrepItem(this.previousSibling,' + item.rowId + ',\'project\')">✏️</span>';
+                h += (dueLabel ? '<span style="color:var(--muted);font-size:11px">' + dueLabel + '</span>' : '');
+                h += '  </div>';
+              }
+              h += '</div>';
+            }
+          }
 
-  if (ev.whitneyItems && ev.whitneyItems.length > 0) {
-    h += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">WHAT I OWE</div>';
-    for (var wi = 0; wi < ev.whitneyItems.length; wi++) {
-      var item = ev.whitneyItems[wi];
-      var dueLabel = item.dueDate ? ' | due ' + item.dueDate : '';
-      h += '<div style="font-size:12px;padding:1px 0;color:var(--fg)">' + escapeHtml(item.actionItem) + (dueLabel ? '<span style="color:var(--muted);font-size:11px">' + dueLabel + '</span>' : '') + '</div>';
+          if (ev.whitneyItems && ev.whitneyItems.length > 0) {
+            h += '<div class="prep-section-label" style="margin-top:6px;font-size:10px">WHAT I OWE</div>';
+            for (var wi = 0; wi < ev.whitneyItems.length; wi++) {
+              var item = ev.whitneyItems[wi];
+              var dueLabel = item.dueDate ? ' | due ' + item.dueDate : '';
+              h += '  <div style="font-size:12px;padding:1px 0;color:var(--fg)">';
+              h += '    <span class="prep-action-text" onclick="editPrepItem(this,' + item.rowId + ',\'project\')">' + escapeHtml(item.actionItem) + '</span>';
+              h += '    <span class="prep-action-edit" onclick="event.stopPropagation();editPrepItem(this.previousSibling,' + item.rowId + ',\'project\')">✏️</span>';
+              h += (dueLabel ? '<span style="color:var(--muted);font-size:11px">' + dueLabel + '</span>' : '');
+              h += '  </div>';
     }
   }
 
@@ -2082,6 +2090,57 @@ window.submitNewTask = function() {
     if (btn) btn.disabled = false;
   });
 };
+
+// ── INLINE EDIT for Prep Agenda Items ──
+function editPrepItem(el, rowId, source) {
+  if (!el) return;
+  var currentText = el.textContent || '';
+  var input = document.createElement('textarea');
+  input.className = 'prep-edit-input';
+  input.value = currentText.trim();
+  input.style.width = '100%';
+  input.style.fontSize = '12px';
+  input.style.fontFamily = 'inherit';
+  input.style.padding = '4px 6px';
+  input.style.border = '1px solid var(--accent)';
+  input.style.borderRadius = '4px';
+  input.style.background = 'var(--card-bg)';
+  input.style.color = 'var(--text)';
+  input.style.resize = 'vertical';
+  input.rows = 2;
+  input.placeholder = 'Edit action item...';
+  el.replaceWith(input);
+  input.focus();
+  input.select();
+
+  function save() {
+    var newText = input.value.trim();
+    var div = document.createElement('span');
+    div.className = 'prep-action-text';
+    div.textContent = newText || currentText;
+    div.style.cursor = 'pointer';
+    if (newText && newText !== currentText) {
+      fetch('/api/tasks/' + rowId + '?source=' + (source || 'project'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ actionItem: newText })
+      }).then(function(r) {
+        if (!r.ok) throw new Error('save failed: ' + r.status);
+      }).catch(function(e) {
+        div.textContent = currentText;
+        showToast('Could not save: ' + e.message, 3000);
+      });
+    }
+    input.replaceWith(div);
+    div.onclick = function() { editPrepItem(div, rowId, source); };
+  }
+
+  input.onblur = save;
+  input.onkeydown = function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); save(); }
+    if (e.key === 'Escape') { input.value = currentText; save(); }
+  };
+}
 
 return refreshInterval;
 } catch(e) { console.error('renderDailyManager error:', e); }
