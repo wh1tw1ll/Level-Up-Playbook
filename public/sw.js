@@ -14,6 +14,7 @@ const ASSETS = [
   '/js/app-luna.js',
   '/manifest.json',
   '/assets/LUCI_icon_tile.png',
+  '/assets/luci-home-icon.jpg',
   '/assets/level-up-app-icon.svg',
   '/assets/level-up-logo.png',
   '/assets/LUCI_lockup_ink.svg',

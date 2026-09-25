@@ -9,16 +9,10 @@
   "theme_color": "#10222a",
   "icons": [
     {
-      "src": "/assets/level-up-app-icon.svg?v=2",
-      "sizes": "500x500",
-      "type": "image/svg+xml",
+      "src": "/assets/luci-home-icon.jpg?v=3",
+      "sizes": "800x800",
+      "type": "image/jpeg",
       "purpose": "any maskable"
-    },
-    {
-      "src": "/assets/level-up-logo.png?v=2",
-      "sizes": "1080x628",
-      "type": "image/png",
-      "purpose": "any"
     }
   ],
   "categories": ["business", "productivity"],
