@@ -9,9 +9,9 @@
   "theme_color": "#10222a",
   "icons": [
     {
-      "src": "/assets/LUCI_icon_tile.png",
-      "sizes": "1000x1000",
-      "type": "image/png",
+      "src": "/assets/level-up-app-icon.svg",
+      "sizes": "500x500",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ],
