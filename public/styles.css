@@ -56,6 +56,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--charcoal)
   transition: all .2s ease;
   animation: help-pulse 3s ease-in-out infinite;
 }
+/* Move help button out of nav way on smaller screens */
+@media (max-width: 700px) {
+  .help-btn {
+    position: fixed;
+    top: auto;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 18px;
+    font-size: 12px;
+    box-shadow: 0 3px 16px rgba(24,70,85,0.4);
+    z-index: 9999;
+  }
+  .help-btn-label { display: none; }
+  .help-btn-icon { font-size: 20px; }
+}
 .help-btn:hover {
   background: var(--teal-mid);
   transform: scale(1.05);

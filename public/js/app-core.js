@@ -148,6 +148,16 @@ function getCookie(name) {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
+// Update status bar date dynamically
+function updateDataDate() {
+  var el = document.getElementById('data-date');
+  if (!el) return;
+  var d = new Date();
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  el.textContent = 'static as of ' + months[d.getMonth()] + ' ' + d.getDate();
+}
+document.addEventListener('DOMContentLoaded', updateDataDate);
+
 // ── AUTH ──────────────────────────────────────────────────────────
 function checkAuthFromCookie() {
   var raw = getCookie('lu_session');
