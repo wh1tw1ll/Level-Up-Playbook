@@ -405,9 +405,10 @@ function render() {
         '<div class="task-meta">' +
           '<span class="meta-tag owner' + (t.owner ? ' editable' : ' empty') + '" onclick="event.stopPropagation();editOwner(this,' + t.rowId + ')">' + (t.owner ? escapeHtml(t.owner) : '+ assign') + '</span>' +
           '<span class="meta-tag ' + dueClass + (t.dueDate ? ' editable' : ' empty') + '" onclick="event.stopPropagation();editDueDate(this,' + t.rowId + ')">' + (t.dueDate ? dueLabel : '+ due date') + '</span>' +
-          (t.project ? '<span class="meta-tag project" data-project="' + escapeHtml(t.project.toLowerCase()) + '">' + escapeHtml(t.project) + '</span>' : '') +
-          (firm ? '<span class="meta-tag firm">' + escapeHtml(firm) + '</span>' : '') +
-          (statusLabel ? '<span class="meta-tag ' + statusClass + '" onclick="event.stopPropagation();cycleStatus(this,' + t.rowId + ')">' + escapeHtml(statusLabel) + '</span>' : '') +
+          (t.project ? '<span class="meta-tag project editable" onclick="event.stopPropagation();editProject(this,' + t.rowId + ')" data-project="' + escapeHtml(t.project.toLowerCase()) + '">' + escapeHtml(t.project) + '</span>' : '<span class="meta-tag project empty" onclick="event.stopPropagation();editProject(this,' + t.rowId + ')">+ project</span>') +
+                    (firm ? '<span class="meta-tag firm editable" onclick="event.stopPropagation();editFirm(this,' + t.rowId + ')">' + escapeHtml(firm) + '</span>' : '<span class="meta-tag firm empty" onclick="event.stopPropagation();editFirm(this,' + t.rowId + ')">+ firm</span>') +
+                    (t.category ? '<span class="meta-tag category editable" onclick="event.stopPropagation();editCategory(this,' + t.rowId + ')">' + escapeHtml(t.category) + '</span>' : '') +
+                    (statusLabel ? '<span class="meta-tag ' + statusClass + '" onclick="event.stopPropagation();cycleStatus(this,' + t.rowId + ')">' + escapeHtml(statusLabel) + '</span>' : '') +
           (sourceText ? '<span class="meta-tag">' + sourceText + '</span>' : '') +
           (typeLabel ? '<span class="meta-tag">' + typeLabel + '</span>' : '') +
           renderSourceLink(t.sourceRef) +
@@ -1135,6 +1136,148 @@ function editDueDate(el, rowId) {
         span.textContent = currentText || '+ due date';
         if (!currentText) span.classList.add('empty');
         showToast('Could not save due date: ' + e.message, 3000);
+      });
+    }
+  }
+
+  input.onblur = save;
+  input.onkeydown = function(e) {
+    if (e.key === 'Enter') { save(); }
+    if (e.key === 'Escape') { input.blur(); }
+  };
+}
+
+// ── PROJECT (inline edit) ──
+function editProject(el, rowId) {
+  var currentText = el.textContent;
+  var isEmpty = el.classList.contains('empty');
+  var input = document.createElement('input');
+  input.className = 'meta-tag-input project-input';
+  input.type = 'text';
+  input.value = isEmpty ? '' : currentText;
+  input.placeholder = 'Set project...';
+  el.replaceWith(input);
+  input.focus();
+  input.select();
+
+  function save() {
+    var newVal = input.value.trim();
+    var span = document.createElement('span');
+    span.className = 'meta-tag project' + (newVal ? ' editable' : ' empty');
+    span.textContent = newVal || '+ project';
+    if (newVal) span.dataset.project = newVal.toLowerCase();
+    input.replaceWith(span);
+    span.onclick = function(e) { e.stopPropagation(); editProject(this, rowId); };
+
+    if (newVal !== (isEmpty ? '' : currentText)) {
+      var taskEl = input.closest('.task');
+      var src = taskEl ? taskEl.dataset.source || 'project' : 'project';
+      fetch('/api/tasks/' + rowId + '?source=' + src, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ project: newVal || null })
+      }).then(function(r) {
+        if (!r.ok) throw new Error('save failed: ' + r.status);
+        var t = allTasks.find(function(t) { return String(t.rowId) === String(rowId); });
+        if (t) t.project = newVal || null;
+      }).catch(function(e) {
+        span.textContent = currentText || '+ project';
+        if (!currentText) span.classList.add('empty');
+        showToast('Could not save project: ' + e.message, 3000);
+      });
+    }
+  }
+
+  input.onblur = save;
+  input.onkeydown = function(e) {
+    if (e.key === 'Enter') { save(); }
+    if (e.key === 'Escape') { input.blur(); }
+  };
+}
+
+// ── FIRM (inline edit) ──
+function editFirm(el, rowId) {
+  var currentText = el.textContent;
+  var isEmpty = el.classList.contains('empty');
+  var input = document.createElement('input');
+  input.className = 'meta-tag-input firm-input';
+  input.type = 'text';
+  input.value = isEmpty ? '' : currentText;
+  input.placeholder = 'Set firm...';
+  el.replaceWith(input);
+  input.focus();
+  input.select();
+
+  function save() {
+    var newVal = input.value.trim();
+    var span = document.createElement('span');
+    span.className = 'meta-tag firm' + (newVal ? ' editable' : ' empty');
+    span.textContent = newVal || '+ firm';
+    input.replaceWith(span);
+    span.onclick = function(e) { e.stopPropagation(); editFirm(this, rowId); };
+
+    if (newVal !== (isEmpty ? '' : currentText)) {
+      var taskEl = input.closest('.task');
+      var src = taskEl ? taskEl.dataset.source || 'project' : 'project';
+      fetch('/api/tasks/' + rowId + '?source=' + src, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ responsibleFirm: newVal || null })
+      }).then(function(r) {
+        if (!r.ok) throw new Error('save failed: ' + r.status);
+        var t = allTasks.find(function(t) { return String(t.rowId) === String(rowId); });
+        if (t) t.responsibleFirm = newVal || null;
+      }).catch(function(e) {
+        span.textContent = currentText || '+ firm';
+        if (!currentText) span.classList.add('empty');
+        showToast('Could not save firm: ' + e.message, 3000);
+      });
+    }
+  }
+
+  input.onblur = save;
+  input.onkeydown = function(e) {
+    if (e.key === 'Enter') { save(); }
+    if (e.key === 'Escape') { input.blur(); }
+  };
+}
+
+// ── CATEGORY (inline edit) ──
+function editCategory(el, rowId) {
+  var currentText = el.textContent;
+  var input = document.createElement('input');
+  input.className = 'meta-tag-input category-input';
+  input.type = 'text';
+  input.value = currentText;
+  input.placeholder = 'Set category...';
+  el.replaceWith(input);
+  input.focus();
+  input.select();
+
+  function save() {
+    var newVal = input.value.trim();
+    var span = document.createElement('span');
+    span.className = 'meta-tag category' + (newVal ? ' editable' : '');
+    span.textContent = newVal || '';
+    input.replaceWith(span);
+    if (newVal) {
+      span.onclick = function(e) { e.stopPropagation(); editCategory(this, rowId); };
+    }
+
+    if (newVal !== currentText) {
+      var taskEl = input.closest('.task');
+      var src = taskEl ? taskEl.dataset.source || 'project' : 'project';
+      fetch('/api/tasks/' + rowId + '?source=' + src, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: newVal || null })
+      }).then(function(r) {
+        if (!r.ok) throw new Error('save failed: ' + r.status);
+        var t = allTasks.find(function(t) { return String(t.rowId) === String(rowId); });
+        if (t) t.category = newVal || null;
+      }).catch(function(e) {
+        span.textContent = currentText || '';
+        showToast('Could not save category: ' + e.message, 3000);
       });
     }
   }

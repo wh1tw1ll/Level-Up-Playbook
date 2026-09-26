@@ -129,6 +129,15 @@
 .meta-tag-input{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1px 5px;color:var(--charcoal);font-size:13px;outline:none;font-family:var(--font);width:auto;min-width:80px;max-width:180px;height:22px}
 .meta-tag-input:focus{border-color:var(--sage)}
 .meta-tag-input.date-input{max-width:140px;min-width:120px}
+.meta-tag-input.project-input{max-width:130px;min-width:90px}
+.meta-tag-input.firm-input{max-width:160px;min-width:90px}
+.meta-tag-input.category-input{max-width:140px;min-width:90px}
+
+/* Editable meta-tags show pointer on hover */
+.meta-tag.editable{cursor:pointer}
+.meta-tag.editable:hover{opacity:0.8}
+.meta-tag.empty{opacity:0.5;cursor:pointer;font-style:italic}
+.meta-tag.empty:hover{opacity:0.8}
 
 /* Status note */
 .status-note{font-size:12px;color:#8a98a5;margin:2px 0 0;display:flex;align-items:center;gap:4px}
