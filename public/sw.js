@@ -1,5 +1,5 @@
 // LUCI PWA — Service Worker
-const CACHE = 'luci-v1';
+const CACHE = 'luci-v2';
 const ASSETS = [
   '/',
   '/styles.css',
@@ -18,7 +18,9 @@ const ASSETS = [
   '/assets/level-up-app-icon.svg',
   '/assets/level-up-logo.png',
   '/assets/LUCI_lockup_ink.svg',
-  '/assets/lockup-black.svg'
+  '/assets/lockup-black.svg',
+  'css/app-briefing.css?v=20260926',
+  'js/app-briefing.js?v=20260926'
 ];
 
 self.addEventListener('install', e => {
