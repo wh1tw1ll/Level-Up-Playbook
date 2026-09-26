@@ -9,12 +9,15 @@ Three phases:
 import json, os, time, re, sys
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
+from datetime import datetime, timezone
 
 # ── CONFIG ──────────────────────────────────────────────────────────
 HOME = 'C:/Users/HermesAdmin'
 TOKEN_PATH = f'{HOME}/.hermes/granola_token.txt'
 SM_TOKEN_PATH = f'{HOME}/.hermes/.smartsheet_token'
 KNOWLEDGE_PATH = f'{HOME}/Level-Up-Playbook/data/granola_knowledge.json'
+LAST_RUN_FILE = f'{HOME}/.hermes/last_run.json'
+RUN_KEY = 'granola_digest'
 SHEET_ID = '4456864287772548'
 
 GRANOLA_API = 'https://public-api.granola.ai/v1'
@@ -65,16 +68,38 @@ def smartsheet_put(url, body, token):
     resp = urlopen(req)
     return json.loads(resp.read())
 
-# ── PHASE 1: FETCH ALL GRANOLA NOTES ───────────────────────────────
-def fetch_all_notes(token):
-    """Fetch ALL Granola notes with full detail."""
+# ── LAST-RUN TRACKER ────────────────────────────────────────────────
+def read_last_run():
+    try:
+        with open(LAST_RUN_FILE) as f:
+            data = json.load(f)
+            return data.get(RUN_KEY, '')
+    except:
+        return ''
+
+def write_last_run(ts):
+    try:
+        with open(LAST_RUN_FILE) as f:
+            data = json.load(f)
+    except:
+        data = {}
+    data[RUN_KEY] = ts
+    with open(LAST_RUN_FILE, 'w') as f:
+        json.dump(data, f, indent=2)
+
+# ── PHASE 1: FETCH NEW GRANOLA NOTES (since last run) ──────────────
+def fetch_new_notes(token):
+    """Fetch Granola notes created since last run."""
     all_ids = []
     cursor = None
+    last_run = read_last_run()
+    since_param = f'&since={last_run}' if last_run else ''
+    print(f'Lookback: {"since " + last_run if last_run else "full fetch (no prior run)"}')
 
     # First pass: list all note IDs
     print('Fetching note list...')
     while True:
-        url = f'{GRANOLA_API}/notes?page_size=30'
+        url = f'{GRANOLA_API}/notes?page_size=30{since_param}'
         if cursor:
             url += f'&cursor={cursor}'
         data = json_get(url, token)
@@ -378,7 +403,7 @@ def main():
     print('═' * 50)
 
     # Phase 1: Fetch all notes
-    details = fetch_all_notes(granola_token)
+    details = fetch_new_notes(granola_token)
 
     # Phase 2: Save knowledge base
     records = save_knowledge_base(details)
@@ -387,6 +412,10 @@ def main():
     fill_smartsheet_blanks(records, sm_token)
 
     print(f'\nDone. Knowledge base: {len(records)} notes with full transcripts.')
+
+    # Update last-run tracker
+    write_last_run(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))
+    print(f'  Last-run updated: {RUN_KEY}')
 
 if __name__ == '__main__':
     main()

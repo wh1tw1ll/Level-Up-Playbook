@@ -90,10 +90,34 @@ def stage(text, owner, ref):
         time.sleep(1)
     return 'FAIL', '?'
 
+LAST_RUN_FILE = r'C:\Users\HermesAdmin\.hermes\last_run.json'
+RUN_KEY = 'granola_staging'
+
+def read_last_run():
+    try:
+        with open(LAST_RUN_FILE) as f:
+            data = json.load(f)
+            return data.get(RUN_KEY, '')
+    except:
+        return ''
+
+def write_last_run(ts):
+    try:
+        with open(LAST_RUN_FILE) as f:
+            data = json.load(f)
+    except:
+        data = {}
+    data[RUN_KEY] = ts
+    with open(LAST_RUN_FILE, 'w') as f:
+        json.dump(data, f, indent=2)
+
 def fetch_notes():
     alln = []; cur = None
+    last_run = read_last_run()
+    since_param = '&since=' + urllib.parse.quote(last_run) if last_run else ''
+    print(f'  Lookback: {"since " + last_run if last_run else "full fetch (no prior run)"}', flush=True)
     while True:
-        url = 'https://public-api.granola.ai/v1/notes?page_size=30'
+        url = f'https://public-api.granola.ai/v1/notes?page_size=30{since_param}'
         if cur: url += '&cursor=' + urllib.parse.quote(cur)
         req = urllib.request.Request(url, headers={'Authorization': 'Bearer ' + gtok})
         data = json.loads(urllib.request.urlopen(req).read())
@@ -156,3 +180,6 @@ for note in notes:
 
 print(f'Staged: {staged_count}  Flagged: {flagged_count}  Dupes: {dup_count}', flush=True)
 log_run('success', staged_count, flagged_count)
+# Update last-run tracker
+write_last_run(datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'))
+print(f'  Last-run updated: {RUN_KEY}', flush=True)
