@@ -267,7 +267,11 @@ function getFilteredTasks() {
     if (currentProject !== 'all' && t.project !== currentProject) return false;
     if (currentSource !== 'all' && t.source !== currentSource) return false;
     if (currentSourceRef && !t.sourceRef?.toLowerCase().includes(currentSourceRef.toLowerCase())) return false;
-    if (currentCategory && t.category !== currentCategory) return false;
+    if (currentCategory) {
+      var cat = t.category || '';
+      var normalizedFilter = currentCategory === 'Design' ? ['Design', 'Design & Plans'] : [currentCategory];
+      if (normalizedFilter.indexOf(cat) === -1) return false;
+    }
     if (currentStatus === 'open' && t.status !== 'Not Started' && t.status !== 'In Progress') return false;
     if (currentStatus === 'closed' && t.status !== 'Complete') return false;
     if (currentOwner && t.owner !== currentOwner) return false;
@@ -502,8 +506,10 @@ function loadTasks() {
           sel.innerHTML += '<option value="' + escapeHtml(o) + '">' + escapeHtml(o) + '</option>';
         });
       }
-      // Populate category filter
-      var categories = new Set(allTasks.map(function(t) { return t.category; }).filter(Boolean));
+      // Populate category filter — consolidate "Design & Plans" into "Design"
+      var categories = new Set(allTasks.map(function(t) { return t.category; }).filter(Boolean).map(function(c) {
+        return c === 'Design & Plans' ? 'Design' : c;
+      }));
       var catSel = document.getElementById('category-filter');
       if (catSel) {
         catSel.innerHTML = '<option value="">All Categories</option>';
