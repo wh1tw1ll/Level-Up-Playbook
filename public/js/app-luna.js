@@ -425,6 +425,7 @@ function openReminderPanel() {
   var toggle = document.getElementById('reminder-toggle');
   if (panel) {
     panel.style.display = 'flex';
+    panel.scrollTop = 0;
     setTimeout(function() { panel.classList.remove('closed'); }, 10);
   }
   if (toggle) toggle.style.display = 'none';
@@ -453,12 +454,12 @@ function switchReminderTab(tab) {
   });
   var a = document.getElementById('reminder-panel-actions');
   var m = document.getElementById('reminder-panel-meetings');
-  var r = document.getElementById('reminder-panel-reminders');
+  var b = document.getElementById('reminder-panel-briefing');
   if (a) a.style.display = tab === 'actions' ? 'block' : 'none';
   if (m) m.style.display = tab === 'meetings' ? 'block' : 'none';
-  if (r) r.style.display = tab === 'reminders' ? 'block' : 'none';
+  if (b) b.style.display = tab === 'briefing' ? 'block' : 'none';
   if (tab === 'meetings') renderReminderMeetings();
-  else if (tab === 'reminders') renderReminderReminders();
+  else if (tab === 'briefing') renderPanelBriefing();
   else renderReminderActions();
 }
 
@@ -466,6 +467,123 @@ function renderReminderPanel() {
   switchReminderTab('actions');
   renderReminderActions();
   setTimeout(renderReminderMeetings, 200);
+}
+
+// ── PANEL: BRIEFING TAB (Daily Operating Picture) ──────────────────
+function renderPanelBriefing() {
+  var el = document.getElementById('reminder-panel-briefing');
+  if (!el) return;
+  var footer = document.getElementById('reminder-panel-footer-text');
+  if (footer) footer.textContent = 'Daily Operating Picture';
+
+  el.innerHTML = '<div class="reminder-loader"></div>';
+
+  fetch('/api/briefing')
+    .then(function(r) {
+      if (!r.ok) throw new Error('Status ' + r.status);
+      return r.json();
+    })
+    .then(function(data) {
+      var html = '';
+
+      // Date + greeting
+      html += '<div class="briefing-header" style="margin-bottom:10px">';
+      html += '  <div class="briefing-greeting" style="font-size:14px;font-weight:700">☕ ' + escapeHtml(data.greeting) + ', <strong>' + escapeHtml(data.name) + '</strong></div>';
+      html += '  <div class="briefing-date" style="font-size:12px;color:var(--muted)">' + escapeHtml(data.dayLabel) + '</div>';
+      html += '</div>';
+
+      // Weather
+      if (data.weather) {
+        html += '<div class="briefing-weather-card" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:12px">';
+        html += '  <div>' + escapeHtml(data.weather.alert || '') + '</div>';
+        html += '</div>';
+      }
+
+      // LUNA note
+      if (data.lunaNote) {
+        html += '<div style="background:var(--teal-light);border:1px solid var(--teal);border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:12px;display:flex;align-items:center;gap:6px">';
+        html += '  <span>' + escapeHtml(data.lunaNote.icon) + '</span>';
+        html += '  <span>' + escapeHtml(data.lunaNote.text) + '</span>';
+        html += '</div>';
+      }
+
+      // Attention items
+      var hasAttention = data.attentionItems && data.attentionItems.length > 0;
+      if (hasAttention) {
+        html += '<div style="margin-bottom:10px">';
+        html += '  <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:6px">Needs Attention</div>';
+        for (var i = 0; i < data.attentionItems.length; i++) {
+          var item = data.attentionItems[i];
+          var dot = item.level === 'critical' ? '🔴' : '🟡';
+          html += '  <div style="display:flex;gap:6px;padding:4px 0;font-size:12px">';
+          html += '    <span>' + dot + '</span>';
+          html += '    <div><div>' + escapeHtml(item.title) + '</div>';
+          html += '      <div style="font-size:11px;color:var(--muted)">' + escapeHtml(item.label || '') + ' · ' + escapeHtml(item.owner || '') + '</div></div>';
+          html += '  </div>';
+        }
+        html += '</div>';
+      }
+
+      // Project Pulse
+      if (data.projectPulse) {
+        html += '<div style="margin-bottom:6px">';
+        html += '  <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:4px">Project Pulse</div>';
+        for (var p = 0; p < data.projectPulse.length; p++) {
+          var pulse = data.projectPulse[p];
+          var healthIcon = pulse.health === 'green' ? '🟢' : '🔶';
+          html += '  <div style="display:flex;gap:6px;padding:2px 0;font-size:11px">';
+          html += '    <span>' + healthIcon + '</span>';
+          html += '    <span><strong>' + escapeHtml(pulse.name) + '</strong> — ' + escapeHtml(pulse.summary) + '</span>';
+          html += '  </div>';
+        }
+        html += '</div>';
+      }
+
+      // Audio + Yesterday buttons
+      html += '<div style="display:flex;gap:6px;margin-top:8px">';
+      if (data.audioSummary) {
+        html += '  <button class="reminder-tab" onclick="playBriefingAudio(this)" data-text="' + escapeHtml(data.audioSummary) + '" style="flex:1;padding:6px">🎧 Listen</button>';
+      }
+      if (data.yesterday) {
+        html += '  <button class="reminder-tab" onclick="renderPanelBriefingDate(\'' + escapeHtml(data.yesterday) + '\')" style="flex:1;padding:6px">📄 Yesterday</button>';
+      }
+      html += '  <button class="reminder-tab" onclick="renderPanelBriefing()" style="flex:0;padding:6px">↻</button>';
+      html += '</div>';
+
+      el.innerHTML = html;
+      if (footer) footer.textContent = 'Updated ' + formatBriefingTime(new Date().toISOString());
+    })
+    .catch(function(err) {
+      el.innerHTML = '<div style="padding:10px;text-align:center;color:var(--muted);font-size:12px">Could not load briefing.<br><button class="reminder-tab" onclick="renderPanelBriefing()" style="margin-top:6px">Retry</button></div>';
+    });
+}
+
+// Briefing for a specific date
+function renderPanelBriefingDate(dateStr) {
+  var el = document.getElementById('reminder-panel-briefing');
+  if (!el) return;
+  var footer = document.getElementById('reminder-panel-footer-text');
+  if (footer) footer.textContent = '📜 Briefing';
+  el.innerHTML = '<div class="reminder-loader"></div>';
+  fetch('/api/briefing?date=' + encodeURIComponent(dateStr))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      data.name = data.name || 'Whitney';
+      data.greeting = data.greeting || 'Good morning';
+      data.dayLabel = data.dayLabel || dateStr;
+      // Re-render back to today view — just show basic info for historical
+      var html = '';
+      html += '<div style="margin-bottom:10px"><button class="reminder-tab" onclick="renderPanelBriefing()" style="padding:4px 10px">← Back to Today</button></div>';
+      html += '<div class="briefing-greeting" style="font-size:14px;font-weight:700">📜 ' + escapeHtml(data.dayLabel) + '</div>';
+      if (data.lunaNote) {
+        html += '<div style="background:var(--teal-light);border:1px solid var(--teal);border-radius:8px;padding:8px 10px;margin:10px 0;font-size:12px">' + escapeHtml(data.lunaNote.text) + '</div>';
+      }
+      el.innerHTML = html;
+      if (footer) footer.textContent = 'Historical — ' + dateStr;
+    })
+    .catch(function() {
+      el.innerHTML = '<div style="padding:10px;text-align:center;color:var(--muted)">Could not load briefing.</div>';
+    });
 }
 
 // ── PANEL: ACTION ITEMS FROM STORE ────────────────────────────────
