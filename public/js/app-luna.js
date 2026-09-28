@@ -1252,7 +1252,6 @@ function init() {
 
   // ── LUCI HERO (default home view) ────────────────────────────────
     function renderHero() {
-          renderBriefing();
           var results = document.getElementById('luna-hero-results');
       if (results && Object.keys(heroResults).length > 0) {
         var html = '';
@@ -1593,12 +1592,13 @@ function buildBriefing() {
   return html;
 }
 
+/* Briefing moved to side panel (reminder-panel-briefing). Old code below kept for reference only.
 function renderBriefing() {
   var el = document.getElementById('luna-briefing');
   if (!el) return;
   el.innerHTML = buildBriefing();
 }
-
+*/
 function dismissBriefing() {
   var now = new Date();
   var briefId = 'brief_' + now.getFullYear() + '_' + now.getMonth() + '_' + now.getDate();
