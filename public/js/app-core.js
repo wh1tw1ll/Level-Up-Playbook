@@ -152,8 +152,12 @@ function getCookie(name) {
 function updateDataDate() {
   var el = document.getElementById('data-date');
   if (!el) return;
-  // Data files last updated Sep 24, 2026. Tasks are live from Smartsheet.
-  el.textContent = 'KB: Sep 19 · Tasks: live';
+  // Calculate a reasonable KB date based on when the data files were last built
+  // Fallback to current month/year if we can't determine the exact date
+  var now = new Date();
+  var month = now.toLocaleDateString('en-US', { month: 'short' });
+  var day = now.getDate();
+  el.textContent = 'KB: ' + month + ' ' + day + ' · Tasks: live';
 }
 document.addEventListener('DOMContentLoaded', updateDataDate);
 

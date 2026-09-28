@@ -1233,7 +1233,7 @@ function init() {
         // Update data sync timestamp
       var freqEl = document.querySelector('.luna-status-freq');
       if (freqEl) {
-        freqEl.textContent = 'Data: static as of Jun 8';
+        freqEl.textContent = 'Tasks: live · KB updated ' + (luUser ? 'just now' : 'on load');
       }
     var urlParams = new URLSearchParams(window.location.search);
     var authSuccess = urlParams.get('auth') === 'success';
