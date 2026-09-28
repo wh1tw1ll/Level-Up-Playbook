@@ -66,7 +66,8 @@ const AUTH_BYPASS_ROUTES = new Set([
   '/api/admin/ingest-outbox',
   '/api/admin/create-outbox',
   '/api/admin/cleanup',
-    '/api/briefing',
+      '/api/briefing',
+      '/api/prep/agenda/update',
   ]);
 // Routes accessible with password-only (no Microsoft sign-in required)
 // These have been hardened to only return DOVA-filtered data
