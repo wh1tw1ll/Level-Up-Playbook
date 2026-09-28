@@ -577,37 +577,6 @@ mark.search-highlight{background:#fff3a8;padding:1px 2px;border-radius:2px;color
   font-weight: 700;
   color: var(--charcoal);
 }
-.reminder-panel-tabs {
-  display: flex;
-  gap: 0;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.reminder-tab {
-  flex: 1;
-  padding: 10px 12px;
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-  cursor: pointer;
-  font-family: inherit;
-  transition: all .15s;
-}
-.reminder-tab.active {
-  color: var(--teal);
-  border-bottom-color: var(--teal);
-  background: var(--teal-light);
-}
-.reminder-tab:hover {
-  color: var(--charcoal);
-}
-/* Dark mode reminder tabs */
-[data-theme="dark"] .reminder-tab{color:#b0bec5}
-[data-theme="dark"] .reminder-tab.active{color:#7ab8d4;border-bottom-color:#7ab8d4;background:rgba(122,184,212,0.08)}
-[data-theme="dark"] .reminder-tab:hover{color:#e8ecef}
 .reminder-panel-body {
   flex: 1;
   overflow-y: auto;
@@ -938,7 +907,7 @@ mark.search-highlight{background:#fff3a8;padding:1px 2px;border-radius:2px;color
   bottom: 24px;
   right: 24px;
   z-index: 10000;
-  cursor: pointer;
+  cursor: grab;
   user-select: none;
   transition: transform .2s ease, opacity .2s ease;
   animation: clippy-float 3s ease-in-out infinite;
