@@ -312,24 +312,19 @@
     <div class="chat-resize-handle" id="chat-resize-handle"></div>
   </div>
 
-  <!-- ===== REMINDERS SIDE PANEL ===== -->
-  <div id="reminder-panel" class="reminder-panel" style="display:none">
-    <div class="reminder-panel-header">
-      <span class="reminder-panel-title">Today's Briefing</span>
-      <button class="chat-close" onclick="closeReminderPanel()" title="Close panel">×</button>
+  <!-- ===== BRIEFING SIDE PANEL ===== -->
+    <div id="reminder-panel" class="reminder-panel" style="display:none">
+      <div class="reminder-panel-header">
+        <span class="reminder-panel-title">Today's Briefing</span>
+        <button class="chat-close" onclick="closeReminderPanel()" title="Close panel">×</button>
+      </div>
+            <div id="reminder-panel-body" class="reminder-panel-body">
+        <div class="reminder-loader"></div>
+      </div>
+      <div class="reminder-panel-footer">
+        <span id="reminder-panel-footer-text">Daily Operating Picture</span>
+      </div>
     </div>
-    <div class="reminder-panel-tabs">
-            <button class="reminder-tab active" data-rtab="actions" onclick="switchReminderTab('actions')">Actions</button>
-            <button class="reminder-tab" data-rtab="meetings" onclick="switchReminderTab('meetings')">Meetings</button>
-            <button class="reminder-tab" data-rtab="briefing" onclick="switchReminderTab('briefing')">Briefing</button>
-          </div>
-          <div id="reminder-panel-actions" class="reminder-panel-body"></div>
-          <div id="reminder-panel-meetings" class="reminder-panel-body" style="display:none"></div>
-          <div id="reminder-panel-briefing" class="reminder-panel-body" style="display:none"></div>
-    <div class="reminder-panel-footer">
-      <span id="reminder-panel-footer-text">Loading...</span>
-    </div>
-  </div>
   <div id="reminder-toggle" class="reminder-toggle" onclick="openReminderPanel()" title="Open daily briefing">
     <span id="reminder-toggle-count" class="reminder-toggle-count">!</span>
     <span class="reminder-toggle-text">Briefing</span>
