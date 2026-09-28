@@ -486,75 +486,79 @@ function renderPanelBriefing() {
     .then(function(data) {
       var html = '';
 
-      // Date + greeting
-      html += '<div class="briefing-header" style="margin-bottom:10px">';
-      html += '  <div class="briefing-greeting" style="font-size:14px;font-weight:700">☕ ' + escapeHtml(data.greeting) + ', <strong>' + escapeHtml(data.name) + '</strong></div>';
-      html += '  <div class="briefing-date" style="font-size:12px;color:var(--muted)">' + escapeHtml(data.dayLabel) + '</div>';
+      // ── Header: greeting + date ──
+      html += '<div style="margin-bottom:12px">';
+      html += '  <div style="font-size:15px;font-weight:700;color:var(--charcoal)">☕ ' + escapeHtml(data.greeting) + ', <strong>' + escapeHtml(data.name) + '</strong></div>';
+      html += '  <div style="font-size:12px;color:var(--muted);margin-top:2px">' + escapeHtml(data.dayLabel) + '</div>';
       html += '</div>';
 
-      // Weather
+      // ── Weather ──
       if (data.weather) {
-        html += '<div class="briefing-weather-card" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:12px">';
-        html += '  <div>' + escapeHtml(data.weather.alert || '') + '</div>';
-        html += '</div>';
+        var w = data.weather;
+        var icon = w.condition === 'Clear' ? '☀️' : w.condition.indexOf('Cloud') >= 0 ? '⛅' : w.condition.indexOf('Rain') >= 0 ? '🌧️' : w.condition.indexOf('Thunder') >= 0 ? '⛈️' : w.condition.indexOf('Snow') >= 0 ? '❄️' : w.condition.indexOf('Fog') >= 0 ? '🌫️' : w.condition.indexOf('Drizzle') >= 0 ? '🌦️' : '🌤️';
+        html += '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:12px;display:flex;align-items:center;gap:8px">';
+        html += '  <span style="font-size:18px">' + icon + '</span>';
+        html += '  <div><strong>' + escapeHtml(w.condition) + '</strong> &#8212; H:' + escapeHtml(String(w.tempHigh)) + '° L:' + escapeHtml(String(w.tempLow)) + '°';
+        if (w.precipProb > 0) html += ' &middot; ' + escapeHtml(String(w.precipProb)) + '% rain';
+        html += '</div></div>';
       }
 
-      // LUNA note
+      // ── LUNA note ──
       if (data.lunaNote) {
-        html += '<div style="background:var(--teal-light);border:1px solid var(--teal);border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:12px;display:flex;align-items:center;gap:6px">';
-        html += '  <span>' + escapeHtml(data.lunaNote.icon) + '</span>';
-        html += '  <span>' + escapeHtml(data.lunaNote.text) + '</span>';
+        html += '<div style="background:var(--teal-light);border:1px solid var(--teal);border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:12px;display:flex;align-items:flex-start;gap:6px;line-height:1.5">';
+        html += '  <span style="font-size:14px;flex-shrink:0;margin-top:1px">' + escapeHtml(data.lunaNote.icon) + '</span>';
+        html += '  <span style="color:var(--charcoal)">' + escapeHtml(data.lunaNote.text) + '</span>';
         html += '</div>';
       }
 
-      // Attention items
+      // ── Needs Attention ──
       var hasAttention = data.attentionItems && data.attentionItems.length > 0;
       if (hasAttention) {
         html += '<div style="margin-bottom:10px">';
-        html += '  <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:6px">Needs Attention</div>';
+        html += '  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)">Needs Attention</div>';
         for (var i = 0; i < data.attentionItems.length; i++) {
           var item = data.attentionItems[i];
           var dot = item.level === 'critical' ? '🔴' : '🟡';
-          html += '  <div style="display:flex;gap:6px;padding:4px 0;font-size:12px">';
-          html += '    <span>' + dot + '</span>';
-          html += '    <div><div>' + escapeHtml(item.title) + '</div>';
-          html += '      <div style="font-size:11px;color:var(--muted)">' + escapeHtml(item.label || '') + ' · ' + escapeHtml(item.owner || '') + '</div></div>';
+          html += '  <div style="display:flex;gap:8px;padding:5px 0;font-size:12px;border-bottom:1px solid var(--border)">';
+          html += '    <span style="font-size:12px;flex-shrink:0;margin-top:1px">' + dot + '</span>';
+          html += '    <div style="flex:1;min-width:0"><div style="font-weight:600;color:var(--charcoal)">' + escapeHtml(item.title) + '</div>';
+          html += '      <div style="font-size:11px;color:var(--muted);margin-top:1px">' + escapeHtml(item.label || '') + (item.owner ? ' · ' + escapeHtml(item.owner) : '') + '</div></div>';
           html += '  </div>';
         }
         html += '</div>';
       }
 
-      // Project Pulse
+      // ── Project Pulse ──
       if (data.projectPulse) {
-        html += '<div style="margin-bottom:6px">';
-        html += '  <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:4px">Project Pulse</div>';
+        html += '<div style="margin-bottom:8px">';
+        html += '  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid var(--border)">Project Pulse</div>';
         for (var p = 0; p < data.projectPulse.length; p++) {
           var pulse = data.projectPulse[p];
           var healthIcon = pulse.health === 'green' ? '🟢' : '🔶';
-          html += '  <div style="display:flex;gap:6px;padding:2px 0;font-size:11px">';
-          html += '    <span>' + healthIcon + '</span>';
-          html += '    <span><strong>' + escapeHtml(pulse.name) + '</strong> — ' + escapeHtml(pulse.summary) + '</span>';
+          html += '  <div style="display:flex;gap:6px;padding:3px 0;font-size:12px">';
+          html += '    <span style="font-size:12px;flex-shrink:0">' + healthIcon + '</span>';
+          html += '    <span style="color:var(--charcoal)"><strong>' + escapeHtml(pulse.name) + '</strong> &#8212; ' + escapeHtml(pulse.summary) + '</span>';
           html += '  </div>';
         }
         html += '</div>';
       }
 
-      // Audio + Yesterday buttons
-      html += '<div style="display:flex;gap:6px;margin-top:8px">';
+      // ── Action buttons ──
+      html += '<div style="display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">';
       if (data.audioSummary) {
-        html += '  <button class="reminder-tab" onclick="playBriefingAudio(this)" data-text="' + escapeHtml(data.audioSummary) + '" style="flex:1;padding:6px">🎧 Listen</button>';
+        html += '  <button class="reminder-tab" onclick="playBriefingAudio(this)" data-text="' + escapeHtml(data.audioSummary) + '" style="flex:1;padding:6px 8px;font-size:11px">🎧 Listen</button>';
       }
       if (data.yesterday) {
-        html += '  <button class="reminder-tab" onclick="renderPanelBriefingDate(\'' + escapeHtml(data.yesterday) + '\')" style="flex:1;padding:6px">📄 Yesterday</button>';
+        html += '  <button class="reminder-tab" onclick="renderPanelBriefingDate(\'' + escapeHtml(data.yesterday) + '\')" style="flex:1;padding:6px 8px;font-size:11px">📄 Yesterday</button>';
       }
-      html += '  <button class="reminder-tab" onclick="renderPanelBriefing()" style="flex:0;padding:6px">↻</button>';
+      html += '  <button class="reminder-tab" onclick="renderPanelBriefing()" style="flex:0;padding:6px 8px;font-size:11px">↻</button>';
       html += '</div>';
 
       el.innerHTML = html;
       if (footer) footer.textContent = 'Updated ' + formatBriefingTime(new Date().toISOString());
     })
     .catch(function(err) {
-      el.innerHTML = '<div style="padding:10px;text-align:center;color:var(--muted);font-size:12px">Could not load briefing.<br><button class="reminder-tab" onclick="renderPanelBriefing()" style="margin-top:6px">Retry</button></div>';
+      el.innerHTML = '<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px">Could not load briefing.<br><button class="reminder-tab" onclick="renderPanelBriefing()" style="margin-top:6px">Retry</button></div>';
     });
 }
 
@@ -1481,133 +1485,5 @@ function init() {
 
 
 // ── DAILY BRIEFING ───────────────────────────────────────────────────
-function buildBriefing() {
-  if (!kbLoaded) return '<div style="padding:12px;text-align:center;color:var(--muted);font-size:13px">Loading briefing...</div>';
-  var now = new Date();
-  var day = now.getDate();
-  var month = now.getMonth();
-  var year = now.getFullYear();
-  var monthKey = year + '-' + month;
-
-  // Dismissed state
-  var dismissed = {};
-  try { var d = localStorage.getItem('lu_brief_dismiss'); if (d) dismissed = JSON.parse(d); } catch(e) {}
-  var briefId = 'brief_' + year + '_' + month + '_' + now.getDate();
-  if (dismissed[briefId]) return '';
-
-  // Financial data
-  var fin = window.__MFP_FINANCIALS;
-  var Su = fin && fin.summary ? fin.summary : null;
-
-  // Reminder deadlines (same logic as renderReminders)
-  var drawDue = new Date(year, month, 10);
-  if (day > 10) drawDue.setMonth(month + 1);
-  var drawDays = Math.round((drawDue - now) / 86400000);
-
-  var expDue = new Date(year, month, 5);
-  if (day > 5) expDue.setMonth(month + 1);
-  var expDays = Math.round((expDue - now) / 86400000);
-
-  // Action items
-  var items = [];
-
-  if (Su) {
-    // Project pulse
-    var pulse = Su.days_past_baseline > 0 ? '\uD83D\uDD34' : '\uD83D\uDFE2';
-    items.push({ icon: pulse, label: 'MFP Stadium', detail: Su.days_past_baseline + ' days past baseline, targeting ' + Su.target_completion });
-
-    // Past due
-    if (Su.past_due > 0) {
-      items.push({ icon: '\u26A0\uFE0F', label: 'Past Due Invoices', detail: '$' + Math.round(Su.past_due/1000000) + 'M outstanding', urgent: true });
-    }
-
-    // Cost recovery deadline
-    var crDue = new Date(2026, 5, 30);
-    var crDays = Math.round((crDue - now) / 86400000);
-    if (crDays > 0 && crDays <= 30) {
-      items.push({ icon: '\uD83D\uDD0D', label: 'Cost Recovery Deadline', detail: crDays + ' days until Jun 30 target ($9M+)', urgent: crDays <= 14 });
-    }
-
-    // ARQ hold
-    items.push({ icon: '\uD83D\uDD34', label: 'ARQ Payment Hold', detail: '~$1.5M Feb-Apr invoices on hold', urgent: true });
-
-    // Lemartec indirects
-    if (Su.lemartec_indirects_outstanding > 0) {
-      items.push({ icon: '\uD83D\uDCB0', label: 'Lemartec Indirects Gap', detail: '$' + Math.round(Su.lemartec_indirects_outstanding/1000000) + 'M unpaid' });
-    }
-  }
-
-  // Draw package
-  if (drawDays <= 7) {
-    items.push({ icon: '\uD83D\uDCC4', label: 'Monthly Draw Package', detail: 'Due in ' + drawDays + ' day' + (drawDays !== 1 ? 's' : ''), urgent: drawDays <= 3 });
-  }
-
-  // Expense report
-  if (expDays <= 5) {
-    items.push({ icon: '\uD83E\uDDFE', label: 'Monthly Expense Report', detail: 'Due in ' + expDays + ' day' + (expDays !== 1 ? 's' : ''), warn: expDays <= 3 });
-  }
-
-  // HVAC
-    items.push({ icon: '\uD83D\uDD27', label: 'HVAC Service Agreement', detail: 'Hill York — pending signature', urgent: true });
-
-    // CO Watchdog findings — top 3 high severity
-        var wd = window.__CO_WATCHDOG;
-        if (wd && wd.subcontractors) {
-          var topFindings = wd.subcontractors.filter(function(f) {
-            return f.forensic_notes && f.forensic_notes.length > 0;
-          }).sort(function(a,b) {
-            return (b.potential_savings || 0) - (a.potential_savings || 0);
-          }).slice(0, 3);
-          topFindings.forEach(function(f) {
-            items.push({
-              icon: '\uD83D\uDD0D',
-              label: f.name + ' — $' + fmtNum(f.potential_savings) + ' savings',
-              detail: (f.forensic_notes && f.forensic_notes[0]) || '',
-              urgent: true
-            });
-          });
-        }
-
-  // Build HTML
-  var greeting = 'Good ' + (now.getHours() < 12 ? 'morning' : now.getHours() < 18 ? 'afternoon' : 'evening');
-  var dateStr = now.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
-
-  var html = '<div class="briefing-card" id="briefing-card">'
-    + '<div class="briefing-header">'
-    + '<div>'
-    + '<div class="briefing-greeting">' + greeting + (luUser && luUser.name ? ', ' + luUser.name.split(' ')[0] : '') + '</div>'
-    + '<div class="briefing-date">' + dateStr + '</div>'
-    + '</div>'
-    + '<button class="briefing-close" onclick="dismissBriefing()" title="Dismiss for today">\u00D7</button>'
-    + '</div>'
-    // Remove the "Today's Action Items" section from middle of page
-    // Action items are only in the Briefing side panel now
-
-    html += '</div>';
-
-  // Budget snapshot removed per Whitney request
-    // Financial data is in the MFP Command Center dashboard now
-
-    html += '</div>';
-  return html;
-}
-
-/* Briefing moved to side panel (reminder-panel-briefing). Old code below kept for reference only.
-function renderBriefing() {
-  var el = document.getElementById('luna-briefing');
-  if (!el) return;
-  el.innerHTML = buildBriefing();
-}
-*/
-function dismissBriefing() {
-  var now = new Date();
-  var briefId = 'brief_' + now.getFullYear() + '_' + now.getMonth() + '_' + now.getDate();
-  var dismissed = {};
-  try { var d = localStorage.getItem('lu_brief_dismiss'); if (d) dismissed = JSON.parse(d); } catch(e) {}
-  dismissed[briefId] = true;
-  try { localStorage.setItem('lu_brief_dismiss', JSON.stringify(dismissed)); } catch(e) {}
-  var el = document.getElementById('luna-briefing');
-  if (el) el.innerHTML = '';
-}
-
+// Briefing moved to side panel (reminder-panel-briefing)
 // init() is called from index.html after data scripts load
