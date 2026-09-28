@@ -11,7 +11,7 @@ from datetime import datetime, timezone, timedelta
 DOVA_FOLDER = r'C:\Users\HermesAdmin\OneDrive - levelup-pd.com\Documents - Level Up\05 - DOVA\Attachments'
 
 DRY_RUN = '--dry-run' in sys.argv
-DAYS = 3  # Scan last 3 days for the re-run (initial full 7-day already done)
+DAYS = 1  # Fallback — see last_run.json below for actual cutoff
 
 LOG_FILE = r'C:\Users\HermesAdmin\.hermes\levelup_mail_scan_log.json'
 
@@ -282,7 +282,20 @@ folder_ids = get_all_folder_ids()
 print('Folders: ' + str(len(folder_ids)), flush=True)
 
 now = datetime.now(timezone.utc)
-since = (now - timedelta(days=DAYS)).isoformat()
+LAST_RUN_FILE = r'C:\Users\HermesAdmin\.hermes\last_run.json'
+try:
+    with open(LAST_RUN_FILE) as f:
+        lr = json.load(f)
+    lr_ts = lr.get('email_level_up', '')
+    if lr_ts:
+        lr_dt = datetime.fromisoformat(lr_ts.replace('Z', '+00:00'))
+        cutoff = max(lr_dt, now - timedelta(days=DAYS))
+    else:
+        cutoff = now - timedelta(days=DAYS)
+except:
+    cutoff = now - timedelta(days=DAYS)
+since = cutoff.isoformat()
+print(f'Window: max(last_run.json(email_level_up) or {DAYS}d ago) → {since}', flush=True)
 
 staged_count = 0
 skipped_no_commitment = 0
@@ -330,3 +343,15 @@ summary = ('Folders:' + str(scanned_count) + ' Staged:' + str(staged_count)
            + ' FilesSaved:' + str(files_saved))
 print('=== ' + mode + ' COMPLETE - ' + summary + ' ===', flush=True)
 log_run('dry_run' if DRY_RUN else 'live', staged_count, 0, scanned_count, files_saved)
+
+# Update last_run.json
+if not DRY_RUN:
+    LR_FILE = r'C:\Users\HermesAdmin\.hermes\last_run.json'
+    try:
+        with open(LR_FILE) as f:
+            lr = json.load(f)
+        lr['email_level_up'] = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+        with open(LR_FILE, 'w') as f:
+            json.dump(lr, f, indent=2)
+    except Exception as e:
+        print(f'WARNING: could not update last_run.json: {e}', flush=True)

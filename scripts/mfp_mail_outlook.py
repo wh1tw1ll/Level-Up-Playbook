@@ -7,7 +7,7 @@ import sys, json, re, subprocess, time, os
 from datetime import datetime, timezone, timedelta
 
 DRY_RUN = '--dry-run' in sys.argv
-DAYS = 7
+DAYS = 1
 
 STAGE_URL = 'https://level-up-playbook.vercel.app/api/stage'
 LOG_FILE = r'C:\Users\HermesAdmin\.hermes\mfp_mail_scan_log.json'
@@ -186,7 +186,19 @@ seen_subjects = set()
 staged_count = 0
 skipped_count = 0
 scanned_count = 0
-cutoff = datetime.now(timezone.utc) - timedelta(days=DAYS)
+LAST_RUN_FILE = r'C:\Users\HermesAdmin\.hermes\last_run.json'
+try:
+    with open(LAST_RUN_FILE) as f:
+        lr = json.load(f)
+    lr_ts = lr.get('email_mfp', '')
+    if lr_ts:
+        lr_dt = datetime.fromisoformat(lr_ts.replace('Z', '+00:00'))
+        cutoff = max(lr_dt, datetime.now(timezone.utc) - timedelta(days=DAYS))
+    else:
+        cutoff = datetime.now(timezone.utc) - timedelta(days=DAYS)
+except:
+    cutoff = datetime.now(timezone.utc) - timedelta(days=DAYS)
+print(f'Window: max(last_run.json(email_mfp) or {DAYS}d ago) → {cutoff.isoformat()}', flush=True)
 
 for fname, folder in folders:
     try:
@@ -273,3 +285,15 @@ mode = 'DRY RUN' if DRY_RUN else 'LIVE'
 summary = 'Folders:' + str(scanned_count) + ' Staged:' + str(staged_count) + ' Skipped:' + str(skipped_count)
 print('=== ' + mode + ' COMPLETE - ' + summary + ' ===', flush=True)
 log_run('success' if not DRY_RUN else 'dry_run', staged_count, skipped_count, scanned_count)
+
+# Update last_run.json
+if not DRY_RUN:
+    LR_FILE = r'C:\Users\HermesAdmin\.hermes\last_run.json'
+    try:
+        with open(LR_FILE) as f:
+            lr = json.load(f)
+        lr['email_mfp'] = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+        with open(LR_FILE, 'w') as f:
+            json.dump(lr, f, indent=2)
+    except Exception as e:
+        print(f'WARNING: could not update last_run.json: {e}', flush=True)
