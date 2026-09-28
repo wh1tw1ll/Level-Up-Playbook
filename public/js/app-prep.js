@@ -233,7 +233,8 @@ function renderCardBody(card) {
       html += '</div>';
       html += '<div class="prep-collapsible">';
       html += '<div class="prep-collapsible-header" onclick="prepToggleSection(this)">📋 Agenda <span class="prep-collapsible-chevron">▶</span></div>';
-      html += '<div class="prep-collapsible-body"><div class="prep-agenda-content">' + card.agendaHtml + '</div></div>';
+      html += '<div class="prep-collapsible-body"><div class="prep-agenda-content" data-agenda-subject="' + escapeHtmlAttr(card.subject) + '"></div></div>';
+      html += '<div class="prep-agenda-edit-bar" style="margin-top:6px"><button class="prep-edit-agenda-btn" data-subject="' + escapeHtmlAttr(card.subject) + '">✏️ Edit Agenda</button></div>';
       html += '</div>';
     } else {
       html += '<div class="prep-card-actions-row">';
@@ -254,7 +255,9 @@ function renderCardBody(card) {
       html += '<div class="prep-card-actions-row" style="margin-bottom:10px">';
       html += '<button class="prep-export-btn" data-export="' + escapeHtmlAttr(card.id) + '">⬇ Export to Word</button>';
       html += '</div>';
-      html += '<div class="prep-agenda-content">' + card.agendaHtml + '</div></div></div>';
+      html += '<div class="prep-agenda-content">' + card.agendaHtml + '</div></div>';
+      html += '<div class="prep-agenda-edit-bar" style="margin-top:6px"><button class="prep-edit-agenda-btn" data-subject="' + escapeHtmlAttr(card.subject) + '">✏️ Edit Agenda</button></div>';
+      html += '</div>';
     }
     html += '<div class="prep-collapsible">';
     html += '<div class="prep-collapsible-header" onclick="prepToggleSection(this)">📝 Notes <span class="prep-collapsible-chevron">▶</span></div>';
@@ -306,6 +309,22 @@ function wirePrepEvents(container) {
       exportAgendaToWord(card.subject, card.agendaHtml);
     });
   });
+  // ── AGENDA INLINE EDITING ──
+  // Fill agenda content from card data
+  container.querySelectorAll('.prep-agenda-content[data-agenda-subject]').forEach(function(el) {
+    var subj = el.getAttribute('data-agenda-subject');
+    var card = container._cards.find(function(c) { return c.id === subj || c.subject === subj; });
+    if (card && card.agendaHtml) el.innerHTML = card.agendaHtml;
+  });
+  container.querySelectorAll('.prep-edit-agenda-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(ev) {
+      ev.stopPropagation();
+      var subj = btn.getAttribute('data-subject');
+      var card = container._cards.find(function(c) { return c.id === subj || c.subject === subj; });
+      if (!card) return;
+      toggleAgendaEdit(btn, card, subj);
+    });
+  });
 }
 
 function prepRequestAgenda(container, card, button) {
@@ -355,6 +374,100 @@ function prepRequestAgenda(container, card, button) {
       }
       button.disabled = false;
     });
+}
+
+// ── AGENDA INLINE EDITING ──
+function toggleAgendaEdit(btn, card, subj) {
+  var bar = btn.closest('.prep-agenda-edit-bar');
+  var contentEl = bar && bar.parentElement ? bar.parentElement.querySelector('.prep-agenda-content') : null;
+  if (!bar || !contentEl) return;
+
+  // If already in edit mode, cancel
+  if (bar._editing) {
+    bar._editing = false;
+    btn.textContent = '✏️ Edit Agenda';
+    var ta = bar.querySelector('.prep-agenda-textarea');
+    if (ta) ta.remove();
+    var saveBtn = bar.querySelector('.prep-save-agenda-btn');
+    if (saveBtn) saveBtn.remove();
+    var cancelBtn = bar.querySelector('.prep-cancel-agenda-btn');
+    if (cancelBtn) cancelBtn.remove();
+    contentEl.style.display = '';
+    return;
+  }
+
+  // Enter edit mode
+  bar._editing = true;
+  btn.textContent = '✕ Cancel';
+  contentEl.style.display = 'none';
+
+  var currentHtml = card.agendaHtml || '';
+  var ta = document.createElement('textarea');
+  ta.className = 'prep-agenda-textarea';
+  ta.value = currentHtml;
+  ta.style.width = '100%';
+  ta.style.minHeight = '200px';
+  ta.style.fontSize = '13px';
+  ta.style.fontFamily = 'var(--font)';
+  ta.style.padding = '8px 10px';
+  ta.style.border = '1px solid var(--teal)';
+  ta.style.borderRadius = '6px';
+  ta.style.background = 'var(--card)';
+  ta.style.color = 'var(--charcoal)';
+  ta.style.outline = 'none';
+  ta.style.resize = 'vertical';
+  ta.style.boxSizing = 'border-box';
+  bar.parentElement.insertBefore(ta, bar);
+
+  var saveBtn = document.createElement('button');
+  saveBtn.className = 'prep-save-agenda-btn';
+  saveBtn.textContent = '💾 Save Agenda';
+  saveBtn.style.cssText = 'padding:7px 18px;border:none;border-radius:6px;background:var(--teal);color:#fff;font-size:13px;font-weight:600;cursor:pointer;margin-right:6px';
+  saveBtn.onclick = function() {
+    var newHtml = ta.value.trim();
+    if (!newHtml) { alert('Agenda cannot be empty.'); return; }
+    saveBtn.disabled = true;
+    saveBtn.textContent = '⏳ Saving...';
+    fetch('/api/prep/agenda/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ meetingSubject: subj, agendaHtml: newHtml })
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      if (data.success) {
+        card.agendaHtml = newHtml;
+        contentEl.innerHTML = newHtml;
+        ta.remove();
+        saveBtn.remove();
+        var cb = bar.querySelector('.prep-cancel-agenda-btn');
+        if (cb) cb.remove();
+        bar._editing = false;
+        btn.textContent = '✏️ Edit Agenda';
+        contentEl.style.display = '';
+      } else {
+        alert('Save failed: ' + (data.error || 'Unknown'));
+        saveBtn.disabled = false;
+        saveBtn.textContent = '💾 Save Agenda';
+      }
+    }).catch(function(err) {
+      alert('Network error: ' + err.message);
+      saveBtn.disabled = false;
+      saveBtn.textContent = '💾 Save Agenda';
+    });
+  };
+  bar.insertBefore(saveBtn, btn);
+
+  var cancelBtn = document.createElement('button');
+  cancelBtn.textContent = '✕ Cancel';
+  cancelBtn.style.cssText = 'padding:7px 14px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);font-size:13px;cursor:pointer';
+  cancelBtn.onclick = function() {
+    ta.remove();
+    saveBtn.remove();
+    cancelBtn.remove();
+    bar._editing = false;
+    btn.textContent = '✏️ Edit Agenda';
+    contentEl.style.display = '';
+  };
+  bar.insertBefore(cancelBtn, btn);
 }
 
 // ── EXPORT AGENDA TO WORD ──

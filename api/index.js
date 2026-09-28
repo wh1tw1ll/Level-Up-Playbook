@@ -30,6 +30,7 @@ import promoteHandler from '../lib/handlers/promote.js';
 import extractFromNote from '../lib/handlers/extract-from-note.js';
 import prepMapHandler from '../lib/handlers/prep-map.js';
 import agendasStoreHandler from '../lib/handlers/agendas-store.js';
+import agendaUpdateHandler from '../lib/handlers/agenda-update.js';
 import briefingHandler from '../lib/handlers/briefing.js';
 import smartsheet from '../lib/smartsheet.js';
 import guardedWrite from '../lib/guarded-write.js';
@@ -193,6 +194,7 @@ export default async function handler(req, res) {
       case '/api/chat': return chatHandler(req, res);
       case '/api/prep': return prepHandler(req, res);
       case '/api/prep/agendas': return agendasStoreHandler(req, res);
+      case '/api/prep/agenda/update': return agendaUpdateHandler(req, res);
       case '/api/prep/upcoming': return prepUpcomingHandler(req, res);
       case '/api/prep/generate': return prepGenerateHandler(req, res);
       case '/api/stage': return stageHandler(req, res);
