@@ -2291,6 +2291,14 @@ function editPrepItem(el, rowId, source) {
   };
 }
 
+// Export inline editing functions so inline onclick handlers (HTML strings) can find them
+window.editOwner = editOwner;
+window.editDueDate = editDueDate;
+window.editProject = editProject;
+window.editFirm = editFirm;
+window.editCategory = editCategory;
+window.cycleStatus = cycleStatus;
+
 return refreshInterval;
 } catch(e) { console.error('renderDailyManager error:', e); }
 } // end renderDailyManager()
