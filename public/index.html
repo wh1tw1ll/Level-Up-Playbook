@@ -356,9 +356,12 @@
   if (!btn || !inp) return;
   
   function hideOverlay() {
-          overlay.classList.remove('open');
-          overlay.style.display = 'none';
-          // Check for direct view link (query param or hash)
+            overlay.classList.remove('open');
+            overlay.style.display = 'none';
+            // Hide Microsoft sign-in button — password unlocks are sufficient on this domain
+            var signinBtn = document.getElementById('auth-signin-btn');
+            if (signinBtn) signinBtn.style.display = 'none';
+            // Check for auth session (handles Microsoft sign-in redirect)
                     var params = new URLSearchParams(window.location.search);
                     var view = params.get('view');
                     if (view) {

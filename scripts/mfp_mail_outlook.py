@@ -13,7 +13,9 @@ STAGE_URL = 'https://level-up-playbook.vercel.app/api/stage'
 LOG_FILE = r'C:\Users\HermesAdmin\.hermes\mfp_mail_scan_log.json'
 STATE_FILE = r'C:\Users\HermesAdmin\.hermes\mfp_mail_state.json'
 
-EXCLUDE_FOLDERS = ['junk', 'deleted items', 'drafts', 'rss', 'conversation history', 'outbox', 'sync issues', 'conflicts', 'local failures']
+EXCLUDE_FOLDERS = ['junk', 'deleted items', 'drafts', 'rss', 'conversation history', 'outbox', 'sync issues', 'conflicts', 'local failures',
+                     'calendar', 'contacts', 'tasks', 'notes', 'journal', 'externalcontacts', 'recipient cache', 'companies',
+                     'peoplecentricconversation buddies', 'organizational contacts', 'birthdays', 'gal contacts']
 
 def log_run(status, staged, skipped, folders_scanned, error=None):
     entry = {'timestamp': datetime.now(timezone.utc).isoformat(), 'status': status,
@@ -70,6 +72,8 @@ for i in range(1, ns.Folders.Count + 1):
     s = ns.Folders.Item(i)
     store_names.append(s.Name)
     name = s.Name.lower()
+    if "archive" in name:
+        continue
     if any(kw in name for kw in ["miamifreedompark", "miamifreedom", "freedom park", "mfp", "whitney.williams"]):
         ms = s
         print(f'Found MFP store via name match: "{s.Name}"', flush=True)
@@ -198,7 +202,7 @@ try:
         cutoff = datetime.now(timezone.utc) - timedelta(days=DAYS)
 except:
     cutoff = datetime.now(timezone.utc) - timedelta(days=DAYS)
-print(f'Window: max(last_run.json(email_mfp) or {DAYS}d ago) → {cutoff.isoformat()}', flush=True)
+print(f'Window: max(last_run.json(email_mfp) or {DAYS}d ago) -> {cutoff.isoformat()}', flush=True)
 
 for fname, folder in folders:
     try:

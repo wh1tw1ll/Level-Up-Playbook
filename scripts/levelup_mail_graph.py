@@ -3,12 +3,9 @@
 Scans last N days across ALL mail folders recursively.
 Extracts commitments from email BODY, not subjects.
 If no commitment found in body, produces NO row.
-Saves attachments from DOVA emails to OneDrive.
 Dry-run flag: --dry-run."""
-import sys, json, re, os, base64, urllib.request, urllib.parse, subprocess, time
+import sys, json, re, os, urllib.request, urllib.parse, subprocess, time
 from datetime import datetime, timezone, timedelta
-
-DOVA_FOLDER = r'C:\Users\HermesAdmin\OneDrive - levelup-pd.com\Documents - Level Up\05 - DOVA\Attachments'
 
 DRY_RUN = '--dry-run' in sys.argv
 DAYS = 1  # Fallback — see last_run.json below for actual cutoff
@@ -70,47 +67,6 @@ def get_all_folder_ids():
     walk(None)
     return ids
 
-def is_dova(subj, sender, folder_name):
-    """Check if an email is DOVA-related by subject, sender, or folder."""
-    text = (subj + ' ' + sender + ' ' + folder_name).lower()
-    return 'dova' in text or 'detroit' in text
-
-def save_attachments(msg_id, subj, sender, rdate, fname):
-    """Download and save attachments from a DOVA email to OneDrive."""
-    try:
-        atts = graph_get('/me/messages/' + msg_id + '/attachments')
-        items = atts.get('value', [])
-        # Skip inline images (signatures, logos under 50KB)
-        items = [a for a in items if not ('image' in a.get('contentType', '') and a.get('size', 0) < 51200)]
-        if not items:
-            return 0
-        date_prefix = (rdate or '')[:10].replace('-', '') or 'nodate'
-        sender_short = sender.split('@')[0][:15] if '@' in sender else sender[:15]
-        saved = 0
-        for att in items:
-            name = att.get('name', 'unnamed')
-            content = att.get('contentBytes')
-            if not content or att.get('size', 0) == 0:
-                continue
-            clean_name = re.sub(r'[<>:"/\\|?*]', '_', name)
-            subfolder = re.sub(r'[<>:"/\\|?*]', '_', fname)
-            att_dir = os.path.join(DOVA_FOLDER, date_prefix, subfolder)
-            os.makedirs(att_dir, exist_ok=True)
-            dest = os.path.join(att_dir, f"{date_prefix}_{sender_short}_{clean_name}")
-            counter = 1
-            while os.path.exists(dest):
-                base_name, ext = os.path.splitext(clean_name)
-                dest = os.path.join(att_dir, f"{date_prefix}_{sender_short}_{base_name}_{counter}{ext}")
-                counter += 1
-            with open(dest, 'wb') as f:
-                f.write(base64.b64decode(content))
-            saved += 1
-            print(f'    [FILE] Saved: {clean_name} ({att.get("size",0)} bytes)', flush=True)
-        return saved
-    except Exception as e:
-        print(f'    [FILE] Error: {e}', flush=True)
-        return 0
-
 def scan_folder_body(folder_id, since, fname):
     """Get messages with body from a folder. Returns (message_id, subject, body, sender, date, hasAttachments)."""
     results = []
@@ -124,9 +80,9 @@ def scan_folder_body(folder_id, since, fname):
         data = graph_get('/me/mailFolders/' + folder_id + '/messages', params)
         for m in data.get('value', []):
             mid = m.get('id', '')
-            subj = m.get('subject', '')
-            body_preview = m.get('bodyPreview', '') or ''
-            body_full = m.get('body', {}).get('content', '') or ''
+            subj = str(m.get('subject', '') or '')
+            body_preview = str(m.get('bodyPreview', '') or '')
+            body_full = str(m.get('body', {}).get('content', '') or '')
             body_type = m.get('body', {}).get('contentType', '') or ''
             sender = m.get('from', {}).get('emailAddress', {}).get('address', '')
             rdate = (m.get('receivedDateTime', '') or '')[:10]
@@ -189,6 +145,7 @@ def extract_commitments(subj, body):
     return unique
 
 def should_skip(subj):
+    if not subj: return True
     skip = ['unsubscribe', 'newsletter', 'Breaking:', 'tax liability', 'maximizing',
             'Behave at Work', 'A token limit', 'Cover Face', '10 Most Inspiring',
             'United in Service', 'Creating A World of Difference']
@@ -229,7 +186,7 @@ def stage_item(text, owner, source_ref):
         "cells": [
             {"columnId": col_map['Action ID'], "value": text},
             {"columnId": col_map['Owner'], "value": owner},
-            {"columnId": col_map['Status'], "value": "Not Started"},
+            {"columnId": col_map['Status'], "value": "Open"},
             {"columnId": col_map['Category'], "value": "Staged"},
             {"columnId": col_map['Source'], "value": "Email"},
             {"columnId": col_map['SourceRef'], "value": source_ref},
@@ -256,10 +213,10 @@ def stage_item(text, owner, source_ref):
         time.sleep(1)
     return 'FAIL', '?'
 
-def log_run(status, staged, skipped, folders_scanned, files_saved=0, error=None):
+def log_run(status, staged, skipped, folders_scanned, error=None):
     entry = {'timestamp': datetime.now(timezone.utc).isoformat(),
              'status': status, 'staged': staged, 'skipped': skipped,
-             'folders_scanned': folders_scanned, 'files_saved': files_saved, 'error': error}
+             'folders_scanned': folders_scanned, 'error': error}
     try:
         with open(LOG_FILE) as f: log = json.load(f)
     except: log = []
@@ -270,7 +227,7 @@ def log_run(status, staged, skipped, folders_scanned, files_saved=0, error=None)
 print('=== LUNA Level Up Mail Scanner - BODY COMMITMENT EXTRACTION + DOVA FILES ===')
 print('Mode: ' + ('DRY RUN' if DRY_RUN else 'LIVE'))
 print('Window: last ' + str(DAYS) + ' days')
-print('DOVA folder: ' + DOVA_FOLDER)
+print('DOVA folder: N/A (no DOVA_FOLDER defined)')
 print(flush=True)
 
 existing = get_existing_texts()
@@ -295,13 +252,12 @@ try:
 except:
     cutoff = now - timedelta(days=DAYS)
 since = cutoff.isoformat()
-print(f'Window: max(last_run.json(email_level_up) or {DAYS}d ago) → {since}', flush=True)
+print(f'Window: max(last_run.json(email_level_up) or {DAYS}d ago) -> {since}', flush=True)
 
 staged_count = 0
 skipped_no_commitment = 0
 skipped_dup = 0
 skipped_noise = 0
-files_saved = 0
 scanned_count = 0
 
 for fid, fname, parent in folder_ids:
@@ -312,12 +268,7 @@ for fid, fname, parent in folder_ids:
     for mid, subj, body, sender, rdate, has_atts in msgs:
         if should_skip(subj):
             skipped_noise += 1; continue
-        
-        # --- DOVA attachment filing ---
-        if has_atts and is_dova(subj, sender, fname):
-            saved = save_attachments(mid, subj, sender, rdate, fname)
-            files_saved += saved
-        
+
         # Extract commitments from body
         commitments = extract_commitments(subj, body)
         
@@ -339,10 +290,9 @@ print()
 mode = 'DRY RUN' if DRY_RUN else 'LIVE'
 summary = ('Folders:' + str(scanned_count) + ' Staged:' + str(staged_count)
            + ' NoCommitment:' + str(skipped_no_commitment)
-           + ' Dup:' + str(skipped_dup) + ' Noise:' + str(skipped_noise)
-           + ' FilesSaved:' + str(files_saved))
+           + ' Dup:' + str(skipped_dup) + ' Noise:' + str(skipped_noise))
 print('=== ' + mode + ' COMPLETE - ' + summary + ' ===', flush=True)
-log_run('dry_run' if DRY_RUN else 'live', staged_count, 0, scanned_count, files_saved)
+log_run('dry_run' if DRY_RUN else 'live', staged_count, 0, scanned_count)
 
 # Update last_run.json
 if not DRY_RUN:

@@ -4,6 +4,9 @@
 // Calls /api/prep for stored agendas + past notes, /api/prep/upcoming for calendar events.
 
 function renderPrepView() {
+  // Close the reminder panel overlay when entering Prep view
+  if (typeof closeReminderPanel === 'function') closeReminderPanel();
+
   var container = document.getElementById('prep-container');
   if (!container) {
     container = document.createElement('div');
@@ -12,6 +15,8 @@ function renderPrepView() {
     var view = document.getElementById('view-prep');
     if (view) { view.innerHTML = ''; view.appendChild(container); }
     else { document.body.appendChild(container); }
+  } else {
+    container.className = 'prep-container';
   }
   container.innerHTML = '<div class="prep-loading"><div class="luna-spinner"></div> Loading prep data...</div>';
 
@@ -402,9 +407,27 @@ function toggleAgendaEdit(btn, card, subj) {
   contentEl.style.display = 'none';
 
   var currentHtml = card.agendaHtml || '';
+  // Convert HTML to readable plain text for editing
+  var plainText = currentHtml
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<\/h[1-6]>/gi, '\n\n')
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<\/tr>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '- ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
   var ta = document.createElement('textarea');
   ta.className = 'prep-agenda-textarea';
-  ta.value = currentHtml;
+  ta.value = plainText;
   ta.style.width = '100%';
   ta.style.minHeight = '200px';
   ta.style.fontSize = '13px';
@@ -424,8 +447,37 @@ function toggleAgendaEdit(btn, card, subj) {
   saveBtn.textContent = '💾 Save Agenda';
   saveBtn.style.cssText = 'padding:7px 18px;border:none;border-radius:6px;background:var(--teal);color:#fff;font-size:13px;font-weight:600;cursor:pointer;margin-right:6px';
   saveBtn.onclick = function() {
-    var newHtml = ta.value.trim();
-    if (!newHtml) { alert('Agenda cannot be empty.'); return; }
+    var rawText = ta.value.trim();
+    if (!rawText) { alert('Agenda cannot be empty.'); return; }
+    
+    // Convert plain text back to simple HTML
+    var lines = rawText.split('\n');
+    var html = '';
+    var inList = false;
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].trim();
+      if (!line) {
+        if (inList) { html += '</ul>'; inList = false; }
+        continue;
+      }
+      var escaped = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      // Check for heading patterns
+      if (/^#{1,6}\s/.test(line)) {
+        if (inList) { html += '</ul>'; inList = false; }
+        var level = line.match(/^#+/)[0].length;
+        var headingText = line.replace(/^#+\s*/, '');
+        html += '<h' + level + '>' + headingText + '</h' + level + '>';
+      } else if (/^- /.test(line) || /^\* /.test(line)) {
+        if (!inList) { html += '<ul>'; inList = true; }
+        html += '<li>' + escaped.replace(/^[-*]\s*/, '') + '</li>';
+      } else {
+        if (inList) { html += '</ul>'; inList = false; }
+        html += '<p>' + escaped + '</p>';
+      }
+    }
+    if (inList) html += '</ul>';
+    
+    var newHtml = html;
     saveBtn.disabled = true;
     saveBtn.textContent = '⏳ Saving...';
     fetch('/api/prep/agenda/update', {

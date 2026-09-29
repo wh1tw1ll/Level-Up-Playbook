@@ -57,8 +57,8 @@ function escapeHtml(s) {
 
 function displayStatus(s) {
   if (!s) return '';
-  if (s === 'Complete') return 'Closed';
-  return s;
+  if (s === 'Complete' || s === 'Closed') return 'Closed';
+  return 'Open';
 }
 
 // ── SOUND ──
@@ -272,14 +272,14 @@ function getFilteredTasks() {
       var normalizedFilter = currentCategory === 'Design' ? ['Design', 'Design & Plans'] : [currentCategory];
       if (normalizedFilter.indexOf(cat) === -1) return false;
     }
-    if (currentStatus === 'open' && t.status !== 'Not Started' && t.status !== 'In Progress') return false;
-    if (currentStatus === 'closed' && t.status !== 'Complete') return false;
+    if (currentStatus === 'open' && (t.status === 'Complete' || t.status === 'Closed')) return false;
+    if (currentStatus === 'closed' && t.status !== 'Complete' && t.status !== 'Closed') return false;
     if (currentOwner && t.owner !== currentOwner) return false;
     if (currentSeries && t.seriesMasterId !== currentSeries) return false;
     if (quickFilters.mine && t.owner !== myName) return false;
     if (quickFilters.hot && !t.hotTopic) return false;
-    if (quickFilters.overdue && !(t.status !== 'Complete' && isOverdue(t.dueDate))) return false;
-    if (quickFilters.week && !(t.status !== 'Complete' && isThisWeek(t.dueDate))) return false;
+    if (quickFilters.overdue && !(t.status !== 'Complete' && t.status !== 'Closed' && isOverdue(t.dueDate))) return false;
+    if (quickFilters.week && !(t.status !== 'Complete' && t.status !== 'Closed' && isThisWeek(t.dueDate))) return false;
     if (q) {
       var text = ((t.actionItem || '') + ' ' + (t.notes || '') + ' ' + (t.responsibleFirm || '')).toLowerCase();
       if (!text.includes(q)) return false;
@@ -339,7 +339,7 @@ function render() {
 
   for (var i = 0; i < filtered.length; i++) {
     var t = filtered[i];
-    var isComplete = t.status === 'Complete';
+    var isComplete = t.status === 'Complete' || t.status === 'Closed';
     var over = !isComplete && isOverdue(t.dueDate);
     var cls = 'task' + (over ? ' overdue' : '') + (isComplete ? ' completed' : '');
 
@@ -354,7 +354,7 @@ function render() {
     }
 
     var statusLabel = displayStatus(t.status);
-    var statusClass = 'status' + (t.status === 'Complete' ? ' closed' : '');
+    var statusClass = 'status' + (t.status === 'Complete' || t.status === 'Closed' ? ' closed' : '');
     var firm = t.responsibleFirm || '';
 
     var div = document.createElement('div');
@@ -428,10 +428,10 @@ function render() {
   }
 
   // Counts
-  var myTasks = allTasks.filter(function(t) { return t.owner === myName && t.status !== 'Complete'; }).length;
-  var overdue = filtered.filter(function(t) { return isOverdue(t.dueDate) && t.status !== 'Complete'; }).length;
-  var dueWeek = filtered.filter(function(t) { return isThisWeek(t.dueDate) && t.status !== 'Complete'; }).length;
-  var unowned = filtered.filter(function(t) { return !t.owner && t.status !== 'Complete'; }).length;
+  var myTasks = allTasks.filter(function(t) { return t.owner === myName && t.status !== 'Closed' && t.status !== 'Complete'; }).length;
+  var overdue = filtered.filter(function(t) { return isOverdue(t.dueDate) && t.status !== 'Closed' && t.status !== 'Complete'; }).length;
+  var dueWeek = filtered.filter(function(t) { return isThisWeek(t.dueDate) && t.status !== 'Closed' && t.status !== 'Complete'; }).length;
+  var unowned = filtered.filter(function(t) { return !t.owner && t.status !== 'Closed' && t.status !== 'Complete'; }).length;
   var countDisplay = document.getElementById('count-display');
   if (countDisplay) countDisplay.textContent = filtered.length + ' tasks';
   var myCountDisplay = document.getElementById('my-tasks-count');
@@ -575,9 +575,9 @@ function cycleStatus(el, rowId) {
   if (!task) return;
   var raw = task.status || '';
   var next;
-  if (raw === 'Not Started' || !raw) next = 'In Progress';
-  else if (raw === 'In Progress') next = 'Complete';
-  else next = 'Not Started';
+  // Toggle between Open and Closed
+  if (raw === 'Complete' || raw === 'Closed') next = 'Open';
+  else next = 'Closed';
 
   var taskEl = document.querySelector('.task[data-row-id="' + rowId + '"]');
   var source = taskEl ? taskEl.dataset.source || 'project' : 'project';
@@ -605,8 +605,8 @@ function toggleTask(el, rowId) {
   var isDone = el.classList.contains('done');
   var task = allTasks.find(function(t) { return String(t.rowId) === String(rowId); });
   if (!task) return;
-  var rawStatus = task.status || 'Not Started';
-  var isClosed = rawStatus === 'Complete' || isDone;
+  var rawStatus = task.status || 'Open';
+  var isClosed = rawStatus === 'Complete' || rawStatus === 'Closed' || isDone;
   var becomingComplete = !isClosed;
   var prevStatus = rawStatus;
 
@@ -626,16 +626,16 @@ function toggleTask(el, rowId) {
 
     var source = taskEl.dataset.source || 'project';
     fetch('/api/tasks/' + rowId + '?source=' + source, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'Not Started' })
-    })
-      .then(function(r) {
-        if (!r.ok) {
-          el.classList.add('done'); el.innerHTML = '\u2713'; taskEl.classList.add('completed');
-          showToast('Revert failed', 2000);
-        } else {
-          task.status = 'Not Started';
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'Open' })
+        })
+          .then(function(r) {
+            if (!r.ok) {
+              el.classList.add('done'); el.innerHTML = '✓'; taskEl.classList.add('completed');
+              showToast('Revert failed', 2000);
+            } else {
+              task.status = 'Open';
           loadTasks();
         }
       })
@@ -669,7 +669,7 @@ function toggleTask(el, rowId) {
     fetch('/api/tasks/' + rowId + '?source=' + source, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'Complete', completedDate: new Date().toISOString().slice(0, 10) })
+      body: JSON.stringify({ status: 'Closed', completedDate: new Date().toISOString().slice(0, 10) })
     })
       .then(function(r) {
         if (!r.ok) {
@@ -683,7 +683,7 @@ function toggleTask(el, rowId) {
           showToast('Toggle failed', 2000);
           return;
         }
-        task.status = 'Complete';
+        task.status = 'Closed';
 
         setTimeout(function() {
           taskEl.classList.add('collapsing');
@@ -695,7 +695,7 @@ function toggleTask(el, rowId) {
             var count = incrementCompletedToday();
             updateCompletedTodayDisplay(true);
 
-            var myTasks = allTasks.filter(function(t) { return t.owner === 'Whitney Williams' && t.status !== 'Complete'; });
+            var myTasks = allTasks.filter(function(t) { return t.owner === 'Whitney Williams' && t.status !== 'Closed' && t.status !== 'Complete'; });
             var stillOverdue = myTasks.filter(function(t) { return isOverdue(t.dueDate); });
             if (stillOverdue.length === 0) {
               setContextMessage('No overdue items', 3000);

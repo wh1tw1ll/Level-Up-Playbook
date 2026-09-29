@@ -508,12 +508,15 @@ function renderUnifiedBriefing() {
           var start = ev.start ? new Date(ev.start) : null;
           var timeStr = start ? start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' }) : 'all day';
           var loc = ev.location || (ev.isOnline ? 'Online' : '');
-          html += '  <div style="display:flex;gap:8px;padding:6px 0;font-size:12px;border-bottom:1px solid var(--border);align-items:flex-start">';
+          var hasNote = ev.granolaUrl ? true : false;
+          html += '  <div class="briefing-event" onclick="' + (hasNote ? 'window.open(\'' + escapeHtml(ev.granolaUrl) + '\',\'_blank\')' : '') + '" style="cursor:' + (hasNote ? 'pointer' : 'default') + ';display:flex;gap:8px;padding:6px 0;font-size:12px;border-bottom:1px solid var(--border);align-items:flex-start;transition:background .15s">';
           html += '    <div style="font-weight:700;color:var(--teal);min-width:52px;flex-shrink:0">' + escapeHtml(timeStr) + '</div>';
           html += '    <div style="flex:1;min-width:0">';
           html += '      <div style="font-weight:600;color:var(--charcoal)">' + escapeHtml(ev.subject) + '</div>';
           if (loc) html += '      <div style="font-size:11px;color:var(--muted);margin-top:1px">' + escapeHtml(loc) + '</div>';
+          if (hasNote) html += '      <div style="font-size:11px;color:var(--teal);margin-top:2px">📝 Notes available</div>';
           html += '    </div>';
+          if (hasNote) html += '    <div style="font-size:14px;flex-shrink:0;margin-top:2px;color:var(--teal)">📝</div>';
           html += '  </div>';
         }
         html += '</div>';
@@ -622,14 +625,129 @@ function renderBriefingDate(dateStr) {
       data.greeting = data.greeting || 'Good morning';
       data.dayLabel = data.dayLabel || dateStr;
       var html = '';
+
+      // Back button
       html += '<div style="margin-bottom:10px"><button class="reminder-tab" onclick="renderUnifiedBriefing()" style="padding:4px 10px;font-size:11px">← Back to Today</button></div>';
+
+      // Date header
       html += '<div style="font-size:14px;font-weight:700;color:var(--charcoal);margin-bottom:6px">📜 ' + escapeHtml(data.dayLabel) + '</div>';
-      if (data.lunaNote) {
-        html += '<div style="background:var(--teal-light);border:1px solid var(--teal);border-radius:8px;padding:8px 10px;margin:10px 0;font-size:12px;line-height:1.5">' + escapeHtml(data.lunaNote.text) + '</div>';
+
+      // Weather
+      if (data.weather && data.weather.alert) {
+        html += '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:12px;display:flex;align-items:center;gap:8px;line-height:1.4">';
+        html += '  <span style="font-size:16px;flex-shrink:0">🌤</span>';
+        html += '  <span style="color:var(--charcoal)">' + escapeHtml(data.weather.alert) + '</span>';
+        html += '</div>';
       }
-      if (!data.lunaNote) {
+
+      // LUNA note
+      if (data.lunaNote) {
+        html += '<div style="background:var(--teal-light);border:1px solid var(--teal);border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:12px;display:flex;align-items:flex-start;gap:6px;line-height:1.5">';
+        html += '  <span style="font-size:14px;flex-shrink:0;margin-top:1px">' + escapeHtml(data.lunaNote.icon) + '</span>';
+        html += '  <span style="color:var(--charcoal)">' + escapeHtml(data.lunaNote.text) + '</span>';
+        html += '</div>';
+      } else {
         html += '<div style="color:var(--muted);font-size:12px;margin-top:12px">No briefing data available for this date.</div>';
       }
+
+      // Meetings
+      if (data.events && data.events.length > 0) {
+        html += '<div style="margin-bottom:10px">';
+        html += '  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid var(--border)">Meetings</div>';
+        for (var i = 0; i < data.events.length; i++) {
+          var ev = data.events[i];
+          var start = ev.start ? new Date(ev.start) : null;
+          var timeStr = start ? start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' }) : 'all day';
+          var loc = ev.location || (ev.isOnline ? 'Online' : '');
+          var hasNote = ev.granolaUrl ? true : false;
+          html += '  <div class="briefing-event" onclick="' + (hasNote ? 'window.open(\'' + escapeHtml(ev.granolaUrl) + '\',\'_blank\')' : '') + '" style="cursor:' + (hasNote ? 'pointer' : 'default') + ';display:flex;gap:8px;padding:6px 0;font-size:12px;border-bottom:1px solid var(--border);align-items:flex-start;transition:background .15s">';
+          html += '    <div style="font-weight:700;color:var(--teal);min-width:52px;flex-shrink:0">' + escapeHtml(timeStr) + '</div>';
+          html += '    <div style="flex:1;min-width:0">';
+          html += '      <div style="font-weight:600;color:var(--charcoal)">' + escapeHtml(ev.subject) + '</div>';
+          if (loc) html += '      <div style="font-size:11px;color:var(--muted);margin-top:1px">' + escapeHtml(loc) + '</div>';
+          if (hasNote) html += '      <div style="font-size:11px;color:var(--teal);margin-top:2px">📝 Notes available</div>';
+          html += '    </div>';
+          if (hasNote) html += '    <div style="font-size:14px;flex-shrink:0;margin-top:2px;color:var(--teal)">📝</div>';
+          html += '  </div>';
+        }
+        html += '</div>';
+      }
+
+      // Needs attention
+      var urgentItems = [];
+      if (data.attentionItems) {
+        for (var a = 0; a < data.attentionItems.length; a++) {
+          var item = data.attentionItems[a];
+          if (item.level === 'critical' || item.level === 'high') {
+            urgentItems.push(item);
+            if (urgentItems.length >= 10) break;
+          }
+        }
+      }
+      if (urgentItems.length > 0) {
+        html += '<div style="margin-bottom:10px">';
+        html += '  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid var(--border)">Needs Attention</div>';
+        for (var b = 0; b < urgentItems.length; b++) {
+          var it = urgentItems[b];
+          var dot = it.level === 'critical' ? '🔴' : '🟡';
+          var projTag = it.project ? ' <span style="font-size:10px;background:var(--cool);padding:1px 5px;border-radius:4px;color:var(--muted)">' + escapeHtml(it.project) + '</span>' : '';
+          html += '  <div style="display:flex;gap:8px;padding:5px 0;font-size:12px;border-bottom:1px solid var(--border);align-items:flex-start">';
+          html += '    <span style="font-size:12px;flex-shrink:0;margin-top:1px">' + dot + '</span>';
+          html += '    <div style="flex:1;min-width:0">';
+          html += '      <div style="font-weight:600;color:var(--charcoal);line-height:1.4">' + escapeHtml(it.title) + projTag + '</div>';
+          html += '      <div style="font-size:11px;color:var(--muted);margin-top:1px">' + escapeHtml(it.label || '') + (it.owner ? ' · ' + escapeHtml(it.owner) : '') + '</div>';
+          html += '    </div>';
+          html += '  </div>';
+        }
+        html += '</div>';
+      }
+
+      // Project Pulse
+      if (data.projectPulse && data.projectPulse.length > 0) {
+        html += '<div style="margin-bottom:8px">';
+        html += '  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid var(--border)">Project Pulse</div>';
+        for (var p = 0; p < data.projectPulse.length; p++) {
+          var pulse = data.projectPulse[p];
+          var healthIcon = pulse.health === 'green' ? '🟢' : pulse.health === 'amber' ? '🟡' : '🔴';
+          html += '  <div style="display:flex;gap:6px;padding:3px 0;font-size:12px">';
+          html += '    <span style="font-size:12px;flex-shrink:0">' + healthIcon + '</span>';
+          html += '    <span style="color:var(--charcoal)"><strong>' + escapeHtml(pulse.name) + '</strong> &#8212; ' + escapeHtml(pulse.summary) + '</span>';
+          html += '  </div>';
+        }
+        html += '</div>';
+      }
+
+      // Decisions
+      if (data.decisions && data.decisions.length > 0) {
+        html += '<div style="margin-bottom:8px">';
+        html += '  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid var(--border)">Decisions Needed</div>';
+        var maxD = Math.min(data.decisions.length, 5);
+        for (var d = 0; d < maxD; d++) {
+          var dec = data.decisions[d];
+          html += '  <div style="display:flex;gap:8px;padding:4px 0;font-size:12px;border-bottom:1px solid var(--border);align-items:flex-start">';
+          html += '    <span style="font-size:12px;flex-shrink:0;margin-top:1px">✋</span>';
+          html += '    <div style="flex:1;min-width:0">';
+          html += '      <div style="font-weight:600;color:var(--charcoal);line-height:1.4">' + escapeHtml(dec.title) + '</div>';
+          html += '      <div style="font-size:11px;color:var(--muted);margin-top:1px">' + (dec.project ? escapeHtml(dec.project) + ' · ' : '') + escapeHtml(dec.label || '') + '</div>';
+          html += '    </div>';
+          html += '  </div>';
+        }
+        html += '</div>';
+      }
+
+      // Meta
+      if (data.meta) {
+        html += '<div style="font-size:10px;color:var(--muted);margin-bottom:8px;padding:4px 0">';
+        html += '  ' + escapeHtml(String(data.meta.totalOpenTasks)) + ' open tasks · ' + escapeHtml(String(data.meta.totalOverdue)) + ' overdue';
+        html += '</div>';
+      }
+
+      // Refresh button
+      html += '<div style="display:flex;gap:6px;padding-top:8px;border-top:1px solid var(--border)">';
+      html += '  <button class="reminder-tab" onclick="renderUnifiedBriefing()" style="flex:1;padding:6px 8px;font-size:11px">📅 Back to Today</button>';
+      html += '  <button class="reminder-tab" onclick="renderBriefingDate(\'' + escapeHtml(dateStr) + '\')" style="flex:0;padding:6px 8px;font-size:11px">↻</button>';
+      html += '</div>';
+
       el.innerHTML = html;
       if (footer) footer.textContent = 'Historical — ' + dateStr;
     })
@@ -679,32 +797,50 @@ function playBriefingAudio(btn) {
   }
   // Cancel any ongoing speech
   synth.cancel();
-  var utterance = new SpeechSynthesisUtterance(text);
-  utterance.rate = 0.9;
-  utterance.pitch = 1.0;
-  utterance.volume = 1.0;
-  // Try female English voice — prefer modern/clear voices
+  btn.textContent = '🔊 Loading voice...';
+
+  function speakWithVoice() {
+    var utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.95;
+    utterance.pitch = 0.95;
+    utterance.volume = 1.0;
+
+    var voices = synth.getVoices();
+    // Windows voices: Microsoft Zira (female), Microsoft Aria (female)
+    // Mac voices: Samantha (female)
+    // Chrome voices: Google US English Female
+    var preferred =
+      voices.filter(function(v) { return v.lang.indexOf('en') === 0 && v.name.indexOf('Zira') >= 0; })[0] ||
+      voices.filter(function(v) { return v.lang.indexOf('en') === 0 && v.name.indexOf('Aria') >= 0; })[0] ||
+      voices.filter(function(v) { return v.lang.indexOf('en') === 0 && v.name.indexOf('Samantha') >= 0; })[0] ||
+      voices.filter(function(v) { return v.lang.indexOf('en') === 0 && v.name.indexOf('Female') >= 0; })[0] ||
+      voices.filter(function(v) { return v.lang.indexOf('en') === 0 && v.name.indexOf('female') >= 0; })[0] ||
+      voices.filter(function(v) { return v.lang.indexOf('en') === 0 && v.name.indexOf('Google US') >= 0; })[0] ||
+      voices.filter(function(v) { return v.lang.indexOf('en') === 0 && v.name.indexOf('Google UK') >= 0; })[0] ||
+      voices.filter(function(v) { return v.lang.indexOf('en') === 0; })[0] ||  // any English voice last resort
+      null;
+    if (preferred) utterance.voice = preferred;
+
+    btn.textContent = '🔊 Playing...';
+    utterance.onend = function() { btn.textContent = '🎧 Listen'; };
+    utterance.onerror = function() { btn.textContent = '🎧 Listen'; };
+    synth.speak(utterance);
+  }
+
+  // Chrome needs to wait for voices to load asynchronously
   var voices = synth.getVoices();
-  var preferred = voices.filter(function(v) {
-    return v.lang.indexOf('en') === 0 && (v.name.indexOf('Female') >= 0 || v.name.indexOf('female') >= 0);
-  })[0] || voices.filter(function(v) {
-    return v.lang.indexOf('en') === 0 && v.name.indexOf('Samantha') >= 0;
-  })[0] || voices.filter(function(v) {
-    return v.lang.indexOf('en') === 0 && v.name.indexOf('Google UK') >= 0;
-  })[0] || voices.filter(function(v) {
-    return v.lang.indexOf('en') === 0 && v.name.indexOf('Google US') >= 0;
-  })[0] || voices.filter(function(v) {
-    return v.lang.indexOf('en') === 0 && v.name.indexOf('Microsoft') >= 0 && v.name.indexOf('Natural') >= 0;
-  })[0];
-  if (preferred) utterance.voice = preferred;
-  btn.textContent = '🔊 Playing...';
-  utterance.onend = function() {
-    btn.textContent = '🎧 Listen';
-  };
-  utterance.onerror = function() {
-    btn.textContent = '🎧 Listen';
-  };
-  synth.speak(utterance);
+  if (voices.length === 0) {
+    synth.addEventListener('voiceschanged', function handler() {
+      synth.removeEventListener('voiceschanged', handler);
+      speakWithVoice();
+    }, { once: true });
+    // Timeout: if voices never load, just speak anyway
+    setTimeout(function() {
+      if (btn.textContent === '🔊 Loading voice...') speakWithVoice();
+    }, 1500);
+  } else {
+    speakWithVoice();
+  }
 }
 
 function formatBriefingTime(isoStr) {

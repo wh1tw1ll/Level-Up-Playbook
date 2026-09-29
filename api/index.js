@@ -878,7 +878,7 @@ async function handleIngestOutbox(req, res) {
           const tCols = targetData.columns || [];
           const stageCols = [];
           const map = {
-            'Action ID': actionText, 'Owner': owner, 'Status': proposedStatus || 'Not Started',
+            'Action ID': actionText, 'Owner': owner, 'Status': proposedStatus || 'Open',
             'Due Date': dueDate, 'Project': project, 'Source': source || 'Manual',
             'SourceRef': sourceRef, 'Confidence': confidence || 'medium', 'SeriesMasterId': seriesId,
           };

@@ -29,6 +29,7 @@ CLS={
     "Source": 2297540940435332,
     "Project": 6920668081590148,
     "Category": 146108531380100,
+    "Meeting Source": 4768601229528964,
 }
 ctx=ssl.create_default_context()
 ah="Bearer "+S_TK
@@ -129,7 +130,7 @@ def dedup_candidates(candidates):
     return survivors
 
 VALID_PROJECTS = {'DOVA', 'Sphere', 'SPH', 'Business', 'MFP'}
-VALID_CATEGORIES = {'Design & Plans', 'Entitlements', 'Utilities & Infrastructure',
+VALID_CATEGORIES = {'Design', 'Entitlements', 'Utilities & Infrastructure',
                     'Financial', 'Schedule', 'Legal & Contracts', 'Procurement',
                     'General Coordination'}
 
@@ -155,7 +156,7 @@ def derive_category(title, item_text=''):
     if any(k in text for k in ['permit','condition of approval','coa','public works','planning commission','zoning','altrans','traffic study','cup','entitle','trigger','inspection milestone','drainage study','cultural','biologist','hcp','mitigation']):
         return 'Entitlements'
     if any(k in text for k in ['esign','chematic','lans','rawings','pecification','sd','architectural','structur','ivil','floor plan']):
-        return 'Design & Plans'
+        return 'Design'
     if any(k in text for k in ['chedule','ilestone','imeline','eadline','uration','baseline']):
         return 'Schedule'
     if any(k in text for k in ['ontract','loi','greement','nda','edline','language','lause','suit','precedent','ownership','risk']):
@@ -428,6 +429,7 @@ for n in notes:
             'cat': derive_category(title, txt),
             'key': key,
             'note': f'{title} ({ndate})',
+            'meeting_name': title,
         })
 
 print(f"\nCandidates: {total} | Gate-rejected: {gated} | ExtractionId dupes: {updates} | Text dupes: {text_dupes} | Jaccard-deduped: {deduped} | New: {len(new_items)}")
@@ -442,11 +444,12 @@ for item in new_items:
     cells=[
         {'columnId':CLS['ExtractionId'],'objectValue':item['key']},
         {'columnId':CLS['Action ID'],'objectValue':action_text[:500]},
-        {'columnId':CLS['Status'],'objectValue':'Not Started'},
+        {'columnId':CLS['Status'],'objectValue':'Open'},
         {'columnId':CLS['Owner'],'objectValue':item['owner']},
         {'columnId':CLS['Source'],'objectValue':item['source']},
         {'columnId':CLS['Project'],'objectValue':item['project']},
         {'columnId':CLS['Category'],'objectValue':item['cat']},
+        {'columnId':CLS['Meeting Source'],'objectValue':item.get('meeting_name','')},
     ]
     payload=json.dumps({'cells':cells,'toBottom':True}).encode('utf-8')
     req=urllib.request.Request(f'https://api.smartsheet.com/2.0/sheets/{S_SID}/rows',data=payload,headers={'Authorization':ah,'Content-Type':'application/json'})
