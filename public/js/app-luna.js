@@ -162,12 +162,18 @@ function scheduleClippySuggestion() {
         if (e.button !== 0) return; // left-click only
         dragging = true;
         dragDist = 0;
-        var pos = getComputedStyle(el);
-        origX = parseInt(pos.left) || 0;
-        origY = parseInt(pos.top) || 0;
+        var rect = el.getBoundingClientRect();
+        origX = rect.left;
+        origY = rect.top;
         var pt = e.touches ? e.touches[0] : e;
         startX = pt.clientX;
         startY = pt.clientY;
+        // Switch from bottom/right to left/top positioning immediately
+        el.style.left = rect.left + 'px';
+        el.style.top = rect.top + 'px';
+        el.style.bottom = 'auto';
+        el.style.right = 'auto';
+        el.classList.add('dragged');
         el.style.cursor = 'grabbing';
         el.style.transition = 'none';
         el.style.animation = 'none';
@@ -182,14 +188,6 @@ function scheduleClippySuggestion() {
         dragDist = Math.max(dragDist, Math.abs(dx), Math.abs(dy));
         el.style.left = (origX + dx) + 'px';
         el.style.top = (origY + dy) + 'px';
-        if (!el.classList.contains('dragged')) {
-          el.classList.add('dragged');
-          var rect = el.getBoundingClientRect();
-          el.style.left = rect.left + 'px';
-          el.style.top = rect.top + 'px';
-          el.style.bottom = 'auto';
-          el.style.right = 'auto';
-        }
       }
       function onEnd() {
         if (!dragging) return;
