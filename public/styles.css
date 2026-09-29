@@ -595,7 +595,7 @@ mark.search-highlight{background:#fff3a8;padding:1px 2px;border-radius:2px;color
 .reminder-toggle {
   position: fixed;
   right: 0;
-  top: 80px;
+  top: 140px;
   z-index: 999;
   background: var(--teal);
   color: #fff;

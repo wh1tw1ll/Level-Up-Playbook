@@ -423,12 +423,14 @@ function initDailyBriefing() {
 function openReminderPanel() {
   var panel = document.getElementById('reminder-panel');
   var toggle = document.getElementById('reminder-toggle');
+  var helpBtn = document.getElementById('help-btn');
   if (panel) {
     panel.style.display = 'flex';
     panel.scrollTop = 0;
     setTimeout(function() { panel.classList.remove('closed'); }, 10);
   }
   if (toggle) toggle.style.display = 'none';
+  if (helpBtn) helpBtn.style.display = 'none';
   reminderPanelOpen = true;
   renderUnifiedBriefing();
   startPanelAutoRefresh();
@@ -437,12 +439,20 @@ function openReminderPanel() {
 function closeReminderPanel() {
   var panel = document.getElementById('reminder-panel');
   var toggle = document.getElementById('reminder-toggle');
+  var helpBtn = document.getElementById('help-btn');
   if (panel) {
     panel.classList.add('closed');
     setTimeout(function() {
       panel.style.display = 'none';
       if (toggle) toggle.style.display = 'flex';
     }, 300);
+  }
+  if (helpBtn) {
+    // Only re-show if clippy isn't already visible
+    var clippy = document.getElementById('luna-clippy');
+    if (!clippy || clippy.style.display === 'none') {
+      setTimeout(function() { helpBtn.style.display = 'flex'; }, 350);
+    }
   }
     reminderPanelOpen = false;
     stopPanelAutoRefresh();
@@ -603,7 +613,10 @@ function renderBriefingDate(dateStr) {
   if (footer) footer.textContent = '📜 Briefing';
   el.innerHTML = '<div class="reminder-loader"></div>';
   fetch('/api/briefing?date=' + encodeURIComponent(dateStr))
-    .then(function(r) { return r.json(); })
+    .then(function(r) {
+      if (!r.ok) throw new Error('Status ' + r.status);
+      return r.json();
+    })
     .then(function(data) {
       data.name = data.name || 'Whitney';
       data.greeting = data.greeting || 'Good morning';
@@ -614,11 +627,15 @@ function renderBriefingDate(dateStr) {
       if (data.lunaNote) {
         html += '<div style="background:var(--teal-light);border:1px solid var(--teal);border-radius:8px;padding:8px 10px;margin:10px 0;font-size:12px;line-height:1.5">' + escapeHtml(data.lunaNote.text) + '</div>';
       }
+      if (!data.lunaNote) {
+        html += '<div style="color:var(--muted);font-size:12px;margin-top:12px">No briefing data available for this date.</div>';
+      }
       el.innerHTML = html;
       if (footer) footer.textContent = 'Historical — ' + dateStr;
     })
-    .catch(function() {
-      el.innerHTML = '<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px">Could not load briefing.</div>';
+    .catch(function(err) {
+      el.innerHTML = '<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px">Could not load briefing for this date.<br><button class="reminder-tab" onclick="renderUnifiedBriefing()" style="margin-top:8px">← Back to Today</button></div>';
+      if (footer) footer.textContent = 'Error loading ' + dateStr;
     });
 }
 
@@ -666,12 +683,18 @@ function playBriefingAudio(btn) {
   utterance.rate = 0.9;
   utterance.pitch = 1.0;
   utterance.volume = 1.0;
-  // Try to use a good English voice
+  // Try female English voice — prefer modern/clear voices
   var voices = synth.getVoices();
   var preferred = voices.filter(function(v) {
+    return v.lang.indexOf('en') === 0 && (v.name.indexOf('Female') >= 0 || v.name.indexOf('female') >= 0);
+  })[0] || voices.filter(function(v) {
     return v.lang.indexOf('en') === 0 && v.name.indexOf('Samantha') >= 0;
   })[0] || voices.filter(function(v) {
+    return v.lang.indexOf('en') === 0 && v.name.indexOf('Google UK') >= 0;
+  })[0] || voices.filter(function(v) {
     return v.lang.indexOf('en') === 0 && v.name.indexOf('Google US') >= 0;
+  })[0] || voices.filter(function(v) {
+    return v.lang.indexOf('en') === 0 && v.name.indexOf('Microsoft') >= 0 && v.name.indexOf('Natural') >= 0;
   })[0];
   if (preferred) utterance.voice = preferred;
   btn.textContent = '🔊 Playing...';
