@@ -191,7 +191,10 @@ function renderPrepUnified(container, prepData, upcomingData) {
         dayLabel = 'Unscheduled';
       }
       html += '<div class="prep-day-group" data-day="' + dayKey + '">';
-      html += '<div class="prep-day-header">' + escapeHtml(dayLabel) + ' <span class="prep-day-count">' + cardsInDay.length + '</span></div>';
+      html += '<div class="prep-day-header" onclick="prepToggleDay(this)">';
+      html += '<span class="prep-day-chevron">▼</span>';
+      html += '<span>' + escapeHtml(dayLabel) + '</span> <span class="prep-day-count">' + cardsInDay.length + '</span>';
+      html += '</div>';
       html += '<div class="prep-day-cards">';
       cardsInDay.forEach(function(card, idx) {
         html += renderCard(card, idx);
@@ -622,6 +625,17 @@ function prepToggleCard(header) {
 }
 window.prepToggleCard = prepToggleCard;
 
+function prepToggleDay(header) {
+  var group = header.closest('.prep-day-group');
+  if (!group) return;
+  var cards = group.querySelector('.prep-day-cards');
+  var chevron = header.querySelector('.prep-day-chevron');
+  var isCollapsed = group.classList.toggle('collapsed');
+  if (cards) cards.style.display = isCollapsed ? 'none' : '';
+  if (chevron) chevron.textContent = isCollapsed ? '▶' : '▼';
+}
+window.prepToggleDay = prepToggleDay;
+
 function prepSetFilter(btn) {
   var container = document.getElementById('prep-container');
   if (!container || !container._cards) return;
@@ -647,6 +661,14 @@ function prepSetFilter(btn) {
       if (c.style.display !== 'none') hasVisible = true;
     });
     group.style.display = hasVisible ? '' : 'none';
+    // Expand visible groups (reset collapsed state on filter change)
+    if (hasVisible) {
+      group.classList.remove('collapsed');
+      var cards = group.querySelector('.prep-day-cards');
+      var chevron = group.querySelector('.prep-day-chevron');
+      if (cards) cards.style.display = '';
+      if (chevron) chevron.textContent = '▼';
+    }
   });
 }
 window.prepSetFilter = prepSetFilter;
@@ -786,7 +808,10 @@ function escapeHtmlAttr(s) {
     // Unified list
     '.prep-meeting-list{display:flex;flex-direction:column;gap:0;margin-bottom:20px}' +
     '.prep-day-group{margin-bottom:16px}' +
-    '.prep-day-header{font-size:13px;font-weight:700;color:var(--charcoal);padding:8px 4px 8px 0;margin-bottom:6px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}' +
+    '.prep-day-group.collapsed .prep-day-cards{display:none}' +
+    '.prep-day-header{font-size:13px;font-weight:700;color:var(--charcoal);padding:8px 4px 8px 0;margin-bottom:6px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}' +
+    '.prep-day-header:hover{background:var(--teal-light);border-radius:4px}' +
+    '.prep-day-chevron{font-size:10px;color:var(--muted);flex-shrink:0;width:12px;text-align:center}' +
     '.prep-day-count{font-size:11px;font-weight:400;color:var(--muted);background:var(--cool);border-radius:8px;padding:1px 7px}' +
     '.prep-day-cards{display:flex;flex-direction:column;gap:8px}' +
     '.prep-card{border:1px solid var(--border);border-radius:10px;background:var(--card);overflow:hidden;transition:border-color .12s}' +
