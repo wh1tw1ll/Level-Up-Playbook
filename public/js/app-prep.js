@@ -22,13 +22,18 @@ function renderPrepView() {
 
   Promise.all([
     fetch('/api/prep').then(function(r) { if (!r.ok) throw new Error('Prep API ' + r.status); return r.json(); }),
-    fetch('/api/prep/upcoming').then(function(r) { if (!r.ok) throw new Error('Upcoming API ' + r.status); return r.json(); }),
+    fetch('/api/prep/upcoming').then(function(r) {
+      if (r.status === 401) return null; // Not signed in — upcoming data unavailable
+      if (!r.ok) throw new Error('Upcoming API ' + r.status);
+      return r.json();
+    }),
   ])
     .then(function(results) {
       renderPrepUnified(container, results[0], results[1]);
     })
     .catch(function(err) {
-      container.innerHTML = '<div class="prep-empty">⚠ Failed to load prep data: ' + escapeHtml(err.message) + '</div>';
+      // If prep data itself failed, show error; otherwise try to render with what we have
+      container.innerHTML = '<div class=\"prep-empty\">⚠ Failed to load prep data: ' + escapeHtml(err.message) + '</div>';
     });
 }
 window.renderPrepView = renderPrepView;
@@ -40,8 +45,8 @@ window.renderPrepView = renderPrepView;
 function renderPrepUnified(container, prepData, upcomingData) {
   var meetings = prepData.meetings || [];       // past Granola notes (full summaries now)
   var priorityActions = (prepData.agenda && prepData.agenda.upcomingActions) || [];
-  var storedAgendas = (upcomingData.allAgendas || []).concat(prepData.perMeetingAgendas || []);
-  var upcomingEvents = upcomingData.events || [];
+  var storedAgendas = (upcomingData && upcomingData.allAgendas || []).concat(prepData.perMeetingAgendas || []);
+  var upcomingEvents = upcomingData && upcomingData.events || [];
 
   // Normalize stored agendas by lowercased subject for matching
   var agendaBySubject = {};
