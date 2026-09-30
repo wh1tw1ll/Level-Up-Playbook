@@ -1,6 +1,338 @@
 {
   "notes": [
     {
+      "id": "not_mOIPJEkCwvFg1T",
+      "title": "DOVA | Envac Chat",
+      "web_url": "https://notes.granola.ai/d/495cf0d5-c3c3-4442-9a77-39720a57fc88",
+      "created_at": "2026-09-29T21:30:22.559Z",
+      "updated_at": "2026-09-29T21:49:22.866Z",
+      "summary_markdown": "# Tom Embley and Envac Background\n\n- Tom: 40 years in the industry, company acquired by Envac 5 years ago (minority shareholder)\n- Envac: founded in the 1960s, 36 offices in 32 countries, 6 million people/day use their systems\n- Originally focused on healthcare/industrial waste conveying; expanded into residential/commercial around 2015\n- Notable installs: Disney World (original system from \\~1972, still running), California (Orange County, LA)\n- Josh made first contact Dec 30/31 last year; project has moved unusually fast since\n\n# System Design and Specs\n\n- 20-inch pipe throughout, \\~3/8-inch thick wall (50-year durability target)\n- Pipe thickness driven by material type (e.g., glass recyclables) as much as longevity\n- System layout: tree-like, multiple legs with air inlets at each end, all feeding back to one collection terminal\n- Two separate systems planned: one for the arena, one for the district\n  - \\~4 compactors per system (8 total if combined)\n  - Volume too high to run on a single system\n\n# Collection Terminal Footprint\n\n- Terminal building is not in Envac’s scope: owner provides the space\n- Footprint: 40 x 60 ft per system (40 x 120 ft if both systems share one location)\n- Preferred location: bottom of a parking garage, with truck access around the perimeter\n  - Tom suggested the parking area on the far side of the park as ideal\n  - Tom to send examples of parking garage installations\n- Architectural treatment is owner’s choice: Envac does not carry that cost\n\n# Scope Split and Cost Estimates\n\n- Pipe installation: McCarthy to handle as part of civil works, stub up vertically\n  - JCI coordinating this arrangement\n- Envac scope: everything above ground (cans, control valves, equipment, collection terminal fit-out)\n- Arena system estimate: \\~$9M (Tom’s ballpark, not a formal quote)\n- Cosphere budget figure Whitney had heard: $15M total for Envac scope (detail unknown)\n- Tom to forward the high-level proposal sent to Cosphere, plus a more project-specific summary in a couple of days\n\n# Schedule and Next Steps\n\n- Design milestones (arena):\n  - 50% SDs: mid-October\n  - 100% SDs: end of November\n  - Tentative groundbreaking: early 2027\n  - Construction: 18 to 20 months (aggressive, to be validated by CM)\n- CM candidates being engaged: Hunt, Level 10, Suffolk\n  - Schedule will sharpen once CM is selected\n- Envac coordination needed when site work begins: all underground piping must go in early\n- Whitney to send Tom the current design milestone schedule for the arena\n\n# Next Steps\n\n- **Send Tom the arena design milestone schedule** (Whitney)\n\n  Gives Tom visibility on SD and groundbreaking targets to plan Envac's coordination timing.\n- **Forward high-level Envac proposal and project-specific cost summary** (Tom)\n\n  Whitney needs detail to build out the budget; Tom will have someone prepare a project-tailored version within a couple of days.\n- **Send parking garage installation examples** (Tom)\n\n  To support siting the collection terminal in the parking structure.\n\n---\n\nChat with meeting transcript: [https://notes.granola.ai/t/8f578d48-4778-429f-b403-deda09bc1d7f](https://notes.granola.ai/t/8f578d48-4778-429f-b403-deda09bc1d7f)",
+      "summary_text": "Tom Embley and Envac Background\nTom: 40 years in the industry, company acquired by Envac 5 years ago (minority shareholder)\nEnvac: founded in the 1960s, 36 offices in 32 countries, 6 million people/day use their systems\nOriginally focused on healthcare/industrial waste conveying; expanded into residential/commercial around 2015\nNotable installs: Disney World (original system from ~1972, still running), California (Orange County, LA)\nJosh made first contact Dec 30/31 last year; project has moved unusually fast since\nSystem Design and Specs\n20-inch pipe throughout, ~3/8-inch thick wall (50-year durability target)\nPipe thickness driven by material type (e.g., glass recyclables) as much as longevity\nSystem layout: tree-like, multiple legs with air inlets at each end, all feeding back to one collection terminal\nTwo separate systems planned: one for the arena, one for the district\n~4 compactors per system (8 total if combined)\nVolume too high to run on a single system\nCollection Terminal Footprint\nTerminal building is not in Envac’s scope: owner provides the space\nFootprint: 40 x 60 ft per system (40 x 120 ft if both systems share one location)\nPreferred location: bottom of a parking garage, with truck access around the perimeter\nTom suggested the parking area on the far side of the park as ideal\nTom to send examples of parking garage installations\nArchitectural treatment is owner’s choice: Envac does not carry that cost\nScope Split and Cost Estimates\nPipe installation: McCarthy to handle as part of civil works, stub up vertically\nJCI coordinating this arrangement\nEnvac scope: everything above ground (cans, control valves, equipment, collection terminal fit-out)\nArena system estimate: ~$9M (Tom’s ballpark, not a formal quote)\nCosphere budget figure Whitney had heard: $15M total for Envac scope (detail unknown)\nTom to forward the high-level proposal sent to Cosphere, plus a more project-specific summary in a couple of days\nSchedule and Next Steps\nDesign milestones (arena):\n50% SDs: mid-October\n100% SDs: end of November\nTentative groundbreaking: early 2027\nConstruction: 18 to 20 months (aggressive, to be validated by CM)\nCM candidates being engaged: Hunt, Level 10, Suffolk\nSchedule will sharpen once CM is selected\nEnvac coordination needed when site work begins: all underground piping must go in early\nWhitney to send Tom the current design milestone schedule for the arena\nNext Steps\nSend Tom the arena design milestone schedule (Whitney)\nGives Tom visibility on SD and groundbreaking targets to plan Envac's coordination timing.\nForward high-level Envac proposal and project-specific cost summary (Tom)\nWhitney needs detail to build out the budget; Tom will have someone prepare a project-tailored version within a couple of days.\nSend parking garage installation examples (Tom)\nTo support siting the collection terminal in the parking structure.",
+      "attendees": [
+        {
+          "name": "Whitney Williams",
+          "email": "wwilliams@levelup-pd.com"
+        },
+        {
+          "email": "tembley@airconvey.com",
+          "name": "Tom Embley"
+        }
+      ],
+      "calendar_event": {
+        "event_title": "DOVA | Envac Chat",
+        "organiser": "wwilliams@levelup-pd.com",
+        "scheduled_start": "2026-09-29T21:30:00Z",
+        "scheduled_end": "2026-09-29T22:00:00Z",
+        "invitees": [
+          {
+            "email": "tembley@airconvey.com"
+          }
+        ],
+        "calendar_event_id": "AAMkADg2YTYzOGYzLWIyNjUtNDdjNC1hMWFmLWRkNmI4Yzg0YzkxYwBGAAAAAAANSGciwxM9QqGKVPt1m6ouBwBcRqSwc1nXRaC9s95bx39SAAAAAAENAABcRqSwc1nXRaC9s95bx39SAANVuz30AAA="
+      }
+    },
+    {
+      "id": "not_Yuit32XEMWFLrb",
+      "title": "Zoom - Final Walk Through of Slides",
+      "web_url": "https://notes.granola.ai/d/2f4e6fb8-789f-4e18-97dd-9778b8424689",
+      "created_at": "2026-09-29T20:05:00.335Z",
+      "updated_at": "2026-09-29T22:19:05.771Z",
+      "summary_markdown": "# Presentation Flow and Speaker Order\n\n- Agreed sequence for the hearing:\n  1. Whitney (LevelUp) opens, introduces Josh and Charlie (KozPure)\n  2. Josh and Charlie set the vision and site overview\n  3. Don and Sam (Perkins Will): plans, exterior/interior renderings, fly-through\n  4. David (HTHG Law): entitlements and dry legal framing\n  5. Matt (Wood Rodgers): traffic analysis\n  6. Whitney: brief owner’s rep intro, role and delivery experience, transitions to Don\n  7. Don and Mike: 3D walkthrough and renderings as grand finale\n- Charlie to serve as podium anchor throughout, fielding questions and redirecting to technical experts (Matt, Mario) as needed\n- Schedule and budget questions: Charlie fields those, not the technical team\n- Commissioners may interrupt, but likely won’t; Charlie will manage flow if they do\n\n# Slide Deck: Vision and Site Orientation\n\n- Open with aerial overview, then drop in the connection/convention overlay, followed by zoomed-in site plan\n  - Gives orientation before diving into the building\n  - Josh and Charlie lead on vision; Don and Sam transition from sky-level plan down into the building\n- Visibility slide: remove numbers and the last sentence; save traffic/visibility data for a different moment\n- Sam (Perkins Will) to send highway visibility images from the Major Design Review package for potential use on this slide\n- Freeway signage slide flagged for replacement\n\n# Slide Deck: Programming and Floor Configurations\n\n- Remove all floor plan slides (event level, main concourse, suite level, upper concourse)\n- Keep floor configuration slides showing different uses (MASL soccer, volleyball, pickleball, basketball, concerts, conventions)\n- Lean into multipurpose/flexible building narrative: commissioners have been surprised by this\n- ADA parking: add to program list on zoomed-in site plan slide alongside fire lanes, rideshare drop-off\n  - Keep it as a label only, no numbers\n  - Rideshare noted as down Kilburn\n- Scorecard slide: move to appendix, available if asked; main slide stays image-only\n- Street soccer courts: Orlana checking with Street Soccer USA on correct terminology; follow up after meeting\n\n# Slide Deck: Renderings and Color Updates\n\n- Soccer/turf slides: Sam to add bright green over the turf on the MASL slide and all turf-use slides (currently reads as ice)\n- “Fuel Our Fight” text: replace with “Culturally Rooted”\n- Food image: replace pizza with lumpia (Filipino egg rolls, L-U-M-P-I-A)\n- All references to “Knights” and “Sacramento” to be removed; replace with “Dova Arena” throughout\n- Beauty shot (bowl corner view): add an LED screen to the white bar at the bottom of the frame\n- Inline club portal: remove the obstruction on the right side so both sides show open access\n\n# 3D Fly-Through and Rendering Strategy\n\n- Walkthrough order: nightclub lobby → daytime lobby → N Club (day/night) → corner portal/grab-and-go → bowl → south cabanas → concourse bar → suite level → upper terrace → beauty shot\n- Don to narrate; Mike operates the 3D model at the podium\n- Strategy: show snippets of the walkthrough, not the full run; flash renderings quickly so no one analyzes them too long (AI renders have artifacts under scrutiny)\n- Two high-resolution images to be released:\n  - Nighttime lobby shot: released via social media the morning of the hearing (before Don and Mike fly)\n  - Beauty shot (bowl overview): released during or after the hearing for media\n- Technical logistics: need to confirm with city AV team whether Mike can plug in at the podium and run the 3D model live; discuss on the 9 AM city call tomorrow\n\n# Traffic Slides: Changes Required\n\n- Remove entirely: VMT screening slide, shuttle route slide (blue/green/purple/red line work)\n- Revert to the version of the consolidated slide without shuttles or wayfinding\n- Language change: “All Improvements” → “LTA Analyzed Enhancements” across all relevant slides and indexes\n- Remove “50+ total locations” language; replace with “improvements” or “possible improvements” only\n- Flock cameras: keep in the slide (conditioned by DOT, not the project’s proposal); do not volunteer it\n- New interchange (Caltrans/Sac County): do not raise; Public Works consensus is not to tie project opening to an unfunded future interchange\n- Parking narrative: Josh and Charlie to address verbally using Golden 1 Center as the relatable example of how moving an arena into a city center alleviates Carmageddon-style traffic\n- Albert (city traffic lead) is well-versed and enthusiastic; expected to present the bulk of the technical traffic material\n\n# Hearing Day Logistics\n\n- Arrive by 4:30 PM (30–45 minutes before the hearing)\n- 9 AM call with the city tomorrow to coordinate with city staff (David, Darcy, Albert); Matt and Mario have a conflict, Philip to join instead\n  - Whitney to reschedule the overlapping call with Matt, Phil, and the JCI team\n- Final walkthrough/run-through: 2:00 PM tomorrow at KozPure’s office; Don and Mike coming straight from the airport (arriving \\~12:30 PM)\n- Hearing is the only item on the agenda; team has the full stage\n- AI/public comment risk flagged: opponents may use Claude or ChatGPT in real time during public comment to generate rebuttals; team strategy is to lead with credentials and the depth of work done, not chase every claim\n\n# LevelUp Slide and Project Experience\n\n- Whitney’s section: role as owner’s rep, responsibility for delivery, brief experience highlights\n- Charlie to send 1–2 additional project images to Pippin (Eckhoff) to round out to 8 projects\n- Pinnacle Bank Arena (similar scale) and Harbor Center (Buffalo, similar scale) to be added\n- Miami Freedom Park (27,000-seat) highlighted as comparable catalyst project for mixed-use district\n- Slide format: images of referenced projects, finishing with Dova Arena rendering as the transition to Don’s fly-through\n- Closeout slide: Charlie to decide what goes on screen during Q\\&A wrap-up\n\n# Next Steps\n\n- **Send highway visibility images to Pippin and Sam** (Sam Kalscheur)\n\n  Images from the Major Design Review package showing arena visibility from the highway.\n- **Update all renderings: remove \"Knights,\" \"Sacramento,\" add \"Dova Arena\"** (Mike Honyak)\n\n  Also replace \"Fuel Our Fight\" with \"Culturally Rooted,\" swap pizza for lumpia, add LED screen to beauty shot, fix inline club portal, and add green turf to all soccer/turf slides.\n- **Prepare two high-res release images**\n\n  Nighttime lobby shot for social media morning of 30th September; beauty shot for media release during or after the hearing.\n- **Revert consolidated traffic slide to the version without shuttles or wayfinding** (Mario Tambellini)\n\n  Update \"All Improvements\" language to \"LTA Analyzed Enhancements\" and cascade through all indexes; remove 50+ locations language.\n- **Confirm AV/podium setup with city technical team**\n\n  Determine whether Mike can plug in and run the 3D fly-through live at the podium; resolve before the 9 AM city call.\n- **Reschedule 9 AM coordination call for Matt, Phil, and JCI team** (Whitney)\n\n  Matt and Mario have a conflict; Philip to join the city call instead.\n- **Send 1–2 project images to Pippin for the LevelUp experience slide** (Charlie)\n\n  Include Pinnacle Bank Arena and Harbor Center; finish the slide with the Dova Arena rendering.\n- **Confirm street soccer court terminology with Street Soccer USA** (Orlana)\n\n  Follow up after the meeting and update the relevant slide.\n- **Decide on closeout slide** (Charlie)\n\n  Determine what image or slide is on screen during the Q\\&A wrap-up at the end of the hearing.\n- **Final run-through at KozPure office, 2:00 PM tomorrow (30th September)**\n\n  Don and Mike arriving from airport around 12:30 PM; all final slides should be locked by then.\n\n---\n\nChat with meeting transcript: [https://notes.granola.ai/t/ddaeb422-1e2f-4d12-9448-a61d18cd67cc](https://notes.granola.ai/t/ddaeb422-1e2f-4d12-9448-a61d18cd67cc)",
+      "summary_text": "Presentation Flow and Speaker Order\nAgreed sequence for the hearing:\nWhitney (LevelUp) opens, introduces Josh and Charlie (KozPure)\nJosh and Charlie set the vision and site overview\nDon and Sam (Perkins Will): plans, exterior/interior renderings, fly-through\nDavid (HTHG Law): entitlements and dry legal framing\nMatt (Wood Rodgers): traffic analysis\nWhitney: brief owner’s rep intro, role and delivery experience, transitions to Don\nDon and Mike: 3D walkthrough and renderings as grand finale\nCharlie to serve as podium anchor throughout, fielding questions and redirecting to technical experts (Matt, Mario) as needed\nSchedule and budget questions: Charlie fields those, not the technical team\nCommissioners may interrupt, but likely won’t; Charlie will manage flow if they do\nSlide Deck: Vision and Site Orientation\nOpen with aerial overview, then drop in the connection/convention overlay, followed by zoomed-in site plan\nGives orientation before diving into the building\nJosh and Charlie lead on vision; Don and Sam transition from sky-level plan down into the building\nVisibility slide: remove numbers and the last sentence; save traffic/visibility data for a different moment\nSam (Perkins Will) to send highway visibility images from the Major Design Review package for potential use on this slide\nFreeway signage slide flagged for replacement\nSlide Deck: Programming and Floor Configurations\nRemove all floor plan slides (event level, main concourse, suite level, upper concourse)\nKeep floor configuration slides showing different uses (MASL soccer, volleyball, pickleball, basketball, concerts, conventions)\nLean into multipurpose/flexible building narrative: commissioners have been surprised by this\nADA parking: add to program list on zoomed-in site plan slide alongside fire lanes, rideshare drop-off\nKeep it as a label only, no numbers\nRideshare noted as down Kilburn\nScorecard slide: move to appendix, available if asked; main slide stays image-only\nStreet soccer courts: Orlana checking with Street Soccer USA on correct terminology; follow up after meeting\nSlide Deck: Renderings and Color Updates\nSoccer/turf slides: Sam to add bright green over the turf on the MASL slide and all turf-use slides (currently reads as ice)\n“Fuel Our Fight” text: replace with “Culturally Rooted”\nFood image: replace pizza with lumpia (Filipino egg rolls, L-U-M-P-I-A)\nAll references to “Knights” and “Sacramento” to be removed; replace with “Dova Arena” throughout\nBeauty shot (bowl corner view): add an LED screen to the white bar at the bottom of the frame\nInline club portal: remove the obstruction on the right side so both sides show open access\n3D Fly-Through and Rendering Strategy\nWalkthrough order: nightclub lobby → daytime lobby → N Club (day/night) → corner portal/grab-and-go → bowl → south cabanas → concourse bar → suite level → upper terrace → beauty shot\nDon to narrate; Mike operates the 3D model at the podium\nStrategy: show snippets of the walkthrough, not the full run; flash renderings quickly so no one analyzes them too long (AI renders have artifacts under scrutiny)\nTwo high-resolution images to be released:\nNighttime lobby shot: released via social media the morning of the hearing (before Don and Mike fly)\nBeauty shot (bowl overview): released during or after the hearing for media\nTechnical logistics: need to confirm with city AV team whether Mike can plug in at the podium and run the 3D model live; discuss on the 9 AM city call tomorrow\nTraffic Slides: Changes Required\nRemove entirely: VMT screening slide, shuttle route slide (blue/green/purple/red line work)\nRevert to the version of the consolidated slide without shuttles or wayfinding\nLanguage change: “All Improvements” → “LTA Analyzed Enhancements” across all relevant slides and indexes\nRemove “50+ total locations” language; replace with “improvements” or “possible improvements” only\nFlock cameras: keep in the slide (conditioned by DOT, not the project’s proposal); do not volunteer it\nNew interchange (Caltrans/Sac County): do not raise; Public Works consensus is not to tie project opening to an unfunded future interchange\nParking narrative: Josh and Charlie to address verbally using Golden 1 Center as the relatable example of how moving an arena into a city center alleviates Carmageddon-style traffic\nAlbert (city traffic lead) is well-versed and enthusiastic; expected to present the bulk of the technical traffic material\nHearing Day Logistics\nArrive by 4:30 PM (30–45 minutes before the hearing)\n9 AM call with the city tomorrow to coordinate with city staff (David, Darcy, Albert); Matt and Mario have a conflict, Philip to join instead\nWhitney to reschedule the overlapping call with Matt, Phil, and the JCI team\nFinal walkthrough/run-through: 2:00 PM tomorrow at KozPure’s office; Don and Mike coming straight from the airport (arriving ~12:30 PM)\nHearing is the only item on the agenda; team has the full stage\nAI/public comment risk flagged: opponents may use Claude or ChatGPT in real time during public comment to generate rebuttals; team strategy is to lead with credentials and the depth of work done, not chase every claim\nLevelUp Slide and Project Experience\nWhitney’s section: role as owner’s rep, responsibility for delivery, brief experience highlights\nCharlie to send 1–2 additional project images to Pippin (Eckhoff) to round out to 8 projects\nPinnacle Bank Arena (similar scale) and Harbor Center (Buffalo, similar scale) to be added\nMiami Freedom Park (27,000-seat) highlighted as comparable catalyst project for mixed-use district\nSlide format: images of referenced projects, finishing with Dova Arena rendering as the transition to Don’s fly-through\nCloseout slide: Charlie to decide what goes on screen during Q&A wrap-up\nNext Steps\nSend highway visibility images to Pippin and Sam (Sam Kalscheur)\nImages from the Major Design Review package showing arena visibility from the highway.\nUpdate all renderings: remove \"Knights,\" \"Sacramento,\" add \"Dova Arena\" (Mike Honyak)\nAlso replace \"Fuel Our Fight\" with \"Culturally Rooted,\" swap pizza for lumpia, add LED screen to beauty shot, fix inline club portal, and add green turf to all soccer/turf slides.\nPrepare two high-res release images\nNighttime lobby shot for social media morning of 30th September; beauty shot for media release during or after the hearing.\nRevert consolidated traffic slide to the version without shuttles or wayfinding (Mario Tambellini)\nUpdate \"All Improvements\" language to \"LTA Analyzed Enhancements\" and cascade through all indexes; remove 50+ locations language.\nConfirm AV/podium setup with city technical team\nDetermine whether Mike can plug in and run the 3D fly-through live at the podium; resolve before the 9 AM city call.\nReschedule 9 AM coordination call for Matt, Phil, and JCI team (Whitney)\nMatt and Mario have a conflict; Philip to join the city call instead.\nSend 1–2 project images to Pippin for the LevelUp experience slide (Charlie)\nInclude Pinnacle Bank Arena and Harbor Center; finish the slide with the Dova Arena rendering.\nConfirm street soccer court terminology with Street Soccer USA (Orlana)\nFollow up after the meeting and update the relevant slide.\nDecide on closeout slide (Charlie)\nDetermine what image or slide is on screen during the Q&A wrap-up at the end of the hearing.\nFinal run-through at KozPure office, 2:00 PM tomorrow (30th September)\nDon and Mike arriving from airport around 12:30 PM; all final slides should be locked by then.",
+      "attendees": [
+        {
+          "name": "Whitney Williams",
+          "email": "wwilliams@levelup-pd.com"
+        },
+        {
+          "email": "Orlana@kozpure.com",
+          "name": "Orlana Van Zandt"
+        },
+        {
+          "email": "gwieting@levelup-pd.com",
+          "name": "Greg Wieting"
+        },
+        {
+          "email": "Josh@kozpure.com",
+          "name": "Joshua Wood"
+        },
+        {
+          "email": "Charlie@kozpure.com",
+          "name": "Charlie Tiwana"
+        },
+        {
+          "email": "mtambellini@woodrodgers.com",
+          "name": "Mario Tambellini"
+        },
+        {
+          "email": "dtemblador@hthglaw.com",
+          "name": "David Temblador"
+        },
+        {
+          "email": "Onkar@kozpure.com",
+          "name": "Onkar Purewal"
+        },
+        {
+          "email": "proberts@woodrodgers.com",
+          "name": "Philip Roberts"
+        },
+        {
+          "email": "mspokely@woodrodgers.com",
+          "name": "Matt Spokely"
+        },
+        {
+          "email": "don.dethlefs@perkinswill.com",
+          "name": "Don Dethlefs"
+        },
+        {
+          "email": "sam.kalscheur@perkinswill.com",
+          "name": "Sam Kalscheur"
+        },
+        {
+          "email": "info@kozpure.com",
+          "name": "KP Conference Room"
+        },
+        {
+          "email": "rudi@kozpure.com",
+          "name": "Rudi Macias"
+        }
+      ],
+      "calendar_event": {
+        "event_title": "Zoom - Final Walk Through of Slides",
+        "organiser": "Orlana@kozpure.com",
+        "scheduled_start": "2026-09-29T20:00:00Z",
+        "scheduled_end": "2026-09-29T21:30:00Z",
+        "invitees": [
+          {
+            "email": "Orlana@kozpure.com"
+          },
+          {
+            "email": "gwieting@levelup-pd.com"
+          },
+          {
+            "email": "wwilliams@levelup-pd.com"
+          },
+          {
+            "email": "Josh@kozpure.com"
+          },
+          {
+            "email": "Charlie@kozpure.com"
+          },
+          {
+            "email": "mtambellini@woodrodgers.com"
+          },
+          {
+            "email": "dtemblador@hthglaw.com"
+          },
+          {
+            "email": "Onkar@kozpure.com"
+          },
+          {
+            "email": "proberts@woodrodgers.com"
+          },
+          {
+            "email": "mspokely@woodrodgers.com"
+          },
+          {
+            "email": "don.dethlefs@perkinswill.com"
+          },
+          {
+            "email": "sam.kalscheur@perkinswill.com"
+          },
+          {
+            "email": "info@kozpure.com"
+          },
+          {
+            "email": "rudi@kozpure.com"
+          }
+        ],
+        "calendar_event_id": "AAMkADg2YTYzOGYzLWIyNjUtNDdjNC1hMWFmLWRkNmI4Yzg0YzkxYwBGAAAAAAANSGciwxM9QqGKVPt1m6ouBwBcRqSwc1nXRaC9s95bx39SAAAAAAENAABcRqSwc1nXRaC9s95bx39SAANWUv_nAAA="
+      }
+    },
+    {
+      "id": "not_qh6zLM6OM1os2I",
+      "title": "Mardale CRB review and change order negotiation strategy",
+      "web_url": "https://notes.granola.ai/d/96cc44ef-1de2-48f7-b50a-423924a5d1ab",
+      "created_at": "2026-09-29T19:20:29.821Z",
+      "updated_at": "2026-09-29T20:05:00.298Z",
+      "summary_markdown": "# Mardale (SDI) Overview\n\n- Scope: bathroom partitions, accessories, hand dryers; installs everything except electrical\n- Large portion of change orders were scope awards (COs 2-5), not true changes\n  - Fire extinguishers, back-of-house lockers, shower compartments, accessories package\n  - First true change order: CO 6 (ASK-158), plus sales tax and OSIP credit\n- No Kroll opinion on Mardale\n\n# Change Order Review\n\n- **SDI-011: Hand dryers ($50K)** — recommend approval\n  - SDI supplied per spec and drawings; ADA protrusion issue discovered during city walk\n  - Spec didn’t comply with code; swap to 4\" depth required\n  - Tyler’s rejection note likely made without context; treat as disregarded pending confirmation\n  - Recovery expected from another party (design liability)\n- **SDI-010: Added materials and labor ($47K)** — voided/rejected 8/14\n  - Temporary partitions installed where openings didn’t match approved shop drawings\n  - Operations accepted what’s in field; replacement work never executed\n  - $17K labor: reject outright (work not performed)\n  - $31K material: potentially in SDI’s warehouse; may need to negotiate return or restocking\n    - Breakdown confirmed: \\~$31K material, \\~$16.8K labor\n    - Need to confirm with Jennifer whether SDI already accepted the void/rejection\n- **Third CRB change order**: voided; no further discussion needed\n\n# Negotiation Strategy\n\n- Current position: $211K remaining contract balance + $96K in CRBs = $308K SDI’s likely starting point\n- Goal: eliminate the $96K before any haircut conversation begins\n  - $50K hand dryers: owed, stays in ($261K starting point)\n  - $47K partitions: push to zero; $17K labor flat-out rejected, $31K material to resolve with Jennifer\n  - Net: reduce starting point by \\~$47K, bringing it to \\~$261K\n- Haircut then applied to the $211K remaining balance from there\n- Jennifer to confirm if SDI already accepted the void on SDI-010 material\n\n# Next Steps\n\n- **Follow up with Jennifer on SDI-010 material status**\n\n  Confirm whether SDI accepted the void/rejection on the $47K partition CO and what was discussed about the $31K material in their warehouse.\n- **Confirm Tyler's rejection note on SDI-011 hand dryers**\n\n  Verify with Tyler that his rejection was made without full context and can be disregarded; $50K should be approved.\n- **Confirm locker scope (SDI vs. Glenn Reader)**\n\n  Ask Jennifer or Allie to clarify who supplied metal lockers in staff locker rooms vs. millwork lockers in coach's locker room.\n\n---\n\nChat with meeting transcript: [https://notes.granola.ai/t/790a56a1-ca6c-4b45-8f2a-83653a206ead](https://notes.granola.ai/t/790a56a1-ca6c-4b45-8f2a-83653a206ead)",
+      "summary_text": "Mardale (SDI) Overview\nScope: bathroom partitions, accessories, hand dryers; installs everything except electrical\nLarge portion of change orders were scope awards (COs 2-5), not true changes\nFire extinguishers, back-of-house lockers, shower compartments, accessories package\nFirst true change order: CO 6 (ASK-158), plus sales tax and OSIP credit\nNo Kroll opinion on Mardale\nChange Order Review\nSDI-011: Hand dryers ($50K) — recommend approval\nSDI supplied per spec and drawings; ADA protrusion issue discovered during city walk\nSpec didn’t comply with code; swap to 4\" depth required\nTyler’s rejection note likely made without context; treat as disregarded pending confirmation\nRecovery expected from another party (design liability)\nSDI-010: Added materials and labor ($47K) — voided/rejected 8/14\nTemporary partitions installed where openings didn’t match approved shop drawings\nOperations accepted what’s in field; replacement work never executed\n$17K labor: reject outright (work not performed)\n$31K material: potentially in SDI’s warehouse; may need to negotiate return or restocking\nBreakdown confirmed: ~$31K material, ~$16.8K labor\nNeed to confirm with Jennifer whether SDI already accepted the void/rejection\nThird CRB change order: voided; no further discussion needed\nNegotiation Strategy\nCurrent position: $211K remaining contract balance + $96K in CRBs = $308K SDI’s likely starting point\nGoal: eliminate the $96K before any haircut conversation begins\n$50K hand dryers: owed, stays in ($261K starting point)\n$47K partitions: push to zero; $17K labor flat-out rejected, $31K material to resolve with Jennifer\nNet: reduce starting point by ~$47K, bringing it to ~$261K\nHaircut then applied to the $211K remaining balance from there\nJennifer to confirm if SDI already accepted the void on SDI-010 material\nNext Steps\nFollow up with Jennifer on SDI-010 material status\nConfirm whether SDI accepted the void/rejection on the $47K partition CO and what was discussed about the $31K material in their warehouse.\nConfirm Tyler's rejection note on SDI-011 hand dryers\nVerify with Tyler that his rejection was made without full context and can be disregarded; $50K should be approved.\nConfirm locker scope (SDI vs. Glenn Reader)\nAsk Jennifer or Allie to clarify who supplied metal lockers in staff locker rooms vs. millwork lockers in coach's locker room.",
+      "attendees": [
+        {
+          "name": "Whitney Williams",
+          "email": "wwilliams@levelup-pd.com"
+        }
+      ],
+      "calendar_event": {
+        "event_title": "",
+        "organiser": "",
+        "scheduled_start": "",
+        "scheduled_end": "",
+        "invitees": [],
+        "calendar_event_id": ""
+      }
+    },
+    {
+      "id": "not_Kxx0oGx613MRKc",
+      "title": "Whitney + John Chat",
+      "web_url": "https://notes.granola.ai/d/16bd40d7-8626-4104-82e3-7fead640d584",
+      "created_at": "2026-09-29T18:09:22.739Z",
+      "updated_at": "2026-09-29T19:20:29.815Z",
+      "summary_markdown": "# Network Connex Capabilities\n\n- Full lifecycle solution provider: design, installation, network, DAS, converged infrastructure\n- Union division available internally (page 14 of deck), rare differentiator for electrical and related trades\n- Not all-or-nothing: can engage on components or the full scope\n- Rishi and John have direct experience with Miami Freedom Park engineers\n\n# Bolden Partnership and Project Fit\n\n- Network Connex are preferred/direct partners with Krista (neutral host/financing entity)\n- John met with Krista and Jennifer last Thursday\n- Bolden typically takes on financial responsibility; Network Connex executes design and installation\n- Shaker also in the mix: already sponsoring Network Connex\n- Dova/Sphere America identified as target venues to bring the full team to the table\n\n# Dova Project Context\n\n- ME Engineers handling mechanical, plumbing, and some low-voltage work\n- WJHW is the A/V engineer under Perkins and Will (speakers, TVs, etc.)\n- Network/DAS still a void: Network Connex positioned to fill it\n- Dova still in fundraising mode, running parallel tracks: design/construction push and capital raise\n- Efficiency with cash flow is a priority; any capital/funding angle from Network Connex would be attractive\n\n# Next Steps\n\n- **Draft intro/coordination email and send to John and Rishi for review** (Whitney)\n\n  Frame up the full picture before going to the Dova team; John and Rishi to review before it goes out.\n- **Schedule in-person meeting with the Dova team**\n\n  Target 2 to 3 weeks out; location flexible. Bring Network Connex, Bolden, and Levelup-pd together.\n- **Let Josh know the conversation happened and ask him to call John** (Whitney)\n\n---\n\nChat with meeting transcript: [https://notes.granola.ai/t/aae5e142-c717-49e7-8d95-60267d64a6f0](https://notes.granola.ai/t/aae5e142-c717-49e7-8d95-60267d64a6f0)",
+      "summary_text": "Network Connex Capabilities\nFull lifecycle solution provider: design, installation, network, DAS, converged infrastructure\nUnion division available internally (page 14 of deck), rare differentiator for electrical and related trades\nNot all-or-nothing: can engage on components or the full scope\nRishi and John have direct experience with Miami Freedom Park engineers\nBolden Partnership and Project Fit\nNetwork Connex are preferred/direct partners with Krista (neutral host/financing entity)\nJohn met with Krista and Jennifer last Thursday\nBolden typically takes on financial responsibility; Network Connex executes design and installation\nShaker also in the mix: already sponsoring Network Connex\nDova/Sphere America identified as target venues to bring the full team to the table\nDova Project Context\nME Engineers handling mechanical, plumbing, and some low-voltage work\nWJHW is the A/V engineer under Perkins and Will (speakers, TVs, etc.)\nNetwork/DAS still a void: Network Connex positioned to fill it\nDova still in fundraising mode, running parallel tracks: design/construction push and capital raise\nEfficiency with cash flow is a priority; any capital/funding angle from Network Connex would be attractive\nNext Steps\nDraft intro/coordination email and send to John and Rishi for review (Whitney)\nFrame up the full picture before going to the Dova team; John and Rishi to review before it goes out.\nSchedule in-person meeting with the Dova team\nTarget 2 to 3 weeks out; location flexible. Bring Network Connex, Bolden, and Levelup-pd together.\nLet Josh know the conversation happened and ask him to call John (Whitney)",
+      "attendees": [
+        {
+          "name": "Whitney Williams",
+          "email": "wwilliams@levelup-pd.com"
+        },
+        {
+          "email": "jlogiudice@networkconnex.com",
+          "name": "jlogiudice@networkconnex.com"
+        },
+        {
+          "email": "rmahajan@networkconnex.com",
+          "name": "Rishi Mahajan"
+        }
+      ],
+      "calendar_event": {
+        "event_title": "Whitney + John Chat",
+        "organiser": "wwilliams@levelup-pd.com",
+        "scheduled_start": "2026-09-29T18:00:00Z",
+        "scheduled_end": "2026-09-29T18:30:00Z",
+        "invitees": [
+          {
+            "email": "jlogiudice@networkconnex.com"
+          },
+          {
+            "email": "rmahajan@networkconnex.com"
+          }
+        ],
+        "calendar_event_id": "AAMkADg2YTYzOGYzLWIyNjUtNDdjNC1hMWFmLWRkNmI4Yzg0YzkxYwBGAAAAAAANSGciwxM9QqGKVPt1m6ouBwBcRqSwc1nXRaC9s95bx39SAAAAAAENAABcRqSwc1nXRaC9s95bx39SAANZKcqNAAA="
+      }
+    },
+    {
+      "id": "not_qrOocx6ygp0IHf",
+      "title": "MFP | Glenn Rieder Chat",
+      "web_url": "https://notes.granola.ai/d/0de0f40f-ba97-4d85-aba5-356c9cea69be",
+      "created_at": "2026-09-28T17:59:23.114Z",
+      "updated_at": "2026-09-28T18:49:10.404Z",
+      "summary_markdown": "# Glenn Reader Loge Seating Dispute\n\n- Two distinct loge issues conflated throughout, causing confusion:\n  - ADA loge seating: base contract scope, Glenn Reader has not delivered\n  - Infill loge seating: true change order add (stairs chipped out, loges slid and expanded)\n- ADA loges were clearly shown on multiple drawing sheets; Glenn Reader claimed they weren’t in scope\n  - No exclusion note in contract (unlike Baker’s hatch area carve-out)\n  - At minimum, an RFI should have been submitted; nothing was done\n  - Email from Glenn Reader with loge counts appears to include ADA seats in the tally\n- Temporary white-box workaround installed with TVs; does not match permanent loge console standard\n- Glenn Reader priced ADA loge consoles at \\~$500K (submitted as a change order before being pushed back)\n- Back charges for temp steel, temp cladding, and associated electrical work exceed $100K\n- Infill loges: sourcing from a separate contractor; RFPs already sent by Chris to a millworker contact\n  - LaMarTech unable to get traction: contractors responding but declining to bid\n\n# Glenn Reader Performance Issues\n\n- Missed fabrication and delivery milestones even after schedule was reset post-submittal process\n- Loge mockup due in October; not delivered until late November\n- Inadequate resources deployed when areas were turned over\n- Coordination breakdown between Glenn Reader and countertop sub Armina Stone\n  - Armina’s performance not the root issue; coordination with Glenn Reader was the problem\n- Glenn Reader will likely counter with design gaps, late interior drawings, and submittal revisions\n  - Response: CCDs were issued per contract terms, authorizing proceed without fully executed COs\n  - First major CCD was \\~$1.5M; agreed price came in at \\~$900K after audit\n\n# Financial Exposure and Withholding\n\n- Currently holding $2.7M from Glenn Reader\n- Identifiable recoverable costs:\n  - ADA loge supply and install: \\~$500K\n  - Temp console back charges: $100K+\n  - Electrical rework (Miller Electric disconnect and reinstall): additional cost\n  - Cleaning back charges: identified but not quantified here\n- Bryce flagged \\~4 additional line items over $200K each (\\~$1M total) with same “shown on drawings, not carried” pattern\n  - Trophy case item: has two components; only one is recoverable (noted in CO log)\n- Chris’s view: $1M in withholding is defensible based on actualized scope gaps alone\n- Joseph’s view: holding $1M is safe; $2.7M may be excessive given what’s been actualized so far\n\n# CO Log and CRB Tracker Issues\n\n- Master CO log was built for internal review; now being used for broader purposes, causing alignment gaps\n  - CRBs were manually exported sub-by-sub by Justin and inserted; not a live feed\n  - New CRBs added by Chris and Whitney since, but not all subs reconciled\n- CRB total on closeout checklist pulls from LaMarTech’s tab, not the master CO log directly\n- \\~$580K in open change orders not formally rejected yet; zeroed out in delta column, creating misleading wash\n  - Joseph flagged: Glenn Reader’s position is they’re owed that $580K; budget doesn’t reflect it as risk\n  - Chris: carried in CRB, so it’s inside the $626 budget number\n- Tracker shows $1.2M CRB vs. $1.15M in column L (pre-offset); discrepancy due to stale CRB inserts\n- Andres (Joseph’s team) sent a CRB export after Friday’s LaMarTech meeting; forwarded to the group\n\n# Glenn Reader Outreach Strategy\n\n- John to send response letter to Glenn Reader addressing:\n  - ADA loge seating (scope dispute)\n  - Infill loge seating (change order)\n  - Fabrication and delivery milestone failures\n  - Resource availability failures\n- Primary contact: Ben Gover (decision-maker throughout the process)\n  - Colin Brown (senior PM) to be copied, as he’s on Jennifer McNamara’s correspondence\n  - Joe West (BD) to be excluded\n  - LaMarTech to be left off the correspondence for now\n- Avoid “audit” framing: Kroll already ran an audit with Glenn Reader in Jan/Feb; using the term will draw pushback\n- Follow-up meeting planned after John sends initial response\n\n# Next Steps\n\n- **Extract high-ticket recoverable COs and send to John** (Whitney)\n\n  Pull title blocks for flagged change orders from the audit log; Tyler and Tanya to verify Republic column and notes before sending.\n- **Request full Procore commitment sheet from Lorenzo** (Whitney)\n\n  Needed to reconcile what's feeding the closeout checklist CRB total against the master CO log.\n- **Send response letter to Glenn Reader** (John)\n\n  Address to Ben Gover and Colin Brown; cover ADA loges, infill loges, milestone failures, and resource issues. LaMarTech excluded.\n- **Call Chris after the meeting** (John)\n\n  Chris may have additional context on Glenn Reader to share one-on-one.\n\n---\n\nChat with meeting transcript: [https://notes.granola.ai/t/e6e42208-40a7-4a69-ad5a-2da781140a9e](https://notes.granola.ai/t/e6e42208-40a7-4a69-ad5a-2da781140a9e)",
+      "summary_text": "Glenn Reader Loge Seating Dispute\nTwo distinct loge issues conflated throughout, causing confusion:\nADA loge seating: base contract scope, Glenn Reader has not delivered\nInfill loge seating: true change order add (stairs chipped out, loges slid and expanded)\nADA loges were clearly shown on multiple drawing sheets; Glenn Reader claimed they weren’t in scope\nNo exclusion note in contract (unlike Baker’s hatch area carve-out)\nAt minimum, an RFI should have been submitted; nothing was done\nEmail from Glenn Reader with loge counts appears to include ADA seats in the tally\nTemporary white-box workaround installed with TVs; does not match permanent loge console standard\nGlenn Reader priced ADA loge consoles at ~$500K (submitted as a change order before being pushed back)\nBack charges for temp steel, temp cladding, and associated electrical work exceed $100K\nInfill loges: sourcing from a separate contractor; RFPs already sent by Chris to a millworker contact\nLaMarTech unable to get traction: contractors responding but declining to bid\nGlenn Reader Performance Issues\nMissed fabrication and delivery milestones even after schedule was reset post-submittal process\nLoge mockup due in October; not delivered until late November\nInadequate resources deployed when areas were turned over\nCoordination breakdown between Glenn Reader and countertop sub Armina Stone\nArmina’s performance not the root issue; coordination with Glenn Reader was the problem\nGlenn Reader will likely counter with design gaps, late interior drawings, and submittal revisions\nResponse: CCDs were issued per contract terms, authorizing proceed without fully executed COs\nFirst major CCD was ~$1.5M; agreed price came in at ~$900K after audit\nFinancial Exposure and Withholding\nCurrently holding $2.7M from Glenn Reader\nIdentifiable recoverable costs:\nADA loge supply and install: ~$500K\nTemp console back charges: $100K+\nElectrical rework (Miller Electric disconnect and reinstall): additional cost\nCleaning back charges: identified but not quantified here\nBryce flagged ~4 additional line items over $200K each (~$1M total) with same “shown on drawings, not carried” pattern\nTrophy case item: has two components; only one is recoverable (noted in CO log)\nChris’s view: $1M in withholding is defensible based on actualized scope gaps alone\nJoseph’s view: holding $1M is safe; $2.7M may be excessive given what’s been actualized so far\nCO Log and CRB Tracker Issues\nMaster CO log was built for internal review; now being used for broader purposes, causing alignment gaps\nCRBs were manually exported sub-by-sub by Justin and inserted; not a live feed\nNew CRBs added by Chris and Whitney since, but not all subs reconciled\nCRB total on closeout checklist pulls from LaMarTech’s tab, not the master CO log directly\n~$580K in open change orders not formally rejected yet; zeroed out in delta column, creating misleading wash\nJoseph flagged: Glenn Reader’s position is they’re owed that $580K; budget doesn’t reflect it as risk\nChris: carried in CRB, so it’s inside the $626 budget number\nTracker shows $1.2M CRB vs. $1.15M in column L (pre-offset); discrepancy due to stale CRB inserts\nAndres (Joseph’s team) sent a CRB export after Friday’s LaMarTech meeting; forwarded to the group\nGlenn Reader Outreach Strategy\nJohn to send response letter to Glenn Reader addressing:\nADA loge seating (scope dispute)\nInfill loge seating (change order)\nFabrication and delivery milestone failures\nResource availability failures\nPrimary contact: Ben Gover (decision-maker throughout the process)\nColin Brown (senior PM) to be copied, as he’s on Jennifer McNamara’s correspondence\nJoe West (BD) to be excluded\nLaMarTech to be left off the correspondence for now\nAvoid “audit” framing: Kroll already ran an audit with Glenn Reader in Jan/Feb; using the term will draw pushback\nFollow-up meeting planned after John sends initial response\nNext Steps\nExtract high-ticket recoverable COs and send to John (Whitney)\nPull title blocks for flagged change orders from the audit log; Tyler and Tanya to verify Republic column and notes before sending.\nRequest full Procore commitment sheet from Lorenzo (Whitney)\nNeeded to reconcile what's feeding the closeout checklist CRB total against the master CO log.\nSend response letter to Glenn Reader (John)\nAddress to Ben Gover and Colin Brown; cover ADA loges, infill loges, milestone failures, and resource issues. LaMarTech excluded.\nCall Chris after the meeting (John)\nChris may have additional context on Glenn Reader to share one-on-one.",
+      "attendees": [
+        {
+          "name": "Whitney Williams",
+          "email": "wwilliams@levelup-pd.com"
+        }
+      ],
+      "calendar_event": {
+        "event_title": "",
+        "organiser": "",
+        "scheduled_start": "",
+        "scheduled_end": "",
+        "invitees": [],
+        "calendar_event_id": ""
+      }
+    },
+    {
+      "id": "not_Pj6TkjeNCY9Xxa",
+      "title": "DCL contract closeout and payment settlement with Joseph Vergara",
+      "web_url": "https://notes.granola.ai/d/ca644331-8196-4ee0-89dc-4310464e4573",
+      "created_at": "2026-09-28T16:37:32.855Z",
+      "updated_at": "2026-09-28T18:57:26.223Z",
+      "summary_markdown": "# DCL Contract Overview\n\n- Original contract value: $1.5M in signed change orders\n- Paid to date: $17M; remaining contract balance: owed amount per spreadsheet\n- Total contract risk (contract value + revised value + change orders): $3.8M outstanding\n\n# Settlement Scenarios\n\n- Option A: Close at $19.8M\n  - Reduces contract by $800K\n  - With $410K baked into budget, total impact: $1.2M\n  - Immediate payout of $2,644,719 (single payment, all at once) (2.4M)\n  - if 2.6M 50% this week, and 50% end of november\n  - Remaining balance: forfeited (contractor receives nothing beyond this)\n- Option B: Close at $20M\n  - 1m payment by October 15th, 2nd by end of november \n    - Savings of $1M flat\n    - Payout of $2,844,719 in 2 stages \n    - Remaining balance: also forfeited\n\n# Contractor’s Likely Pushback\n\n- DCL may reject both offers and hold firm at $20M contract value\n  - Argument: change orders should be honored; $3.4M still owed\n  - Threat: pursue tribunal to declare final contract amount and force full payment\n  - Joseph’s view: if he were the contractor, he’d go to court rather than accept a clawback\n\n# Next Steps\n\n- **Present $19.8M closeout offer to DCL** (Whitney)\n\n  Frame as immediate full payout of $2,644,719 vs. a 2-stage payment under the $20M scenario.\n- **Prepare negotiation rationale for the $19.8M figure**\n\n  Anticipate DCL pushing back on the number; Joseph available to advise if needed.\n\n---\n\nChat with meeting transcript: [https://notes.granola.ai/t/d7c746ef-6c01-4fe8-a212-f1565366e631](https://notes.granola.ai/t/d7c746ef-6c01-4fe8-a212-f1565366e631)",
+      "summary_text": "DCL Contract Overview\nOriginal contract value: $1.5M in signed change orders\nPaid to date: $17M; remaining contract balance: owed amount per spreadsheet\nTotal contract risk (contract value + revised value + change orders): $3.8M outstanding\nSettlement Scenarios\nOption A: Close at $19.8M\nReduces contract by $800K\nWith $410K baked into budget, total impact: $1.2M\nImmediate payout of $2,644,719 (single payment, all at once)\nRemaining balance: forfeited (contractor receives nothing beyond this)\nOption B: Close at $20M\nSavings of $1M flat\nPayout of $2,844,719 in 2 stages\nRemaining balance: also forfeited\nContractor’s Likely Pushback\nDCL may reject both offers and hold firm at $20M contract value\nArgument: change orders should be honored; $3.4M still owed\nThreat: pursue tribunal to declare final contract amount and force full payment\nJoseph’s view: if he were the contractor, he’d go to court rather than accept a clawback\nNext Steps\nPresent $19.8M closeout offer to DCL (Whitney)\nFrame as immediate full payout of $2,644,719 vs. a 2-stage payment under the $20M scenario.\nPrepare negotiation rationale for the $19.8M figure\nAnticipate DCL pushing back on the number; Joseph available to advise if needed.",
+      "attendees": [
+        {
+          "name": "Whitney Williams",
+          "email": "wwilliams@levelup-pd.com"
+        }
+      ],
+      "calendar_event": {
+        "event_title": "",
+        "organiser": "",
+        "scheduled_start": "",
+        "scheduled_end": "",
+        "invitees": [],
+        "calendar_event_id": ""
+      }
+    },
+    {
+      "id": "not_jCitOm652luHS0",
+      "title": "PC Tegan Mauldin | KozPure re: Downtown Dova Project Update",
+      "web_url": "https://notes.granola.ai/d/cba204dd-8f20-43de-9db0-4f5a9b6d036a",
+      "created_at": "2026-09-28T15:30:29.318Z",
+      "updated_at": "2026-09-28T16:24:07.617Z",
+      "summary_markdown": "# Project Overview\n\n- Downtown Dova: 7,500-seat arena, large community plaza, 2 hotels (\\~800 rooms total), \\~1,000 residences\n- Concept originated \\~10 years ago with former city manager Cyrus; intensified significantly in the last year\n- Arena visible from Highway 50, supporting naming rights and city prominence\n- Phase 1: arena and plaza; hotels, residential, and retail in future phases\n\n# Arena Design and Flexibility\n\n- Bowl organized around 85x200 ft playing surface (arena soccer, lacrosse, football, ice events)\n  - Lower bowl: \\~5,000 of 7,500 seats; mid-level premium suites, loges, cabanas, clubs; upper terrace level\n  - Telescopic seats on north end and sides allow floor expansion to 28,000 sq ft\n- Multi-use floor configurations:\n  - 5 soccer fields, 5 volleyball courts, 12 pickleball courts, 3 cross-court NCAA basketball courts\n  - Banquet capacity for 1,000+; meeting rooms adjacent for midweek conventions\n  - High school and collegiate graduations also targeted\n- Technology: 603-ft halo LED screen (partnership with i5 LED, local firm); ribbon boards, dasher boards, video board facing Main Street (Tiwana Passage)\n- Music agreements already in place with promoters; venue size designed to attract sellout-oriented artists\n- LEED Silver baseline met by design; SMUD confirmed adequate power; will-serve letter secured from Golden State Water\n\n# Site Plan, Parking, and Transit\n\n- Single internal road runs over sewer easement, providing parking garage access and emergency vehicle access\n- \\~2,500 on-site parking spots for residents, hotel guests, and visitors\n- Event parking via secured agreements with surrounding property owners (reciprocal access model, similar to Golden 1)\n  - Parking management plan in development; includes road closures, rerouting, double lanes\n- Bus stop being relocated closer to site with a shelter; within 0.5 miles of Sunrise Station (SacRT)\n  - Exploring ticketed partnership with SacRT for free transit access on event days\n- Traffic study uses conservative 80% car mode split; team believes actual split will be better\n\n# Entitlement Status and Wednesday Commission Hearing\n\n- All uses (arena, hotel, residential) permitted by right under the existing convention overlay zone\n- Items before the Planning Commission Wednesday:\n  - Major design review\n  - General plan consistency determination (staff confirmed consistent as of Friday)\n- Development agreement negotiated: 10-year vesting, extendable to 15 years if 25% construction milestone met\n- Financial arrangements will go separately to city council\n- Tegan (commission chair) plans to level-set the audience on the commission’s specific role before public comment\n- Other commissioners briefed; generally positive, with traffic as the primary technical focus\n- Full consultant team will be present Wednesday to handle detailed questions\n\n---\n\nChat with meeting transcript: [https://notes.granola.ai/t/f906f917-d1c5-42e1-bfc0-9f96447058d9](https://notes.granola.ai/t/f906f917-d1c5-42e1-bfc0-9f96447058d9)",
+      "summary_text": "Project Overview\nDowntown Dova: 7,500-seat arena, large community plaza, 2 hotels (~800 rooms total), ~1,000 residences\nConcept originated ~10 years ago with former city manager Cyrus; intensified significantly in the last year\nArena visible from Highway 50, supporting naming rights and city prominence\nPhase 1: arena and plaza; hotels, residential, and retail in future phases\nArena Design and Flexibility\nBowl organized around 85x200 ft playing surface (arena soccer, lacrosse, football, ice events)\nLower bowl: ~5,000 of 7,500 seats; mid-level premium suites, loges, cabanas, clubs; upper terrace level\nTelescopic seats on north end and sides allow floor expansion to 28,000 sq ft\nMulti-use floor configurations:\n5 soccer fields, 5 volleyball courts, 12 pickleball courts, 3 cross-court NCAA basketball courts\nBanquet capacity for 1,000+; meeting rooms adjacent for midweek conventions\nHigh school and collegiate graduations also targeted\nTechnology: 603-ft halo LED screen (partnership with i5 LED, local firm); ribbon boards, dasher boards, video board facing Main Street (Tiwana Passage)\nMusic agreements already in place with promoters; venue size designed to attract sellout-oriented artists\nLEED Silver baseline met by design; SMUD confirmed adequate power; will-serve letter secured from Golden State Water\nSite Plan, Parking, and Transit\nSingle internal road runs over sewer easement, providing parking garage access and emergency vehicle access\n~2,500 on-site parking spots for residents, hotel guests, and visitors\nEvent parking via secured agreements with surrounding property owners (reciprocal access model, similar to Golden 1)\nParking management plan in development; includes road closures, rerouting, double lanes\nBus stop being relocated closer to site with a shelter; within 0.5 miles of Sunrise Station (SacRT)\nExploring ticketed partnership with SacRT for free transit access on event days\nTraffic study uses conservative 80% car mode split; team believes actual split will be better\nEntitlement Status and Wednesday Commission Hearing\nAll uses (arena, hotel, residential) permitted by right under the existing convention overlay zone\nItems before the Planning Commission Wednesday:\nMajor design review\nGeneral plan consistency determination (staff confirmed consistent as of Friday)\nDevelopment agreement negotiated: 10-year vesting, extendable to 15 years if 25% construction milestone met\nFinancial arrangements will go separately to city council\nTegan (commission chair) plans to level-set the audience on the commission’s specific role before public comment\nOther commissioners briefed; generally positive, with traffic as the primary technical focus\nFull consultant team will be present Wednesday to handle detailed questions",
+      "attendees": [
+        {
+          "name": "Whitney Williams",
+          "email": "wwilliams@levelup-pd.com"
+        },
+        {
+          "email": "Orlana@kozpure.com",
+          "name": "Orlana Van Zandt"
+        },
+        {
+          "email": "Charlie@kozpure.com",
+          "name": "Charlie Tiwana"
+        },
+        {
+          "email": "Josh@kozpure.com",
+          "name": "Joshua Wood"
+        },
+        {
+          "email": "dtemblador@hthglaw.com",
+          "name": "David Temblador"
+        },
+        {
+          "email": "don.dethlefs@perkinswill.com",
+          "name": "Don Dethlefs"
+        },
+        {
+          "email": "tmauldin@cityofranchocordova.org",
+          "name": "Tegan Knifton"
+        },
+        {
+          "email": "info@kozpure.com",
+          "name": "KP Conference Room"
+        }
+      ],
+      "calendar_event": {
+        "event_title": "PC Tegan Mauldin | KozPure re: Downtown Dova Project Update",
+        "organiser": "Orlana@kozpure.com",
+        "scheduled_start": "2026-09-28T15:30:00Z",
+        "scheduled_end": "2026-09-28T16:00:00Z",
+        "invitees": [
+          {
+            "email": "Orlana@kozpure.com"
+          },
+          {
+            "email": "Charlie@kozpure.com"
+          },
+          {
+            "email": "Josh@kozpure.com"
+          },
+          {
+            "email": "dtemblador@hthglaw.com"
+          },
+          {
+            "email": "don.dethlefs@perkinswill.com"
+          },
+          {
+            "email": "tmauldin@cityofranchocordova.org"
+          },
+          {
+            "email": "info@kozpure.com"
+          },
+          {
+            "email": "wwilliams@levelup-pd.com"
+          }
+        ],
+        "calendar_event_id": "AAMkADg2YTYzOGYzLWIyNjUtNDdjNC1hMWFmLWRkNmI4Yzg0YzkxYwBGAAAAAAANSGciwxM9QqGKVPt1m6ouBwBcRqSwc1nXRaC9s95bx39SAAAAAAENAABcRqSwc1nXRaC9s95bx39SAANT0OxOAAA="
+      }
+    },
+    {
       "id": "not_zUG9XDMSTWRG3f",
       "title": "DOVA | F&B Design & Program Review",
       "web_url": "https://notes.granola.ai/d/a9bd09e0-6476-4c93-bc04-ff9e60766e9f",
@@ -4742,6 +5074,6 @@
       }
     }
   ],
-  "count": 68,
-  "fetched_at": "2026-09-28T04:01:12Z"
+  "count": 75,
+  "fetched_at": "2026-09-30T04:01:38Z"
 }

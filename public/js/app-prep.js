@@ -121,36 +121,78 @@ function renderPrepUnified(container, prepData, upcomingData) {
     });
   });
 
-  // Sort: upcoming by start time asc; past by date desc. Upcoming first in list.
-  var upcomingCards = cards.filter(function(c) { return c.type === 'upcoming'; })
-    .sort(function(a, b) { return new Date(a.timeISO || 0) - new Date(b.timeISO || 0); });
-  var pastCards = cards.filter(function(c) { return c.type === 'past'; })
-    .sort(function(a, b) { return new Date(b.timeISO || 0) - new Date(a.timeISO || 0); });
-  var allCards = upcomingCards.concat(pastCards);
+  // Group all cards by day — mix upcoming and past chronologically
+  // Sort all cards together: ascending by timeISO. Upcoming at their time, past at their date.
+  var allCards = cards.sort(function(a, b) {
+    return new Date(a.timeISO || 0) - new Date(b.timeISO || 0);
+  });
+
+  // Group by day (normalized date string helps cross-referencing upcoming ISO vs past date-only)
+  var dayGroups = {};
+  var daySortKeys = {};
+  allCards.forEach(function(card) {
+    var dt = card.timeISO ? new Date(card.timeISO) : null;
+    var dayKey = dt ? dt.toISOString().split('T')[0] : 'nodate';
+    if (!dayGroups[dayKey]) {
+      dayGroups[dayKey] = [];
+      daySortKeys[dayKey] = dt ? dt.getTime() : 0;
+    }
+    dayGroups[dayKey].push(card);
+  });
+  // Sort days chronologically; "nodate" goes last
+  var sortedDayKeys = Object.keys(dayGroups).sort(function(a, b) {
+    if (a === 'nodate' && b === 'nodate') return 0;
+    if (a === 'nodate') return 1;
+    if (b === 'nodate') return -1;
+    return daySortKeys[a] - daySortKeys[b];
+  });
 
   container._cards = allCards;
+  container._dayGroups = dayGroups;
+  container._sortedDayKeys = sortedDayKeys;
   container._priorityActions = priorityActions;
 
   var html = '';
 
   // Header + filter chips
+  var upcomingCount = cards.filter(function(c) { return c.type === 'upcoming'; }).length;
+  var pastCount = cards.filter(function(c) { return c.type === 'past'; }).length;
+  var agendaCount = cards.filter(function(c) { return c.hasAgenda; }).length;
   html += '<div class="prep-toolbar">';
   html += '<div class="prep-filters">';
   html += '<button class="prep-filter-chip active" data-filter="all" onclick="prepSetFilter(this)">All <span class="prep-chip-count">' + allCards.length + '</span></button>';
-  html += '<button class="prep-filter-chip" data-filter="upcoming" onclick="prepSetFilter(this)">Upcoming <span class="prep-chip-count">' + upcomingCards.length + '</span></button>';
-  html += '<button class="prep-filter-chip" data-filter="past" onclick="prepSetFilter(this)">Past <span class="prep-chip-count">' + pastCards.length + '</span></button>';
-  html += '<button class="prep-filter-chip" data-filter="agenda" onclick="prepSetFilter(this)">Has Agenda <span class="prep-chip-count">' + allCards.filter(function(c){return c.hasAgenda;}).length + '</span></button>';
+  html += '<button class="prep-filter-chip" data-filter="upcoming" onclick="prepSetFilter(this)">Upcoming <span class="prep-chip-count">' + upcomingCount + '</span></button>';
+  html += '<button class="prep-filter-chip" data-filter="past" onclick="prepSetFilter(this)">Past <span class="prep-chip-count">' + pastCount + '</span></button>';
+  html += '<button class="prep-filter-chip" data-filter="agenda" onclick="prepSetFilter(this)">Has Agenda <span class="prep-chip-count">' + agendaCount + '</span></button>';
   html += '</div>';
   html += '<div class="prep-toolbar-hint">Click a meeting to expand. Upcoming → generate an agenda. Past → full notes.</div>';
   html += '</div>';
 
-  // Unified meeting list
+  // Meeting list grouped by day
   html += '<div class="prep-meeting-list" id="prep-meeting-list">';
   if (allCards.length === 0) {
     html += '<div class="prep-empty">No meetings found. Sign in with Microsoft to see your calendar.</div>';
   } else {
-    allCards.forEach(function(card, idx) {
-      html += renderCard(card, idx);
+    sortedDayKeys.forEach(function(dayKey) {
+      var cardsInDay = dayGroups[dayKey];
+      // Build a human label for this day
+      var dayLabel = dayKey;
+      if (dayKey !== 'nodate') {
+        try {
+          var dt = new Date(dayKey + 'T12:00:00'); // noon to avoid timezone edge
+          dayLabel = dt.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        } catch (e) {}
+      } else {
+        dayLabel = 'Unscheduled';
+      }
+      html += '<div class="prep-day-group" data-day="' + dayKey + '">';
+      html += '<div class="prep-day-header">' + escapeHtml(dayLabel) + ' <span class="prep-day-count">' + cardsInDay.length + '</span></div>';
+      html += '<div class="prep-day-cards">';
+      cardsInDay.forEach(function(card, idx) {
+        html += renderCard(card, idx);
+      });
+      html += '</div>';
+      html += '</div>';
     });
   }
   html += '</div>';
@@ -581,9 +623,8 @@ function prepSetFilter(btn) {
   var filter = btn.getAttribute('data-filter');
   container.querySelectorAll('.prep-filter-chip').forEach(function(chip) { chip.classList.remove('active'); });
   btn.classList.add('active');
-  var list = document.getElementById('prep-meeting-list');
-  if (!list) return;
-  list.querySelectorAll('.prep-card').forEach(function(card) {
+  // Hide/show individual cards based on filter
+  container.querySelectorAll('.prep-card').forEach(function(card) {
     var type = card.getAttribute('data-type');
     var hasAgenda = card.getAttribute('data-has-agenda') === '1';
     var show = false;
@@ -592,6 +633,15 @@ function prepSetFilter(btn) {
     else if (filter === 'past') show = type === 'past';
     else if (filter === 'agenda') show = hasAgenda;
     card.style.display = show ? '' : 'none';
+  });
+  // Hide empty day groups (all cards within hidden)
+  container.querySelectorAll('.prep-day-group').forEach(function(group) {
+    // If any card has display:'' (not explicitly none), the group has visible cards
+    var hasVisible = false;
+    group.querySelectorAll('.prep-card').forEach(function(c) {
+      if (c.style.display !== 'none') hasVisible = true;
+    });
+    group.style.display = hasVisible ? '' : 'none';
   });
 }
 window.prepSetFilter = prepSetFilter;
@@ -729,7 +779,11 @@ function escapeHtmlAttr(s) {
     '.prep-chip-count{opacity:.7;font-weight:400;margin-left:4px}' +
     '.prep-toolbar-hint{font-size:11px;color:var(--muted)}' +
     // Unified list
-    '.prep-meeting-list{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}' +
+    '.prep-meeting-list{display:flex;flex-direction:column;gap:0;margin-bottom:20px}' +
+    '.prep-day-group{margin-bottom:16px}' +
+    '.prep-day-header{font-size:13px;font-weight:700;color:var(--charcoal);padding:8px 4px 8px 0;margin-bottom:6px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}' +
+    '.prep-day-count{font-size:11px;font-weight:400;color:var(--muted);background:var(--cool);border-radius:8px;padding:1px 7px}' +
+    '.prep-day-cards{display:flex;flex-direction:column;gap:8px}' +
     '.prep-card{border:1px solid var(--border);border-radius:10px;background:var(--card);overflow:hidden;transition:border-color .12s}' +
     '.prep-card:hover{border-color:var(--teal)}' +
     '.prep-card-header{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;cursor:pointer;user-select:none}' +
