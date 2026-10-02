@@ -45,47 +45,12 @@ window.renderPrepView = renderPrepView;
 function renderPrepUnified(container, prepData, upcomingData) {
   var meetings = prepData.meetings || [];       // past Granola notes (full summaries now)
   var priorityActions = (prepData.agenda && prepData.agenda.upcomingActions) || [];
-  var storedAgendas = (upcomingData && upcomingData.allAgendas || []).concat(prepData.perMeetingAgendas || []);
   var upcomingEvents = upcomingData && upcomingData.events || [];
 
-  // Normalize stored agendas by lowercased subject for matching
-  var agendaBySubject = {};
-  storedAgendas.forEach(function(ag) {
-    var key = (ag.meetingSubject || '').toLowerCase().trim();
-    if (key && !agendaBySubject[key]) agendaBySubject[key] = ag;
-  });
-  function findAgenda(subject) {
-    if (!subject) return null;
-    // Denylist: these meetings never get a fuzzy-matched agenda (keep meeting, drop agenda)
-    var subjLower = String(subject).toLowerCase();
-    if (subjLower.indexOf('boldyn') !== -1 || subjLower.indexOf('design team') !== -1) return null;
-    // Word-overlap scoring, same as server. Handles "i5 LED Coordination" vs "...Design Coordination".
-    function norm(s) {
-      return String(s || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/)
-        .filter(function(w) { return w.length > 2 && ['the','and','for','with','you','our','are','per','re'].indexOf(w) === -1; });
-    }
-    var a = norm(subject);
-    if (a.length === 0) return null;
-    var best = null;
-    var bestScore = 0;
-    for (var k in agendaBySubject) {
-      var b = norm(k);
-      if (b.length === 0) continue;
-      var short = a.length < b.length ? a : b;
-      var long = a.length < b.length ? b : a;
-      var overlap = short.filter(function(w) { return long.indexOf(w) !== -1; }).length;
-      var score = overlap / short.length;
-      if (score > bestScore) { bestScore = score; best = k; }
-    }
-    if (best && bestScore >= 0.7) return agendaBySubject[best];
-    return null;
-  }
-
-  // Build cards
+  // Build cards — agenda matching is done server-side by EventId, no client-side word-overlap
   var cards = [];
 
   upcomingEvents.forEach(function(ev) {
-    var ag = findAgenda(ev.subject);
     cards.push({
       type: 'upcoming',
       id: 'up-' + (ev.eventId || ev.subject + ev.start),
@@ -94,8 +59,8 @@ function renderPrepUnified(container, prepData, upcomingData) {
       timeLabel: formatTime(ev.start),
       location: ev.location || '',
       attendees: ev.attendees || [],
-      hasAgenda: !!(ag && ag.agendaHtml),
-      agendaHtml: (ag && ag.agendaHtml) || ev.agendaHtml || '',
+      hasAgenda: !!(ev.hasAgenda && ev.agendaHtml),
+      agendaHtml: (ev.hasAgenda && ev.agendaHtml) || '',
       notes: '',
       webUrl: '',
       actions: [],
@@ -165,8 +130,8 @@ function renderPrepUnified(container, prepData, upcomingData) {
   var agendaCount = cards.filter(function(c) { return c.hasAgenda; }).length;
   html += '<div class="prep-toolbar">';
   html += '<div class="prep-filters">';
-  html += '<button class="prep-filter-chip active" data-filter="all" onclick="prepSetFilter(this)">All <span class="prep-chip-count">' + allCards.length + '</span></button>';
-  html += '<button class="prep-filter-chip" data-filter="upcoming" onclick="prepSetFilter(this)">Upcoming <span class="prep-chip-count">' + upcomingCount + '</span></button>';
+  html += '<button class="prep-filter-chip active" data-filter="upcoming" onclick="prepSetFilter(this)">Upcoming <span class="prep-chip-count">' + upcomingCount + '</span></button>';
+  html += '<button class="prep-filter-chip" data-filter="all" onclick="prepSetFilter(this)">All <span class="prep-chip-count">' + allCards.length + '</span></button>';
   html += '<button class="prep-filter-chip" data-filter="past" onclick="prepSetFilter(this)">Past <span class="prep-chip-count">' + pastCount + '</span></button>';
   html += '<button class="prep-filter-chip" data-filter="agenda" onclick="prepSetFilter(this)">Has Agenda <span class="prep-chip-count">' + agendaCount + '</span></button>';
   html += '</div>';
@@ -190,12 +155,12 @@ function renderPrepUnified(container, prepData, upcomingData) {
       } else {
         dayLabel = 'Unscheduled';
       }
-      html += '<div class="prep-day-group" data-day="' + dayKey + '">';
+      html += '<div class="prep-day-group collapsed" data-day="' + dayKey + '">';
       html += '<div class="prep-day-header" onclick="prepToggleDay(this)">';
-      html += '<span class="prep-day-chevron">▼</span>';
+      html += '<span class="prep-day-chevron">▶</span>';
       html += '<span>' + escapeHtml(dayLabel) + '</span> <span class="prep-day-count">' + cardsInDay.length + '</span>';
       html += '</div>';
-      html += '<div class="prep-day-cards">';
+      html += '<div class="prep-day-cards" style="display:none">';
       cardsInDay.forEach(function(card, idx) {
         html += renderCard(card, idx);
       });
@@ -233,6 +198,10 @@ function renderPrepUnified(container, prepData, upcomingData) {
   html += '</div>';
 
   container.innerHTML = html;
+
+  // Apply default filter
+  var defaultChip = container.querySelector('.prep-filter-chip.active');
+  if (defaultChip) prepSetFilter(defaultChip);
 
   // Delegated click handlers (avoids inline quoting bugs)
   wirePrepEvents(container);
@@ -465,6 +434,11 @@ function toggleAgendaEdit(btn, card, subj) {
     .replace(/<\/li>/gi, '\n')
     .replace(/<\/tr>/gi, '\n')
     .replace(/<li[^>]*>/gi, '- ')
+    // Preserve bold/italic markers before stripping remaining tags
+    .replace(/<strong>/gi, '**').replace(/<\/strong>/gi, '**')
+    .replace(/<b>/gi, '**').replace(/<\/b>/gi, '**')
+    .replace(/<em>/gi, '*').replace(/<\/em>/gi, '*')
+    .replace(/<i>/gi, '*').replace(/<\/i>/gi, '*')
     .replace(/<[^>]+>/g, '')
     .replace(/&nbsp;/gi, ' ')
     .replace(/&amp;/gi, '&')
@@ -500,10 +474,17 @@ function toggleAgendaEdit(btn, card, subj) {
     var rawText = ta.value.trim();
     if (!rawText) { alert('Agenda cannot be empty.'); return; }
     
-    // Convert plain text back to simple HTML
+    // Convert plain text back to simple HTML, with inline formatting
     var lines = rawText.split('\n');
     var html = '';
     var inList = false;
+    // Inline formatter: **bold** → <strong>, __bold__ → <strong>, *italic* → <em>
+    function formatInline(text) {
+      return text
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/__(.+?)__/g, '<strong>$1</strong>')
+        .replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+    }
     for (var i = 0; i < lines.length; i++) {
       var line = lines[i].trim();
       if (!line) {
@@ -515,14 +496,14 @@ function toggleAgendaEdit(btn, card, subj) {
       if (/^#{1,6}\s/.test(line)) {
         if (inList) { html += '</ul>'; inList = false; }
         var level = line.match(/^#+/)[0].length;
-        var headingText = line.replace(/^#+\s*/, '');
-        html += '<h' + level + '>' + headingText + '</h' + level + '>';
+        var headingText = formatInline(line.replace(/^#+\s*/, ''));
+        html += '<h' + level + '>' + headingText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</h' + level + '>';
       } else if (/^- /.test(line) || /^\* /.test(line)) {
         if (!inList) { html += '<ul>'; inList = true; }
-        html += '<li>' + escaped.replace(/^[-*]\s*/, '') + '</li>';
+        html += '<li>' + formatInline(escaped.replace(/^[-*]\s*/, '')) + '</li>';
       } else {
         if (inList) { html += '</ul>'; inList = false; }
-        html += '<p>' + escaped + '</p>';
+        html += '<p>' + formatInline(escaped) + '</p>';
       }
     }
     if (inList) html += '</ul>';
@@ -661,14 +642,6 @@ function prepSetFilter(btn) {
       if (c.style.display !== 'none') hasVisible = true;
     });
     group.style.display = hasVisible ? '' : 'none';
-    // Expand visible groups (reset collapsed state on filter change)
-    if (hasVisible) {
-      group.classList.remove('collapsed');
-      var cards = group.querySelector('.prep-day-cards');
-      var chevron = group.querySelector('.prep-day-chevron');
-      if (cards) cards.style.display = '';
-      if (chevron) chevron.textContent = '▼';
-    }
   });
 }
 window.prepSetFilter = prepSetFilter;
