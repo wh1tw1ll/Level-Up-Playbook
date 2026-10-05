@@ -8,7 +8,7 @@ import sys, json, re, os, urllib.request, urllib.parse, time, hashlib
 from datetime import datetime, timezone, timedelta
 
 DRY_RUN = '--dry-run' in sys.argv
-DAYS = 1  # Fallback — see last_run.json below for actual cutoff
+DAYS = 30  # Wide window for backfill and recall
 
 # --- Paths ---
 HOME = r'C:\Users\HermesAdmin'
