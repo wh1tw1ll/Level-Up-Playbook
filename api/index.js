@@ -68,6 +68,8 @@ const AUTH_BYPASS_ROUTES = new Set([
   '/api/admin/cleanup',
       '/api/briefing',
       '/api/prep/agenda/update',
+      '/api/stage',
+      '/api/version',
   ]);
 // Routes accessible with password-only (no Microsoft sign-in required)
 // These have been hardened to only return DOVA-filtered data
@@ -198,6 +200,13 @@ export default async function handler(req, res) {
       case '/api/prep/agenda/update': return agendaUpdateHandler(req, res);
       case '/api/prep/upcoming': return prepUpcomingHandler(req, res);
       case '/api/prep/generate': return prepGenerateHandler(req, res);
+      case '/api/version': {
+        return res.json({
+          commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.GIT_SHA || 'unknown',
+          deployId: process.env.VERCEL_DEPLOYMENT_ID || 'unknown',
+          region: process.env.VERCEL_REGION || 'unknown',
+        });
+      }
       case '/api/stage': return stageHandler(req, res);
       case '/api/promote': return promoteHandler(req, res);
       case '/api/ss-ops': return ssOpsHandler(req, res);

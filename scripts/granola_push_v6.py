@@ -489,6 +489,7 @@ for item in new_items:
         'owner': item['owner'],
         'status': 'Open',
         'source': 'Granola',
+        'target': 'project',
         'sourceRef': item.get('note', '')[:200],
         'project': item['project'] or 'General',
         'category': item['cat'] or 'General Coordination',
