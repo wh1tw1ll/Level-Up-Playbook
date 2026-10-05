@@ -28,6 +28,7 @@ import prepGenerateHandler from '../lib/handlers/prep-generate.js';
 import stageHandler from '../lib/handlers/stage.js';
 import promoteHandler from '../lib/handlers/promote.js';
 import extractFromNote from '../lib/handlers/extract-from-note.js';
+import extractEmailsHandler from '../lib/handlers/extract-emails.js';
 import prepMapHandler from '../lib/handlers/prep-map.js';
 import agendasStoreHandler from '../lib/handlers/agendas-store.js';
 import agendaUpdateHandler from '../lib/handlers/agenda-update.js';
@@ -58,7 +59,7 @@ function getCellValue(row, colId) {
     || '';
 }
 // ── AUTH GUARD — every route except verify-password, check-auth, and OAuth ──
-const AUTH_BYPASS_ROUTES = new Set([
+AUTH_BYPASS_ROUTES = new Set([
   '/api/verify-password',
   '/api/check-auth',
   '/api/prep',
@@ -70,6 +71,7 @@ const AUTH_BYPASS_ROUTES = new Set([
       '/api/prep/agenda/update',
       '/api/stage',
       '/api/version',
+      '/api/extract-emails',
   ]);
 // Routes accessible with password-only (no Microsoft sign-in required)
 // These have been hardened to only return DOVA-filtered data
@@ -201,13 +203,14 @@ export default async function handler(req, res) {
       case '/api/prep/upcoming': return prepUpcomingHandler(req, res);
       case '/api/prep/generate': return prepGenerateHandler(req, res);
       case '/api/version': {
-        return res.json({
-          commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.GIT_SHA || 'unknown',
-          deployId: process.env.VERCEL_DEPLOYMENT_ID || 'unknown',
-          region: process.env.VERCEL_REGION || 'unknown',
-        });
-      }
-      case '/api/stage': return stageHandler(req, res);
+              return res.json({
+                commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.GIT_SHA || 'unknown',
+                deployId: process.env.VERCEL_DEPLOYMENT_ID || 'unknown',
+                region: process.env.VERCEL_REGION || 'unknown',
+              });
+            }
+            case '/api/extract-emails': return extractEmailsHandler(req, res);
+            case '/api/stage': return stageHandler(req, res);
       case '/api/promote': return promoteHandler(req, res);
       case '/api/ss-ops': return ssOpsHandler(req, res);
             case '/api/admin/batch': return adminBatch(req, res);
