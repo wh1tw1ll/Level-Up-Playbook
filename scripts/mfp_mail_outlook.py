@@ -10,6 +10,7 @@ DRY_RUN = '--dry-run' in sys.argv
 DAYS = 1
 
 STAGE_URL = 'https://level-up-playbook.vercel.app/api/stage'
+STAGE_KEY = 'ChRJVBkqJEaha5mLiDYGn3WCzE79I9yNkmEID'
 LOG_FILE = r'C:\Users\HermesAdmin\.hermes\mfp_mail_scan_log.json'
 STATE_FILE = r'C:\Users\HermesAdmin\.hermes\mfp_mail_state.json'
 
@@ -266,7 +267,7 @@ for fname, folder in folders:
                     for _ in range(3):
                         try:
                             r = subprocess.run(['curl', '-s', '-X', 'POST', STAGE_URL,
-                                '-H', 'Content-Type: application/json', '-d', payload],
+                                '-H', 'Content-Type: application/json', '-H', 'x-service-key: ' + STAGE_KEY, '-d', payload],
                                 capture_output=True, text=True, timeout=15)
                             if r.stdout:
                                 resp = json.loads(r.stdout)
