@@ -194,17 +194,19 @@ def normalize_owner(name):
     if not name: return 'TBD'
     m = name.strip()
     key = m.lower()
-    if key in OWNER_NORMAL:
-        return OWNER_NORMAL[key]
-    first = key.split()[0]
-    if first in OWNER_NORMAL:
-        return OWNER_NORMAL[first]
-    # Reject multi-owner
+    # Multi-owner check FIRST — reject comma, semicolon, slash, ampersand, "and"
     for sep in [',', ';', '/', '&']:
         if sep in m:
             return 'TBD'
     if ' and ' in key:
         return 'TBD'
+    # Canonical full name match
+    if key in OWNER_NORMAL:
+        return OWNER_NORMAL[key]
+    # First-word match (only after multi-owner cleared)
+    first = key.split()[0]
+    if first in OWNER_NORMAL:
+        return OWNER_NORMAL[first]
     return m[:40]
 
 # Legacy owner list (kept for backward compat, will be removed)
@@ -475,31 +477,50 @@ unset_project = sum(1 for i in new_items if not i['project'])
 unset_cat = sum(1 for i in new_items if not i['cat'])
 print(f"Rows with Project blank: {unset_project}  Category blank: {unset_cat}  Section-extracted: {sum(1 for n in notes for c in extract_next_steps_items(n.get('summary_markdown','') or '') if n)} (approximate)")
 
-# --- Step 3: Push to Smartsheet ---
+# --- Step 3: Push through Vercel /api/stage (guarded write chokepoint) ---
 added=0
+dup_count = 0
 for item in new_items:
     action_text=item['txt']
-    cells=[
-        {'columnId':CLS['ExtractionId'],'objectValue':item['key']},
-        {'columnId':CLS['Action ID'],'objectValue':action_text[:4000]},
-        {'columnId':CLS['Status'],'objectValue':'Open'},
-        {'columnId':CLS['Owner'],'objectValue':item['owner']},
-        {'columnId':CLS['Source'],'objectValue':item['source']},
-        {'columnId':CLS['Project'],'objectValue':item['project']},
-        {'columnId':CLS['Category'],'objectValue':item['cat']},
-        {'columnId':CLS['Meeting Source'],'objectValue':item.get('meeting_name','')},
-    ]
-    payload=json.dumps({'cells':cells,'toBottom':True}).encode('utf-8')
-    req=urllib.request.Request(f'https://api.smartsheet.com/2.0/sheets/{S_SID}/rows',data=payload,headers={'Authorization':ah,'Content-Type':'application/json'})
-    try:
-        with urllib.request.urlopen(req,context=ctx,timeout=15) as resp: json.load(resp)
-        added+=1
-        existing_keys.add(item['key'])
-        existing_texts.add(text_dedup_key(action_text))
-        print(f"OK [{added}] Project={item['project'][:10]:10s} Cat={item['cat'][:20]:20s} key={item['key']} {item['txt'][:50]}...")
-    except urllib.error.HTTPError as e:
-        detail=e.read().decode('utf-8')[:200]
-        print(f"FAIL: {detail[:80]} - {item['txt'][:40]}")
+    
+    import urllib.request as _ur
+    payload = json.dumps({
+        'text': action_text[:4000],
+        'owner': item['owner'],
+        'status': 'Open',
+        'source': 'Granola',
+        'sourceRef': item.get('note', '')[:200],
+        'project': item['project'] or 'General',
+        'category': item['cat'] or 'General Coordination',
+        'extractionId': item['key'],
+        'confidence': 'Medium',
+    }).encode()
+    
+    for _ in range(3):
+        try:
+            req = _ur.Request('https://level-up-playbook.vercel.app/api/stage',
+                data=payload, headers={'Content-Type': 'application/json'}, method='POST')
+            resp = json.loads(_ur.urlopen(req, timeout=30).read())
+            if resp.get('status') == 'staged' or resp.get('rowId'):
+                added+=1
+                existing_keys.add(item['key'])
+                existing_texts.add(text_dedup_key(action_text))
+                print(f"OK [{added}] Proj={item['project'][:10]:10s} Cat={item['cat'][:20]:20s} key={item['key']} {item['txt'][:50]}...")
+                break
+            print(f"DUP [{added}] {resp.get('reason','?')[:60]}")
+            dup_count += 1
+            break
+        except urllib.error.HTTPError as e:
+            body = e.read().decode()[:200]
+            if 'Duplicate' in body or 'Guard rejected' in body:
+                dup_count += 1
+                print(f"DUP [{added}] {body[:60]}")
+                break
+            print(f"FAIL: {body[:60]} - {item['txt'][:40]}")
+            break
+        except Exception as e:
+            print(f"FAIL: {e} - {item['txt'][:40]}")
+            break
     time.sleep(0.3)
 
 print(f"\nDone: {added}/{len(new_items)} added. Unknown project count: {unset_project}")

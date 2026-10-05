@@ -219,12 +219,13 @@ def normalize_owner(name):
     if not name: return 'TBD'
     m = name.strip()
     key = m.lower()
-    if key in OWNER_MAP: return OWNER_MAP[key]
-    first = key.split()[0] if ' ' in key else key
-    if first in OWNER_MAP: return OWNER_MAP[first]
+    # Multi-owner check FIRST
     for sep in [',', ';', '/', '&']:
         if sep in m: return 'TBD'
     if ' and ' in key: return 'TBD'
+    if key in OWNER_MAP: return OWNER_MAP[key]
+    first = key.split()[0] if ' ' in key else key
+    if first in OWNER_MAP: return OWNER_MAP[first]
     return m[:40]
 
 # Commitment detection patterns
@@ -331,42 +332,35 @@ def jaccard(a, b):
     return len(inter) / len(union)
 
 def stage_item(text, owner, source_ref):
-    """Write to Smartsheet Personal Action Log using objectValue."""
+    """POST to Vercel /api/stage endpoint (routes through guarded-write.js)."""
     if DRY_RUN:
         return 'DRY_RUN', 'N/A'
-    col_map = get_col_map()
-    cells = []
-    col_cfg = [
-        ('Action ID', text, 'TEXT_NUMBER'),
-        ('Owner', owner, 'PICKLIST'),
-        ('Status', 'Open', 'PICKLIST'),
-        ('Category', 'General Coordination', 'TEXT_NUMBER'),
-        ('Source', 'Email', 'PICKLIST'),
-        ('SourceRef', source_ref, 'TEXT_NUMBER'),
-        ('Confidence', 'High', 'PICKLIST'),
-    ]
-    for title, val, ctype in col_cfg:
-        if not val: continue
-        col = col_map.get(title)
-        if not col: continue
-        entry = {'columnId': col['id']}
-        entry['objectValue'] = str(val)[:500]
-        cells.append(entry)
-
-    row = {'toBottom': True, 'cells': cells}
-    payload = json.dumps([row]).encode()
-    url = 'https://api.smartsheet.com/2.0/sheets/' + PERSONAL_SHEET_ID + '/rows'
+    
+    payload = json.dumps({
+        'text': text,
+        'owner': owner,
+        'sourceRef': source_ref,
+        'source': 'Email',
+        'status': 'Open',
+        'category': 'General Coordination',
+        'confidence': 'High',
+    }).encode()
+    
     for _ in range(3):
         try:
-            req = urllib.request.Request(url, data=payload, headers=SST_HDR, method='POST')
-            resp = json.loads(urllib.request.urlopen(req, timeout=15).read())
-            results = resp.get('result', [])
-            row_id = results[0].get('id', '?') if results else '?'
-            return 'OK', str(row_id)
+            req = urllib.request.Request('https://level-up-playbook.vercel.app/api/stage',
+                data=payload, headers={'Content-Type': 'application/json'}, method='POST')
+            resp = json.loads(urllib.request.urlopen(req, timeout=30).read())
+            if resp.get('status') == 'staged' or resp.get('rowId'):
+                return 'OK', str(resp.get('rowId', '?'))
+            return 'FAIL', '?'
         except urllib.error.HTTPError as e:
             body = e.read().decode()[:300]
-            print(f'    [STAGE HTTP {e.code}] {body}', flush=True)
+            if 'Duplicate' in body or 'Guard rejected' in body:
+                print(f'    [GUARD] {body[:120]}', flush=True)
+                return 'DUP', '?'
             if e.code in (400, 422):
+                print(f'    [STAGE HTTP {e.code}] {body[:120]}', flush=True)
                 return 'FAIL', '?'
         except Exception as e:
             print(f'    [STAGE ERR] {e}', flush=True)
@@ -484,6 +478,8 @@ for fid, fname, parent in folder_ids:
                 existing_texts.add(tag)
                 existing_norm.add(tag)
                 existing_ext_ids.add(ext_hash)
+            elif status == 'DUP':
+                pass
             src = sender.split('@')[0] if '@' in sender else sender
             print(f'    [{status}][{ptype}] {comm[:65]} ({src})', flush=True)
 
