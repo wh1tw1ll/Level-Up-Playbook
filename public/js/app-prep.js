@@ -70,7 +70,6 @@ function renderPrepUnified(container, prepData, upcomingData) {
 
   // Past meetings (Granola notes) newest first
   meetings.forEach(function(m, i) {
-    var ag = findAgenda(m.title);
     var dateISO = m.date || '';
     cards.push({
       type: 'past',
@@ -80,8 +79,8 @@ function renderPrepUnified(container, prepData, upcomingData) {
       timeLabel: m.date ? formatDate(m.date) : '',
       location: '',
       attendees: [],
-      hasAgenda: !!(ag && ag.agendaHtml),
-      agendaHtml: (ag && ag.agendaHtml) || '',
+      hasAgenda: !!(m.agendaHtml || ''),
+      agendaHtml: m.agendaHtml || '',
       notes: m.summary || '',
       webUrl: m.web_url || '',
       actions: (m.actions || []).map(function(a) {
