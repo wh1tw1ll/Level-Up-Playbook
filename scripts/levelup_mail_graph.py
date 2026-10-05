@@ -170,7 +170,7 @@ def get_all_folder_ids():
     return ids, errors
 
 def scan_folder_body(folder_id, since, fname):
-    """Get messages with body from a folder. Returns (message_id, subject, body, sender, date, hasAttachments)."""
+    """Get messages with body from a folder. Raises on API error."""
     results = []
     params = {
         '$filter': 'receivedDateTime ge ' + since,
@@ -178,25 +178,23 @@ def scan_folder_body(folder_id, since, fname):
         '$top': 20,
         '$orderby': 'receivedDateTime desc'
     }
-    try:
-        data = graph_get('/me/mailFolders/' + folder_id + '/messages', params)
-        for m in data.get('value', []):
-            mid = m.get('id', '')
-            subj = str(m.get('subject', '') or '')
-            body_preview = str(m.get('bodyPreview', '') or '')
-            body_full = str(m.get('body', {}).get('content', '') or '')
-            body_type = m.get('body', {}).get('contentType', '') or ''
-            sender = m.get('from', {}).get('emailAddress', {}).get('address', '')
-            rdate = (m.get('receivedDateTime', '') or '')[:10]
-            has_atts = m.get('hasAttachments', False)
-            if len(body_preview) < 100 and body_full and body_type == 'html':
-                body_text = re.sub(r'<[^>]+>', ' ', body_full)
-                body_text = re.sub(r'\s+', ' ', body_text).strip()
-                if len(body_text) > len(body_preview):
-                    body_preview = body_text[:500]
-            results.append((mid, subj, body_preview, sender, rdate, has_atts))
-    except:
-        pass
+    data = graph_get('/me/mailFolders/' + folder_id + '/messages', params)
+    msgs = data if isinstance(data, dict) else {'value': []}
+    for m in msgs.get('value', []):
+        mid = m.get('id', '')
+        subj = str(m.get('subject', '') or '')
+        body_preview = str(m.get('bodyPreview', '') or '')
+        body_full = str(m.get('body', {}).get('content', '') or '')
+        body_type = m.get('body', {}).get('contentType', '') or ''
+        sender = m.get('from', {}).get('emailAddress', {}).get('address', '')
+        rdate = (m.get('receivedDateTime', '') or '')[:10]
+        has_atts = m.get('hasAttachments', False)
+        if len(body_preview) < 100 and body_full and body_type == 'html':
+            body_text = re.sub(r'<[^>]+>', ' ', body_full)
+            body_text = re.sub(r'\s+', ' ', body_text).strip()
+            if len(body_text) > len(body_preview):
+                body_preview = body_text[:500]
+        results.append((mid, subj, body_preview, sender, rdate, has_atts))
     return results
 
 # Owner normalization map (for new rows only)
@@ -496,12 +494,13 @@ print(f'=== {mode} COMPLETE - {summary} ===', flush=True)
 run_failed = False
 fail_reason = None
 
-if len(folder_ids) == 0 and folder_errors > 0:
+tot_folders = len(folder_ids)
+if tot_folders > 0 and scanned_count < tot_folders:
+    run_failed = True
+    fail_reason = f'Scanned {scanned_count}/{tot_folders} folders ({tot_folders - scanned_count} not scanned — likely token/network)'
+elif tot_folders == 0 and folder_errors > 0:
     run_failed = True
     fail_reason = f'Zero folders found ({folder_errors} enumeration errors)'
-elif folder_scan_errors > 0:
-    run_failed = True
-    fail_reason = f'{folder_scan_errors} folder scan errors (auth or network)'
 
 if DRY_RUN:
     log_run('dry_run', staged_count,
