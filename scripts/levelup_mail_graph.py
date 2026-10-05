@@ -4,48 +4,148 @@ Scans last N days across ALL mail folders recursively.
 Extracts commitments from email BODY, not subjects.
 If no commitment found in body, produces NO row.
 Dry-run flag: --dry-run."""
-import sys, json, re, os, urllib.request, urllib.parse, subprocess, time
+import sys, json, re, os, urllib.request, urllib.parse, time, hashlib
 from datetime import datetime, timezone, timedelta
 
 DRY_RUN = '--dry-run' in sys.argv
 DAYS = 1  # Fallback — see last_run.json below for actual cutoff
 
-LOG_FILE = r'C:\Users\HermesAdmin\.hermes\levelup_mail_scan_log.json'
+# --- Paths ---
+HOME = r'C:\Users\HermesAdmin'
+LOG_FILE = HOME + r'\.hermes\levelup_mail_scan_log.json'
+LAST_RUN_FILE = HOME + r'\.hermes\last_run.json'
+GRAPH_CACHE_FILE = HOME + r'\.hermes\graph_levelup_cache.json'
+MSAL_TOKEN_FILE = HOME + r'\.hermes\msal_tokens.json'
+SS_API_KEY = HOME + r'\ss_api_key.txt'
+TELEGRAM_TOKEN_PATH = HOME + r'\.hermes\telegram_token.txt'
 
-# Smartsheet Personal action log
 PERSONAL_SHEET_ID = '2802755367554948'
-SST = open(r'C:\Users\HermesAdmin\ss_api_key.txt').read().strip()
+
+# OAuth constants (match generate_agendas.py)
+TENANT_ID = '8222d14d-0869-42d3-8b7f-858c65b89c0e'
+CLIENT_ID = 'd43fa6d5-ac58-4c6a-a0a1-083a1573ab03'
+# Read the actual scope from the cached token for refresh
+with open(GRAPH_CACHE_FILE) as f:
+    _GRAPH_SCOPE = f.read()
+import re
+_scope_match = re.search(r'"scope":\s*"([^"]+)"', _GRAPH_SCOPE)
+GRAPH_SCOPES = _scope_match.group(1) if _scope_match else (
+    'openid profile email offline_access Calendars.Read Mail.Read Mail.ReadWrite '
+    'Files.Read Files.ReadWrite Sites.Read Sites.ReadWrite User.Read'
+)
+
+# Smartsheet token
+SST = open(SS_API_KEY).read().strip()
 SST_HDR = {'Authorization': 'Bearer ' + SST, 'Content-Type': 'application/json'}
 
-# Cache column map once
+# --- Telegram alert ---
+def send_telegram(message):
+    try:
+        tok = open(TELEGRAM_TOKEN_PATH).read().strip()
+        if not tok: return
+        payload = json.dumps({'chat_id': '8947918104', 'text': message}).encode()
+        req = urllib.request.Request(
+            f'https://api.telegram.org/bot{tok}/sendMessage',
+            data=payload, headers={'Content-Type': 'application/json'})
+        urllib.request.urlopen(req, timeout=10)
+    except Exception as e:
+        print(f'Telegram alert failed: {e}')
+
+# --- Token Refresh ---
+def refresh_graph_token():
+    """Refresh Microsoft Graph token from msal_tokens.json. Returns access_token or None."""
+    try:
+        with open(MSAL_TOKEN_FILE) as f: msal = json.load(f)
+    except:
+        return None
+    rt = msal.get('refresh_token')
+    if not rt: return None
+    body = urllib.parse.urlencode({
+        'client_id': CLIENT_ID,
+        'refresh_token': rt,
+        'grant_type': 'refresh_token',
+        'scope': GRAPH_SCOPES,
+    }).encode()
+    url = f'https://login.microsoftonline.com/{TENANT_ID}/oauth2/v2.0/token'
+    try:
+        req = urllib.request.Request(url, data=body,
+            headers={'Content-Type': 'application/x-www-form-urlencoded'})
+        resp = json.loads(urllib.request.urlopen(req, timeout=15).read())
+        if 'access_token' in resp:
+            with open(GRAPH_CACHE_FILE) as f: cache = json.load(f)
+            cache['access_token'] = resp['access_token']
+            if 'refresh_token' in resp:
+                cache['refresh_token'] = resp['refresh_token']
+            with open(GRAPH_CACHE_FILE, 'w') as f: json.dump(cache, f, indent=2)
+            return resp['access_token']
+        return None
+    except Exception as e:
+        print(f'Token refresh error: {e}')
+        return None
+
+# --- Load token (refresh on startup) ---
+token = refresh_graph_token()
+if not token:
+    try:
+        with open(GRAPH_CACHE_FILE) as f:
+            tok = json.load(f)
+            token = tok.get('access_token', '')
+    except:
+        token = ''
+if not token:
+    msg = 'FATAL: No Graph access token available. Cannot scan.'
+    print(msg)
+    send_telegram(msg)
+    sys.exit(1)
+
+HDR = {'Authorization': 'Bearer ' + token, 'Accept': 'application/json'}
+
+# Cache column map once (with type info for objectValue writes)
 _COL_MAP = None
 def get_col_map():
     global _COL_MAP
     if _COL_MAP is None:
+        sst = open(SS_API_KEY).read().strip()
         req = urllib.request.Request(
-            'https://api.smartsheet.com/2.0/sheets/' + PERSONAL_SHEET_ID,
-            headers={'Authorization': 'Bearer ' + SST})
-        sheet = json.loads(urllib.request.urlopen(req).read())
-        _COL_MAP = {c['title']: c['id'] for c in sheet.get('columns', [])}
+            'https://api.smartsheet.com/2.0/sheets/' + PERSONAL_SHEET_ID + '?include=columnType',
+            headers={'Authorization': 'Bearer ' + sst})
+        sheet = json.loads(urllib.request.urlopen(req, timeout=15).read())
+        _COL_MAP = {c['title']: {'id': c['id'], 'type': c.get('type','')} for c in sheet.get('columns', [])}
     return _COL_MAP
-
-with open(r'C:\Users\HermesAdmin\.hermes\graph_levelup_cache.json') as f:
-    tok = json.load(f)
-HDR = {'Authorization': 'Bearer ' + tok['access_token'], 'Accept': 'application/json'}
 
 EXCLUDE_FOLDERS = ['junk email', 'deleted items', 'drafts', 'rss feeds', 'conversation history', 'outbox']
 
-def graph_get(path, params=None):
+def graph_get(path, params=None, retried=False):
     url = 'https://graph.microsoft.com/v1.0' + path
     if params:
         url += '?' + urllib.parse.urlencode(params)
-    req = urllib.request.Request(url, headers=HDR)
-    return json.loads(urllib.request.urlopen(req).read())
+    req = urllib.request.Request(url, headers=dict(HDR))
+    try:
+        return json.loads(urllib.request.urlopen(req, timeout=15).read())
+    except urllib.error.HTTPError as e:
+        if e.code == 401 and not retried:
+            print('  Token expired (401), refreshing...', flush=True)
+            new_token = refresh_graph_token()
+            if new_token:
+                HDR['Authorization'] = 'Bearer ' + new_token
+                return graph_get(path, params, retried=True)
+        raise
+    except (urllib.error.URLError, OSError) as e:
+        print(f'  NETWORK ERROR on {path[:30]}...: {e}', flush=True)
+        raise
 
 def get_all_folder_ids():
     ids = []
+    errors = 0
     def walk(parent_id):
-        folders = graph_get('/me/mailFolders/' + parent_id + '/childFolders') if parent_id else graph_get('/me/mailFolders')
+        nonlocal errors
+        try:
+            res = graph_get('/me/mailFolders/' + parent_id + '/childFolders') if parent_id else graph_get('/me/mailFolders')
+            folders = res if isinstance(res, dict) else {'value': []}
+        except Exception as e:
+            errors += 1
+            print(f'  FOLDER enumeratn error: {e}', flush=True)
+            return
         for f in folders.get('value', []):
             name = f['displayName']
             if any(e == name.lower() for e in EXCLUDE_FOLDERS): continue
@@ -62,10 +162,12 @@ def get_all_folder_ids():
                             gn = gk['displayName']
                             if any(e == gn.lower() for e in EXCLUDE_FOLDERS): continue
                             ids.append((gk['id'], gn, kn))
-                    except: pass
-            except: pass
+                    except:
+                        pass
+            except:
+                pass
     walk(None)
-    return ids
+    return ids, errors
 
 def scan_folder_body(folder_id, since, fname):
     """Get messages with body from a folder. Returns (message_id, subject, body, sender, date, hasAttachments)."""
@@ -97,7 +199,35 @@ def scan_folder_body(folder_id, since, fname):
         pass
     return results
 
-# Commitment detection patterns (same approach as Granola)
+# Owner normalization map (for new rows only)
+OWNER_MAP = {
+    'whitney williams': 'Whitney Williams',
+    'whitney': 'Whitney Williams',
+    'whitney w': 'Whitney Williams',
+    'w. williams': 'Whitney Williams',
+    'greg': 'Greg Wieting',
+    'greg wieting': 'Greg Wieting',
+    'charlie': 'Charlie Tiwana',
+    'charlie tiwana': 'Charlie Tiwana',
+    'josh': 'Joshua Wood',
+    'joshua wood': 'Joshua Wood',
+    'sam': 'Sam Kalscheur',
+    'sam kalscheur': 'Sam Kalscheur',
+}
+
+def normalize_owner(name):
+    if not name: return 'TBD'
+    m = name.strip()
+    key = m.lower()
+    if key in OWNER_MAP: return OWNER_MAP[key]
+    first = key.split()[0] if ' ' in key else key
+    if first in OWNER_MAP: return OWNER_MAP[first]
+    for sep in [',', ';', '/', '&']:
+        if sep in m: return 'TBD'
+    if ' and ' in key: return 'TBD'
+    return m[:40]
+
+# Commitment detection patterns
 COMMITMENT_PATTERNS = [
     # Explicit next-steps / action items
     (r'(?:^|\n)\s*[-*]\s*\*\*(.+?)\*\*', 'Granola-style **action**'),
@@ -155,20 +285,32 @@ def should_skip(subj):
     if 'LUCI' in subj: return True
     return False
 
-def get_existing_texts():
-    with open(r'C:\Users\HermesAdmin\ss_api_key.txt') as f:
-        sst = f.read().strip()
-    url = 'https://api.smartsheet.com/2.0/sheets/2802755367554948?rows=1000'
+def get_existing_rows():
+    """Get existing rows as (texts_set, ext_ids_set, status_map_by_text)."""
+    sst = open(SS_API_KEY).read().strip()
+    url = 'https://api.smartsheet.com/2.0/sheets/' + PERSONAL_SHEET_ID + '?rows=1000'
     req = urllib.request.Request(url, headers={'Authorization': 'Bearer ' + sst})
-    sheet = json.loads(urllib.request.urlopen(req).read())
+    sheet = json.loads(urllib.request.urlopen(req, timeout=15).read())
     rev = {c['id']: c['title'] for c in sheet.get('columns', [])}
     texts = set()
+    ext_ids = set()
+    status_map = {}
     for r in sheet.get('rows', []):
+        row_text = ''
+        row_status = ''
         for c in r.get('cells', []):
-            if rev.get(c.get('columnId', '')) == 'Action ID':
-                v = str(c.get('displayValue') or c.get('value', '')).lower().strip()
-                if v: texts.add(v)
-    return texts
+            col_title = rev.get(c.get('columnId', ''), '')
+            v = str(c.get('displayValue') or c.get('value', '')).lower().strip()
+            if col_title == 'Action ID' and v:
+                row_text = v
+                texts.add(v)
+            elif col_title == 'ExtractionId' and v:
+                ext_ids.add(v)
+            elif col_title == 'Status' and v:
+                row_status = v
+        if row_text:
+            status_map[row_text] = row_status
+    return texts, ext_ids, status_map
 
 def normalize(t):
     t = t.lower().strip()
@@ -176,30 +318,48 @@ def normalize(t):
     t = re.sub(r'\s+', ' ', t).strip()
     return t
 
+def jaccard(a, b):
+    """Word overlap for 70% threshold match."""
+    wa = set(a.split())
+    wb = set(b.split())
+    if not wa or not wb: return 0
+    wa = {w for w in wa if len(w) > 2}
+    wb = {w for w in wb if len(w) > 2}
+    if not wa or not wb: return 0
+    inter = wa & wb
+    union = wa | wb
+    return len(inter) / len(union)
+
 def stage_item(text, owner, source_ref):
-    """Write directly to Smartsheet Personal Action Log instead of Vercel API (which needs OAuth)."""
+    """Write to Smartsheet Personal Action Log using objectValue."""
     if DRY_RUN:
         return 'DRY_RUN', 'N/A'
     col_map = get_col_map()
-    row = {
-        "toBottom": True,
-        "cells": [
-            {"columnId": col_map['Action ID'], "value": text},
-            {"columnId": col_map['Owner'], "value": owner},
-            {"columnId": col_map['Status'], "value": "Open"},
-            {"columnId": col_map['Category'], "value": "Staged"},
-            {"columnId": col_map['Source'], "value": "Email"},
-            {"columnId": col_map['SourceRef'], "value": source_ref},
-            {"columnId": col_map['Confidence'], "value": "High"},
-        ]
-    }
+    cells = []
+    col_cfg = [
+        ('Action ID', text, 'TEXT_NUMBER'),
+        ('Owner', owner, 'PICKLIST'),
+        ('Status', 'Open', 'PICKLIST'),
+        ('Category', 'General Coordination', 'TEXT_NUMBER'),
+        ('Source', 'Email', 'PICKLIST'),
+        ('SourceRef', source_ref, 'TEXT_NUMBER'),
+        ('Confidence', 'High', 'PICKLIST'),
+    ]
+    for title, val, ctype in col_cfg:
+        if not val: continue
+        col = col_map.get(title)
+        if not col: continue
+        entry = {'columnId': col['id']}
+        entry['objectValue'] = str(val)[:500]
+        cells.append(entry)
+
+    row = {'toBottom': True, 'cells': cells}
     payload = json.dumps([row]).encode()
     url = 'https://api.smartsheet.com/2.0/sheets/' + PERSONAL_SHEET_ID + '/rows'
     for _ in range(3):
         try:
             req = urllib.request.Request(url, data=payload, headers=SST_HDR, method='POST')
-            resp = json.loads(urllib.request.urlopen(req).read())
-            # resp.result is a list (one entry per row added)
+            resp = json.loads(urllib.request.urlopen(req, timeout=15).read())
             results = resp.get('result', [])
             row_id = results[0].get('id', '?') if results else '?'
             return 'OK', str(row_id)
@@ -207,7 +367,7 @@ def stage_item(text, owner, source_ref):
             body = e.read().decode()[:300]
             print(f'    [STAGE HTTP {e.code}] {body}', flush=True)
             if e.code in (400, 422):
-                return 'FAIL', '?'  # Don't retry validation errors
+                return 'FAIL', '?'
         except Exception as e:
             print(f'    [STAGE ERR] {e}', flush=True)
         time.sleep(1)
@@ -224,22 +384,25 @@ def log_run(status, staged, skipped, folders_scanned, error=None):
     log = log[-100:]
     with open(LOG_FILE, 'w') as f: json.dump(log, f, indent=2)
 
-print('=== LUNA Level Up Mail Scanner - BODY COMMITMENT EXTRACTION + DOVA FILES ===')
+# ============================================================================
+# Main
+# ============================================================================
+print('=== Level Up Mail Scanner (Graph API) ===')
 print('Mode: ' + ('DRY RUN' if DRY_RUN else 'LIVE'))
-print('Window: last ' + str(DAYS) + ' days')
-print('DOVA folder: N/A (no DOVA_FOLDER defined)')
 print(flush=True)
 
-existing = get_existing_texts()
-existing_norm = {normalize(t) for t in existing}
-print('Existing rows: ' + str(len(existing)), flush=True)
+# 1. Load existing rows for dedup
+existing_texts, existing_ext_ids, existing_statuses = get_existing_rows()
+existing_norm = {normalize(t) for t in existing_texts}
+print(f'Existing rows: {len(existing_texts)}', flush=True)
 
+# 2. Enumerate folders
 print('Enumerating folders...', flush=True)
-folder_ids = get_all_folder_ids()
-print('Folders: ' + str(len(folder_ids)), flush=True)
+folder_ids, folder_errors = get_all_folder_ids()
+print(f'Folders: {len(folder_ids)} (errors: {folder_errors})', flush=True)
 
+# 3. Compute scan window
 now = datetime.now(timezone.utc)
-LAST_RUN_FILE = r'C:\Users\HermesAdmin\.hermes\last_run.json'
 try:
     with open(LAST_RUN_FILE) as f:
         lr = json.load(f)
@@ -252,56 +415,119 @@ try:
 except:
     cutoff = now - timedelta(days=DAYS)
 since = cutoff.isoformat()
-print(f'Window: max(last_run.json(email_level_up) or {DAYS}d ago) -> {since}', flush=True)
+print(f'Window: max(last_run.json) -> {since}', flush=True)
 
+# 4. Scan folders
 staged_count = 0
 skipped_no_commitment = 0
 skipped_dup = 0
 skipped_noise = 0
+skipped_closed = 0
 scanned_count = 0
+folder_scan_errors = 0
 
 for fid, fname, parent in folder_ids:
-    msgs = scan_folder_body(fid, since, fname)
+    try:
+        msgs = scan_folder_body(fid, since, fname)
+    except Exception as e:
+        print(f'  ERROR scanning {fname}: {e}', flush=True)
+        folder_scan_errors += 1
+        continue
     if not msgs: continue
     scanned_count += 1
-    print('  ' + fname + ': ' + str(len(msgs)) + ' msgs', flush=True)
+    print(f'  {fname}: {len(msgs)} msgs', flush=True)
     for mid, subj, body, sender, rdate, has_atts in msgs:
         if should_skip(subj):
-            skipped_noise += 1; continue
+            skipped_noise += 1
+            continue
 
-        # Extract commitments from body
         commitments = extract_commitments(subj, body)
-        
         if not commitments:
             skipped_no_commitment += 1
             continue
-        
+
         for comm, ptype in commitments:
+            # Dedup 1: ExtractionId
+            ext_hash = hashlib.md5((subj + '|' + comm).encode()).hexdigest()[:16]
+            if ext_hash in existing_ext_ids:
+                skipped_dup += 1
+                continue
+
+            # Dedup 2: Normalized text + closed check
             tag = normalize(comm)
             if tag in existing_norm:
-                skipped_dup += 1; continue
-            
-            status, rid = stage_item(comm, 'Whitney Williams', 'LevelUpMail:' + fname + ':' + rdate)
+                existing_status = existing_statuses.get(tag, '')
+                if existing_status in ('closed', 'complete', 'archived'):
+                    skipped_closed += 1
+                    continue
+                skipped_dup += 1
+                continue
+
+            # Dedup 3: Jaccard 70% with closed check
+            is_dup = False
+            for et in existing_texts:
+                if jaccard(tag, normalize(et)) >= 0.70:
+                    matched_status = existing_statuses.get(et, '')
+                    if matched_status in ('closed', 'complete', 'archived'):
+                        skipped_closed += 1
+                    else:
+                        skipped_dup += 1
+                    is_dup = True
+                    break
+            if is_dup:
+                continue
+
+            owner = normalize_owner('Whitney Williams')
+            status, rid = stage_item(comm, owner, 'LevelUpMail:' + fname + ':' + rdate)
             staged_count += 1
+            if status == 'OK':
+                existing_texts.add(tag)
+                existing_norm.add(tag)
+                existing_ext_ids.add(ext_hash)
             src = sender.split('@')[0] if '@' in sender else sender
-            print('    [' + status + '][' + ptype + '] ' + comm[:65] + ' (' + src + ')', flush=True)
+            print(f'    [{status}][{ptype}] {comm[:65]} ({src})', flush=True)
 
+# 5. Summary
 print()
+summary = (f'Folders:{scanned_count} Staged:{staged_count} '
+           f'NoCommitment:{skipped_no_commitment} Dup:{skipped_dup} '
+           f'Closed:{skipped_closed} Noise:{skipped_noise} '
+           f'FolderErrs:{folder_scan_errors}')
 mode = 'DRY RUN' if DRY_RUN else 'LIVE'
-summary = ('Folders:' + str(scanned_count) + ' Staged:' + str(staged_count)
-           + ' NoCommitment:' + str(skipped_no_commitment)
-           + ' Dup:' + str(skipped_dup) + ' Noise:' + str(skipped_noise))
-print('=== ' + mode + ' COMPLETE - ' + summary + ' ===', flush=True)
-log_run('dry_run' if DRY_RUN else 'live', staged_count, 0, scanned_count)
+print(f'=== {mode} COMPLETE - {summary} ===', flush=True)
 
-# Update last_run.json
-if not DRY_RUN:
-    LR_FILE = r'C:\Users\HermesAdmin\.hermes\last_run.json'
-    try:
-        with open(LR_FILE) as f:
-            lr = json.load(f)
-        lr['email_level_up'] = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
-        with open(LR_FILE, 'w') as f:
-            json.dump(lr, f, indent=2)
-    except Exception as e:
-        print(f'WARNING: could not update last_run.json: {e}', flush=True)
+# 6. Determine run status
+run_failed = False
+fail_reason = None
+
+if len(folder_ids) == 0 and folder_errors > 0:
+    run_failed = True
+    fail_reason = f'Zero folders found ({folder_errors} enumeration errors)'
+elif folder_scan_errors > 0:
+    run_failed = True
+    fail_reason = f'{folder_scan_errors} folder scan errors (auth or network)'
+
+if DRY_RUN:
+    log_run('dry_run', staged_count,
+            skipped_no_commitment + skipped_dup + skipped_closed + skipped_noise,
+            scanned_count, fail_reason)
+else:
+    if run_failed:
+        log_run('failed', staged_count,
+                skipped_no_commitment + skipped_dup + skipped_closed + skipped_noise,
+                scanned_count, fail_reason)
+        alert_msg = f'Mail scan FAILED: {fail_reason}'
+        print(f'\n{alert_msg}', flush=True)
+        send_telegram(alert_msg)
+    else:
+        log_run('live', staged_count,
+                skipped_no_commitment + skipped_dup + skipped_closed + skipped_noise,
+                scanned_count, None)
+        try:
+            with open(LAST_RUN_FILE) as f: lr = json.load(f)
+            lr['email_level_up'] = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+            with open(LAST_RUN_FILE, 'w') as f: json.dump(lr, f, indent=2)
+        except Exception as e:
+            print(f'WARNING: could not update last_run.json: {e}', flush=True)
+
+print('=== DONE ===', flush=True)

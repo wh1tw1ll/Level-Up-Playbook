@@ -168,9 +168,46 @@ def derive_category(title, item_text=''):
     if any(k in text for k in ['tility','mud','pge','ewer','ater','ower','rain','lectric','as','ire','lvac','ve','mep']):
         return 'Utilities & Infrastructure'
     if any(k in text for k in ['onstruction','unch list','loseout','ackcharge','efect','unchlist','unch-list','punchlist']):
-        return 'Construction'
-    return ''
+        return 'General Coordination'  # Construction is not a valid picklist option
+    return 'General Coordination'
 
+# Owner normalization — MUST match Project log PICKLIST + calendar owner names
+OWNER_NORMAL = {
+    'whitney williams': 'Whitney Williams',
+    'whitney': 'Whitney Williams',
+    'whitney w': 'Whitney Williams',
+    'w. williams': 'Whitney Williams',
+    'greg': 'Greg Wieting',
+    'greg wieting': 'Greg Wieting',
+    'charlie': 'Charlie Tiwana',
+    'charlie tiwana': 'Charlie Tiwana',
+    'josh': 'Joshua Wood',
+    'joshua wood': 'Joshua Wood',
+    'sam': 'Sam Kalscheur',
+    'sam kalscheur': 'Sam Kalscheur',
+    'albert': 'Albert',
+    'brian': 'Brian',
+    'orlana': 'Orlana',
+}
+
+def normalize_owner(name):
+    if not name: return 'TBD'
+    m = name.strip()
+    key = m.lower()
+    if key in OWNER_NORMAL:
+        return OWNER_NORMAL[key]
+    first = key.split()[0]
+    if first in OWNER_NORMAL:
+        return OWNER_NORMAL[first]
+    # Reject multi-owner
+    for sep in [',', ';', '/', '&']:
+        if sep in m:
+            return 'TBD'
+    if ' and ' in key:
+        return 'TBD'
+    return m[:40]
+
+# Legacy owner list (kept for backward compat, will be removed)
 OWNERS=['Whitney','Sam','Don','Greg','Justin','Charlie','Josh','Albert','Graham','Jordan','Andrew','Orlana','Chuck','Philip','Jeremiah','DeRay']
 
 def extract_owner_and_text(line, txt):
@@ -205,6 +242,7 @@ def extract_owner_and_text(line, txt):
                 owner = nm
                 break
     final_txt = re.sub(r'\s+', ' ', clean_txt).strip()
+    owner = normalize_owner(owner) if owner != 'TBD' else 'TBD'
     return final_txt, owner
 
 def extract_next_steps_items(md):
@@ -443,7 +481,7 @@ for item in new_items:
     action_text=item['txt']
     cells=[
         {'columnId':CLS['ExtractionId'],'objectValue':item['key']},
-        {'columnId':CLS['Action ID'],'objectValue':action_text[:500]},
+        {'columnId':CLS['Action ID'],'objectValue':action_text[:4000]},
         {'columnId':CLS['Status'],'objectValue':'Open'},
         {'columnId':CLS['Owner'],'objectValue':item['owner']},
         {'columnId':CLS['Source'],'objectValue':item['source']},
