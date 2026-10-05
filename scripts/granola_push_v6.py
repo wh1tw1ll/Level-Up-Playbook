@@ -500,7 +500,7 @@ for item in new_items:
     for _ in range(3):
         try:
             req = _ur.Request('https://level-up-playbook.vercel.app/api/stage',
-                data=payload, headers={'Content-Type': 'application/json'}, method='POST')
+                data=payload, headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S_TK}, method='POST')
             resp = json.loads(_ur.urlopen(req, timeout=30).read())
             if resp.get('status') == 'staged' or resp.get('rowId'):
                 added+=1

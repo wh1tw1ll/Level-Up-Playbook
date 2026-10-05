@@ -347,7 +347,7 @@ def stage_item(text, owner, source_ref):
     for _ in range(3):
         try:
             req = urllib.request.Request('https://level-up-playbook.vercel.app/api/stage',
-                data=payload, headers={'Content-Type': 'application/json'}, method='POST')
+                data=payload, headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S_TK}, method='POST')
             resp = json.loads(urllib.request.urlopen(req, timeout=30).read())
             if resp.get('status') == 'staged' or resp.get('rowId'):
                 return 'OK', str(resp.get('rowId', '?'))
