@@ -36,7 +36,7 @@ GRAPH_SCOPES = _scope_match.group(1) if _scope_match else (
 
 # Smartsheet token
 SST = open(SS_API_KEY).read().strip()
-SST_HDR = {'Authorization': 'Bearer ' + SST, 'Content-Type': 'application/json'}
+SST_HDR = {'x-service-key': SST, 'Content-Type': 'application/json'}
 
 # --- Telegram alert ---
 def send_telegram(message):
@@ -347,7 +347,7 @@ def stage_item(text, owner, source_ref):
     for _ in range(3):
         try:
             req = urllib.request.Request('https://level-up-playbook.vercel.app/api/stage',
-                data=payload, headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S_TK}, method='POST')
+                data=payload, headers={'Content-Type': 'application/json', 'x-service-key': SST}, method='POST')
             resp = json.loads(urllib.request.urlopen(req, timeout=30).read())
             if resp.get('status') == 'staged' or resp.get('rowId'):
                 return 'OK', str(resp.get('rowId', '?'))
