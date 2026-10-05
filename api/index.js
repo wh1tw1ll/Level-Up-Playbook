@@ -59,7 +59,7 @@ function getCellValue(row, colId) {
     || '';
 }
 // ── AUTH GUARD — every route except verify-password, check-auth, and OAuth ──
-AUTH_BYPASS_ROUTES = new Set([
+const AUTH_BYPASS_ROUTES = new Set([
   '/api/verify-password',
   '/api/check-auth',
   '/api/prep',
