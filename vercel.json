@@ -24,6 +24,5 @@
     "api/index.js": {
       "maxDuration": 60
     }
-  },
-  "buildCommand": "bash scripts/deploy-gate.sh"
-}
+      }
+    }
