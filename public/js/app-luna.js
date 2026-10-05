@@ -1046,4 +1046,53 @@ function formatBriefingTime(isoStr) {
     }
     }
 
-// init() is called from index.html after data scripts load
+// ── LUCI BOOT: init() called from index.html after data scripts load ──
+function init() {
+  // Set initial footer status
+  var footer = document.getElementById('footer-status-text');
+  if (footer) footer.textContent = 'JS OK · Initializing...';
+
+  // Theme
+  try {
+    var savedTheme = localStorage.getItem('lu_theme');
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme:dark)').matches;
+    applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
+  } catch(e) {}
+
+  // Auth
+  checkAuthFromCookie();
+  updateAuthUI();
+  if (!luUser || !luUser.authenticated) {
+    tryRefresh();
+  }
+  if (luUser && luUser.authenticated) {
+    var overlay = document.getElementById('password-overlay');
+    if (overlay) {
+      overlay.classList.remove('open');
+      overlay.style.display = 'none';
+    }
+  }
+
+  // Defer KB/template data init to luciInit (handles retry if data not yet loaded)
+  initKB();
+  luciInit();
+
+  // Handle auth=success redirect param
+  var urlParams = new URLSearchParams(window.location.search);
+  var authSuccess = urlParams.get('auth') === 'success';
+  var returnView = 'luna';
+  if (authSuccess) {
+    history.replaceState({}, '', '/');
+    try {
+      returnView = localStorage.getItem('lu_return_view') || 'luna';
+      localStorage.removeItem('lu_return_view');
+    } catch(e) {}
+  }
+
+  setView(returnView);
+  // Also check ?view= URL param for bookmarked links
+  var viewParam = new URLSearchParams(window.location.search).get('view');
+  if (viewParam && viewParam !== returnView) {
+    setTimeout(function() { setView(viewParam); }, 50);
+  }
+}

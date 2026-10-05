@@ -1,5 +1,5 @@
 // LUCI PWA — Service Worker
-const CACHE = 'luci-v2';
+const CACHE = 'luci-v3';
 const ASSETS = [
   '/',
   '/styles.css',
