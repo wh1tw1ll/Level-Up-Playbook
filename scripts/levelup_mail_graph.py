@@ -33,7 +33,7 @@ with open(r'C:\Users\HermesAdmin\.hermes\graph_levelup_cache.json') as f:
     tok = json.load(f)
 HDR = {'Authorization': 'Bearer ' + tok['access_token'], 'Accept': 'application/json'}
 
-EXCLUDE_FOLDERS = ['junk email', 'deleted items', 'drafts', 'rss feeds', 'conversation history', 'outbox', 'sent items']
+EXCLUDE_FOLDERS = ['junk email', 'deleted items', 'drafts', 'rss feeds', 'conversation history', 'outbox']
 
 def graph_get(path, params=None):
     url = 'https://graph.microsoft.com/v1.0' + path
